@@ -21,6 +21,12 @@
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
   
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+  
   body {
     margin: 0;
     background-color: var(--bg);
@@ -33,7 +39,6 @@
     max-width: 1400px;
     margin: 0 auto;
     padding: 24px;
-    box-sizing: border-box;
   }
   
   .center {
@@ -43,7 +48,6 @@
     min-height: 80vh;
   }
   
-  /* IMPORTANT: .section NU trebuie să limiteze dashboard-ul */
   .section {
     width: 100%;
     max-width: none;
@@ -56,8 +60,6 @@
      ========================= */
   .top-bar {
     width: 100%;
-    box-sizing: border-box;
-  
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -65,7 +67,7 @@
     background-color: var(--blue);
     padding: 14px 20px;
     border-radius: 10px;
-    color: white;
+    color: #fff;
     margin-bottom: 25px;
   }
   
@@ -80,13 +82,6 @@
     width: auto;
   }
   
-  .app-title {
-    font-size: 26px;
-    margin: 0;
-    font-weight: 600;
-    color: white;
-  }
-  
   .subtitle {
     margin: 0;
     color: #ffdddd;
@@ -97,18 +92,18 @@
     font-size: 28px;
     font-weight: 600;
     letter-spacing: 4px;
-    color: white;
+    color: #fff;
     font-family: "Georgia", serif;
     text-transform: uppercase;
   }
   
-  /* Top bar buttons (Fermier / Admin / Logout) */
+  /* buttons in top-bar */
   .top-bar button {
     border-radius: 999px;
     padding: 6px 18px;
     border: 1px solid rgba(255, 255, 255, 0.7);
     background: transparent;
-    color: #ffffff;
+    color: #fff;
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
@@ -123,9 +118,9 @@
   
   /* Logout (ultimul) alb */
   .top-bar button:last-child {
-    background: #ffffff;
+    background: #fff;
     color: var(--blue);
-    border-color: #ffffff;
+    border-color: #fff;
   }
   
   .top-bar button:last-child:hover {
@@ -140,6 +135,10 @@
     padding: 18px;
     border-radius: 12px;
     box-shadow: var(--shadow);
+  
+    /* important: previne “iesirea” continutului in griduri */
+    min-width: 0;
+    overflow: hidden;
   }
   
   .card-header {
@@ -150,6 +149,7 @@
   
   .card-body {
     width: 100%;
+    min-width: 0;
   }
   
   /* =========================
@@ -161,37 +161,8 @@
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   }
   
-  /* Dashboard 2x2 (vechi) – îl poți păstra dacă mai e folosit undeva.
-  .dashboard-grid-2x2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 22px;
-    align-items: stretch;
-    grid-auto-rows: 1fr;
-    width: 100%;
-    margin-top: 22px;
-  }
-  
-  .dashboard-card {
-    display: flex;
-    flex-direction: column;
-    min-height: 380px;
-  }
-  
-  .dashboard-card .card-body {
-    flex: 1;
-    min-height: 0;
-  }
-  
-  .dashboard-card .dashboard-section {
-    max-width: none;
-    margin: 0;
-    width: 100%;
-  }
-  */
-  
   /* =========================
-     DASHBOARD LAYOUT (NOU)
+     FARMER DASHBOARD LAYOUT
      Market (full) + Prices (full) + Bid/Activity (split)
      ========================= */
   .farmer-dashboard-layout {
@@ -213,12 +184,13 @@
     width: 100%;
   }
   
-  /* BidForm vine cu <div class="card"> intern; îl neutralizăm doar când wrapper-ul are no-inner-card */
+  /* BidForm vine cu <div class="card"> intern; neutralizăm doar când wrapper-ul are no-inner-card */
   .no-inner-card .card {
     background: transparent;
     box-shadow: none;
     padding: 0;
     border-radius: 0;
+    overflow: visible;
   }
   
   /* =========================
@@ -226,7 +198,7 @@
      ========================= */
   .small-text {
     font-size: 13px;
-    color: #6b7280;
+    color: var(--gray);
   }
   
   .price {
@@ -242,6 +214,7 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+    min-width: 0;
   }
   
   .label {
@@ -250,53 +223,32 @@
     color: var(--gray);
   }
   
-  .input {
+  .input,
+  select.input {
+    width: 100%;
     padding: 10px 12px;
     border-radius: 6px;
     border: 1px solid var(--gray-light);
     font-size: 15px;
+    background: #fff;
   }
   
-  .input:focus {
+  .input:focus,
+  select.input:focus {
     outline: none;
     border-color: var(--blue);
     box-shadow: 0 0 0 2px rgba(179, 0, 0, 0.18);
   }
   
-  /* Bid form grid 2 cols */
+  /* Bid form grid 2 cols (fără duplicate) */
   .bid-form-grid-2 {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 16px;
   }
-  .bid-form-grid-2 .input,
-  .bid-form-grid-2 select.input {
-    width: 100%;
-  }
   
-  /* Date picker styling */
-  .date-wrapper {
-    position: relative;
-  }
-  
-  .hidden-date-input {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    pointer-events: none;
-  }
-  
-  .fake-date-display {
-    padding: 10px 12px;
-    border-radius: 6px;
-    border: 1px solid var(--gray-light);
-    background-color: #ffffff;
-    font-size: 14px;
-    cursor: pointer;
-  }
-  
-  .fake-date-display:hover {
-    border-color: var(--blue);
+  .bid-form-grid-2 > div {
+    min-width: 0;
   }
   
   /* =========================
@@ -316,7 +268,7 @@
   
   .primary-btn {
     background-color: var(--blue);
-    color: white;
+    color: #fff;
   }
   
   .btn.small {
@@ -337,6 +289,7 @@
     border: 1px solid #e5e7eb;
     white-space: nowrap;
   }
+  
   .btn.small.ghost:hover {
     background-color: #edf2ff;
   }
@@ -366,7 +319,7 @@
   }
   
   .table th {
-    background-color: #ffffff;
+    background-color: #fff;
     padding: 8px 10px;
     text-align: left;
     font-weight: 600;
@@ -456,7 +409,7 @@
     position: relative;
     padding: 8px 10px 20px;
     border-radius: 8px;
-    background-color: #ffffff;
+    background-color: #fff;
     border: 1px solid #e5e7eb;
   }
   
@@ -505,7 +458,7 @@
   }
   
   .market-item-flat {
-    background-color: #ffffff;
+    background-color: #fff;
     border-color: #e5e7eb;
   }
   
@@ -526,11 +479,11 @@
   }
   
   .delta-up {
-    color: #16a34a;
+    color: var(--green);
   }
   
   .delta-down {
-    color: #dc2626;
+    color: var(--red);
   }
   
   .delta-flat {
@@ -580,9 +533,68 @@
     margin-bottom: 8px;
   }
   
-  .login-form .input,
-  .login-form select.input {
+  /* =========================
+     ADMIN DASHBOARD
+     ========================= */
+  .admin-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  
+  .admin-card {
     width: 100%;
+  }
+  
+  .admin-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+  
+  .admin-price-item {
+    border: 1px solid #eef0f3;
+    border-radius: 10px;
+    padding: 12px;
+    background: #fff;
+  }
+  
+  .admin-label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+  
+  .admin-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 10px;
+    align-items: center;
+  }
+  
+  .admin-unit {
+    font-size: 13px;
+    color: var(--gray);
+    white-space: nowrap;
+  }
+  
+  .admin-input {
+    width: 100%;
+    min-width: 0;
+  }
+  
+  .admin-btn {
+    padding: 8px 12px;
+    font-size: 13px;
+    border-radius: 8px;
+    white-space: nowrap;
+  }
+  
+  .admin-filters {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    align-items: end;
   }
   
   /* =========================
@@ -590,6 +602,14 @@
      ========================= */
   @media (max-width: 1100px) {
     .dashboard-row.split {
+      grid-template-columns: 1fr;
+    }
+  
+    .admin-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  
+    .admin-filters {
       grid-template-columns: 1fr;
     }
   }
@@ -601,18 +621,9 @@
       gap: 10px;
     }
   
-    .header-left {
-      align-items: flex-start;
-    }
-  
     .ameropa-title {
       font-size: 22px;
       letter-spacing: 3px;
-    }
-  
-    .top-bar .btn {
-      width: 100%;
-      justify-content: center;
     }
   
     .table th,
@@ -664,129 +675,23 @@
     }
   }
   
+  @media (max-width: 650px) {
+    .admin-grid {
+      grid-template-columns: 1fr;
+    }
+  
+    .admin-row {
+      grid-template-columns: 1fr;
+    }
+  
+    .admin-btn {
+      width: 100%;
+    }
+  }
+  
   @media (max-width: 500px) {
     .grid {
       grid-template-columns: 1fr;
     }
   }
-  /* === FIX: BidForm input-uri nu ies din card === */
-.card,
-.card-body,
-.form {
-  min-width: 0; /* permite shrink în grid/flex */
-}
-
-.bid-form-grid-2 {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-}
-
-.bid-form-grid-2 > div {
-  min-width: 0;
-}
-
-.input,
-select.input {
-  width: 100%;
-  box-sizing: border-box;
-}
-
-/* dacă mai “scapă” ceva, ținem totul în card */
-.card {
-  overflow: hidden;
-}
-/* =========================
-   ADMIN DASHBOARD — hard override (fix grid)
-   ========================= */
-
-   .admin-layout .admin-grid {
-    display: grid !important;
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    gap: 16px !important;
-  }
-  
-  .admin-layout .admin-price-item {
-    border: 1px solid #eef0f3;
-    border-radius: 10px;
-    padding: 12px;
-    background: #fff;
-  }
-  
-  .admin-layout .admin-row {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) auto auto !important;
-    gap: 10px !important;
-    align-items: center !important;
-  }
-  
-  .admin-layout .admin-row .admin-input,
-  .admin-layout .admin-row .input {
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-    min-width: 0 !important;
-  }
-  
-  .admin-layout .admin-unit {
-    white-space: nowrap !important;
-  }
-  
-  .admin-layout .admin-btn {
-    white-space: nowrap !important;
-  }
-  
-  /* Responsive */
-  @media (max-width: 1100px) {
-    .admin-layout .admin-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    }
-  }
-  
-  @media (max-width: 650px) {
-    .admin-layout .admin-grid {
-      grid-template-columns: 1fr !important;
-    }
-    .admin-layout .admin-row {
-      grid-template-columns: 1fr !important;
-    }
-    .admin-layout .admin-btn {
-      width: 100% !important;
-    }
-  }
-/* Mobile: folosește date picker nativ, vizibil */
-@media (max-width: 768px) {
-  .hidden-date-input {
-    position: static !important;
-    opacity: 1 !important;
-    pointer-events: auto !important;
-    height: 44px !important;
-  }
-
-  .fake-date-display {
-    display: none !important;
-  }
-}
-/* Date inputs: mobile vs desktop */
-.mobile-date { display: none; }
-.desktop-date { display: block; }
-
-/* Mobile: arată direct date input-ul nativ */
-@media (max-width: 768px) {
-  .mobile-date { display: block; }
-  .desktop-date { display: none; }
-
-  .date-input {
-    width: 100%;
-    height: 44px;              /* match cu restul inputurilor */
-    padding: 10px 12px;
-  }
-}
-
-/* Desktop fake date display as input */
-.fake-date-display {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  cursor: pointer;
-  background: #fff;
-}
   
