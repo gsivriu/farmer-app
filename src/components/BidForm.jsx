@@ -1,5 +1,5 @@
 // src/components/BidForm.jsx
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { supabase } from "../supabaseClient";
 
 const PRODUCT_OPTIONS = [
@@ -29,44 +29,44 @@ export default function BidForm({ onBidCreated }) {
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
 
-  const startRef = useRef(null);
-  const endRef = useRef(null);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage(null);
     setError(null);
 
-    // validare FCA / FOR → trebuie tarif transport
+    // Validare paritate
     if ((parity === "FCA" || parity === "FOR") && !freightCost) {
       setLoading(false);
-      setError(
-        "Te rog completează tariful de transport pentru paritatea selectată."
-      );
+      setError("Completează tariful de transport pentru paritatea selectată.");
       return;
     }
 
     const qtyNum = Number(quantity);
     const priceNum = Number(price);
-    const freightNum = freightCost ? Number(freightCost) : null;
 
     if (!qtyNum || qtyNum <= 0) {
       setLoading(false);
-      setError("Te rog introdu o cantitate validă (> 0).");
-      return;
-    }
-    if (!priceNum || priceNum <= 0) {
-      setLoading(false);
-      setError("Te rog introdu un preț valid (> 0).");
+      setError("Introdu o cantitate validă (> 0).");
       return;
     }
 
-    // utilizator logat
+    if (!priceNum || priceNum <= 0) {
+      setLoading(false);
+      setError("Introdu un preț valid (> 0).");
+      return;
+    }
+
+    if (deliveryEnd && deliveryStart && deliveryEnd < deliveryStart) {
+      setLoading(false);
+      setError("Data de final nu poate fi înainte de data de start.");
+      return;
+    }
+
     const { data: userData, error: userError } = await supabase.auth.getUser();
     if (userError || !userData?.user) {
       setLoading(false);
-      setError("Trebuie să fii logat ca să trimiți un bid.");
+      setError("Trebuie să fii logat pentru a trimite un bid.");
       return;
     }
 
@@ -79,7 +79,7 @@ export default function BidForm({ onBidCreated }) {
       quantity: qtyNum,
       price: priceNum,
       parity,
-      freight_cost: freightNum,
+      freight_cost: freightCost ? Number(freightCost) : null,
       delivery_start: deliveryStart || null,
       delivery_end: deliveryEnd || null,
       status: "pending",
@@ -91,10 +91,10 @@ export default function BidForm({ onBidCreated }) {
       return;
     }
 
-    setLoading(false);
     setMessage("Bid trimis cu succes. Vei fi contactat de trader.");
+    setLoading(false);
 
-    // reset formular
+    // Reset
     setQuantity("");
     setPrice("");
     setParity("CPT");
@@ -102,9 +102,7 @@ export default function BidForm({ onBidCreated }) {
     setDeliveryStart("");
     setDeliveryEnd("");
 
-    if (onBidCreated) {
-      onBidCreated();
-    }
+    if (onBidCreated) onBidCreated();
   };
 
   return (
@@ -131,7 +129,7 @@ export default function BidForm({ onBidCreated }) {
           </select>
         </div>
 
-        {/* CANTITATE & PREȚ */}
+        {/* CANTITATE + PREȚ */}
         <div className="bid-form-grid-2">
           <div>
             <label className="label">Cantitate (t)</label>
@@ -160,7 +158,7 @@ export default function BidForm({ onBidCreated }) {
           </div>
         </div>
 
-        {/* PARITATE + TARIF TRANSPORT */}
+        {/* PARITATE + TRANSPORT */}
         <div className="bid-form-grid-2">
           <div>
             <label className="label">Paritate</label>
@@ -193,48 +191,26 @@ export default function BidForm({ onBidCreated }) {
           )}
         </div>
 
-        {/* DATE LIVRARE */}
+        {/* DATE LIVRARE – NATIV, MOBILE SAFE */}
         <div className="bid-form-grid-2">
           <div>
             <label className="label">Start livrare</label>
-            <div className="date-wrapper">
-              <input
-                ref={startRef}
-                type="date"
-                className="input hidden-date-input"
-                value={deliveryStart}
-                onChange={(e) => setDeliveryStart(e.target.value)}
-              />
-              <div
-                className="fake-date-display"
-                onClick={() => startRef.current?.showPicker?.()}
-              >
-                {deliveryStart
-                  ? new Date(deliveryStart).toLocaleDateString("ro-RO")
-                  : "-"}
-              </div>
-            </div>
+            <input
+              type="date"
+              className="input"
+              value={deliveryStart}
+              onChange={(e) => setDeliveryStart(e.target.value)}
+            />
           </div>
 
           <div>
             <label className="label">Final livrare</label>
-            <div className="date-wrapper">
-              <input
-                ref={endRef}
-                type="date"
-                className="input hidden-date-input"
-                value={deliveryEnd}
-                onChange={(e) => setDeliveryEnd(e.target.value)}
-              />
-              <div
-                className="fake-date-display"
-                onClick={() => endRef.current?.showPicker?.()}
-              >
-                {deliveryEnd
-                  ? new Date(deliveryEnd).toLocaleDateString("ro-RO")
-                  : "-"}
-              </div>
-            </div>
+            <input
+              type="date"
+              className="input"
+              value={deliveryEnd}
+              onChange={(e) => setDeliveryEnd(e.target.value)}
+            />
           </div>
         </div>
 

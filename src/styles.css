@@ -752,4 +752,17 @@ select.input {
       width: 100% !important;
     }
   }
+/* Mobile: folosește date picker nativ, vizibil */
+@media (max-width: 768px) {
+  .hidden-date-input {
+    position: static !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    height: 44px !important;
+  }
+
+  .fake-date-display {
+    display: none !important;
+  }
+}
   
