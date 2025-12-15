@@ -765,4 +765,28 @@ select.input {
     display: none !important;
   }
 }
+/* Date inputs: mobile vs desktop */
+.mobile-date { display: none; }
+.desktop-date { display: block; }
+
+/* Mobile: arată direct date input-ul nativ */
+@media (max-width: 768px) {
+  .mobile-date { display: block; }
+  .desktop-date { display: none; }
+
+  .date-input {
+    width: 100%;
+    height: 44px;              /* match cu restul inputurilor */
+    padding: 10px 12px;
+  }
+}
+
+/* Desktop fake date display as input */
+.fake-date-display {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  cursor: pointer;
+  background: #fff;
+}
   
