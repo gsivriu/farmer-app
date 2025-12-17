@@ -304,51 +304,34 @@ export default function AdminDashboard() {
           </div>
 
           <div className="admin-filter">
-            <label className="label">De la</label>
-            <div className="date-wrapper">
-              <input
-                ref={startInputRef}
-                type="date"
-                className="input hidden-date-input"
-                value={filterStart}
-                onChange={(e) => setFilterStart(e.target.value)}
-              />
-              <div
-                className="fake-date-display"
-                onClick={() => startInputRef.current?.showPicker?.()}
-              >
-                {filterStart
-                  ? new Date(filterStart).toLocaleDateString("ro-RO")
-                  : "-"}
-              </div>
+           <label className="label">De la</label>
+            <input
+            type="date"
+            className="input"
+            value={filterStart}
+            onChange={(e) => setFilterStart(e.target.value)}
+            />
             </div>
-          </div>
 
-          <div className="admin-filter">
-            <label className="label">Până la</label>
-            <div className="date-wrapper">
+            <div className="admin-filter">
+              <label className="label">Până la</label>
               <input
-                ref={endInputRef}
                 type="date"
-                className="input hidden-date-input"
+                className="input"
                 value={filterEnd}
-                onChange={(e) => setFilterEnd(e.target.value)}
-              />
-              <div
-                className="fake-date-display"
-                onClick={() => endInputRef.current?.showPicker?.()}
-              >
-                {filterEnd ? new Date(filterEnd).toLocaleDateString("ro-RO") : "-"}
-              </div>
+                        onChange={(e) => setFilterEnd(e.target.value)}
+                  />
             </div>
-          </div>
+
+
         </div>
 
         {loading && <p className="small-text" style={{ marginTop: 12 }}>Se încarcă...</p>}
         {error && <p className="badge rejected" style={{ marginTop: 12 }}>{error}</p>}
 
         {!loading && !error && (
-          <div className="table-wrapper" style={{ marginTop: 14 }}>
+          <div className="admin-table-scroll" style={{ marginTop: 14 }}>
+            <div className="table-wrapper">
             <table className="table wide-table">
               <thead>
                 <tr>
@@ -469,6 +452,7 @@ export default function AdminDashboard() {
                 )}
               </tbody>
             </table>
+          </div>
           </div>
         )}
       </div>

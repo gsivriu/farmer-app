@@ -5,6 +5,9 @@ import MarketTicker from "../components/MarketTicker";
 import PricesGrid from "../components/PricesGrid";
 import BidForm from "../components/BidForm";
 
+import FarmerProgress from "../components/FarmerProgress";
+
+
 const PRODUCT_LABELS = {
   wheat: "Grâu",
   barley: "Orz",
@@ -163,6 +166,7 @@ export default function FarmerDashboard() {
 
   return (
     <div className="app-container">
+      <FarmerProgress/>
       <div className="farmer-dashboard-layout">
         {/* ROW 1: MARKET OVERVIEW (FULL WIDTH) */}
         <div className="dashboard-row full">
@@ -189,7 +193,6 @@ export default function FarmerDashboard() {
           <div className="card">
             <div className="card-header">
               <h2 className="market-title">Activitatea mea</h2>
-              <p className="market-subtitle">Volum confirmat, statistici și istoric</p>
             </div>
   
             <div className="card-body">
@@ -197,9 +200,6 @@ export default function FarmerDashboard() {
               {error && <p className="badge rejected">{error}</p>}
   
               <div className="dashboard-section">
-                <p className="small-text">
-                  Volum confirmat (<strong>accepted</strong>).
-                </p>
                 <p>
                   <strong>Volum total:</strong> {Number(totalQty || 0).toFixed(2)} t
                 </p>
