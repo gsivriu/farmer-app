@@ -30,6 +30,7 @@
 body {
   margin: 0;
   background-color: var(--bg);
+  /* Prevenim scroll-ul orizontal pe mobil cauzat de tabele */
   overflow-x: hidden;
 }
 
@@ -40,6 +41,7 @@ body {
   max-width: 1400px;
   margin: 0 auto;
   padding: 24px;
+  width: 100%;
 }
 
 .center {
@@ -117,7 +119,6 @@ body {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
 }
 
-/* Logout (ultimul) alb */
 .top-bar button:last-child {
   background: #fff;
   color: var(--blue);
@@ -136,9 +137,8 @@ body {
   border-radius: 12px;
   box-shadow: var(--shadow);
   background: #fff;
-  width: 100%;
+  width: 100%; /* Fortam cardul sa ocupe latimea pe mobil */
 }
-
 
 .card-header {
   margin-bottom: 14px;
@@ -163,13 +163,12 @@ body {
 /* =========================
    FARMER DASHBOARD LAYOUT
    ========================= */
-/* Layout principal pentru dashboard */
 .farmer-dashboard-layout {
   display: flex;
   flex-direction: column;
-  gap: 28px; /* ← AICI controlezi tot */
+  gap: 28px;
+  width: 100%;
 }
-
 
 .dashboard-row.full {
   width: 100%;
@@ -183,7 +182,6 @@ body {
   width: 100%;
 }
 
-/* BidForm vine cu <div class="card"> intern; neutralizăm doar când wrapper-ul are no-inner-card */
 .no-inner-card .card {
   background: transparent;
   box-shadow: none;
@@ -239,7 +237,6 @@ select.input:focus {
   box-shadow: 0 0 0 2px rgba(179, 0, 0, 0.18);
 }
 
-/* Bid form grid 2 cols */
 .bid-form-grid-2 {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -305,7 +302,6 @@ select.input:focus {
   width: 100%;
 }
 
-/* Actions column (vertical) */
 .actions-vertical {
   display: flex;
   flex-direction: column;
@@ -313,11 +309,12 @@ select.input:focus {
 }
 
 /* =========================
-   TABLES
+   TABLES (FIXED WRAPPERS)
    ========================= */
 .table-wrapper {
   width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .table-wrapper.bids-table {
@@ -356,7 +353,7 @@ select.input:focus {
 }
 
 /* =========================
-   BADGES (status)
+   BADGES
    ========================= */
 .badge {
   display: inline-block;
@@ -387,7 +384,7 @@ select.input:focus {
 }
 
 /* =========================
-   MARKET (ticker + prices)
+   MARKET (Ticker + Prices)
    ========================= */
 .market-card {
   margin-bottom: 10px;
@@ -458,7 +455,6 @@ select.input:focus {
   font-size: 16px;
 }
 
-/* Market cards up/down/flat */
 .market-item-up {
   background-color: #ecfdf3;
   border-color: #bbf7d0;
@@ -474,7 +470,6 @@ select.input:focus {
   border-color: #e5e7eb;
 }
 
-/* delta in bottom-right */
 .market-delta {
   position: absolute;
   right: 10px;
@@ -609,14 +604,12 @@ select.input:focus {
   align-items: end;
 }
 
-/* Admin bids – max 4 rows + vertical scroll */
 .admin-table-scroll {
-  max-height: 320px; /* ~4 rânduri */
+  max-height: 320px;
   overflow-y: auto;
   overflow-x: hidden;
 }
 
-/* Header sticky */
 .admin-table-scroll thead th {
   position: sticky;
   top: 0;
@@ -625,7 +618,6 @@ select.input:focus {
   border-bottom: 2px solid #e5e7eb;
 }
 
-/* Scrollbar discret */
 .admin-table-scroll::-webkit-scrollbar {
   width: 8px;
 }
@@ -635,11 +627,11 @@ select.input:focus {
 }
 
 .fake-date-display.placeholder {
-  color: #9ca3af; /* gri subtil */
+  color: #9ca3af;
 }
 
 /* =========================
-   PROGRESS (Uiverse-like, red theme)
+   PROGRESS (Uiverse-like)
    ========================= */
 .uv-loader {
   --bg: #e5e7eb;
@@ -656,7 +648,6 @@ select.input:focus {
   overflow: hidden;
 }
 
-/* fill */
 .uv-bar {
   position: absolute;
   inset: 0;
@@ -667,20 +658,17 @@ select.input:focus {
   z-index: 1;
 }
 
-/* checkpoints container */
 .uv-checks {
   position: absolute;
   inset: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-
   padding: 0 10px;
   z-index: 2;
   pointer-events: none;
 }
 
-/* checkpoint dot */
 .uv-check {
   width: 18px;
   height: 18px;
@@ -711,18 +699,12 @@ select.input:focus {
 }
 
 /* =========================
-   REWARD CARDS (targets)
+   REWARD CARDS
    ========================= */
 .reward-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
-}
-
-@media (max-width: 900px) {
-  .reward-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 .reward-card {
@@ -745,59 +727,107 @@ select.input:focus {
   margin-bottom: 6px;
 }
 
-/* când e atins targetul -> verde */
 .reward-unlocked {
   background: #ecfdf3;
   border-color: #86efac;
 }
 
-/* locked rămâne alb */
 .reward-locked {
   background: #fff;
 }
 
 /* =========================
-   RESPONSIVE
+   PROGRESS RING - NEON
    ========================= */
+.progress-ring {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+
+.ring-outer {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  position: relative;
+  background: conic-gradient(#b30000 calc(var(--pct) * 1%), #f1f5f9 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ring-outer.neon {
+  animation: neonPulse 1.6s ease-in-out infinite alternate;
+}
+
+@keyframes neonPulse {
+  0% { box-shadow: 0 0 8px rgba(179, 0, 0, 0.35), 0 0 18px rgba(255, 255, 255, 0.25); }
+  100% { box-shadow: 0 0 14px rgba(179, 0, 0, 0.55), 0 0 28px rgba(255, 255, 255, 0.4); }
+}
+
+.ring-inner {
+  width: 48px;
+  height: 48px;
+  background: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.06);
+}
+
+.ring-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: 0.5px;
+}
+
+/* =========================
+   RESPONSIVE (CORECTAT PENTRU MOBIL)
+   ========================= */
+
 @media (max-width: 1100px) {
   .dashboard-row.split {
     grid-template-columns: 1fr;
   }
-
-  .admin-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .admin-filters {
-    grid-template-columns: 1fr;
+  .reward-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 768px) {
   .top-bar {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
+    align-items: center;
+    gap: 15px;
+    text-align: center;
+  }
+
+  .header-left {
+    flex-direction: column;
   }
 
   .ameropa-title {
     font-size: 22px;
-    letter-spacing: 3px;
+    letter-spacing: 2px;
   }
 
-  .table th,
-  .table td {
+  .table th, .table td {
     padding: 6px 8px;
-    white-space: nowrap;
-  }
-
-  .btn.small {
-    padding: 4px 6px;
-    font-size: 11px;
+    font-size: 12px;
   }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 650px) {
+  .reward-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+
   .bid-form-grid-2 {
     grid-template-columns: 1fr;
   }
@@ -808,75 +838,30 @@ select.input:focus {
     padding: 12px;
   }
 
-  .center {
-    min-height: 100vh;
-    padding: 12px;
-  }
-
-  .login-body {
-    padding: 16px 16px 20px;
-  }
-
-  .login-title {
-    font-size: 20px;
+  .card {
+    padding: 16px;
+    margin-bottom: 8px;
+    width: 100%;
   }
 
   .market-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .input, select.input {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .progress-head {
     grid-template-columns: 1fr;
+    text-align: center;
+    justify-items: center;
   }
 
-  .dashboard-row.split {
-    grid-template-columns: 1fr;
-  }
-
-  .market-item {
-    padding: 6px 8px 18px;
-  }
-
-  .market-title {
-    font-size: 16px;
-  }
-
-  .bid-form-card {
-    padding: 14px;
-  }
-
-  .bid-form-card .label {
-    font-size: 12px;
-  }
-
-  .bid-form-card .input,
-  .bid-form-card select.input {
-    padding: 6px 8px;
-    font-size: 13px;
-  }
-
-  .bid-form-card .btn {
-    padding: 7px 10px;
-    font-size: 13px;
-  }
-
-  .bid-form-card h2 {
-    font-size: 16px;
-    margin: 0 0 8px;
-  }
-
-  .bid-form-card .form {
-    gap: 8px;
-  }
-}
-
-@media (max-width: 650px) {
-  .admin-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-row {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-btn {
-    width: 100%;
+  /* Rezolvam problema tabelelor pe ecrane de iPhone */
+  .table {
+    min-width: 500px;
   }
 }
 
@@ -884,185 +869,4 @@ select.input:focus {
   .grid {
     grid-template-columns: 1fr;
   }
-}
-/* =========================
-   PROGRESS RING – NEON RED/WHITE
-   ========================= */
-
-.progress-ring {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 6px;
-}
-
-/* cerc exterior cu progres + glow */
-.ring-outer {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  position: relative;
-
-  /* progres real */
-  background:
-    conic-gradient(
-      #b30000 calc(var(--pct) * 1%),
-      #f1f5f9 0
-    );
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* glow neon */
-.ring-outer.neon {
-  box-shadow:
-    0 0 10px rgba(179, 0, 0, 0.45),
-    0 0 22px rgba(255, 255, 255, 0.35),
-    0 0 40px rgba(179, 0, 0, 0.25);
-}
-
-/* cerc interior */
-.ring-inner {
-  width: 86px;
-  height: 86px;
-  background: #ffffff;
-  border-radius: 50%;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  /* ușor relief */
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.06);
-}
-
-/* procent */
-.ring-label {
-  font-size: 14px;
-  font-weight: 700;
-  color: #111827;
-  letter-spacing: 0.5px;
-}
-@keyframes neonPulse {
-  0% {
-    box-shadow:
-      0 0 8px rgba(179, 0, 0, 0.35),
-      0 0 18px rgba(255, 255, 255, 0.25);
-  }
-  100% {
-    box-shadow:
-      0 0 14px rgba(179, 0, 0, 0.55),
-      0 0 28px rgba(255, 255, 255, 0.4);
-  }
-}
-
-.ring-outer.neon {
-  animation: neonPulse 1.6s ease-in-out infinite alternate;
-}
-/* =========================
-   PROGRESS HEADER ROW
-   ========================= */
-.progress-head {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  column-gap: 20px;
-  margin-bottom: 10px;
-}
-
-.progress-header-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  margin-bottom: 14px;
-}
-
-.progress-title-group {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.progress-title {
-  margin: 0 0 2px;
-}
-
-.progress-ring-center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.progress-ring-center .progress-ring {
-  margin-bottom: 0;
-}
-
-.progress-head-spacer {
-  min-height: 1px;
-}
-
-@media (max-width: 700px) {
-  .progress-head {
-    grid-template-columns: 1fr;
-    row-gap: 10px;
-    justify-items: center;
-    text-align: center;
-  }
-
-  .progress-title-group {
-    align-items: center;
-  }
-
-  .progress-meta {
-    text-align: center;
-  }
-
-  .progress-head-spacer {
-    display: none;
-  }
-}
-
-/* =========================
-   PROGRESS RING – SMALL
-   ========================= */
-.ring-outer {
-  width: 68px;   /* ↓ era 120 */
-  height: 68px;
-}
-
-.ring-inner {
-  width: 48px;   /* ↓ era 86 */
-  height: 48px;
-}
-
-.ring-label {
-  font-size: 14px;  /* ↓ era 22 */
-  font-weight: 700;
-}
-/* Card cu ring flotant */
-.progress-card {
-  position: relative;
-  padding-top: 16px; /* spațiu să nu se suprapună peste header */
-}
-
-/* Ring centrat optic */
-/* ring centrat, deasupra barei, fără intersecții */
-.progress-ring-above {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  /* îl „coboară” în zona dintre text și bară */
-  margin-top: 6px;
-  margin-bottom: 8px;
-
-  pointer-events: none;
-}
-
-/* IMPORTANT: eliminăm orice poziționare absolută rămasă */
-.progress-ring-float {
-  position: static !important;
-  transform: none !important;
 }
