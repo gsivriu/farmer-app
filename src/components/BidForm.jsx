@@ -106,7 +106,7 @@ export default function BidForm({ onBidCreated }) {
   };
 
   return (
-    <div className="card">
+    <div className="card bid-form-card">
       <h2>Plasează un bid</h2>
 
       {message && <p className="badge accepted">{message}</p>}

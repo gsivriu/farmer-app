@@ -248,6 +248,14 @@ select.input:focus {
   min-width: 0;
 }
 
+.bid-form-card h2 {
+  margin: 0 0 10px;
+}
+
+.bid-form-card .form {
+  gap: 10px;
+}
+
 /* =========================
    BUTTONS
    ========================= */
@@ -821,6 +829,24 @@ select.input:focus {
 
   .market-title {
     font-size: 16px;
+  }
+
+  .bid-form-card {
+    padding: 16px;
+  }
+
+  .bid-form-card .label {
+    font-size: 13px;
+  }
+
+  .bid-form-card .input,
+  .bid-form-card select.input {
+    padding: 8px 10px;
+    font-size: 14px;
+  }
+
+  .bid-form-card .btn {
+    padding: 8px 12px;
   }
 }
 
