@@ -128,7 +128,6 @@ export default function FarmerProgress() {
           )}
         </div>
       </div>
-
       <div className="progress-ring-center">
         <ProgressRing percent={progress.pct} />
       </div>
