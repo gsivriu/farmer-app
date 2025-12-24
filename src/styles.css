@@ -900,6 +900,10 @@ select.input:focus {
     text-align: center;
   }
 
+  .progress-ring-center {
+    margin-top: 6px;
+  }
+
   .progress-head-spacer {
     display: none;
   }
