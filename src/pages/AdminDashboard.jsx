@@ -169,6 +169,19 @@ export default function AdminDashboard() {
     setFarmerHistory(data || []);
   };
 
+  const formatDateTime = (value) => {
+    if (!value) return "-";
+    const dt = new Date(value);
+    if (Number.isNaN(dt.getTime())) return "-";
+    return dt.toLocaleString("ro-RO", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   const getFarmerEmail = (farmer_id) => {
     const fromList = farmers.find((f) => f.id === farmer_id)?.email || null;
     const fromBids = bids.find((b) => b.farmer_id === farmer_id)?.farmer_email || farmer_id;
@@ -349,7 +362,7 @@ export default function AdminDashboard() {
               <tbody>
                 {filteredBids.map((b) => (
                   <tr key={b.id}>
-                    <td>{b.created_at ? new Date(b.created_at).toLocaleString() : "-"}</td>
+                    <td>{formatDateTime(b.created_at)}</td>
                     <td>{b.farmer_email || b.farmer_id}</td>
                     <td>{PRODUCT_LABELS[b.product] || b.product}</td>
                     <td>{Number(b.quantity || 0).toFixed(2)}</td>
@@ -534,7 +547,7 @@ export default function AdminDashboard() {
                   <tbody>
                     {filteredHistory.map((b) => (
                       <tr key={b.id}>
-                        <td>{b.created_at ? new Date(b.created_at).toLocaleString() : "-"}</td>
+                        <td>{formatDateTime(b.created_at)}</td>
                         <td>{PRODUCT_LABELS[b.product] || b.product}</td>
                         <td>{Number(b.quantity || 0).toFixed(2)}</td>
                         <td>

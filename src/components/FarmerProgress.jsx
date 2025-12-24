@@ -1,24 +1,27 @@
 // src/components/FarmerProgress.jsx
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../supabaseClient";
+import ProgressRing from "./ProgressRing";
 
 const TARGETS = [
-  { t: 1000, title: "1,000 t", desc: "+2 EUR/t la următoarele 500 t vândute" },
+  { t: 1000, title: "1,000 t", desc: "+2 EUR/t on the next 500 t sold" },
   {
     t: 2500,
     title: "2,500 t",
-    desc: "Blochezi un preț 15 zile (max 1,000 t) pe un produs",
+    desc: "+3 EUR/t on the next 1,000 t sold",
   },
-  { t: 5000, title: "5,000 t", desc: "+5 EUR/t la următoarele 2,000 t vândute" },
+  { t: 5000, title: "5,000 t", desc: "+5 EUR/t on the next 2,000 t sold" },
 ];
 
+const MAX_TARGET = TARGETS[TARGETS.length - 1].t;
+
 const fmt = (n) =>
-  Number(n || 0).toLocaleString("ro-RO", {
+  Number(n || 0).toLocaleString("en-GB", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
 
-const fmt0 = (n) => Number(n || 0).toLocaleString("ro-RO");
+const fmt0 = (n) => Number(n || 0).toLocaleString("en-GB");
 
 export default function FarmerProgress() {
   const [totalAccepted, setTotalAccepted] = useState(0);
@@ -32,7 +35,7 @@ export default function FarmerProgress() {
     const { data: userData, error: userErr } = await supabase.auth.getUser();
     if (userErr || !userData?.user) {
       setLoading(false);
-      setErr("Nu am putut identifica utilizatorul.");
+      setErr("We couldn't identify the current user.");
       return;
     }
 
@@ -46,7 +49,7 @@ export default function FarmerProgress() {
 
     if (bidsErr) {
       setLoading(false);
-      setErr("Eroare la încărcarea volumului: " + bidsErr.message);
+      setErr("Error loading volume: " + bidsErr.message);
       return;
     }
 
@@ -66,49 +69,36 @@ export default function FarmerProgress() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const progress = useMemo(() => {
-    const targetsOnly = TARGETS.map((x) => x.t);
+ const progress = useMemo(() => {
+  const targetsOnly = TARGETS.map((x) => x.t);
+  const maxTarget = targetsOnly[targetsOnly.length - 1];
 
-    // dacă ești peste ultimul target -> ești "complete"
-    const maxTarget = targetsOnly[targetsOnly.length - 1];
-    if (totalAccepted >= maxTarget) {
-      const prevT = targetsOnly[targetsOnly.length - 2] ?? 0;
-      const span = maxTarget - prevT;
-
-      return {
-        complete: true,
-        prevT,
-        nextT: maxTarget,
-        span,
-        segmentProgress: span,
-        remaining: 0,
-        pct: 100,
-        pctLabel: `100% (${fmt0(span)} / ${fmt0(span)} t)`,
-      };
-    }
-
-    // găsește următorul target
-    const nextT = targetsOnly.find((t) => totalAccepted < t);
-    const idx = targetsOnly.findIndex((t) => t === nextT);
-    const prevT = idx <= 0 ? 0 : targetsOnly[idx - 1];
-
-    const span = Math.max(nextT - prevT, 1);
-    const segmentProgress = Math.min(Math.max(totalAccepted - prevT, 0), span);
-    const remaining = Math.max(nextT - totalAccepted, 0);
-
-    const pct = Math.round((segmentProgress / span) * 100);
-
+  // dacă ești peste ultimul target -> complete
+  if (totalAccepted >= maxTarget) {
     return {
-      complete: false,
-      prevT,
-      nextT,
-      span,
-      segmentProgress,
-      remaining,
-      pct,
-      pctLabel: `${pct}% (${fmt0(segmentProgress)} / ${fmt0(span)} t)`,
+      complete: true,
+      nextT: maxTarget,
+      remaining: 0,
+      pct: 100,
     };
+  }
+
+  // următorul target (cel mai mic target mai mare decât totalAccepted)
+  const nextT = targetsOnly.find((t) => totalAccepted < t) ?? maxTarget;
+
+  const pctRaw = (Number(totalAccepted) / Number(maxTarget)) * 100;
+  const pct = Math.max(0, Math.min(100, Math.round(pctRaw)));
+
+  const remaining = Math.max(nextT - totalAccepted, 0);
+
+  return {
+    complete: false,
+    nextT,
+    remaining,
+    pct,
+  };
   }, [totalAccepted]);
+
 
   // Text alb dacă centrul etichetei e în zona roșie (fill)
   const labelInFill = useMemo(() => {
@@ -117,77 +107,92 @@ export default function FarmerProgress() {
   }, [progress.pct]);
 
   return (
-    <div className="card">
-      <div className="progress-head">
-        <div>
-          <h2 style={{ marginBottom: 6 }}>Progress target volum</h2>
-          <div className="small-text">
-            Volum total acceptat: <b>{fmt(totalAccepted)} t</b>
-          </div>
+  <div className="card progress-card">
+    {/* Header */}
+    <div className="progress-head">
+      <div className="progress-title-group">
+        <h2 className="progress-title">Your Delivery Progress</h2>
+        <div className="small-text">
+          Total accepted volume: <b>{fmt(totalAccepted)} t</b>
         </div>
-
-        <div style={{ textAlign: "right" }} className="small-text">
+        <div className="progress-meta small-text">
           {progress.complete ? (
-            <b>Felicitări — ai atins toate targeturile.</b>
+            <b>Congrats — you have reached all targets.</b>
           ) : (
             <>
-              Segment curent: <b>{fmt0(progress.prevT)} t</b> →{" "}
-              <b>{fmt0(progress.nextT)} t</b>
+              Progress: <b>{fmt0(totalAccepted)} t</b> /{" "}
+              <b>{fmt0(MAX_TARGET)} t</b>
               <br />
-              Următorul target: <b>{fmt0(progress.nextT)} t</b> ({fmt(progress.remaining)} t rămas)
+              Remaining to unlock: <b>{fmt0(progress.remaining)} t</b>
             </>
           )}
         </div>
       </div>
 
-      {err && (
-        <p className="badge rejected" style={{ marginTop: 10 }}>
-          {err}
-        </p>
-      )}
-      {loading && (
-        <p className="small-text" style={{ marginTop: 10 }}>
-          Se încarcă...
-        </p>
-      )}
-
-      {/* Bara (mai groasă) */}
-      <div className="progress-bar" style={{ marginTop: 12, height: 28 }}>
-        <div className="progress-fill" style={{ width: `${progress.pct}%` }} />
-        <div
-          className="progress-text"
-          style={{
-            color: labelInFill ? "#fff" : "#111827",
-            fontWeight: 800,
-          }}
-        >
-          {progress.pctLabel}
-        </div>
+      <div className="progress-ring-center">
+        <ProgressRing percent={progress.pct} />
       </div>
+      <div className="progress-head-spacer" aria-hidden="true" />
+    </div>
 
-      {/* Cele 3 dreptunghiuri (verde când unlocked) */}
-      <div className="reward-grid" style={{ marginTop: 14 }}>
+    {/* Progress bar */}
+    <div className="uv-loader" style={{ "--pct": `${progress.pct}%` }}>
+      <div className="uv-bar" />
+
+      <div className="uv-checks">
         {TARGETS.map((r) => {
-          const unlocked = totalAccepted >= r.t;
+          const active = totalAccepted >= r.t;
           return (
             <div
               key={r.t}
-              className={"reward-card " + (unlocked ? "reward-unlocked" : "reward-locked")}
+              className={"uv-check " + (active ? "is-active" : "")}
+              title={r.title}
+              aria-hidden="true"
             >
-              <div className="reward-top">
-                <div>
-                  <div className="reward-title">{r.title}</div>
-                  <div className="small-text">{r.desc}</div>
-                </div>
-
-                <span className={"badge " + (unlocked ? "accepted" : "pending")}>
-                  {unlocked ? "Unlocked" : "Locked"}
-                </span>
-              </div>
+              <svg
+                className="uv-check-icon"
+                stroke="white"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="m4.5 12.75 6 6 9-13.5"
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                />
+              </svg>
             </div>
           );
         })}
       </div>
     </div>
-  );
+
+    {/* Rewards */}
+    <div className="reward-grid" style={{ marginTop: 20 }}>
+      {TARGETS.map((r) => {
+        const unlocked = totalAccepted >= r.t;
+        return (
+          <div
+            key={r.t}
+            className={"reward-card " + (unlocked ? "reward-unlocked" : "reward-locked")}
+          >
+            <div className="reward-top">
+              <div>
+                <div className="reward-title">{r.title}</div>
+                <div className="small-text">{r.desc}</div>
+              </div>
+
+              <span className={"badge " + (unlocked ? "accepted" : "pending")}>
+                {unlocked ? "Unlocked" : "Locked"}
+              </span>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+);
+
 }

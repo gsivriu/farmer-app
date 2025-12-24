@@ -164,177 +164,222 @@ export default function FarmerDashboard() {
     );
   };
 
+  const formatDateTime = (value) => {
+    if (!value) return "-";
+    const dt = new Date(value);
+    if (Number.isNaN(dt.getTime())) return "-";
+    return dt.toLocaleString("ro-RO", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   return (
-    <div className="app-container">
-      <FarmerProgress/>
-      <div className="farmer-dashboard-layout">
-        {/* ROW 1: MARKET OVERVIEW (FULL WIDTH) */}
-        <div className="dashboard-row full">
-          <div className="card">
-            <MarketTicker />
-          </div>
+  <div className="app-container">
+    <div className="farmer-dashboard-layout">
+
+      {/* ROW 0: PROGRESS TARGET (FULL WIDTH) */}
+      <div className="dashboard-row full">
+        <div className="card">
+          <FarmerProgress />
         </div>
-  
-        {/* ROW 2: PRICES (FULL WIDTH) */}
-        <div className="dashboard-row full">
-          <div className="card">
-            <PricesGrid />
-          </div>
+      </div>
+
+      {/* ROW 1: MARKET OVERVIEW (FULL WIDTH) */}
+      <div className="dashboard-row full">
+        <div className="card">
+          <MarketTicker />
         </div>
-  
-        {/* ROW 3: BID FORM + ACTIVITY (2 COL) */}
-        <div className="dashboard-row split">
-          {/* LEFT: BID FORM */}
-          <div className="card no-inner-card">
-            <BidForm onBidCreated={loadBids} />
+      </div>
+
+      {/* ROW 2: PRICES (FULL WIDTH) */}
+      <div className="dashboard-row full">
+        <div className="card">
+          <PricesGrid />
+        </div>
+      </div>
+
+      {/* ROW 3: BID FORM + ACTIVITY (2 COL) */}
+      <div className="dashboard-row split">
+
+        {/* LEFT: BID FORM */}
+        <div className="card no-inner-card">
+          <BidForm onBidCreated={loadBids} />
+        </div>
+
+        {/* RIGHT: ACTIVITY */}
+        <div className="card">
+          <div className="card-header">
+            <h2 className="market-title">Activitatea mea</h2>
           </div>
-  
-          {/* RIGHT: ACTIVITY */}
-          <div className="card">
-            <div className="card-header">
-              <h2 className="market-title">Activitatea mea</h2>
+
+          <div className="card-body">
+            {loading && <p>Se încarcă datele...</p>}
+            {error && <p className="badge rejected">{error}</p>}
+
+            <div className="dashboard-section">
+              <p>
+                <strong>Volum total:</strong>{" "}
+                {Number(totalQty || 0).toFixed(2)} t
+              </p>
             </div>
-  
-            <div className="card-body">
-              {loading && <p>Se încarcă datele...</p>}
-              {error && <p className="badge rejected">{error}</p>}
-  
-              <div className="dashboard-section">
-                <p>
-                  <strong>Volum total:</strong> {Number(totalQty || 0).toFixed(2)} t
+
+            <div className="dashboard-section">
+              <h3 style={{ margin: "10px 0 8px", fontSize: 16 }}>
+                Statistici pe produs
+              </h3>
+
+              {statsRows.length === 0 ? (
+                <p className="small-text">
+                  Nu ai încă bid-uri acceptate pentru a calcula statistici.
                 </p>
-              </div>
-  
-              <div className="dashboard-section">
-                <h3 style={{ margin: "10px 0 8px", fontSize: 16 }}>Statistici pe produs</h3>
-  
-                {statsRows.length === 0 ? (
-                  <p className="small-text">
-                    Nu ai încă bid-uri acceptate pentru a calcula statistici.
-                  </p>
-                ) : (
-                  <div className="table-wrapper">
-                    <table className="table stats-table">
-                      <thead>
-                        <tr>
-                          <th>Produs</th>
-                          <th>Volum (t)</th>
-                          <th>Preț mediu</th>
+              ) : (
+                <div className="table-wrapper">
+                  <table className="table stats-table">
+                    <thead>
+                      <tr>
+                        <th>Produs</th>
+                        <th>Volum (t)</th>
+                        <th>Preț mediu</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {statsRows.map((row) => (
+                        <tr key={row.product}>
+                          <td>{PRODUCT_LABELS[row.product] || row.product}</td>
+                          <td>{Number(row.totalQty || 0).toFixed(2)}</td>
+                          <td>{Number(row.avgPrice || 0).toFixed(2)}</td>
                         </tr>
-                      </thead>
-                      <tbody>
-                        {statsRows.map((row) => (
-                          <tr key={row.product}>
-                            <td>{PRODUCT_LABELS[row.product] || row.product}</td>
-                            <td>{Number(row.totalQty || 0).toFixed(2)}</td>
-                            <td>{Number(row.avgPrice || 0).toFixed(2)}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-  
-              <div className="dashboard-section">
-                <h3 style={{ margin: "10px 0 8px", fontSize: 16 }}>Bid-urile mele</h3>
-  
-                {bids.length === 0 ? (
-                  <p className="small-text">Nu ai încă bid-uri plasate.</p>
-                ) : (
-                  <div className="table-wrapper">
-                    <table className="table wide-table">
-                      <thead>
-                        <tr>
-                          <th>Data</th>
-                          <th>Produs</th>
-                          <th>Cantitate (t)</th>
-                          <th>Preț (EUR/t)</th>
-                          <th>Livrare</th>
-                          <th>Status</th>
-                          <th>Acțiuni</th>
-                        </tr>
-                      </thead>
-  
-                      <tbody>
-                        {bids.map((b) => {
-                          const activePrice =
-                            b.counter_price != null
-                              ? Number(b.counter_price)
-                              : Number(b.price);
-  
-                          const isCounteredBid = b.status === "countered";
-  
-                          return (
-                            <tr key={b.id}>
-                              <td>{b.created_at ? new Date(b.created_at).toLocaleString() : "-"}</td>
-                              <td>{PRODUCT_LABELS[b.product] || b.product}</td>
-                              <td>{Number(b.quantity || 0).toFixed(2)}</td>
-  
-                              <td
-                                style={
-                                  b.counter_price != null
-                                    ? { color: "red", fontWeight: 700 }
-                                    : undefined
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            <div className="dashboard-section">
+              <h3 style={{ margin: "10px 0 8px", fontSize: 16 }}>
+                Bid-urile mele
+              </h3>
+
+              {bids.length === 0 ? (
+                <p className="small-text">
+                  Nu ai încă bid-uri plasate.
+                </p>
+              ) : (
+                <div className="table-wrapper bids-table">
+                  <table className="table wide-table">
+                    <thead>
+                      <tr>
+                        <th>Data</th>
+                        <th>Produs</th>
+                        <th>Cantitate (t)</th>
+                        <th>Preț (EUR/t)</th>
+                        <th>Livrare</th>
+                        <th>Status</th>
+                        <th>Acțiuni</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {bids.map((b) => {
+                        const activePrice =
+                          b.counter_price != null
+                            ? Number(b.counter_price)
+                            : Number(b.price);
+
+                        const isCounteredBid =
+                          b.status === "countered";
+
+                        return (
+                          <tr key={b.id}>
+                            <td>
+                              {formatDateTime(b.created_at)}
+                            </td>
+                            <td>
+                              {PRODUCT_LABELS[b.product] || b.product}
+                            </td>
+                            <td>
+                              {Number(b.quantity || 0).toFixed(2)}
+                            </td>
+
+                            <td
+                              style={
+                                b.counter_price != null
+                                  ? { color: "red", fontWeight: 700 }
+                                  : undefined
+                              }
+                            >
+                              {Number(activePrice || 0).toFixed(2)}
+                            </td>
+
+                            <td>
+                              {b.delivery_start && b.delivery_end
+                                ? `${b.delivery_start} → ${b.delivery_end}`
+                                : "-"}
+                            </td>
+
+                            <td>
+                              <span
+                                className={
+                                  "badge " +
+                                  (b.status === "accepted"
+                                    ? "accepted"
+                                    : b.status === "rejected"
+                                    ? "rejected"
+                                    : b.status === "countered"
+                                    ? "counter"
+                                    : "pending")
                                 }
                               >
-                                {Number(activePrice || 0).toFixed(2)}
-                              </td>
-  
-                              <td>
-                                {b.delivery_start && b.delivery_end
-                                  ? `${b.delivery_start} → ${b.delivery_end}`
-                                  : "-"}
-                              </td>
-  
-                              <td>
-                                <span
-                                  className={
-                                    "badge " +
-                                    (b.status === "accepted"
-                                      ? "accepted"
-                                      : b.status === "rejected"
-                                      ? "rejected"
-                                      : b.status === "countered"
-                                      ? "counter"
-                                      : "pending")
-                                  }
-                                >
-                                  {b.status}
-                                </span>
-                              </td>
-  
-                              <td>
-                                {isCounteredBid ? (
-                                  <div className="actions-vertical">
-                                    <button className="btn small ghost" onClick={() => handleAcceptCounter(b)}>
-                                      Acceptă
-                                    </button>
-                                    <button className="btn small ghost" onClick={() => handleRejectCounter(b)}>
-                                      Respinge
-                                    </button>
-                                    <button className="btn small ghost" onClick={() => handleCounterBack(b)}>
-                                      Counter
-                                    </button>
-                                  </div>
-                                ) : (
-                                  <span>-</span>
-                                )}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-  
+                                {b.status}
+                              </span>
+                            </td>
+
+                            <td>
+                              {isCounteredBid ? (
+                                <div className="actions-vertical">
+                                  <button
+                                    className="btn small ghost"
+                                    onClick={() => handleAcceptCounter(b)}
+                                  >
+                                    Acceptă
+                                  </button>
+                                  <button
+                                    className="btn small ghost"
+                                    onClick={() => handleRejectCounter(b)}
+                                  >
+                                    Respinge
+                                  </button>
+                                  <button
+                                    className="btn small ghost"
+                                    onClick={() => handleCounterBack(b)}
+                                  >
+                                    Counter
+                                  </button>
+                                </div>
+                              ) : (
+                                <span>-</span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
+
     </div>
-  );
+  </div>
+);
+
   
 }

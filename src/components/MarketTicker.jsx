@@ -36,7 +36,7 @@ const FUTURES = [
     {
       id: 4,
       market: "CBOT",
-      product: "Corn",
+      product: "Porumb",
       contract: "Jul 25",
       price: 492.75,
       change: +0.75,
