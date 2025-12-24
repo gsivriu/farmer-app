@@ -123,8 +123,7 @@ export default function FarmerProgress() {
               Progress: <b>{fmt0(totalAccepted)} t</b> /{" "}
               <b>{fmt0(MAX_TARGET)} t</b>
               <br />
-              Remaining to unlock: <b>{fmt0(progress.remaining)} t</b>
-            </>
+              </>
           )}
         </div>
       </div>

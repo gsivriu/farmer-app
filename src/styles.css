@@ -163,6 +163,97 @@ body {
 }
 
 /* =========================
+   NAVIGATION BAR (Global)
+   ========================= */
+.desktop-nav {
+  display: flex;
+  justify-content: center;
+  background: #fff;
+  border-bottom: 1px solid var(--gray-light);
+  padding: 0 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.nav-item {
+  padding: 15px 25px;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--gray);
+  border: none;
+  background: transparent;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-item.active {
+  color: var(--blue);
+  border-bottom-color: var(--blue);
+}
+
+.tab-content {
+  display: none;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background: #ffffff;
+  border-top: 1px solid var(--gray-light);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 1000;
+  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: 0 -4px 15px rgba(0,0,0,0.05);
+}
+
+.bottom-nav .nav-item {
+  flex-direction: column;
+  padding: 10px;
+  font-size: 11px;
+  gap: 4px;
+  border: none;
+}
+
+.bottom-nav .nav-item span {
+  font-size: 20px;
+  margin-bottom: 2px;
+}
+
+.nav-item.sale-btn {
+  background: var(--blue);
+  color: #fff;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  margin-top: -30px;
+  box-shadow: 0 4px 12px rgba(179, 0, 0, 0.4);
+  justify-content: center;
+}
+
+.nav-item.sale-btn.active {
+  background: var(--blue-dark);
+}
+
+/* =========================
    FARMER DASHBOARD LAYOUT
    ========================= */
 .farmer-dashboard-layout {
@@ -857,6 +948,18 @@ select.input:focus {
   .table th, .table td {
     padding: 6px 8px;
     font-size: 12px;
+  }
+
+  .desktop-nav {
+    display: none;
+  }
+
+  .bottom-nav {
+    display: flex;
+  }
+
+  .app-container {
+    padding-bottom: 90px;
   }
 }
 
