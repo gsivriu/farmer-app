@@ -424,6 +424,113 @@ select.input:focus {
 }
 
 /* =========================
+   BID LIST (Farmer Activity)
+   ========================= */
+.bid-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bid-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+}
+
+.bid-row.is-accepted {
+  background: #ecfdf3;
+  border-color: #86efac;
+}
+
+.bid-row.is-pending {
+  background: #fff7ed;
+  border-color: #fdba74;
+}
+
+.bid-row.is-rejected {
+  background: #fee2e2;
+  border-color: #fca5a5;
+}
+
+.bid-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.bid-line {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.bid-date {
+  font-weight: 600;
+}
+
+.bid-product {
+  color: var(--gray);
+}
+
+.bid-status {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+/* =========================
+   BID MODAL
+   ========================= */
+.bid-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: grid;
+  place-items: center;
+  z-index: 1100;
+  padding: 16px;
+}
+
+.bid-modal {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  padding: 16px;
+}
+
+.bid-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.bid-modal-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.bid-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+}
+
+/* =========================
    TABLES (FIXED WRAPPERS)
    ========================= */
 .table-wrapper {
@@ -981,7 +1088,7 @@ select.input:focus {
   }
 
   .app-container {
-    padding-bottom: 90px;
+    padding-bottom: 120px;
   }
 }
 

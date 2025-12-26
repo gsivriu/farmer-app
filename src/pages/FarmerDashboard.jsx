@@ -21,6 +21,7 @@ export default function FarmerDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("home");
+  const [selectedBid, setSelectedBid] = useState(null);
 
   const loadBids = useCallback(async () => {
     setLoading(true);
@@ -178,6 +179,13 @@ export default function FarmerDashboard() {
     });
   };
 
+  const formatDateOnly = (value) => {
+    if (!value) return "-";
+    const dt = new Date(value);
+    if (Number.isNaN(dt.getTime())) return "-";
+    return dt.toLocaleDateString("en-GB");
+  };
+
   return (
     <div className="app-container">
       <nav className="desktop-nav">
@@ -297,106 +305,42 @@ export default function FarmerDashboard() {
                       Nu ai încă bid-uri plasate.
                     </p>
                   ) : (
-                    <div className="table-wrapper bids-table">
-                      <table className="table wide-table">
-                        <thead>
-                          <tr>
-                            <th>Data</th>
-                            <th>Produs</th>
-                            <th>Cantitate (t)</th>
-                            <th>Preț (EUR/t)</th>
-                            <th>Livrare</th>
-                            <th>Status</th>
-                            <th>Acțiuni</th>
-                          </tr>
-                        </thead>
+                    <div className="bid-list">
+                      {bids.map((b) => {
+                        const statusClass =
+                          b.status === "accepted"
+                            ? "is-accepted"
+                            : b.status === "rejected"
+                            ? "is-rejected"
+                            : "is-pending";
+                        const activePrice =
+                          b.counter_price != null
+                            ? Number(b.counter_price)
+                            : Number(b.price);
 
-                        <tbody>
-                          {bids.map((b) => {
-                            const activePrice =
-                              b.counter_price != null
-                                ? Number(b.counter_price)
-                                : Number(b.price);
-
-                            const isCounteredBid =
-                              b.status === "countered";
-
-                            return (
-                              <tr key={b.id}>
-                                <td>
-                                  {formatDateTime(b.created_at)}
-                                </td>
-                                <td>
+                        return (
+                          <button
+                            key={b.id}
+                            type="button"
+                            className={"bid-row " + statusClass}
+                            onClick={() => setSelectedBid(b)}
+                          >
+                            <div className="bid-main">
+                              <div className="bid-line">
+                                <span className="bid-date">{formatDateOnly(b.created_at)}</span>
+                                <span className="bid-product">
                                   {PRODUCT_LABELS[b.product] || b.product}
-                                </td>
-                                <td>
-                                  {Number(b.quantity || 0).toFixed(2)}
-                                </td>
-
-                                <td
-                                  style={
-                                    b.counter_price != null
-                                      ? { color: "red", fontWeight: 700 }
-                                      : undefined
-                                  }
-                                >
-                                  {Number(activePrice || 0).toFixed(2)}
-                                </td>
-
-                                <td>
-                                  {b.delivery_start && b.delivery_end
-                                    ? `${b.delivery_start} → ${b.delivery_end}`
-                                    : "-"}
-                                </td>
-
-                                <td>
-                                  <span
-                                    className={
-                                      "badge " +
-                                      (b.status === "accepted"
-                                        ? "accepted"
-                                        : b.status === "rejected"
-                                        ? "rejected"
-                                        : b.status === "countered"
-                                        ? "counter"
-                                        : "pending")
-                                    }
-                                  >
-                                    {b.status}
-                                  </span>
-                                </td>
-
-                                <td>
-                                  {isCounteredBid ? (
-                                    <div className="actions-vertical">
-                                      <button
-                                        className="btn small ghost"
-                                        onClick={() => handleAcceptCounter(b)}
-                                      >
-                                        Acceptă
-                                      </button>
-                                      <button
-                                        className="btn small ghost"
-                                        onClick={() => handleRejectCounter(b)}
-                                      >
-                                        Respinge
-                                      </button>
-                                      <button
-                                        className="btn small ghost"
-                                        onClick={() => handleCounterBack(b)}
-                                      >
-                                        Counter
-                                      </button>
-                                    </div>
-                                  ) : (
-                                    <span>-</span>
-                                  )}
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
+                                </span>
+                              </div>
+                              <div className="bid-line">
+                                <span>{Number(b.quantity || 0).toFixed(2)} t</span>
+                                <span>{Number(activePrice || 0).toFixed(2)} EUR/t</span>
+                              </div>
+                            </div>
+                            <span className="bid-status">{b.status}</span>
+                          </button>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -405,6 +349,56 @@ export default function FarmerDashboard() {
           </div>
         </div>
       </div>
+
+      {selectedBid && (
+        <div
+          className="bid-modal-backdrop"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setSelectedBid(null)}
+        >
+          <div
+            className="bid-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="bid-modal-header">
+              <h3>Detalii bid</h3>
+              <button
+                type="button"
+                className="btn small ghost"
+                onClick={() => setSelectedBid(null)}
+              >
+                Închide
+              </button>
+            </div>
+            <div className="bid-modal-body">
+              <div><b>Data:</b> {formatDateTime(selectedBid.created_at)}</div>
+              <div>
+                <b>Produs:</b> {PRODUCT_LABELS[selectedBid.product] || selectedBid.product}
+              </div>
+              <div><b>Cantitate:</b> {Number(selectedBid.quantity || 0).toFixed(2)} t</div>
+              <div>
+                <b>Preț:</b>{" "}
+                {Number(
+                  selectedBid.counter_price != null
+                    ? selectedBid.counter_price
+                    : selectedBid.price || 0
+                ).toFixed(2)}{" "}
+                EUR/t
+              </div>
+              <div>
+                <b>Status:</b> {selectedBid.status}
+              </div>
+              <div>
+                <b>Livrare:</b>{" "}
+                {selectedBid.delivery_start && selectedBid.delivery_end
+                  ? `${selectedBid.delivery_start} → ${selectedBid.delivery_end}`
+                  : "-"}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <nav className="bottom-nav">
         <button
