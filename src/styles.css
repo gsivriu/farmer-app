@@ -1200,6 +1200,31 @@ select.input:focus {
     display: none;
   }
 
+  .bid-list {
+    gap: 12px;
+  }
+
+  .bid-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .bid-left {
+    min-width: 0;
+  }
+
+  .bid-details {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 12px;
+    width: 100%;
+  }
+
+  .bid-status {
+    align-self: flex-start;
+  }
+
   /* Tabele scrollabile fără a lărgi cardul */
   .table-wrapper {
     overflow-x: auto;
