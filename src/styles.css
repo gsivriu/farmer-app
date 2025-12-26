@@ -434,59 +434,119 @@ select.input:focus {
 
 .bid-row {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: space-between;
   gap: 12px;
   width: 100%;
-  padding: 10px 12px;
-  border-radius: 10px;
+  padding: 12px;
+  border-radius: 12px;
   border: 1px solid transparent;
   background: #fff;
   cursor: pointer;
   text-align: left;
+  position: relative;
+  overflow: hidden;
 }
 
 .bid-row.is-accepted {
-  background: #ecfdf3;
   border-color: #86efac;
 }
 
 .bid-row.is-pending {
-  background: #fff7ed;
   border-color: #fdba74;
 }
 
 .bid-row.is-rejected {
-  background: #fee2e2;
   border-color: #fca5a5;
 }
 
-.bid-main {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 13px;
+.bid-row.is-accepted::before,
+.bid-row.is-pending::before,
+.bid-row.is-rejected::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 6px;
+  border-radius: 999px;
 }
 
-.bid-line {
+.bid-row.is-accepted::before {
+  background: #16a34a;
+}
+
+.bid-row.is-pending::before {
+  background: #f59e0b;
+}
+
+.bid-row.is-rejected::before {
+  background: #dc2626;
+}
+
+.bid-left {
   display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 120px;
+}
+
+.bid-title {
+  font-weight: 700;
+  font-size: 14px;
 }
 
 .bid-date {
-  font-weight: 600;
-}
-
-.bid-product {
+  font-size: 12px;
   color: var(--gray);
 }
 
-.bid-status {
+.bid-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 16px;
+  flex: 1;
   font-size: 12px;
+}
+
+.bid-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bid-label {
+  color: var(--gray);
+  font-size: 11px;
+}
+
+.bid-value {
+  font-weight: 600;
+}
+
+.bid-status {
+  align-self: center;
+  font-size: 11px;
   font-weight: 700;
   text-transform: capitalize;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.bid-row.is-accepted .bid-status {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.bid-row.is-pending .bid-status {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.bid-row.is-rejected .bid-status {
+  background: #fee2e2;
+  color: #b91c1c;
 }
 
 /* =========================

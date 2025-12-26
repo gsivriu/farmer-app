@@ -325,18 +325,28 @@ export default function FarmerDashboard() {
                             className={"bid-row " + statusClass}
                             onClick={() => setSelectedBid(b)}
                           >
-                            <div className="bid-main">
-                              <div className="bid-line">
-                                <span className="bid-date">{formatDateOnly(b.created_at)}</span>
-                                <span className="bid-product">
-                                  {PRODUCT_LABELS[b.product] || b.product}
+                            <div className="bid-left">
+                              <div className="bid-title">
+                                {PRODUCT_LABELS[b.product] || b.product}
+                              </div>
+                              <div className="bid-date">{formatDateOnly(b.created_at)}</div>
+                            </div>
+
+                            <div className="bid-details">
+                              <div className="bid-field">
+                                <span className="bid-label">Cantitate</span>
+                                <span className="bid-value">
+                                  {Number(b.quantity || 0).toFixed(2)} t
                                 </span>
                               </div>
-                              <div className="bid-line">
-                                <span>{Number(b.quantity || 0).toFixed(2)} t</span>
-                                <span>{Number(activePrice || 0).toFixed(2)} EUR/t</span>
+                              <div className="bid-field">
+                                <span className="bid-label">Preț</span>
+                                <span className="bid-value">
+                                  {Number(activePrice || 0).toFixed(2)} EUR/t
+                                </span>
                               </div>
                             </div>
+
                             <span className="bid-status">{b.status}</span>
                           </button>
                         );
