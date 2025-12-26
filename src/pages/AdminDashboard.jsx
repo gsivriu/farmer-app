@@ -579,6 +579,9 @@ export default function AdminDashboard() {
                           {PRODUCT_LABELS[b.product] || b.product}
                         </div>
                         <div className="bid-date">{formatDateOnly(b.created_at)}</div>
+                        {b.status === "accepted" && b.contract_no && (
+                          <div className="bid-contract">Contract: {b.contract_no}</div>
+                        )}
                       </div>
 
                       <div className="bid-details">
@@ -660,6 +663,11 @@ export default function AdminDashboard() {
               <div>
                 <b>Status:</b> {selectedBid.status}
               </div>
+              {selectedBid.contract_no && (
+                <div>
+                  <b>Contract:</b> {selectedBid.contract_no}
+                </div>
+              )}
               <div>
                 <b>Livrare:</b>{" "}
                 {selectedBid.delivery_start && selectedBid.delivery_end

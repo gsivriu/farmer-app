@@ -506,6 +506,11 @@ select.input:focus {
   color: var(--gray);
 }
 
+.bid-contract {
+  font-size: 11px;
+  color: var(--gray);
+}
+
 .bid-details {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
