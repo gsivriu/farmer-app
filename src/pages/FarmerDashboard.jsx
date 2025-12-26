@@ -412,24 +412,43 @@ export default function FarmerDashboard() {
           className={"nav-item " + (activeTab === "home" ? "active" : "")}
           onClick={() => setActiveTab("home")}
         >
-          <span>🏠</span>
-          Home
+          <svg
+            className="nav-icon"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path d="M4 10.5L12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1v-9.5z" />
+          </svg>
+          <span className="nav-label">Home</span>
         </button>
         <button
           type="button"
           className={"nav-item " + (activeTab === "sale" ? "active" : "")}
           onClick={() => setActiveTab("sale")}
         >
-          <span>💰</span>
-          Sale
+          <svg
+            className="nav-icon"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path d="M4 7.5V6a2 2 0 0 1 2-2h8l6 6v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V16" />
+            <path d="M14 4v6h6" />
+          </svg>
+          <span className="nav-label">Sale</span>
         </button>
         <button
           type="button"
           className={"nav-item " + (activeTab === "activity" ? "active" : "")}
           onClick={() => setActiveTab("activity")}
         >
-          <span>📊</span>
-          Activity
+          <svg
+            className="nav-icon"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path d="M5 20V9m7 11V4m7 16v-6" />
+          </svg>
+          <span className="nav-label">Activity</span>
         </button>
       </nav>
     </div>
