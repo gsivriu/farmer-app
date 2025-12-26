@@ -27,11 +27,14 @@
   box-sizing: border-box;
 }
 
+html,
 body {
   margin: 0;
   background-color: var(--bg);
   /* Prevenim scroll-ul orizontal pe mobil cauzat de tabele */
   overflow-x: hidden;
+  max-width: 100%;
+  overscroll-behavior-x: none;
 }
 
 /* =========================
