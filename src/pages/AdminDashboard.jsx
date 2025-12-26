@@ -70,6 +70,7 @@ export default function AdminDashboard() {
   const [farmerProductFilter, setFarmerProductFilter] = useState("all");
 
   const [counterValues, setCounterValues] = useState({});
+  const [selectedBid, setSelectedBid] = useState(null);
 
   // referințe pentru date (pentru fake picker)
   const startInputRef = useRef(null);
@@ -168,6 +169,13 @@ export default function AdminDashboard() {
     }
 
     setFarmerHistory(data || []);
+  };
+
+  const formatDateOnly = (value) => {
+    if (!value) return "-";
+    const dt = new Date(value);
+    if (Number.isNaN(dt.getTime())) return "-";
+    return dt.toLocaleDateString("en-GB");
   };
 
   const formatDateTime = (value) => {
@@ -542,59 +550,59 @@ export default function AdminDashboard() {
               <div style={{ marginTop: 14 }}>
                 <h3 style={{ margin: "10px 0 8px", fontSize: 16 }}>Bid-uri fermier</h3>
 
-                {filteredHistory.length === 0 ? (
-                  <p className="small-text">Nicio înregistrare pentru filtrul selectat.</p>
-                ) : (
-                  <div className="table-wrapper">
-                    <table className="table wide-table">
-                      <thead>
-                        <tr>
-                          <th>Data</th>
-                          <th>Produs</th>
-                          <th>Cantitate (t)</th>
-                          <th>Preț</th>
-                          <th>Livrare</th>
-                          <th>Status</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filteredHistory.map((b) => (
-                          <tr key={b.id}>
-                            <td>{formatDateTime(b.created_at)}</td>
-                            <td>{PRODUCT_LABELS[b.product] || b.product}</td>
-                            <td>{Number(b.quantity || 0).toFixed(2)}</td>
-                            <td>
-                              {Number(b.price || 0).toFixed(2)}{" "}
-                              {b.product === "sunflower" ? "USD/t" : "EUR/t"}
-                            </td>
-                            <td>
-                              {b.delivery_start && b.delivery_end
-                                ? `${b.delivery_start} → ${b.delivery_end}`
-                                : "-"}
-                            </td>
-                            <td>
-                              <span
-                                className={
-                                  "badge " +
-                                  (b.status === "accepted"
-                                    ? "accepted"
-                                    : b.status === "rejected"
-                                    ? "rejected"
-                                    : b.status === "countered"
-                                    ? "counter"
-                                    : "pending")
-                                }
-                              >
-                                {b.status}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+            {filteredHistory.length === 0 ? (
+              <p className="small-text">Nicio înregistrare pentru filtrul selectat.</p>
+            ) : (
+              <div className="bid-list">
+                {filteredHistory.map((b) => {
+                  const statusClass =
+                    b.status === "accepted"
+                      ? "is-accepted"
+                      : b.status === "rejected"
+                      ? "is-rejected"
+                      : "is-pending";
+                  const activePrice =
+                    b.counter_price != null
+                      ? Number(b.counter_price)
+                      : Number(b.price);
+                  const unit = b.product === "sunflower" ? "USD/t" : "EUR/t";
+
+                  return (
+                    <button
+                      key={b.id}
+                      type="button"
+                      className={"bid-row " + statusClass}
+                      onClick={() => setSelectedBid(b)}
+                    >
+                      <div className="bid-left">
+                        <div className="bid-title">
+                          {PRODUCT_LABELS[b.product] || b.product}
+                        </div>
+                        <div className="bid-date">{formatDateOnly(b.created_at)}</div>
+                      </div>
+
+                      <div className="bid-details">
+                        <div className="bid-field">
+                          <span className="bid-label">Cantitate</span>
+                          <span className="bid-value">
+                            {Number(b.quantity || 0).toFixed(2)} t
+                          </span>
+                        </div>
+                        <div className="bid-field">
+                          <span className="bid-label">Preț</span>
+                          <span className="bid-value">
+                            {Number(activePrice || 0).toFixed(2)} {unit}
+                          </span>
+                        </div>
+                      </div>
+
+                      <span className="bid-status">{b.status}</span>
+                    </button>
+                  );
+                })}
               </div>
+            )}
+          </div>
 
               <div style={{ marginTop: 14 }}>
                 <button
@@ -612,6 +620,56 @@ export default function AdminDashboard() {
           )}
         </div>
       </div>
+
+      {selectedBid && (
+        <div
+          className="bid-modal-backdrop"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setSelectedBid(null)}
+        >
+          <div
+            className="bid-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="bid-modal-header">
+              <h3>Detalii bid</h3>
+              <button
+                type="button"
+                className="btn small ghost"
+                onClick={() => setSelectedBid(null)}
+              >
+                Închide
+              </button>
+            </div>
+            <div className="bid-modal-body">
+              <div><b>Data:</b> {formatDateTime(selectedBid.created_at)}</div>
+              <div>
+                <b>Produs:</b> {PRODUCT_LABELS[selectedBid.product] || selectedBid.product}
+              </div>
+              <div><b>Cantitate:</b> {Number(selectedBid.quantity || 0).toFixed(2)} t</div>
+              <div>
+                <b>Preț:</b>{" "}
+                {Number(
+                  selectedBid.counter_price != null
+                    ? selectedBid.counter_price
+                    : selectedBid.price || 0
+                ).toFixed(2)}{" "}
+                {selectedBid.product === "sunflower" ? "USD/t" : "EUR/t"}
+              </div>
+              <div>
+                <b>Status:</b> {selectedBid.status}
+              </div>
+              <div>
+                <b>Livrare:</b>{" "}
+                {selectedBid.delivery_start && selectedBid.delivery_end
+                  ? `${selectedBid.delivery_start} → ${selectedBid.delivery_end}`
+                  : "-"}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <nav className="bottom-nav admin-bottom-nav">
         <button
