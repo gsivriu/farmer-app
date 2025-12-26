@@ -16,6 +16,7 @@ export default function AdminDashboard() {
   const { commodities, updateCommodityPrice } = useAppContext();
 
   const [draftPrices, setDraftPrices] = useState({});
+  const [activeTab, setActiveTab] = useState("home");
 
   useEffect(() => {
     setDraftPrices(
@@ -233,327 +234,170 @@ export default function AdminDashboard() {
 
   return (
     <div className="admin-layout">
-      {/* Optional: Market overview sus (arata bine pe admin) */}
-      <div className="card admin-card">
-        <MarketTicker />
-      </div>
+      <nav className="desktop-nav">
+        <button
+          type="button"
+          className={"nav-item " + (activeTab === "home" ? "active" : "")}
+          onClick={() => setActiveTab("home")}
+        >
+          Home
+        </button>
+        <button
+          type="button"
+          className={"nav-item " + (activeTab === "bids" ? "active" : "")}
+          onClick={() => setActiveTab("bids")}
+        >
+          Farmer Bids
+        </button>
+      </nav>
 
-      {/* CARD: Setare prețuri */}
-      <div className="card admin-card">
-        <div className="card-header">
-          <h2 className="market-title">Setare prețuri zilnice</h2>
-          <p className="market-subtitle">
-            Introdu și confirmă prețurile interne. Fermierii vor vedea automat noile valori.
-          </p>
-        </div>
-
-        <div className="admin-grid">
-          {(commodities || []).map((c) => (
-            <div className="admin-price-item" key={c.id}>
-              <div className="admin-label">{c.name || PRODUCT_LABELS[c.id] || c.id}</div>
-
-              <div className="admin-row">
-                <input
-                  className="input admin-input"
-                  type="number"
-                  step="0.01"
-                  value={draftPrices?.[c.id] ?? ""}
-                  onChange={(e) => handleDraftChange(c.id, e.target.value)}
-                  placeholder="ex: 200"
-                />
-
-                <span className="admin-unit">
-                  {c.id === "sunflower" ? "USD/t" : "EUR/t"}
-                </span>
-
-                <button
-                  type="button"
-                  className="btn primary-btn admin-btn"
-                  onClick={() => handleSavePrice(c.id)}
-                >
-                  Confirmă
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* CARD: Filtre + Toate bid-urile */}
-      <div className="card admin-card">
-        <div className="card-header">
-          <h2 className="market-title">Toate bid-urile</h2>
-          <p className="market-subtitle">Filtrează după fermier și perioadă.</p>
-        </div>
-
-        <div className="admin-filters">
-          <div className="admin-filter">
-            <label className="label">Fermieri</label>
-            <select
-              className="input"
-              value={listFarmerFilter}
-              onChange={(e) => {
-                const id = e.target.value;
-                setListFarmerFilter(id);
-              
-                // dacă alegi un fermier, încarcă automat istoricul lui
-                if (id !== "all") {
-                  loadFarmerHistory(id);
-                } else {
-                  // dacă revii pe "all", ascundem istoricul
-                  setSelectedFarmer(null);
-                  setFarmerHistory([]);
-                }
-              }}
-              
-            >
-              <option value="all">Toți fermierii</option>
-              {(farmers || []).map((f) => (
-                <option key={f.id} value={f.id}>
-                  {f.email || f.id}
-                </option>
-              ))}
-            </select>
+      <div className="tab-content admin-tab-content">
+        <div className={activeTab === "home" ? "tab-pane active" : "tab-pane"}>
+          {/* Optional: Market overview sus (arata bine pe admin) */}
+          <div className="card admin-card">
+            <MarketTicker />
           </div>
 
-          <div className="admin-filter">
-           <label className="label">De la</label>
-            <input
-            type="date"
-            className="input"
-            value={filterStart}
-            onChange={(e) => setFilterStart(e.target.value)}
-            />
+          {/* CARD: Setare prețuri */}
+          <div className="card admin-card">
+            <div className="card-header">
+              <h2 className="market-title">Setare prețuri zilnice</h2>
+              <p className="market-subtitle">
+                Introdu și confirmă prețurile interne. Fermierii vor vedea automat noile valori.
+              </p>
             </div>
 
-            <div className="admin-filter">
-              <label className="label">Până la</label>
-              <input
+            <div className="admin-grid">
+              {(commodities || []).map((c) => (
+                <div className="admin-price-item" key={c.id}>
+                  <div className="admin-label">{c.name || PRODUCT_LABELS[c.id] || c.id}</div>
+
+                  <div className="admin-row">
+                    <input
+                      className="input admin-input"
+                      type="number"
+                      step="0.01"
+                      value={draftPrices?.[c.id] ?? ""}
+                      onChange={(e) => handleDraftChange(c.id, e.target.value)}
+                      placeholder="ex: 200"
+                    />
+
+                    <span className="admin-unit">
+                      {c.id === "sunflower" ? "USD/t" : "EUR/t"}
+                    </span>
+
+                    <button
+                      type="button"
+                      className="btn primary-btn admin-btn"
+                      onClick={() => handleSavePrice(c.id)}
+                    >
+                      Confirmă
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className={activeTab === "bids" ? "tab-pane active" : "tab-pane"}>
+          {/* CARD: Filtre + Toate bid-urile */}
+          <div className="card admin-card">
+            <div className="card-header">
+              <h2 className="market-title">Toate bid-urile</h2>
+              <p className="market-subtitle">Filtrează după fermier și perioadă.</p>
+            </div>
+
+            <div className="admin-filters">
+              <div className="admin-filter">
+                <label className="label">Fermieri</label>
+                <select
+                  className="input"
+                  value={listFarmerFilter}
+                  onChange={(e) => {
+                    const id = e.target.value;
+                    setListFarmerFilter(id);
+                  
+                    // dacă alegi un fermier, încarcă automat istoricul lui
+                    if (id !== "all") {
+                      loadFarmerHistory(id);
+                    } else {
+                      // dacă revii pe "all", ascundem istoricul
+                      setSelectedFarmer(null);
+                      setFarmerHistory([]);
+                    }
+                  }}
+                  
+                >
+                  <option value="all">Toți fermierii</option>
+                  {(farmers || []).map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.email || f.id}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="admin-filter">
+               <label className="label">De la</label>
+                <input
                 type="date"
                 className="input"
-                value={filterEnd}
-                        onChange={(e) => setFilterEnd(e.target.value)}
-                  />
+                value={filterStart}
+                onChange={(e) => setFilterStart(e.target.value)}
+                />
+                </div>
+
+                <div className="admin-filter">
+                  <label className="label">Până la</label>
+                  <input
+                    type="date"
+                    className="input"
+                    value={filterEnd}
+                            onChange={(e) => setFilterEnd(e.target.value)}
+                      />
+                </div>
+
+
             </div>
 
+            {loading && <p className="small-text" style={{ marginTop: 12 }}>Se încarcă...</p>}
+            {error && <p className="badge rejected" style={{ marginTop: 12 }}>{error}</p>}
 
-        </div>
-
-        {loading && <p className="small-text" style={{ marginTop: 12 }}>Se încarcă...</p>}
-        {error && <p className="badge rejected" style={{ marginTop: 12 }}>{error}</p>}
-
-        {!loading && !error && (
-          <div className="admin-table-scroll" style={{ marginTop: 14 }}>
-            <div className="table-wrapper">
-            <table className="table wide-table">
-              <thead>
-                <tr>
-                  <th>Data</th>
-                  <th>Fermier</th>
-                  <th>Produs</th>
-                  <th>Cantitate (t)</th>
-                  <th>Preț</th>
-                  <th>Paritate</th>
-                  <th>Livrare</th>
-                  <th>Status</th>
-                  <th>Acțiuni</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredBids.map((b) => (
-                  <tr key={b.id}>
-                    <td>{formatDateTime(b.created_at)}</td>
-                    <td>{b.farmer_email || b.farmer_id}</td>
-                    <td>{PRODUCT_LABELS[b.product] || b.product}</td>
-                    <td>{Number(b.quantity || 0).toFixed(2)}</td>
-                    <td>
-                      {Number(b.price || 0).toFixed(2)}{" "}
-                      {b.product === "sunflower" ? "USD/t" : "EUR/t"}
-                      {b.counter_price != null && (
-                        <span style={{ marginLeft: 8, color: "#b91c1c", fontWeight: 700 }}>
-                          (counter: {Number(b.counter_price).toFixed(2)})
-                        </span>
-                      )}
-                    </td>
-                    <td>{b.parity || "-"}</td>
-                    <td>
-                      {b.delivery_start && b.delivery_end
-                        ? `${b.delivery_start} → ${b.delivery_end}`
-                        : "-"}
-                    </td>
-                    <td>
-                      <span
-                        className={
-                          "badge " +
-                          (b.status === "accepted"
-                            ? "accepted"
-                            : b.status === "rejected"
-                            ? "rejected"
-                            : b.status === "countered"
-                            ? "counter"
-                            : "pending")
-                        }
-                      >
-                        {b.status}
-                      </span>
-                    </td>
-
-                    <td>
-                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                        <button
-                          className="btn small ghost"
-                          type="button"
-                          onClick={() => updateStatus(b.id, "accepted")}
-                        >
-                          Accept
-                        </button>
-
-                        <button
-                          className="btn small ghost"
-                          type="button"
-                          onClick={() => updateStatus(b.id, "rejected")}
-                        >
-                          Reject
-                        </button>
-
-                        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                          <input
-                            className="input"
-                            style={{ width: 110, padding: "6px 8px", fontSize: 13 }}
-                            type="number"
-                            step="0.01"
-                            placeholder="Counter"
-                            value={counterValues[b.id] ?? ""}
-                            onChange={(e) =>
-                              setCounterValues((prev) => ({
-                                ...prev,
-                                [b.id]: e.target.value,
-                              }))
-                            }
-                          />
-                          <button
-                            className="btn small ghost"
-                            type="button"
-                            onClick={() => sendCounter(b.id)}
-                          >
-                            Send
-                          </button>
-                        </div>
-
-                        <button
-                        className="btn small ghost"
-                          type="button"
-                          onClick={() => {
-                          setListFarmerFilter(b.farmer_id);
-                          loadFarmerHistory(b.farmer_id);
-                       }}
-                        >
-                        Istoric
-                        </button>
-
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-
-                {filteredBids.length === 0 && (
-                  <tr>
-                    <td colSpan={9} className="small-text" style={{ padding: 12 }}>
-                      Nu există bid-uri pentru filtrele selectate.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-          </div>
-        )}
-      </div>
-
-      {/* CARD: Istoric fermier (optional, doar dacă ai selectat) */}
-      {selectedFarmer && (
-        <div className="card admin-card">
-          <div className="card-header">
-            <h2 className="market-title">Istoric fermier</h2>
-            <p className="market-subtitle">{getFarmerEmail(selectedFarmer)}</p>
-          </div>
-
-          <div className="admin-filters">
-            <div className="admin-filter">
-              <label className="label">Produs</label>
-              <select
-                className="input"
-                value={farmerProductFilter}
-                onChange={(e) => setFarmerProductFilter(e.target.value)}
-              >
-                <option value="all">Toate</option>
-                {Object.keys(PRODUCT_LABELS).map((k) => (
-                  <option key={k} value={k}>
-                    {PRODUCT_LABELS[k]}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* statistici */}
-          <div style={{ marginTop: 14 }}>
-            <h3 style={{ margin: "10px 0 8px", fontSize: 16 }}>Statistici pe produs (accepted)</h3>
-            {statsRows.length === 0 ? (
-              <p className="small-text">Nu există bid-uri accepted în istoric.</p>
-            ) : (
-              <div className="table-wrapper">
-                <table className="table stats-table">
-                  <thead>
-                    <tr>
-                      <th>Produs</th>
-                      <th>Volum (t)</th>
-                      <th>Preț mediu</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {statsRows.map((row) => (
-                      <tr key={row.product}>
-                        <td>{PRODUCT_LABELS[row.product] || row.product}</td>
-                        <td>{Number(row.totalQty || 0).toFixed(2)}</td>
-                        <td>{Number(row.avgPrice || 0).toFixed(2)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-
-          {/* tabel istoric */}
-          <div style={{ marginTop: 14 }}>
-            <h3 style={{ margin: "10px 0 8px", fontSize: 16 }}>Bid-uri fermier</h3>
-
-            {filteredHistory.length === 0 ? (
-              <p className="small-text">Nicio înregistrare pentru filtrul selectat.</p>
-            ) : (
-              <div className="table-wrapper">
+            {!loading && !error && (
+              <div className="admin-table-scroll" style={{ marginTop: 14 }}>
+                <div className="table-wrapper">
                 <table className="table wide-table">
                   <thead>
                     <tr>
                       <th>Data</th>
+                      <th>Fermier</th>
                       <th>Produs</th>
                       <th>Cantitate (t)</th>
                       <th>Preț</th>
+                      <th>Paritate</th>
                       <th>Livrare</th>
                       <th>Status</th>
+                      <th>Acțiuni</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredHistory.map((b) => (
+                    {filteredBids.map((b) => (
                       <tr key={b.id}>
                         <td>{formatDateTime(b.created_at)}</td>
+                        <td>{b.farmer_email || b.farmer_id}</td>
                         <td>{PRODUCT_LABELS[b.product] || b.product}</td>
                         <td>{Number(b.quantity || 0).toFixed(2)}</td>
                         <td>
                           {Number(b.price || 0).toFixed(2)}{" "}
                           {b.product === "sunflower" ? "USD/t" : "EUR/t"}
+                          {b.counter_price != null && (
+                            <span style={{ marginLeft: 8, color: "#b91c1c", fontWeight: 700 }}>
+                              (counter: {Number(b.counter_price).toFixed(2)})
+                            </span>
+                          )}
                         </td>
+                        <td>{b.parity || "-"}</td>
                         <td>
                           {b.delivery_start && b.delivery_end
                             ? `${b.delivery_start} → ${b.delivery_end}`
@@ -575,28 +419,220 @@ export default function AdminDashboard() {
                             {b.status}
                           </span>
                         </td>
+
+                        <td>
+                          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                            <button
+                              className="btn small ghost"
+                              type="button"
+                              onClick={() => updateStatus(b.id, "accepted")}
+                            >
+                              Accept
+                            </button>
+
+                            <button
+                              className="btn small ghost"
+                              type="button"
+                              onClick={() => updateStatus(b.id, "rejected")}
+                            >
+                              Reject
+                            </button>
+
+                            <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                              <input
+                                className="input"
+                                style={{ width: 110, padding: "6px 8px", fontSize: 13 }}
+                                type="number"
+                                step="0.01"
+                                placeholder="Counter"
+                                value={counterValues[b.id] ?? ""}
+                                onChange={(e) =>
+                                  setCounterValues((prev) => ({
+                                    ...prev,
+                                    [b.id]: e.target.value,
+                                  }))
+                                }
+                              />
+                              <button
+                                className="btn small ghost"
+                                type="button"
+                                onClick={() => sendCounter(b.id)}
+                              >
+                                Send
+                              </button>
+                            </div>
+
+                          </div>
+                        </td>
                       </tr>
                     ))}
+
+                    {filteredBids.length === 0 && (
+                      <tr>
+                        <td colSpan={9} className="small-text" style={{ padding: 12 }}>
+                          Nu există bid-uri pentru filtrele selectate.
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
+              </div>
               </div>
             )}
           </div>
 
-          <div style={{ marginTop: 14 }}>
-            <button
-              type="button"
-              className="btn outline"
-              onClick={() => {
-                setSelectedFarmer(null);
-                setFarmerHistory([]);
-              }}
-            >
-              Închide istoricul
-            </button>
-          </div>
+          {/* CARD: Istoric fermier (optional, doar dacă ai selectat) */}
+          {selectedFarmer && (
+            <div className="card admin-card">
+              <div className="card-header">
+                <h2 className="market-title">Istoric fermier</h2>
+                <p className="market-subtitle">{getFarmerEmail(selectedFarmer)}</p>
+              </div>
+
+              <div className="admin-filters">
+                <div className="admin-filter">
+                  <label className="label">Produs</label>
+                  <select
+                    className="input"
+                    value={farmerProductFilter}
+                    onChange={(e) => setFarmerProductFilter(e.target.value)}
+                  >
+                    <option value="all">Toate</option>
+                    {Object.keys(PRODUCT_LABELS).map((k) => (
+                      <option key={k} value={k}>
+                        {PRODUCT_LABELS[k]}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* statistici */}
+              <div style={{ marginTop: 14 }}>
+                <h3 style={{ margin: "10px 0 8px", fontSize: 16 }}>
+                  Statistici pe produs (accepted)
+                </h3>
+                {statsRows.length === 0 ? (
+                  <p className="small-text">Nu există bid-uri accepted în istoric.</p>
+                ) : (
+                  <div className="table-wrapper">
+                    <table className="table stats-table">
+                      <thead>
+                        <tr>
+                          <th>Produs</th>
+                          <th>Volum (t)</th>
+                          <th>Preț mediu</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {statsRows.map((row) => (
+                          <tr key={row.product}>
+                            <td>{PRODUCT_LABELS[row.product] || row.product}</td>
+                            <td>{Number(row.totalQty || 0).toFixed(2)}</td>
+                            <td>{Number(row.avgPrice || 0).toFixed(2)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              {/* tabel istoric */}
+              <div style={{ marginTop: 14 }}>
+                <h3 style={{ margin: "10px 0 8px", fontSize: 16 }}>Bid-uri fermier</h3>
+
+                {filteredHistory.length === 0 ? (
+                  <p className="small-text">Nicio înregistrare pentru filtrul selectat.</p>
+                ) : (
+                  <div className="table-wrapper">
+                    <table className="table wide-table">
+                      <thead>
+                        <tr>
+                          <th>Data</th>
+                          <th>Produs</th>
+                          <th>Cantitate (t)</th>
+                          <th>Preț</th>
+                          <th>Livrare</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredHistory.map((b) => (
+                          <tr key={b.id}>
+                            <td>{formatDateTime(b.created_at)}</td>
+                            <td>{PRODUCT_LABELS[b.product] || b.product}</td>
+                            <td>{Number(b.quantity || 0).toFixed(2)}</td>
+                            <td>
+                              {Number(b.price || 0).toFixed(2)}{" "}
+                              {b.product === "sunflower" ? "USD/t" : "EUR/t"}
+                            </td>
+                            <td>
+                              {b.delivery_start && b.delivery_end
+                                ? `${b.delivery_start} → ${b.delivery_end}`
+                                : "-"}
+                            </td>
+                            <td>
+                              <span
+                                className={
+                                  "badge " +
+                                  (b.status === "accepted"
+                                    ? "accepted"
+                                    : b.status === "rejected"
+                                    ? "rejected"
+                                    : b.status === "countered"
+                                    ? "counter"
+                                    : "pending")
+                                }
+                              >
+                                {b.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              <div style={{ marginTop: 14 }}>
+                <button
+                  type="button"
+                  className="btn outline"
+                  onClick={() => {
+                    setSelectedFarmer(null);
+                    setFarmerHistory([]);
+                  }}
+                >
+                  Închide istoricul
+                </button>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
+
+      <nav className="bottom-nav admin-bottom-nav">
+        <button
+          type="button"
+          className={"nav-item " + (activeTab === "home" ? "active" : "")}
+          onClick={() => setActiveTab("home")}
+        >
+          <span>🏠</span>
+          Home
+        </button>
+        <button
+          type="button"
+          className={"nav-item " + (activeTab === "bids" ? "active" : "")}
+          onClick={() => setActiveTab("bids")}
+        >
+          <span>📄</span>
+          Bids
+        </button>
+      </nav>
+
+      {/* Optional: Market overview sus (arata bine pe admin) */}
     </div>
   );
 }

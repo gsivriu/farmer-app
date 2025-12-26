@@ -417,7 +417,7 @@ export default function FarmerDashboard() {
         </button>
         <button
           type="button"
-          className={"nav-item sale-btn " + (activeTab === "sale" ? "active" : "")}
+          className={"nav-item " + (activeTab === "sale" ? "active" : "")}
           onClick={() => setActiveTab("sale")}
         >
           <span>💰</span>
