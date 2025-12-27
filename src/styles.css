@@ -36,6 +36,7 @@ body {
   max-width: 100%;
   overscroll-behavior-x: none;
   width: 100%;
+  touch-action: pan-y;
 }
 
 /* =========================
