@@ -81,49 +81,49 @@ export default function FarmerDashboard() {
         '"agricultural market"',
         '"Port Constanța"',
         '"tranzit cereale"',
-        '"război Ucraina cereale"',
-        '"acordul cerealelor"',
-        '"exporturi Rusia"',
-        '"Constanta port"',
-        '"grain transit"',
         '"Ukraine grain deal"',
-        '"Russia exports"',
+        '"exporturi Rusia"',
         '"curs BNR"',
         '"euro ron"',
         '"inflație România"',
-        '"dobânzi bancare"',
         '"ROBOR"',
-        '"investiții agricultură"',
-        '"BNR exchange rate"',
-        '"RON EUR"',
-        '"Romania inflation"',
-        '"bank interest rates"',
-        '"agri investments"',
         '"preț motorină"',
         '"gaz natural"',
-        '"energie electrică"',
         '"preț baril petrol"',
         '"diesel price"',
         '"natural gas"',
-        '"electricity price"',
         '"oil barrel price"',
       ];
 
-      const q = keywords.join(" OR ");
-      const endpoint = `https://gnews.io/api/v4/search?q=${encodeURIComponent(
-        q
-      )}&lang=ro&max=10&token=903d5205dd0d39e83240ade6f759bffc`;
-
-      try {
-        const res = await fetch(endpoint, { signal: controller.signal });
-        if (!res.ok) {
-          throw new Error("GNews error: " + res.status);
+      const buildQuery = (terms, maxLen) => {
+        let result = "";
+        for (const term of terms) {
+          const next = result ? `${result} OR ${term}` : term;
+          if (next.length > maxLen) break;
+          result = next;
         }
-        const json = await res.json();
-        setNewsItems(Array.isArray(json.articles) ? json.articles : []);
+        return result;
+      };
+
+      const q = buildQuery(keywords, 200);
+      try {
+        const { data, error } = await supabase.functions.invoke("gnews", {
+          body: { q, lang: "ro", max: 10 },
+        });
+
+        if (error) {
+          throw new Error(error.message || "GNews error");
+        }
+
+        if (data?.error) {
+          throw new Error(data.error);
+        }
+
+        setNewsItems(Array.isArray(data?.articles) ? data.articles : []);
       } catch (err) {
         if (err.name !== "AbortError") {
-          setNewsError("Nu am putut încărca știrile.");
+          console.error("GNews fetch failed:", err);
+          setNewsError(err?.message || "Nu am putut încărca știrile.");
         }
       } finally {
         setNewsLoading(false);
@@ -498,12 +498,22 @@ export default function FarmerDashboard() {
                         target="_blank"
                         rel="noreferrer"
                       >
-                        <div className="news-title">{item.title}</div>
-                        <div className="small-text">
-                          {item.source?.name ? item.source.name + " • " : ""}
-                          {item.publishedAt
-                            ? new Date(item.publishedAt).toLocaleDateString("ro-RO")
-                            : ""}
+                        {item.image && (
+                          <img
+                            className="news-thumb"
+                            src={item.image}
+                            alt={item.title}
+                            loading="lazy"
+                          />
+                        )}
+                        <div className="news-content">
+                          <div className="news-title">{item.title}</div>
+                          <div className="small-text">
+                            {item.source?.name ? item.source.name + " • " : ""}
+                            {item.publishedAt
+                              ? new Date(item.publishedAt).toLocaleDateString("ro-RO")
+                              : ""}
+                          </div>
                         </div>
                       </a>
                     ))}

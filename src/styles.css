@@ -611,8 +611,11 @@ select.input:focus {
 }
 
 .news-item {
-  display: block;
-  padding: 12px 14px;
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
   border-radius: 10px;
   border: 1px solid var(--gray-light);
   background: #fff;
@@ -629,6 +632,30 @@ select.input:focus {
   font-weight: 600;
   font-size: 14px;
   margin-bottom: 4px;
+}
+
+.news-thumb {
+  width: 72px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #eef0f3;
+}
+
+.news-content {
+  min-width: 0;
+}
+
+@media (max-width: 600px) {
+  .news-item {
+    grid-template-columns: 56px 1fr;
+    gap: 10px;
+  }
+
+  .news-thumb {
+    width: 56px;
+    height: 44px;
+  }
 }
 
 /* =========================
