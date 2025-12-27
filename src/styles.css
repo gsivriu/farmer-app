@@ -6,17 +6,19 @@
   --white: #ffffff;
 
   /* Ameropa red */
-  --blue: #b30000;
-  --blue-dark: #800000;
+  --blue: #b9101e;
+  --blue-dark: #8b0e18;
 
   --gray: #6b7280;
   --gray-light: #e5e7eb;
 
-  --green: #16a34a;
-  --red: #dc2626;
+  --green: #10b981;
+  --red: #b9101e;
   --yellow: #ca8a04;
 
-  --shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --card-radius: 20px;
 
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -140,7 +142,7 @@ body {
    ========================= */
 .card {
   padding: 22px;
-  border-radius: 12px;
+  border-radius: var(--card-radius);
   box-shadow: var(--shadow);
   background: #fff;
   width: 100%; /* Fortam cardul sa ocupe latimea pe mobil */
@@ -445,7 +447,7 @@ select.input:focus {
   gap: 12px;
   width: 100%;
   padding: 12px;
-  border-radius: 12px;
+  border-radius: 16px;
   border: 1px solid transparent;
   background: #fff;
   cursor: pointer;
@@ -577,7 +579,7 @@ select.input:focus {
   width: 100%;
   max-width: 420px;
   background: #fff;
-  border-radius: 12px;
+  border-radius: 16px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
   padding: 16px;
 }
@@ -616,7 +618,7 @@ select.input:focus {
   align-items: stretch;
   gap: 12px;
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: 16px;
   border: 1px solid var(--gray-light);
   background: #fff;
   text-decoration: none;
@@ -718,13 +720,13 @@ select.input:focus {
 }
 
 .badge.pending {
-  background: #fff3cd;
-  color: #856404;
+  background: #fef3c7;
+  color: #92400e;
 }
 
 .badge.accepted {
-  background: #d4edda;
-  color: #155724;
+  background: #d1fae5;
+  color: #065f46;
 }
 
 .badge.rejected {
@@ -915,7 +917,7 @@ select.input:focus {
 
 .admin-price-item {
   border: 1px solid #eef0f3;
-  border-radius: 10px;
+  border-radius: 16px;
   padding: 12px;
   background: #fff;
 }
