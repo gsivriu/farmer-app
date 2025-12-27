@@ -641,6 +641,16 @@ select.input:focus {
   background-color: #edf2ff;
 }
 
+.theme-dark .btn.small.ghost {
+  background-color: #111827;
+  border-color: #1f2937;
+  color: #e5e7eb;
+}
+
+.theme-dark .btn.small.ghost:hover {
+  background-color: #0f172a;
+}
+
 .full-width {
   width: 100%;
 }
@@ -978,10 +988,12 @@ select.input:focus {
 .theme-dark .table th {
   background-color: #1a1f29;
   border-bottom-color: #1f2937;
+  color: #e2e8f0;
 }
 
 .theme-dark .table td {
   border-bottom-color: #1f2937;
+  color: #e2e8f0;
 }
 
 .stats-table th,
@@ -1254,10 +1266,20 @@ select.input:focus {
   background: #fff;
 }
 
+.theme-dark .admin-price-item {
+  background: #1a1f29;
+  border-color: #1f2937;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35);
+}
+
 .admin-label {
   font-weight: 600;
   margin-bottom: 8px;
   font-size: 14px;
+}
+
+.theme-dark .admin-label {
+  color: #e5e7eb;
 }
 
 .admin-row {
@@ -1271,6 +1293,10 @@ select.input:focus {
   font-size: 13px;
   color: var(--gray);
   white-space: nowrap;
+}
+
+.theme-dark .admin-unit {
+  color: #9ca3af;
 }
 
 .admin-input {
@@ -1312,6 +1338,15 @@ select.input:focus {
 .admin-table-scroll::-webkit-scrollbar-thumb {
   background: #d1d5db;
   border-radius: 8px;
+}
+
+.theme-dark .admin-table-scroll thead th {
+  background: #1a1f29;
+  border-bottom-color: #1f2937;
+}
+
+.theme-dark .admin-table-scroll::-webkit-scrollbar-thumb {
+  background: #334155;
 }
 
 .fake-date-display.placeholder {
