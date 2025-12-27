@@ -137,18 +137,26 @@ function App() {
 
         {/* ROLE SWITCH */}
         <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+          <label className="switch-button" aria-label="Toggle dark mode">
+            <div className="switch-outer">
+              <input
+                id="theme-switch"
+                type="checkbox"
+                checked={darkMode}
+                onChange={() => setDarkMode((prev) => !prev)}
+              />
+              <div className="button">
+                <span className="button-toggle"></span>
+                <span className="button-indicator"></span>
+              </div>
+            </div>
+          </label>
+
           <button
             className={"btn small" + (roleView === "farmer" ? " primary-btn" : " outline")}
             onClick={() => setRoleView("farmer")}
           >
             Fermier
-          </button>
-
-          <button
-            className="btn small outline"
-            onClick={() => setDarkMode((prev) => !prev)}
-          >
-            {darkMode ? "Light" : "Dark"}
           </button>
 
           {/* DOAR ADMIN VEDE TAB-UL ADMIN */}
