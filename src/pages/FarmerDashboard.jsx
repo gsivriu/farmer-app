@@ -325,7 +325,7 @@ export default function FarmerDashboard() {
         <div className={"tab-content " + (activeTab === "sale" ? "active" : "")}>
           {/* PRICES + BID FORM */}
           <div className="dashboard-row full">
-            <div className="card dashboard-card">
+            <div className="card dashboard-card sale-card">
               <PricesGrid />
               <div className="section-divider" />
               <BidForm onBidCreated={loadBids} embedded />
