@@ -22,6 +22,7 @@ export default function FarmerDashboard() {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("home");
   const [selectedBid, setSelectedBid] = useState(null);
+  const [productFilter, setProductFilter] = useState("all");
 
   const loadBids = useCallback(async () => {
     setLoading(true);
@@ -64,14 +65,24 @@ export default function FarmerDashboard() {
     [bids]
   );
 
+  const filteredAcceptedBids = useMemo(() => {
+    if (productFilter === "all") return acceptedBids;
+    return acceptedBids.filter((b) => b.product === productFilter);
+  }, [acceptedBids, productFilter]);
+
+  const filteredBids = useMemo(() => {
+    if (productFilter === "all") return bids;
+    return bids.filter((b) => b.product === productFilter);
+  }, [bids, productFilter]);
+
   const totalQty = useMemo(() => {
     return acceptedBids.reduce((acc, b) => acc + Number(b.quantity || 0), 0);
-  }, [acceptedBids]);
+  }, [filteredAcceptedBids]);
 
   const statsRows = useMemo(() => {
     const map = new Map();
 
-    for (const b of acceptedBids) {
+    for (const b of filteredAcceptedBids) {
       const product = b.product || "unknown";
       const qty = Number(b.quantity || 0);
       const price =
@@ -92,7 +103,7 @@ export default function FarmerDashboard() {
       totalQty: v.totalQty,
       avgPrice: v.totalQty > 0 ? v.totalValue / v.totalQty : 0,
     }));
-  }, [acceptedBids]);
+  }, [filteredAcceptedBids]);
 
   // ============================
   // ACTIONS (countered bids)
@@ -262,15 +273,30 @@ export default function FarmerDashboard() {
                   </p>
                 </div>
 
-                <div className="dashboard-section">
-                  <h3 style={{ margin: "10px 0 8px", fontSize: 16 }}>
-                    Statistici pe produs
-                  </h3>
+            <div className="dashboard-section">
+              <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+                <h3 style={{ margin: "10px 0 8px", fontSize: 16 }}>
+                  Statistici pe produs
+                </h3>
+                <select
+                  className="input"
+                  style={{ maxWidth: 180, padding: "6px 8px", fontSize: 13 }}
+                  value={productFilter}
+                  onChange={(e) => setProductFilter(e.target.value)}
+                >
+                  <option value="all">Toate</option>
+                  {Object.keys(PRODUCT_LABELS).map((key) => (
+                    <option key={key} value={key}>
+                      {PRODUCT_LABELS[key]}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-                  {statsRows.length === 0 ? (
-                    <p className="small-text">
-                      Nu ai încă bid-uri acceptate pentru a calcula statistici.
-                    </p>
+              {statsRows.length === 0 ? (
+                <p className="small-text">
+                  Nu ai încă bid-uri acceptate pentru a calcula statistici.
+                </p>
                   ) : (
                     <div className="table-wrapper">
                       <table className="table stats-table">
@@ -300,13 +326,13 @@ export default function FarmerDashboard() {
                     Bid-urile mele
                   </h3>
 
-                  {bids.length === 0 ? (
+                  {filteredBids.length === 0 ? (
                     <p className="small-text">
                       Nu ai încă bid-uri plasate.
                     </p>
                   ) : (
                     <div className="bid-list">
-                      {bids.map((b) => {
+                      {filteredBids.map((b) => {
                         const statusClass =
                           b.status === "accepted"
                             ? "is-accepted"
