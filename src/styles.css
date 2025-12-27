@@ -607,13 +607,13 @@ select.input:focus {
 .news-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0;
 }
 
 .news-item {
   display: grid;
-  grid-template-columns: 72px 1fr;
-  align-items: center;
+  grid-template-columns: 96px 1fr;
+  align-items: stretch;
   gap: 12px;
   padding: 10px 12px;
   border-radius: 10px;
@@ -635,8 +635,8 @@ select.input:focus {
 }
 
 .news-thumb {
-  width: 72px;
-  height: 56px;
+  width: 96px;
+  height: 100%;
   object-fit: cover;
   border-radius: 8px;
   border: 1px solid #eef0f3;
@@ -1296,16 +1296,16 @@ select.input:focus {
   }
 
   .news-item {
-    grid-template-columns: 80px 1fr;
+    grid-template-columns: 108px 1fr;
     gap: 12px;
     padding: 12px 14px;
     border-radius: 14px;
   }
 
   .news-thumb {
-    width: 80px;
-    height: 64px;
-    border-radius: 10px;
+    width: 108px;
+    height: 100%;
+    border-radius: 12px;
   }
 
   /* Tabele scrollabile fără a lărgi cardul */
