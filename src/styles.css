@@ -331,6 +331,10 @@ body {
   margin-top: 0;
 }
 
+.bid-form-embedded {
+  padding-bottom: 90px;
+}
+
 /* =========================
    TYPO
    ========================= */
