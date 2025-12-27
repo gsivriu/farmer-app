@@ -152,12 +152,14 @@ function App() {
             </div>
           </label>
 
-          <button
-            className={"btn small" + (roleView === "farmer" ? " primary-btn" : " outline")}
-            onClick={() => setRoleView("farmer")}
-          >
-            Fermier
-          </button>
+          {userRole !== "admin" && (
+            <button
+              className={"btn small" + (roleView === "farmer" ? " primary-btn" : " outline")}
+              onClick={() => setRoleView("farmer")}
+            >
+              Fermier
+            </button>
+          )}
 
           {/* DOAR ADMIN VEDE TAB-UL ADMIN */}
           {userRole === "admin" && (

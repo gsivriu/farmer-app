@@ -453,9 +453,53 @@ export default function FarmerDashboard() {
                                   {Number(activePrice || 0).toFixed(2)} EUR/t
                                 </span>
                               </div>
+                              <div className="bid-field">
+                                <span className="bid-label">Livrare</span>
+                                <span className="bid-value">
+                                  {b.delivery_start && b.delivery_end
+                                    ? `${b.delivery_start} → ${b.delivery_end}`
+                                    : "-"}
+                                </span>
+                              </div>
                             </div>
 
-                            <span className="bid-status">{b.status}</span>
+                            <div className="bid-right">
+                              <span className="bid-status">{b.status}</span>
+                              {b.status === "countered" && (
+                                <div className="bid-actions">
+                                  <button
+                                    type="button"
+                                    className="btn small ghost"
+                                    onClick={(event) => {
+                                      event.stopPropagation();
+                                      handleAcceptCounter(b);
+                                    }}
+                                  >
+                                    Acceptă
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="btn small ghost"
+                                    onClick={(event) => {
+                                      event.stopPropagation();
+                                      handleRejectCounter(b);
+                                    }}
+                                  >
+                                    Respinge
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="btn small ghost"
+                                    onClick={(event) => {
+                                      event.stopPropagation();
+                                      handleCounterBack(b);
+                                    }}
+                                  >
+                                    Counter
+                                  </button>
+                                </div>
+                              )}
+                            </div>
                           </button>
                         );
                       })}

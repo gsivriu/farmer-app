@@ -373,118 +373,110 @@ export default function AdminDashboard() {
             {error && <p className="badge rejected" style={{ marginTop: 12 }}>{error}</p>}
 
             {!loading && !error && (
-              <div className="admin-table-scroll" style={{ marginTop: 14 }}>
-                <div className="table-wrapper">
-                <table className="table wide-table">
-                  <thead>
-                    <tr>
-                      <th>Data</th>
-                      <th>Fermier</th>
-                      <th>Produs</th>
-                      <th>Cantitate (t)</th>
-                      <th>Preț</th>
-                      <th>Paritate</th>
-                      <th>Livrare</th>
-                      <th>Status</th>
-                      <th>Acțiuni</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredBids.map((b) => (
-                      <tr key={b.id}>
-                        <td>{formatDateTime(b.created_at)}</td>
-                        <td>{b.farmer_email || b.farmer_id}</td>
-                        <td>{PRODUCT_LABELS[b.product] || b.product}</td>
-                        <td>{Number(b.quantity || 0).toFixed(2)}</td>
-                        <td>
-                          {Number(b.price || 0).toFixed(2)}{" "}
-                          {b.product === "sunflower" ? "USD/t" : "EUR/t"}
-                          {b.counter_price != null && (
-                            <span style={{ marginLeft: 8, color: "#b91c1c", fontWeight: 700 }}>
-                              (counter: {Number(b.counter_price).toFixed(2)})
-                            </span>
-                          )}
-                        </td>
-                        <td>{b.parity || "-"}</td>
-                        <td>
-                          {b.delivery_start && b.delivery_end
-                            ? `${b.delivery_start} → ${b.delivery_end}`
-                            : "-"}
-                        </td>
-                        <td>
-                          <span
-                            className={
-                              "badge " +
-                              (b.status === "accepted"
-                                ? "accepted"
-                                : b.status === "rejected"
-                                ? "rejected"
-                                : b.status === "countered"
-                                ? "counter"
-                                : "pending")
-                            }
-                          >
-                            {b.status}
-                          </span>
-                        </td>
+              <div className="admin-bid-list" style={{ marginTop: 14 }}>
+                {filteredBids.map((b) => {
+                  const unit = b.product === "sunflower" ? "USD/t" : "EUR/t";
+                  const delivery =
+                    b.delivery_start && b.delivery_end
+                      ? `${b.delivery_start} → ${b.delivery_end}`
+                      : "-";
+                  const statusClass =
+                    b.status === "accepted"
+                      ? "is-accepted"
+                      : b.status === "rejected"
+                      ? "is-rejected"
+                      : "is-pending";
 
-                        <td>
-                          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                            <button
-                              className="btn small ghost"
-                              type="button"
-                              onClick={() => updateStatus(b.id, "accepted")}
-                            >
-                              Accept
-                            </button>
-
-                            <button
-                              className="btn small ghost"
-                              type="button"
-                              onClick={() => updateStatus(b.id, "rejected")}
-                            >
-                              Reject
-                            </button>
-
-                            <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                              <input
-                                className="input"
-                                style={{ width: 110, padding: "6px 8px", fontSize: 13 }}
-                                type="number"
-                                step="0.01"
-                                placeholder="Counter"
-                                value={counterValues[b.id] ?? ""}
-                                onChange={(e) =>
-                                  setCounterValues((prev) => ({
-                                    ...prev,
-                                    [b.id]: e.target.value,
-                                  }))
-                                }
-                              />
-                              <button
-                                className="btn small ghost"
-                                type="button"
-                                onClick={() => sendCounter(b.id)}
-                              >
-                                Send
-                              </button>
-                            </div>
-
+                  return (
+                    <div className={"bid-row admin-bid-item " + statusClass} key={b.id}>
+                      <div className="admin-bid-info">
+                        <div className="bid-left">
+                          <div className="bid-title">
+                            {PRODUCT_LABELS[b.product] || b.product}
                           </div>
-                        </td>
-                      </tr>
-                    ))}
+                          <div className="bid-date">{formatDateTime(b.created_at)}</div>
+                          <div className="bid-contract">{b.farmer_email || b.farmer_id}</div>
+                        </div>
 
-                    {filteredBids.length === 0 && (
-                      <tr>
-                        <td colSpan={9} className="small-text" style={{ padding: 12 }}>
-                          Nu există bid-uri pentru filtrele selectate.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                        <div className="bid-details admin-bid-details">
+                          <div className="bid-field">
+                            <span className="bid-label">Cantitate</span>
+                            <span className="bid-value">
+                              {Number(b.quantity || 0).toFixed(2)} t
+                            </span>
+                          </div>
+                          <div className="bid-field">
+                            <span className="bid-label">Preț</span>
+                            <span className="bid-value">
+                              {Number(b.price || 0).toFixed(2)} {unit}
+                              {b.counter_price != null && (
+                                <span className="admin-bid-counter">
+                                  (counter: {Number(b.counter_price).toFixed(2)})
+                                </span>
+                              )}
+                            </span>
+                          </div>
+                          <div className="bid-field">
+                            <span className="bid-label">Paritate</span>
+                            <span className="bid-value">{b.parity || "-"}</span>
+                          </div>
+                          <div className="bid-field">
+                            <span className="bid-label">Livrare</span>
+                            <span className="bid-value">{delivery}</span>
+                          </div>
+                        </div>
+
+                        <div className="admin-bid-actions-row">
+                          <button
+                            className="btn small ghost"
+                            type="button"
+                            onClick={() => updateStatus(b.id, "accepted")}
+                          >
+                            Accept
+                          </button>
+
+                          <button
+                            className="btn small ghost"
+                            type="button"
+                            onClick={() => updateStatus(b.id, "rejected")}
+                          >
+                            Reject
+                          </button>
+
+                          <input
+                            className="input admin-bid-counter-input"
+                            type="number"
+                            step="0.01"
+                            placeholder="Counter"
+                            value={counterValues[b.id] ?? ""}
+                            onChange={(e) =>
+                              setCounterValues((prev) => ({
+                                ...prev,
+                                [b.id]: e.target.value,
+                              }))
+                            }
+                          />
+                          <button
+                            className="btn small ghost"
+                            type="button"
+                            onClick={() => sendCounter(b.id)}
+                          >
+                            Send
+                          </button>
+
+                          <span className="bid-status">{b.status}</span>
+                        </div>
+
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {filteredBids.length === 0 && (
+                  <p className="small-text" style={{ padding: 12 }}>
+                    Nu există bid-uri pentru filtrele selectate.
+                  </p>
+                )}
               </div>
             )}
 
