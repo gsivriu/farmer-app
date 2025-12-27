@@ -23,7 +23,7 @@ const fmt = (n) =>
 
 const fmt0 = (n) => Number(n || 0).toLocaleString("en-GB");
 
-export default function FarmerProgress() {
+export default function FarmerProgress({ embedded = false }) {
   const [totalAccepted, setTotalAccepted] = useState(0);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
@@ -107,7 +107,7 @@ export default function FarmerProgress() {
   }, [progress.pct]);
 
   return (
-  <div className="card progress-card">
+  <div className={(embedded ? "progress-card" : "card progress-card")}>
     {/* Header */}
     <div className="progress-head">
       <div className="progress-title-group">

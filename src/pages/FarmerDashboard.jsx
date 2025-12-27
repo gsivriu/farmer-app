@@ -315,7 +315,7 @@ export default function FarmerDashboard() {
           {/* PROGRESS + MARKET OVERVIEW */}
           <div className="dashboard-row full">
             <div className="card dashboard-card">
-              <FarmerProgress />
+              <FarmerProgress embedded />
               <div className="section-divider" />
               <MarketTicker />
             </div>
@@ -597,8 +597,8 @@ export default function FarmerDashboard() {
             viewBox="0 0 24 24"
             aria-hidden="true"
           >
-            <path d="M4 7.5V6a2 2 0 0 1 2-2h8l6 6v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V16" />
-            <path d="M14 4v6h6" />
+            <path d="M12 3v18" />
+            <path d="M16 7.5c0-1.9-1.8-3-4-3s-4 1.1-4 3 1.8 2.6 4 3 4 1.1 4 3-1.8 3-4 3-4-1.1-4-3" />
           </svg>
           <span className="nav-label">Sale</span>
         </button>
@@ -626,8 +626,8 @@ export default function FarmerDashboard() {
             viewBox="0 0 24 24"
             aria-hidden="true"
           >
-            <path d="M4 6h16v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6z" />
-            <path d="M8 10h8M8 14h6" />
+            <path d="M3.5 6h15a2 2 0 0 1 2 2v9.5a1.5 1.5 0 0 1-3 0V7.5H6.5v10a1.5 1.5 0 0 1-3 0V6z" />
+            <path d="M8 10h6M8 13h6M8 16h5" />
           </svg>
           <span className="nav-label">News</span>
         </button>

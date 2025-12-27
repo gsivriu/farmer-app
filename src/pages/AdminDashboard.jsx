@@ -261,13 +261,13 @@ export default function AdminDashboard() {
 
       <div className="tab-content admin-tab-content">
         <div className={activeTab === "home" ? "tab-pane active" : "tab-pane"}>
-          {/* Optional: Market overview sus (arata bine pe admin) */}
-          <div className="card admin-card">
+          <div className="card admin-card dashboard-card">
+            {/* Optional: Market overview sus (arata bine pe admin) */}
             <MarketTicker />
-          </div>
 
-          {/* CARD: Setare prețuri */}
-          <div className="card admin-card">
+            <div className="section-divider" />
+
+            {/* Setare prețuri */}
             <div className="card-header">
               <h2 className="market-title">Setare prețuri zilnice</h2>
               <p className="market-subtitle">
@@ -309,8 +309,8 @@ export default function AdminDashboard() {
         </div>
 
         <div className={activeTab === "bids" ? "tab-pane active" : "tab-pane"}>
-          {/* CARD: Filtre + Toate bid-urile */}
-          <div className="card admin-card">
+          <div className="card admin-card dashboard-card">
+            {/* Filtre + Toate bid-urile */}
             <div className="card-header">
               <h2 className="market-title">Toate bid-urile</h2>
               <p className="market-subtitle">Filtrează după fermier și perioadă.</p>
@@ -487,64 +487,65 @@ export default function AdminDashboard() {
               </div>
               </div>
             )}
-          </div>
 
-          {/* CARD: Istoric fermier (optional, doar dacă ai selectat) */}
-          {selectedFarmer && (
-            <div className="card admin-card">
-              <div className="card-header">
-                <h2 className="market-title">Istoric fermier</h2>
-                <p className="market-subtitle">{getFarmerEmail(selectedFarmer)}</p>
-              </div>
+            {/* Istoric fermier (optional, doar dacă ai selectat) */}
+            {selectedFarmer && (
+              <>
+                <div className="section-divider" />
 
-              <div className="admin-filters">
-                <div className="admin-filter">
-                  <label className="label">Produs</label>
-                  <select
-                    className="input"
-                    value={farmerProductFilter}
-                    onChange={(e) => setFarmerProductFilter(e.target.value)}
-                  >
-                    <option value="all">Toate</option>
-                    {Object.keys(PRODUCT_LABELS).map((k) => (
-                      <option key={k} value={k}>
-                        {PRODUCT_LABELS[k]}
-                      </option>
-                    ))}
-                  </select>
+                <div className="card-header">
+                  <h2 className="market-title">Istoric fermier</h2>
+                  <p className="market-subtitle">{getFarmerEmail(selectedFarmer)}</p>
                 </div>
-              </div>
 
-              {/* statistici */}
-              <div style={{ marginTop: 14 }}>
-                <h3 style={{ margin: "10px 0 8px", fontSize: 16 }}>
-                  Statistici pe produs (accepted)
-                </h3>
-                {statsRows.length === 0 ? (
-                  <p className="small-text">Nu există bid-uri accepted în istoric.</p>
-                ) : (
-                  <div className="table-wrapper">
-                    <table className="table stats-table">
-                      <thead>
-                        <tr>
-                          <th>Produs</th>
-                          <th>Volum (t)</th>
-                          <th>Preț mediu</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {statsRows.map((row) => (
-                          <tr key={row.product}>
-                            <td>{PRODUCT_LABELS[row.product] || row.product}</td>
-                            <td>{Number(row.totalQty || 0).toFixed(2)}</td>
-                            <td>{Number(row.avgPrice || 0).toFixed(2)}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                <div className="admin-filters">
+                  <div className="admin-filter">
+                    <label className="label">Produs</label>
+                    <select
+                      className="input"
+                      value={farmerProductFilter}
+                      onChange={(e) => setFarmerProductFilter(e.target.value)}
+                    >
+                      <option value="all">Toate</option>
+                      {Object.keys(PRODUCT_LABELS).map((k) => (
+                        <option key={k} value={k}>
+                          {PRODUCT_LABELS[k]}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                )}
-              </div>
+                </div>
+
+                {/* statistici */}
+                <div style={{ marginTop: 14 }}>
+                  <h3 style={{ margin: "10px 0 8px", fontSize: 16 }}>
+                    Statistici pe produs (accepted)
+                  </h3>
+                  {statsRows.length === 0 ? (
+                    <p className="small-text">Nu există bid-uri accepted în istoric.</p>
+                  ) : (
+                    <div className="table-wrapper">
+                      <table className="table stats-table">
+                        <thead>
+                          <tr>
+                            <th>Produs</th>
+                            <th>Volum (t)</th>
+                            <th>Preț mediu</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {statsRows.map((row) => (
+                            <tr key={row.product}>
+                              <td>{PRODUCT_LABELS[row.product] || row.product}</td>
+                              <td>{Number(row.totalQty || 0).toFixed(2)}</td>
+                              <td>{Number(row.avgPrice || 0).toFixed(2)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
 
               {/* tabel istoric */}
               <div style={{ marginTop: 14 }}>
@@ -607,20 +608,21 @@ export default function AdminDashboard() {
             )}
           </div>
 
-              <div style={{ marginTop: 14 }}>
-                <button
-                  type="button"
-                  className="btn outline"
-                  onClick={() => {
-                    setSelectedFarmer(null);
-                    setFarmerHistory([]);
-                  }}
-                >
-                  Închide istoricul
-                </button>
-              </div>
-            </div>
-          )}
+                <div style={{ marginTop: 14 }}>
+                  <button
+                    type="button"
+                    className="btn outline"
+                    onClick={() => {
+                      setSelectedFarmer(null);
+                      setFarmerHistory([]);
+                    }}
+                  >
+                    Închide istoricul
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
 

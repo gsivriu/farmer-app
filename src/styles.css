@@ -79,7 +79,7 @@ body {
   padding: 14px 20px;
   border-radius: 10px;
   color: #fff;
-  margin-bottom: 25px;
+  margin-bottom: 0;
 }
 
 .header-left {
@@ -179,7 +179,7 @@ body {
   background: #fff;
   border-bottom: 1px solid var(--gray-light);
   padding: 0 20px;
-  margin: 12px 0 12px;
+  margin: 0 0 12px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
@@ -261,7 +261,7 @@ body {
 }
 
 .bottom-nav .nav-item.active {
-  color: #111827;
+  color: var(--blue);
   border-bottom-color: transparent;
 }
 
@@ -314,6 +314,10 @@ body {
 }
 
 .dashboard-card .market-card {
+  margin-bottom: 0;
+}
+
+.admin-card .market-card {
   margin-bottom: 0;
 }
 
@@ -1091,7 +1095,7 @@ select.input:focus {
 }
 
 .reward-title {
-  font-weight: 800;
+  font-weight: 600;
   font-size: 18px;
   margin-bottom: 6px;
 }
@@ -1311,6 +1315,10 @@ select.input:focus {
 
   .bid-status {
     align-self: flex-start;
+  }
+
+  .section-divider {
+    display: none;
   }
 
   .news-item {
