@@ -602,6 +602,36 @@ select.input:focus {
 }
 
 /* =========================
+   NEWS
+   ========================= */
+.news-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.news-item {
+  display: block;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--gray-light);
+  background: #fff;
+  text-decoration: none;
+  color: inherit;
+}
+
+.news-item:hover {
+  border-color: #cbd5f5;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+
+.news-title {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+/* =========================
    TABLES (FIXED WRAPPERS)
    ========================= */
 .table-wrapper {

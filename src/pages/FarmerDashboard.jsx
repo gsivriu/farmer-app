@@ -23,6 +23,9 @@ export default function FarmerDashboard() {
   const [activeTab, setActiveTab] = useState("home");
   const [selectedBid, setSelectedBid] = useState(null);
   const [productFilter, setProductFilter] = useState("all");
+  const [newsItems, setNewsItems] = useState([]);
+  const [newsLoading, setNewsLoading] = useState(false);
+  const [newsError, setNewsError] = useState(null);
 
   const loadBids = useCallback(async () => {
     setLoading(true);
@@ -56,6 +59,83 @@ export default function FarmerDashboard() {
   useEffect(() => {
     loadBids();
   }, [loadBids]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const fetchNews = async () => {
+      setNewsLoading(true);
+      setNewsError(null);
+
+      const keywords = [
+        '"preț grâu"',
+        '"porumb"',
+        '"rapiță"',
+        '"floarea soarelui"',
+        '"recoltă cereale"',
+        '"piața agricolă"',
+        '"wheat price"',
+        '"corn price"',
+        '"rapeseed"',
+        '"sunflower seeds"',
+        '"grain harvest"',
+        '"agricultural market"',
+        '"Port Constanța"',
+        '"tranzit cereale"',
+        '"război Ucraina cereale"',
+        '"acordul cerealelor"',
+        '"exporturi Rusia"',
+        '"Constanta port"',
+        '"grain transit"',
+        '"Ukraine grain deal"',
+        '"Russia exports"',
+        '"curs BNR"',
+        '"euro ron"',
+        '"inflație România"',
+        '"dobânzi bancare"',
+        '"ROBOR"',
+        '"investiții agricultură"',
+        '"BNR exchange rate"',
+        '"RON EUR"',
+        '"Romania inflation"',
+        '"bank interest rates"',
+        '"agri investments"',
+        '"preț motorină"',
+        '"gaz natural"',
+        '"energie electrică"',
+        '"preț baril petrol"',
+        '"diesel price"',
+        '"natural gas"',
+        '"electricity price"',
+        '"oil barrel price"',
+      ];
+
+      const q = keywords.join(" OR ");
+      const endpoint = `https://gnews.io/api/v4/search?q=${encodeURIComponent(
+        q
+      )}&lang=ro&max=10&token=903d5205dd0d39e83240ade6f759bffc`;
+
+      try {
+        const res = await fetch(endpoint, { signal: controller.signal });
+        if (!res.ok) {
+          throw new Error("GNews error: " + res.status);
+        }
+        const json = await res.json();
+        setNewsItems(Array.isArray(json.articles) ? json.articles : []);
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          setNewsError("Nu am putut încărca știrile.");
+        }
+      } finally {
+        setNewsLoading(false);
+      }
+    };
+
+    if (activeTab === "news") {
+      fetchNews();
+    }
+
+    return () => controller.abort();
+  }, [activeTab]);
 
   // ============================
   // CALCULE: accepted only
@@ -220,6 +300,13 @@ export default function FarmerDashboard() {
           onClick={() => setActiveTab("activity")}
         >
           Activitatea mea
+        </button>
+        <button
+          type="button"
+          className={"nav-item " + (activeTab === "news" ? "active" : "")}
+          onClick={() => setActiveTab("news")}
+        >
+          News
         </button>
       </nav>
 
@@ -387,6 +474,45 @@ export default function FarmerDashboard() {
             </div>
           </div>
         </div>
+
+        <div className={"tab-content " + (activeTab === "news" ? "active" : "")}>
+          {/* NEWS */}
+          <div className="dashboard-row full">
+            <div className="card">
+              <div className="card-header">
+                <h2 className="market-title">News</h2>
+              </div>
+              <div className="card-body">
+                {newsLoading && <p className="small-text">Se încarcă știrile...</p>}
+                {newsError && <p className="badge rejected">{newsError}</p>}
+                {!newsLoading && !newsError && newsItems.length === 0 && (
+                  <p className="small-text">Nu am găsit știri relevante.</p>
+                )}
+                {!newsLoading && !newsError && newsItems.length > 0 && (
+                  <div className="news-list">
+                    {newsItems.map((item) => (
+                      <a
+                        key={item.url}
+                        className="news-item"
+                        href={item.url}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <div className="news-title">{item.title}</div>
+                        <div className="small-text">
+                          {item.source?.name ? item.source.name + " • " : ""}
+                          {item.publishedAt
+                            ? new Date(item.publishedAt).toLocaleDateString("ro-RO")
+                            : ""}
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {selectedBid && (
@@ -487,6 +613,21 @@ export default function FarmerDashboard() {
             <path d="M5 20V9m7 11V4m7 16v-6" />
           </svg>
           <span className="nav-label">Activity</span>
+        </button>
+        <button
+          type="button"
+          className={"nav-item " + (activeTab === "news" ? "active" : "")}
+          onClick={() => setActiveTab("news")}
+        >
+          <svg
+            className="nav-icon"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path d="M4 6h16v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6z" />
+            <path d="M8 10h8M8 14h6" />
+          </svg>
+          <span className="nav-label">News</span>
         </button>
       </nav>
     </div>
