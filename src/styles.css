@@ -1295,6 +1295,19 @@ select.input:focus {
     align-self: flex-start;
   }
 
+  .news-item {
+    grid-template-columns: 80px 1fr;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 14px;
+  }
+
+  .news-thumb {
+    width: 80px;
+    height: 64px;
+    border-radius: 10px;
+  }
+
   /* Tabele scrollabile fără a lărgi cardul */
   .table-wrapper {
     overflow-x: auto;
