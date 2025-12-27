@@ -4,10 +4,12 @@ import { useAppContext } from "../context/AppContext.jsx";
 export default function PricesGrid() {
   const { commodities } = useAppContext();
 
-  const bgColor = (trend) => {
-    if (trend === "up") return "#e6f9eb";      // verde pal
-    if (trend === "down") return "#fde8e8";    // roșu pal
-    return "#ffffff";                          // neutru
+  const getTrendClass = (trend, lastPrice) => {
+    if (trend === "up") return "market-item-up";
+    if (trend === "down") return "market-item-down";
+    if (trend === "flat") return "market-item-flat";
+    if (lastPrice == null) return "market-item-flat";
+    return "market-item-flat";
   };
 
   return (
@@ -35,15 +37,10 @@ export default function PricesGrid() {
             if (c.trend === "flat") trendText = `→ 0`;
           }
 
+          const trendClass = getTrendClass(c.trend, c.lastPrice);
+
           return (
-            <div
-              key={c.id}
-              className="market-item"
-              style={{
-                backgroundColor: bgColor(c.trend),
-                transition: "0.3s",
-              }}
-            >
+            <div key={c.id} className={"market-item " + trendClass}>
               <div className="market-line-1">
                 <span className="market-product">{c.name}</span>
                 <span className="market-tag">{c.basis || "CPT Constanța"}</span>
@@ -53,7 +50,9 @@ export default function PricesGrid() {
                 <span className="market-price">
                   {Number(c.price).toFixed(2)} {unit}
                 </span>
-                <span className="small-text">{trendText}</span>
+                <span className={"small-text market-trend " + trendClass}>
+                  {trendText}
+                </span>
               </div>
             </div>
           );

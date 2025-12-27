@@ -23,6 +23,18 @@
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+.theme-dark {
+  --bg: #0e1116;
+  --white: #1a1f29;
+  --gray: #9ca3af;
+  --gray-light: #1f2937;
+  --green: #10b981;
+  --red: #ef4444;
+  --blue: #4f46e5;
+  --blue-dark: #6366f1;
+  --shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+}
+
 *,
 *::before,
 *::after {
@@ -39,6 +51,10 @@ body {
   overscroll-behavior-x: none;
   width: 100%;
   touch-action: pan-y;
+}
+
+.theme-dark body {
+  color: #e5e7eb;
 }
 
 /* =========================
@@ -82,6 +98,12 @@ body {
   margin-bottom: 0;
 }
 
+.theme-dark .top-bar {
+  background: #111827;
+  color: #e5e7eb;
+  border: 1px solid #1f2937;
+}
+
 .header-left {
   display: flex;
   align-items: center;
@@ -99,6 +121,10 @@ body {
   font-size: 14px;
 }
 
+.theme-dark .subtitle {
+  color: var(--gray);
+}
+
 .ameropa-title {
   font-size: 28px;
   font-weight: 600;
@@ -106,6 +132,10 @@ body {
   color: #fff;
   font-family: "Georgia", serif;
   text-transform: uppercase;
+}
+
+.theme-dark .ameropa-title {
+  color: #e5e7eb;
 }
 
 /* buttons in top-bar */
@@ -119,6 +149,11 @@ body {
   font-weight: 500;
   cursor: pointer;
   transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+.theme-dark .top-bar button {
+  border-color: #334155;
+  color: #e5e7eb;
 }
 
 .top-bar button:hover {
@@ -137,6 +172,16 @@ body {
   background: #fef2f2;
 }
 
+.theme-dark .top-bar button:last-child {
+  background: #1e293b;
+  color: #e5e7eb;
+  border-color: #334155;
+}
+
+.theme-dark .top-bar button:last-child:hover {
+  background: #111827;
+}
+
 /* =========================
    CARDS
    ========================= */
@@ -148,6 +193,12 @@ body {
   width: 100%; /* Fortam cardul sa ocupe latimea pe mobil */
   max-width: 100%;
   overflow-x: hidden;
+}
+
+.theme-dark .card {
+  background: var(--white);
+  color: #e5e7eb;
+  border: 1px solid #1f2937;
 }
 
 .card-header {
@@ -183,6 +234,12 @@ body {
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
+.theme-dark .desktop-nav {
+  background: #111827;
+  border-bottom-color: #1f2937;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
 .nav-item {
   padding: 15px 25px;
   cursor: pointer;
@@ -198,6 +255,15 @@ body {
 }
 
 .nav-item.active {
+  color: var(--blue);
+  border-bottom-color: var(--blue);
+}
+
+.theme-dark .nav-item {
+  color: #94a3b8;
+}
+
+.theme-dark .nav-item.active {
   color: var(--blue);
   border-bottom-color: var(--blue);
 }
@@ -243,6 +309,12 @@ body {
   padding-bottom: env(safe-area-inset-bottom);
   box-shadow: 0 -6px 18px rgba(0,0,0,0.08);
   backdrop-filter: blur(14px);
+}
+
+.theme-dark .bottom-nav {
+  background: rgba(17, 24, 39, 0.85);
+  border-top-color: #1f2937;
+  box-shadow: 0 -8px 22px rgba(0,0,0,0.5);
 }
 
 .bottom-nav .nav-item {
@@ -375,6 +447,27 @@ select.input {
   background: #fff;
 }
 
+.theme-dark .input,
+.theme-dark select.input {
+  background: #111827;
+  color: #e5e7eb;
+  border-color: #1f2937;
+}
+
+.theme-dark .btn.outline {
+  background: #1e293b;
+  color: #e5e7eb;
+  border-color: #334155;
+}
+
+.theme-dark .btn.outline:hover {
+  background: #111827;
+}
+
+.theme-dark .input::placeholder {
+  color: #64748b;
+}
+
 .input:focus,
 select.input:focus {
   outline: none;
@@ -478,6 +571,26 @@ select.input:focus {
   overflow: hidden;
 }
 
+.theme-dark .bid-row {
+  background: #1a1f29;
+  border-color: #1f2937;
+}
+
+.theme-dark .bid-row.is-accepted {
+  background: #1e293b;
+  border-color: #22c55e;
+}
+
+.theme-dark .bid-row.is-pending {
+  background: #1f2937;
+  border-color: #fbbf24;
+}
+
+.theme-dark .bid-row.is-rejected {
+  background: #2b1b1b;
+  border-color: #ef4444;
+}
+
 .bid-row.is-accepted {
   border-color: #86efac;
 }
@@ -512,6 +625,18 @@ select.input:focus {
 
 .bid-row.is-rejected::before {
   background: #dc2626;
+}
+
+.theme-dark .bid-row.is-accepted::before {
+  background: #22c55e;
+}
+
+.theme-dark .bid-row.is-pending::before {
+  background: #fbbf24;
+}
+
+.theme-dark .bid-row.is-rejected::before {
+  background: #ef4444;
 }
 
 .bid-left {
@@ -567,6 +692,19 @@ select.input:focus {
   padding: 6px 10px;
   border-radius: 999px;
   background: rgba(0, 0, 0, 0.04);
+}
+
+.theme-dark .bid-title,
+.theme-dark .bid-value,
+.theme-dark .bid-label,
+.theme-dark .bid-status,
+.theme-dark .bid-date,
+.theme-dark .bid-contract {
+  color: #f1f5f9;
+}
+
+.theme-dark .bid-status {
+  background: rgba(15, 23, 42, 0.8);
 }
 
 .bid-row.is-accepted .bid-status {
@@ -647,6 +785,11 @@ select.input:focus {
   color: inherit;
 }
 
+.theme-dark .news-item {
+  background: #1a1f29;
+  border-color: #1f2937;
+}
+
 .news-item:hover {
   border-color: #cbd5f5;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
@@ -718,6 +861,15 @@ select.input:focus {
   padding: 8px 10px;
   border-bottom: 1px solid var(--gray-light);
   font-size: 13px;
+}
+
+.theme-dark .table th {
+  background-color: #1a1f29;
+  border-bottom-color: #1f2937;
+}
+
+.theme-dark .table td {
+  border-bottom-color: #1f2937;
 }
 
 .stats-table th,
@@ -824,6 +976,40 @@ select.input:focus {
   letter-spacing: 1px;
 }
 
+.theme-dark .market-item {
+  background-color: #1a1f29;
+  border-color: #1f2937;
+}
+
+.theme-dark .market-item-up {
+  background-color: #102a21;
+  border-color: #22c55e;
+}
+
+.theme-dark .market-item-down {
+  background-color: #2b1b1b;
+  border-color: #ef4444;
+}
+
+.theme-dark .market-item-flat {
+  background-color: #111827;
+  border-color: #1f2937;
+}
+
+.theme-dark .market-item-flat .market-price,
+.theme-dark .market-item-flat .small-text {
+  color: #fbbf24;
+}
+
+.theme-dark .market-trend.market-item-flat {
+  color: #fbbf24;
+}
+
+.theme-dark .market-tag {
+  background-color: #1e293b;
+  color: #c7d2fe;
+}
+
 .market-product {
   font-weight: 500;
 }
@@ -846,6 +1032,18 @@ select.input:focus {
 .market-item-flat {
   background-color: #fff;
   border-color: #e5e7eb;
+}
+
+.market-trend.market-item-up {
+  color: var(--green);
+}
+
+.market-trend.market-item-down {
+  color: var(--red);
+}
+
+.market-trend.market-item-flat {
+  color: var(--gray);
 }
 
 .market-delta {
@@ -1076,6 +1274,13 @@ select.input:focus {
   transform: scale(1);
 }
 
+.theme-dark .uv-loader {
+  --bg: #334155;
+  --fill: #10b981;
+  --dotOff: #334155;
+  --dotOn: #10b981;
+}
+
 /* =========================
    REWARD CARDS
    ========================= */
@@ -1114,6 +1319,21 @@ select.input:focus {
   background: #fff;
 }
 
+.theme-dark .reward-card {
+  background: #1a1f29;
+  border-color: #1f2937;
+}
+
+.theme-dark .reward-unlocked {
+  background: #1e293b;
+  border-color: #22c55e;
+}
+
+.theme-dark .reward-locked {
+  background: #111827;
+  border-color: #1f2937;
+}
+
 /* =========================
    PROGRESS RING - NEON
    ========================= */
@@ -1134,8 +1354,17 @@ select.input:focus {
   justify-content: center;
 }
 
+.theme-dark .ring-outer {
+  background: conic-gradient(#10b981 calc(var(--pct) * 1%), #334155 0);
+}
+
 .ring-outer.neon {
   animation: neonPulse 1.6s ease-in-out infinite alternate;
+}
+
+.theme-dark .ring-outer.neon {
+  animation: none;
+  box-shadow: 0 0 16px rgba(34, 197, 94, 0.35);
 }
 
 @keyframes neonPulse {

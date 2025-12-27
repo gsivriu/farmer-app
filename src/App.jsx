@@ -14,9 +14,15 @@ function App() {
   const [authRole, setAuthRole] = useState("farmer"); // rol ales pe login page
   const [userRole, setUserRole] = useState("farmer"); // rol stocat în Supabase
   const [roleView, setRoleView] = useState("farmer"); // tab-ul activ din dashboard
+  const [darkMode, setDarkMode] = useState(false);
 
   // LOAD SESSION + USER ROLE
   useEffect(() => {
+    const savedTheme = window.localStorage.getItem("theme");
+    if (savedTheme) {
+      setDarkMode(savedTheme === "dark");
+    }
+
     const loadSession = async () => {
       const { data } = await supabase.auth.getSession();
       const s = data.session;
@@ -42,6 +48,17 @@ function App() {
 
     return () => listener.subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (darkMode) {
+      root.classList.add("theme-dark");
+      window.localStorage.setItem("theme", "dark");
+    } else {
+      root.classList.remove("theme-dark");
+      window.localStorage.setItem("theme", "light");
+    }
+  }, [darkMode]);
 
   // ============= PAGE: LOGIN =============
   if (!session) {
@@ -125,6 +142,13 @@ function App() {
             onClick={() => setRoleView("farmer")}
           >
             Fermier
+          </button>
+
+          <button
+            className="btn small outline"
+            onClick={() => setDarkMode((prev) => !prev)}
+          >
+            {darkMode ? "Light" : "Dark"}
           </button>
 
           {/* DOAR ADMIN VEDE TAB-UL ADMIN */}
