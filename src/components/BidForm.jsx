@@ -12,7 +12,7 @@ const PRODUCT_OPTIONS = [
 
 const PARITY_OPTIONS = ["CPT", "DAP", "FCA", "FOR", "FOB", "CIF"];
 
-export default function BidForm({ onBidCreated }) {
+export default function BidForm({ onBidCreated, embedded = false }) {
   const [product, setProduct] = useState("wheat");
   const isSunflower = product === "sunflower";
   const priceLabel = isSunflower ? "Preț (USD/t)" : "Preț (EUR/t)";
@@ -105,8 +105,8 @@ export default function BidForm({ onBidCreated }) {
     if (onBidCreated) onBidCreated();
   };
 
-  return (
-    <div className="card bid-form-card">
+  const content = (
+    <>
       <h2>Plasează un bid</h2>
 
       {message && <p className="badge accepted">{message}</p>}
@@ -222,6 +222,12 @@ export default function BidForm({ onBidCreated }) {
           {loading ? "Se trimite..." : "Trimite bid"}
         </button>
       </form>
-    </div>
+    </>
   );
+
+  if (embedded) {
+    return <div className="bid-form-embedded">{content}</div>;
+  }
+
+  return <div className="card bid-form-card">{content}</div>;
 }

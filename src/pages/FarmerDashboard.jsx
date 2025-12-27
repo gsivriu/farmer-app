@@ -314,13 +314,9 @@ export default function FarmerDashboard() {
         <div className={"tab-content " + (activeTab === "home" ? "active" : "")}>
           {/* PROGRESS + MARKET OVERVIEW */}
           <div className="dashboard-row full">
-            <div className="card">
+            <div className="card dashboard-card">
               <FarmerProgress />
-            </div>
-          </div>
-
-          <div className="dashboard-row full">
-            <div className="card">
+              <div className="section-divider" />
               <MarketTicker />
             </div>
           </div>
@@ -329,14 +325,10 @@ export default function FarmerDashboard() {
         <div className={"tab-content " + (activeTab === "sale" ? "active" : "")}>
           {/* PRICES + BID FORM */}
           <div className="dashboard-row full">
-            <div className="card">
+            <div className="card dashboard-card">
               <PricesGrid />
-            </div>
-          </div>
-
-          <div className="dashboard-row full">
-            <div className="card no-inner-card">
-              <BidForm onBidCreated={loadBids} />
+              <div className="section-divider" />
+              <BidForm onBidCreated={loadBids} embedded />
             </div>
           </div>
         </div>

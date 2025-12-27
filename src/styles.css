@@ -179,7 +179,7 @@ body {
   background: #fff;
   border-bottom: 1px solid var(--gray-light);
   padding: 0 20px;
-  margin-bottom: 20px;
+  margin: 12px 0 12px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
@@ -289,7 +289,7 @@ body {
 .farmer-dashboard-layout {
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 18px;
   width: 100%;
 }
 
@@ -311,6 +311,19 @@ body {
   padding: 0;
   border-radius: 0;
   overflow: visible;
+}
+
+.dashboard-card .market-card {
+  margin-bottom: 0;
+}
+
+.section-divider {
+  margin: 18px 0;
+  border-top: 1px solid var(--gray-light);
+}
+
+.bid-form-embedded h2 {
+  margin-top: 0;
 }
 
 /* =========================
