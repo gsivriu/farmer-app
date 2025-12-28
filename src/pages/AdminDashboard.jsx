@@ -71,6 +71,8 @@ export default function AdminDashboard() {
 
   const [counterValues, setCounterValues] = useState({});
   const [selectedBid, setSelectedBid] = useState(null);
+  const [adminSelectedBid, setAdminSelectedBid] = useState(null);
+  const [adminModalCounter, setAdminModalCounter] = useState("");
 
   // referințe pentru date (pentru fake picker)
   const startInputRef = useRef(null);
@@ -143,6 +145,29 @@ export default function AdminDashboard() {
     }
 
     setCounterValues((prev) => ({ ...prev, [id]: "" }));
+    await loadBids();
+  };
+
+  const sendCounterValue = async (bid, value) => {
+    const num = Number(value);
+
+    if (!Number.isFinite(num) || num <= 0) {
+      alert("Introdu un preț de counter valid.");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("bids")
+      .update({ status: "countered", counter_price: num })
+      .eq("id", bid.id);
+
+    if (error) {
+      alert("Eroare la trimiterea counterului: " + error.message);
+      return;
+    }
+
+    setCounterValues((prev) => ({ ...prev, [bid.id]: "" }));
+    setAdminModalCounter("");
     await loadBids();
   };
 
@@ -392,86 +417,53 @@ export default function AdminDashboard() {
                       : "is-pending";
 
                   return (
-                    <div className={"bid-row admin-bid-item " + statusClass} key={b.id}>
-                      <div className="admin-bid-info">
-                        <div className="bid-left">
-                          <div className="bid-title">
-                            {PRODUCT_LABELS[b.product] || b.product}
-                          </div>
-                          <div className="bid-date">{formatDateOnly(b.created_at)}</div>
-                          <div className="bid-contract">{b.farmer_email || b.farmer_id}</div>
+                    <button
+                      type="button"
+                      className={"bid-row " + statusClass}
+                      key={b.id}
+                      onClick={() => {
+                        setAdminSelectedBid(b);
+                        setAdminModalCounter(b.counter_price ?? "");
+                      }}
+                    >
+                      <div className="bid-left">
+                        <div className="bid-title">
+                          {PRODUCT_LABELS[b.product] || b.product}
                         </div>
-
-                        <div className="bid-details admin-bid-details">
-                          <div className="bid-field">
-                            <span className="bid-label">Cantitate</span>
-                            <span className="bid-value">
-                              {Number(b.quantity || 0).toFixed(2)} t
-                            </span>
-                          </div>
-                          <div className="bid-field">
-                            <span className="bid-label">Preț</span>
-                            <span className="bid-value">
-                              {Number(b.price || 0).toFixed(2)} {unit}
-                              {b.counter_price != null && (
-                                <span className="admin-bid-counter">
-                                  (counter: {Number(b.counter_price).toFixed(2)})
-                                </span>
-                              )}
-                            </span>
-                          </div>
-                          <div className="bid-field">
-                            <span className="bid-label">Paritate</span>
-                            <span className="bid-value">{b.parity || "-"}</span>
-                          </div>
-                          <div className="bid-field">
-                            <span className="bid-label">Livrare</span>
-                            <span className="bid-value">{delivery}</span>
-                          </div>
-                        </div>
-
-                        <div className="admin-bid-side">
-                          <span className="bid-status">{b.status}</span>
-                          <div className="admin-bid-actions-row">
-                            <button
-                              className="btn small ghost"
-                              type="button"
-                              onClick={() => updateStatus(b.id, "accepted")}
-                            >
-                              Accept
-                            </button>
-                            <input
-                              className="input admin-bid-counter-input"
-                              type="number"
-                              step="0.01"
-                              placeholder="Counter"
-                              value={counterValues[b.id] ?? ""}
-                              onChange={(e) =>
-                                setCounterValues((prev) => ({
-                                  ...prev,
-                                  [b.id]: e.target.value,
-                                }))
-                              }
-                            />
-                            <button
-                              className="btn small ghost"
-                              type="button"
-                              onClick={() => updateStatus(b.id, "rejected")}
-                            >
-                              Reject
-                            </button>
-                            <button
-                              className="btn small ghost"
-                              type="button"
-                              onClick={() => sendCounter(b.id)}
-                            >
-                              Send
-                            </button>
-                          </div>
-                        </div>
-
+                        <div className="bid-date">{formatDateOnly(b.created_at)}</div>
+                        <div className="bid-contract">{b.farmer_email || b.farmer_id}</div>
                       </div>
-                    </div>
+
+                      <div className="bid-details">
+                        <div className="bid-field">
+                          <span className="bid-label">Cantitate</span>
+                          <span className="bid-value">
+                            {Number(b.quantity || 0).toFixed(2)} t
+                          </span>
+                        </div>
+                        <div className="bid-field">
+                          <span className="bid-label">Preț</span>
+                          <span className="bid-value">
+                            {Number(b.price || 0).toFixed(2)} {unit}
+                            {b.counter_price != null && (
+                              <span className="admin-bid-counter">
+                                (counter: {Number(b.counter_price).toFixed(2)})
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                        <div className="bid-field">
+                          <span className="bid-label">Paritate</span>
+                          <span className="bid-value">{b.parity || "-"}</span>
+                        </div>
+                        <div className="bid-field">
+                          <span className="bid-label">Livrare</span>
+                          <span className="bid-value">{delivery}</span>
+                        </div>
+                      </div>
+
+                      <span className="bid-status">{b.status}</span>
+                    </button>
                   );
                 })}
 
@@ -671,6 +663,86 @@ export default function AdminDashboard() {
                   ? `${selectedBid.delivery_start} → ${selectedBid.delivery_end}`
                   : "-"}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {adminSelectedBid && (
+        <div
+          className="bid-modal-backdrop"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setAdminSelectedBid(null)}
+        >
+          <div className="bid-modal" onClick={(event) => event.stopPropagation()}>
+            <div className="bid-modal-header">
+              <h3>Detalii bid</h3>
+              <button
+                type="button"
+                className="btn small ghost"
+                onClick={() => setAdminSelectedBid(null)}
+              >
+                Închide
+              </button>
+            </div>
+            <div className="bid-modal-body">
+              <div><b>Data:</b> {formatDateTime(adminSelectedBid.created_at)}</div>
+              <div><b>Fermier:</b> {adminSelectedBid.farmer_email || adminSelectedBid.farmer_id}</div>
+              <div>
+                <b>Produs:</b>{" "}
+                {PRODUCT_LABELS[adminSelectedBid.product] || adminSelectedBid.product}
+              </div>
+              <div><b>Cantitate:</b> {Number(adminSelectedBid.quantity || 0).toFixed(2)} t</div>
+              <div>
+                <b>Preț:</b>{" "}
+                {Number(adminSelectedBid.price || 0).toFixed(2)}{" "}
+                {adminSelectedBid.product === "sunflower" ? "USD/t" : "EUR/t"}
+              </div>
+              {adminSelectedBid.counter_price != null && (
+                <div>
+                  <b>Counter:</b> {Number(adminSelectedBid.counter_price || 0).toFixed(2)}
+                </div>
+              )}
+              <div><b>Paritate:</b> {adminSelectedBid.parity || "-"}</div>
+              <div>
+                <b>Livrare:</b>{" "}
+                {adminSelectedBid.delivery_start && adminSelectedBid.delivery_end
+                  ? `${adminSelectedBid.delivery_start} → ${adminSelectedBid.delivery_end}`
+                  : "-"}
+              </div>
+              <div><b>Status:</b> {adminSelectedBid.status}</div>
+            </div>
+            <div style={{ display: "grid", gap: 8, marginTop: 12 }}>
+              <button
+                type="button"
+                className="btn small ghost"
+                onClick={() => updateStatus(adminSelectedBid.id, "accepted")}
+              >
+                Accept
+              </button>
+              <button
+                type="button"
+                className="btn small ghost"
+                onClick={() => updateStatus(adminSelectedBid.id, "rejected")}
+              >
+                Reject
+              </button>
+              <input
+                className="input"
+                type="number"
+                step="0.01"
+                placeholder="Counter"
+                value={adminModalCounter}
+                onChange={(e) => setAdminModalCounter(e.target.value)}
+              />
+              <button
+                type="button"
+                className="btn small ghost"
+                onClick={() => sendCounterValue(adminSelectedBid, adminModalCounter)}
+              >
+                Send
+              </button>
             </div>
           </div>
         </div>
