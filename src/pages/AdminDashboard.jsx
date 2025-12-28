@@ -431,42 +431,45 @@ export default function AdminDashboard() {
                         </div>
 
                         <div className="admin-bid-actions-row">
-                          <button
-                            className="btn small ghost"
-                            type="button"
-                            onClick={() => updateStatus(b.id, "accepted")}
-                          >
-                            Accept
-                          </button>
+                          <div className="admin-bid-actions-col">
+                            <button
+                              className="btn small ghost"
+                              type="button"
+                              onClick={() => updateStatus(b.id, "accepted")}
+                            >
+                              Accept
+                            </button>
+                            <input
+                              className="input admin-bid-counter-input"
+                              type="number"
+                              step="0.01"
+                              placeholder="Counter"
+                              value={counterValues[b.id] ?? ""}
+                              onChange={(e) =>
+                                setCounterValues((prev) => ({
+                                  ...prev,
+                                  [b.id]: e.target.value,
+                                }))
+                              }
+                            />
+                          </div>
 
-                          <button
-                            className="btn small ghost"
-                            type="button"
-                            onClick={() => updateStatus(b.id, "rejected")}
-                          >
-                            Reject
-                          </button>
-
-                          <input
-                            className="input admin-bid-counter-input"
-                            type="number"
-                            step="0.01"
-                            placeholder="Counter"
-                            value={counterValues[b.id] ?? ""}
-                            onChange={(e) =>
-                              setCounterValues((prev) => ({
-                                ...prev,
-                                [b.id]: e.target.value,
-                              }))
-                            }
-                          />
-                          <button
-                            className="btn small ghost"
-                            type="button"
-                            onClick={() => sendCounter(b.id)}
-                          >
-                            Send
-                          </button>
+                          <div className="admin-bid-actions-col">
+                            <button
+                              className="btn small ghost"
+                              type="button"
+                              onClick={() => updateStatus(b.id, "rejected")}
+                            >
+                              Reject
+                            </button>
+                            <button
+                              className="btn small ghost"
+                              type="button"
+                              onClick={() => sendCounter(b.id)}
+                            >
+                              Send
+                            </button>
+                          </div>
 
                           <span className="bid-status">{b.status}</span>
                         </div>
