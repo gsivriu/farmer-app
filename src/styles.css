@@ -1967,10 +1967,16 @@ select.input:focus {
     flex-wrap: wrap;
     margin-left: 0;
     width: 100%;
+    flex-basis: 100%;
+    order: 3;
   }
 
   .admin-bid-info {
     flex-wrap: wrap;
+  }
+
+  .admin-bid-info > * {
+    min-width: 0;
   }
 }
 
