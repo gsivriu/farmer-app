@@ -687,7 +687,8 @@ select.input:focus {
   justify-content: space-between;
   gap: 12px;
   width: 100%;
-  padding: 12px;
+  padding: 14px 16px;
+  min-height: 117px;
   border-radius: 16px;
   border: 1px solid transparent;
   background: #fff;
@@ -1413,9 +1414,9 @@ select.input:focus {
 .admin-bid-item {
   flex-direction: column;
   align-items: stretch;
-  gap: 10px;
-  padding: 12px;
-  min-height: auto;
+  gap: 12px;
+  padding: 16px;
+  min-height: 120px;
 }
 
 .admin-bid-info {
@@ -2089,6 +2090,7 @@ select.input:focus {
     align-items: flex-start;
     gap: 10px;
     padding: 12px;
+    min-height: 117px;
   }
 
   .bid-left {
