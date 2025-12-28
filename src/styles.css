@@ -2005,12 +2005,23 @@ select.input:focus {
   }
 
   .admin-bid-side {
+    display: flex;
+    flex-direction: column;
     align-items: stretch;
     gap: 8px;
   }
 
   .admin-bid-side .bid-status {
     align-self: flex-end;
+  }
+
+  .admin-bid-details .bid-label {
+    color: #64748b;
+  }
+
+  .admin-bid-details .bid-value {
+    color: #0f172a;
+    font-weight: 700;
   }
 
   .admin-bid-actions-row > :nth-child(1) {
