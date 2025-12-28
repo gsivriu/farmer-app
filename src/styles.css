@@ -1426,12 +1426,16 @@ select.input:focus {
   flex-wrap: nowrap;
 }
 
-.admin-bid-info .bid-status {
-  margin-left: 0;
-}
-
 .admin-bid-details {
   flex: 1;
+}
+
+.admin-bid-side {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  align-self: center;
 }
 
 .admin-bid-actions-row {
@@ -1439,13 +1443,6 @@ select.input:focus {
   flex-wrap: nowrap;
   gap: 6px;
   align-items: center;
-  margin-left: auto;
-  align-self: center;
-}
-
-.admin-bid-actions-row .bid-status {
-  align-self: center;
-  margin-left: 6px;
 }
 
 .admin-bid-item .bid-left {
@@ -1963,30 +1960,26 @@ select.input:focus {
   }
 
   .admin-bid-actions-row {
-    flex-direction: column;
-    flex-wrap: nowrap;
-    align-items: flex-end;
-    justify-content: flex-start;
-    margin-left: 0;
-    width: auto;
-    gap: 8px;
-    order: 2;
+    grid-template-columns: 1fr;
+    width: 100%;
+    align-items: stretch;
   }
 
   .admin-bid-actions-row .btn {
     padding: 4px 8px;
     font-size: 11px;
+    width: 100%;
   }
 
   .admin-bid-actions-row .admin-bid-counter-input {
-    width: 88px;
+    width: 100%;
     padding: 4px 6px;
     font-size: 11px;
   }
 
   .admin-bid-info {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) 120px;
     column-gap: 12px;
     row-gap: 6px;
     align-items: start;
@@ -2001,23 +1994,20 @@ select.input:focus {
     grid-column: 1;
   }
 
-  .admin-bid-info .admin-bid-actions-row {
+  .admin-bid-info .admin-bid-side {
     grid-column: 2;
-    grid-row: 1 / span 2;
+    grid-row: 1 / span 3;
     align-self: start;
+  }
+
+  .admin-bid-side {
+    width: 120px;
   }
 
   .admin-bid-details {
     margin-top: 2px;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 6px 12px;
-  }
-
-  .admin-bid-actions-col {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    align-items: flex-end;
   }
 }
 

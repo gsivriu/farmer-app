@@ -430,8 +430,9 @@ export default function AdminDashboard() {
                           </div>
                         </div>
 
-                        <div className="admin-bid-actions-row">
-                          <div className="admin-bid-actions-col">
+                        <div className="admin-bid-side">
+                          <span className="bid-status">{b.status}</span>
+                          <div className="admin-bid-actions-row">
                             <button
                               className="btn small ghost"
                               type="button"
@@ -452,9 +453,6 @@ export default function AdminDashboard() {
                                 }))
                               }
                             />
-                          </div>
-
-                          <div className="admin-bid-actions-col">
                             <button
                               className="btn small ghost"
                               type="button"
@@ -470,8 +468,6 @@ export default function AdminDashboard() {
                               Send
                             </button>
                           </div>
-
-                          <span className="bid-status">{b.status}</span>
                         </div>
 
                       </div>
