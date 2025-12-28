@@ -437,6 +437,9 @@ export default function AdminDashboard() {
                         </div>
                         <div className="bid-date">{formatDateOnly(b.created_at)}</div>
                         <div className="bid-contract">{b.farmer_email || b.farmer_id}</div>
+                        {b.status === "accepted" && b.contract_no && (
+                          <div className="bid-contract">Contract: {b.contract_no}</div>
+                        )}
                       </div>
 
                       <div className="bid-details">
@@ -765,6 +768,9 @@ export default function AdminDashboard() {
                   : "-"}
               </div>
               <div><b>Status:</b> {adminSelectedBid.status}</div>
+              {adminSelectedBid.status === "accepted" && adminSelectedBid.contract_no && (
+                <div><b>Contract:</b> {adminSelectedBid.contract_no}</div>
+              )}
             </div>
             <div style={{ display: "grid", gap: 8, marginTop: 12 }}>
               <button
