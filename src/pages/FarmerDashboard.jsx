@@ -274,7 +274,11 @@ export default function FarmerDashboard() {
     if (!value) return "-";
     const dt = new Date(value);
     if (Number.isNaN(dt.getTime())) return "-";
-    return dt.toLocaleDateString("en-GB");
+    return dt.toLocaleDateString("en-GB", {
+      year: "2-digit",
+      month: "2-digit",
+      day: "2-digit",
+    });
   };
 
   return (

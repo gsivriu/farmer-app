@@ -175,7 +175,11 @@ export default function AdminDashboard() {
     if (!value) return "-";
     const dt = new Date(value);
     if (Number.isNaN(dt.getTime())) return "-";
-    return dt.toLocaleDateString("en-GB");
+    return dt.toLocaleDateString("en-GB", {
+      year: "2-digit",
+      month: "2-digit",
+      day: "2-digit",
+    });
   };
 
   const formatDateTime = (value) => {
@@ -394,7 +398,7 @@ export default function AdminDashboard() {
                           <div className="bid-title">
                             {PRODUCT_LABELS[b.product] || b.product}
                           </div>
-                          <div className="bid-date">{formatDateTime(b.created_at)}</div>
+                          <div className="bid-date">{formatDateOnly(b.created_at)}</div>
                           <div className="bid-contract">{b.farmer_email || b.farmer_id}</div>
                         </div>
 
