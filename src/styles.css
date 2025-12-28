@@ -1404,7 +1404,7 @@ select.input:focus {
 .admin-bid-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   max-height: calc(5 * 140px + 4 * 12px);
   overflow-y: auto;
   padding-right: 6px;
@@ -1413,9 +1413,9 @@ select.input:focus {
 .admin-bid-item {
   flex-direction: column;
   align-items: stretch;
-  gap: 8px;
-  padding: 10px 12px;
-  min-height: 110px;
+  gap: 10px;
+  padding: 12px;
+  min-height: auto;
 }
 
 .admin-bid-info {
@@ -1960,23 +1960,12 @@ select.input:focus {
   }
 
   .admin-bid-actions-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    width: 100%;
-    align-items: stretch;
+    display: none;
   }
 
-  .admin-bid-actions-row .btn {
-    padding: 4px 8px;
-    font-size: 11px;
-    width: 100%;
-  }
-
+  .admin-bid-actions-row .btn,
   .admin-bid-actions-row .admin-bid-counter-input {
-    width: 100%;
-    padding: 4px 6px;
-    font-size: 11px;
+    display: none;
   }
 
   .admin-bid-info {
@@ -2011,7 +2000,8 @@ select.input:focus {
     gap: 8px;
   }
 
-  .admin-bid-side .bid-status {
+  .admin-bid-side .bid-status,
+  .admin-bid-status-badge {
     align-self: flex-end;
   }
 

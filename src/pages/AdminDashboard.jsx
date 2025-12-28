@@ -73,6 +73,10 @@ export default function AdminDashboard() {
   const [selectedBid, setSelectedBid] = useState(null);
   const [adminSelectedBid, setAdminSelectedBid] = useState(null);
   const [adminModalCounter, setAdminModalCounter] = useState("");
+  const shouldOpenAdminModal = () => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia("(max-width: 768px)").matches;
+  };
 
   // referințe pentru date (pentru fake picker)
   const startInputRef = useRef(null);
@@ -422,6 +426,7 @@ export default function AdminDashboard() {
                       className={"bid-row " + statusClass}
                       key={b.id}
                       onClick={() => {
+                        if (!shouldOpenAdminModal()) return;
                         setAdminSelectedBid(b);
                         setAdminModalCounter(b.counter_price ?? "");
                       }}
@@ -462,7 +467,55 @@ export default function AdminDashboard() {
                         </div>
                       </div>
 
-                      <span className="bid-status">{b.status}</span>
+                      <div className="admin-bid-side">
+                        <span className="bid-status admin-bid-status-badge">{b.status}</span>
+                        <div className="admin-bid-actions-row">
+                          <button
+                            className="btn small ghost"
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              updateStatus(b.id, "accepted");
+                            }}
+                          >
+                            Accept
+                          </button>
+                          <input
+                            className="input admin-bid-counter-input"
+                            type="number"
+                            step="0.01"
+                            placeholder="Counter"
+                            value={counterValues[b.id] ?? ""}
+                            onChange={(e) =>
+                              setCounterValues((prev) => ({
+                                ...prev,
+                                [b.id]: e.target.value,
+                              }))
+                            }
+                            onClick={(event) => event.stopPropagation()}
+                          />
+                          <button
+                            className="btn small ghost"
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              updateStatus(b.id, "rejected");
+                            }}
+                          >
+                            Reject
+                          </button>
+                          <button
+                            className="btn small ghost"
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              sendCounter(b.id);
+                            }}
+                          >
+                            Send
+                          </button>
+                        </div>
+                      </div>
                     </button>
                   );
                 })}
