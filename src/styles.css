@@ -1963,20 +1963,46 @@ select.input:focus {
   }
 
   .admin-bid-actions-row {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: flex-end;
     justify-content: flex-start;
-    flex-wrap: wrap;
     margin-left: 0;
-    width: 100%;
-    flex-basis: 100%;
-    order: 3;
+    width: auto;
+    gap: 6px;
+    order: 2;
+  }
+
+  .admin-bid-actions-row .btn {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+
+  .admin-bid-actions-row .admin-bid-counter-input {
+    width: 80px;
+    padding: 4px 6px;
+    font-size: 12px;
   }
 
   .admin-bid-info {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 12px;
+    row-gap: 8px;
   }
 
   .admin-bid-info > * {
     min-width: 0;
+  }
+
+  .admin-bid-info .bid-left,
+  .admin-bid-info .admin-bid-details {
+    grid-column: 1;
+  }
+
+  .admin-bid-info .admin-bid-actions-row {
+    grid-column: 2;
+    align-self: start;
   }
 }
 
