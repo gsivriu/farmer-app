@@ -1454,6 +1454,22 @@ select.input:focus {
   background: #0b1220;
 }
 
+.silo-table tbody tr:nth-child(even) td:first-child {
+  background: #f6f8ff;
+}
+
+.silo-table tbody tr:nth-child(odd) td:first-child {
+  background: #ffffff;
+}
+
+.theme-dark .silo-table tbody tr:nth-child(even) td:first-child {
+  background: #0b1220;
+}
+
+.theme-dark .silo-table tbody tr:nth-child(odd) td:first-child {
+  background: #1a1f29;
+}
+
 .silo-table {
   width: 100%;
   border-collapse: collapse;
@@ -1479,6 +1495,39 @@ select.input:focus {
   color: #ffffff;
   font-weight: 700;
   letter-spacing: 0.2px;
+}
+
+.silo-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.silo-table thead th:first-child {
+  left: 0;
+  z-index: 3;
+}
+
+.silo-table td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+
+.silo-sticky-head {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  background: #003366;
+  color: #ffffff;
+}
+
+.theme-dark .silo-table td:first-child {
+  background: #1a1f29;
+}
+
+.theme-dark .silo-sticky-head {
+  background: #1e293b;
 }
 
 .theme-dark .silo-table th {

@@ -241,7 +241,7 @@ export default function SiloPriceTable({ commodities = [] }) {
         <table className="silo-table">
           <thead>
             <tr>
-              <th>Siloz</th>
+              <th className="silo-sticky-head">Siloz</th>
               {productList.map((product) => (
                 <th key={product.id}>{product.name}</th>
               ))}
