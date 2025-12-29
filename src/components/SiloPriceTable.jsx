@@ -26,7 +26,7 @@ const normalizeProductType = (value) => {
   return PRODUCT_ID_ALIASES[key] || key;
 };
 
-export default function SiloPriceTable({ commodities = [] }) {
+export default function SiloPriceTable({ commodities = [], readOnly = false }) {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -94,6 +94,9 @@ export default function SiloPriceTable({ commodities = [] }) {
       row?.manual_price !== null && row?.manual_price !== undefined
         ? Number(row.manual_price)
         : null;
+    const isManualOverride =
+      manualValue !== null && Number.isFinite(manualValue) &&
+      Number.isFinite(computed) && Math.abs(manualValue - computed) > 0.001;
     const finalValue = manualValue !== null ? manualValue : computed;
     const currency = row?.currency || product.currency;
 
@@ -102,6 +105,7 @@ export default function SiloPriceTable({ commodities = [] }) {
       offset,
       computed,
       manualValue,
+      isManualOverride,
       currency,
       finalValue,
       display: Number.isFinite(finalValue) ? finalValue.toFixed(2) : "-",
@@ -109,6 +113,7 @@ export default function SiloPriceTable({ commodities = [] }) {
   };
 
   const openCell = (siloName, product) => {
+    if (readOnly) return;
     const cell = getCellValue(siloName, product);
     setSelectedCell({
       siloName,
@@ -232,9 +237,11 @@ export default function SiloPriceTable({ commodities = [] }) {
     <div className="silo-table-wrap">
       <div className="silo-table-header">
         <h3>Prețuri per siloz</h3>
-        <p className="small-text">
-          Prețurile se calculează automat din CPT. Click pe o celulă pentru override.
-        </p>
+        {!readOnly && (
+          <p className="small-text">
+            Prețurile se calculează automat din CPT. Click pe o celulă pentru override.
+          </p>
+        )}
       </div>
 
       <div className="silo-table-scroll">
@@ -256,13 +263,13 @@ export default function SiloPriceTable({ commodities = [] }) {
                   return (
                     <td
                       key={`${silo}-${product.id}`}
-                      className="silo-cell"
+                      className={"silo-cell" + (readOnly ? " readonly" : "")}
                       onClick={() => openCell(silo, product)}
                     >
                       <div
                         className={
                           "silo-cell-value" +
-                          (cell.manualValue !== null ? " silo-cell-value-manual" : "")
+                          (cell.isManualOverride ? " silo-cell-value-manual" : "")
                         }
                       >
                         {cell.display} {cell.currency}
@@ -276,7 +283,7 @@ export default function SiloPriceTable({ commodities = [] }) {
         </table>
       </div>
 
-      {selectedCell && (
+      {selectedCell && !readOnly && (
         <div
           className="bid-modal-backdrop"
           role="dialog"

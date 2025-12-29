@@ -298,7 +298,11 @@ export default function AdminDashboard() {
       </nav>
 
       <div className="tab-content admin-tab-content">
-        <div className={activeTab === "home" ? "tab-pane active" : "tab-pane"}>
+        <div
+          className={
+            "tab-pane admin-home-pane" + (activeTab === "home" ? " active" : "")
+          }
+        >
           <div className="card admin-card dashboard-card">
             {/* Optional: Market overview sus (arata bine pe admin) */}
             <MarketTicker />

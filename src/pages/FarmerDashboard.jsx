@@ -6,6 +6,8 @@ import PricesGrid from "../components/PricesGrid";
 import BidForm from "../components/BidForm";
 
 import FarmerProgress from "../components/FarmerProgress";
+import SiloPriceTable from "../components/SiloPriceTable";
+import { useAppContext } from "../context/AppContext.jsx";
 
 
 const PRODUCT_LABELS = {
@@ -17,6 +19,7 @@ const PRODUCT_LABELS = {
 };
 
 export default function FarmerDashboard() {
+  const { commodities } = useAppContext();
   const [bids, setBids] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -333,6 +336,8 @@ export default function FarmerDashboard() {
               <PricesGrid />
               <div className="section-divider" />
               <BidForm onBidCreated={loadBids} embedded />
+              <div className="section-divider" />
+              <SiloPriceTable commodities={commodities} readOnly />
             </div>
           </div>
         </div>

@@ -1,5 +1,5 @@
 // src/components/BidForm.jsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
 
 const PRODUCT_OPTIONS = [
@@ -21,6 +21,9 @@ export default function BidForm({ onBidCreated, embedded = false }) {
   const [price, setPrice] = useState("");
   const [parity, setParity] = useState("CPT");
   const [freightCost, setFreightCost] = useState("");
+  const [locations, setLocations] = useState([]);
+  const [location, setLocation] = useState("Port Constanța");
+  const [loadingLocation, setLoadingLocation] = useState("");
 
   const [deliveryStart, setDeliveryStart] = useState("");
   const [deliveryEnd, setDeliveryEnd] = useState("");
@@ -29,6 +32,29 @@ export default function BidForm({ onBidCreated, embedded = false }) {
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
 
+  useEffect(() => {
+    const loadLocations = async () => {
+      const { data, error: loadError } = await supabase
+        .from("silo_price_configs")
+        .select("silo_name")
+        .order("silo_name", { ascending: true });
+
+      if (loadError) {
+        return;
+      }
+
+      const map = new Map();
+      (data || []).forEach((row) => {
+        if (row?.silo_name) {
+          map.set(row.silo_name, true);
+        }
+      });
+      setLocations(["Port Constanța", ...Array.from(map.keys())]);
+    };
+
+    loadLocations();
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -36,7 +62,7 @@ export default function BidForm({ onBidCreated, embedded = false }) {
     setError(null);
 
     // Validare paritate
-    if ((parity === "FCA" || parity === "FOR") && !freightCost) {
+    if ((parity === "FCA" || parity === "FOR" || parity === "FOB") && !freightCost) {
       setLoading(false);
       setError("Completează tariful de transport pentru paritatea selectată.");
       return;
@@ -79,6 +105,8 @@ export default function BidForm({ onBidCreated, embedded = false }) {
       quantity: qtyNum,
       price: priceNum,
       parity,
+      delivery_location: location || "Port Constanța",
+      loading_location: loadingLocation || null,
       freight_cost: freightCost ? Number(freightCost) : null,
       delivery_start: deliveryStart || null,
       delivery_end: deliveryEnd || null,
@@ -99,6 +127,8 @@ export default function BidForm({ onBidCreated, embedded = false }) {
     setPrice("");
     setParity("CPT");
     setFreightCost("");
+    setLocation("Port Constanța");
+    setLoadingLocation("");
     setDeliveryStart("");
     setDeliveryEnd("");
 
@@ -158,7 +188,7 @@ export default function BidForm({ onBidCreated, embedded = false }) {
           </div>
         </div>
 
-        {/* PARITATE + TRANSPORT */}
+        {/* PARITATE + LOCAȚIE */}
         <div className="bid-form-grid-2">
           <div>
             <label className="label">Paritate</label>
@@ -175,7 +205,27 @@ export default function BidForm({ onBidCreated, embedded = false }) {
             </select>
           </div>
 
-          {(parity === "FCA" || parity === "FOR") && (
+          <div>
+            <label className="label">Locație descarcare</label>
+            <select
+              className="input"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+            >
+              {locations.length === 0 && (
+                <option value="Port Constanța">Port Constanța</option>
+              )}
+              {locations.map((loc) => (
+                <option key={loc} value={loc}>
+                  {loc}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {(parity === "FCA" || parity === "FOR" || parity === "FOB") && (
+          <div className="bid-form-grid-2">
             <div>
               <label className="label">Tarif transport (EUR/t)</label>
               <input
@@ -188,8 +238,19 @@ export default function BidForm({ onBidCreated, embedded = false }) {
                 placeholder="ex: 15"
               />
             </div>
-          )}
-        </div>
+
+            <div>
+              <label className="label">Locație încărcare</label>
+              <input
+                className="input"
+                type="text"
+                value={loadingLocation}
+                onChange={(e) => setLoadingLocation(e.target.value)}
+                placeholder="ex: Fermă / Siloz"
+              />
+            </div>
+          </div>
+        )}
 
         {/* DATE LIVRARE – NATIV, MOBILE SAFE */}
         <div className="bid-form-grid-2">
