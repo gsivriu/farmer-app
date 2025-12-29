@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { supabase } from "../supabaseClient";
 
-export default function LoginForm({ onLogin, role = "farmer" }) {
+export default function LoginForm({
+  onLogin,
+  role = "farmer",
+  externalError,
+  onAuthError,
+}) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -11,19 +16,31 @@ export default function LoginForm({ onLogin, role = "farmer" }) {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    onAuthError?.(null);
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    setLoading(false);
-
     if (error) {
+      setLoading(false);
       setError(error.message);
       return;
     }
 
+    const user = data?.user;
+    const actualRole = user?.user_metadata?.role || "farmer";
+    if (actualRole !== role) {
+      setLoading(false);
+      const message = `Nu ai autorizație să te autentifici ca ${roleLabel}. Selectează rolul corect și încearcă din nou.`;
+      setError(message);
+      onAuthError?.(message);
+      await supabase.auth.signOut();
+      return;
+    }
+
+    setLoading(false);
     onLogin?.();
   };
 
@@ -59,7 +76,9 @@ export default function LoginForm({ onLogin, role = "farmer" }) {
         />
       </label>
 
-      {error && <p className="badge rejected">{error}</p>}
+      {(error || externalError) && (
+        <p className="badge rejected">{error || externalError}</p>
+      )}
 
       <button
         className="btn primary-btn full-width"

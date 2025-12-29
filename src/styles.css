@@ -1064,6 +1064,12 @@ select.input:focus {
   white-space: nowrap;
 }
 
+.login-form .badge {
+  white-space: normal;
+  display: block;
+  width: 100%;
+}
+
 .badge.pending {
   background: #fef3c7;
   color: #92400e;
@@ -1379,6 +1385,17 @@ select.input:focus {
   white-space: nowrap;
 }
 
+.admin-price-notice {
+  margin: 6px 0 0;
+  color: #16a34a;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.theme-dark .admin-price-notice {
+  color: #22c55e;
+}
+
 .theme-dark .admin-unit {
   color: #9ca3af;
 }
@@ -1402,13 +1419,110 @@ select.input:focus {
   align-items: end;
 }
 
+.silo-table-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-family: "Space Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.silo-table-header h3 {
+  margin: 0 0 4px;
+  font-size: 18px;
+}
+
+.silo-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 14px;
+  border: 1px solid #c7d2fe;
+  background: #ffffff;
+  box-shadow: 0 18px 30px rgba(30, 64, 175, 0.12);
+}
+
+.theme-dark .silo-table-scroll {
+  background: #0f172a;
+  border-color: #1f2937;
+  box-shadow: 0 18px 30px rgba(2, 6, 23, 0.5);
+}
+
+.silo-table tbody tr:nth-child(even) {
+  background: #f6f8ff;
+}
+
+.theme-dark .silo-table tbody tr:nth-child(even) {
+  background: #0b1220;
+}
+
+.silo-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+
+.silo-table th,
+.silo-table td {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 13px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.theme-dark .silo-table th,
+.theme-dark .silo-table td {
+  border-bottom-color: #1f2937;
+  color: #e2e8f0;
+}
+
+.silo-table th {
+  background: #003366;
+  color: #ffffff;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.theme-dark .silo-table th {
+  background: #1e293b;
+}
+
+.silo-name {
+  font-weight: 600;
+}
+
+.silo-cell {
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.silo-cell:hover {
+  background: #eef2ff;
+}
+
+.theme-dark .silo-cell:hover {
+  background: #111827;
+}
+
+.silo-cell-value {
+  font-weight: 600;
+}
+
+.silo-cell-value-manual {
+  color: #b91c1c;
+}
+
 .admin-bid-list {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  max-height: calc(5 * 140px + 4 * 12px);
+  max-height: none;
   overflow-y: auto;
   padding-right: 6px;
+}
+
+@media (min-width: 769px) {
+  .admin-bid-list {
+    max-height: calc(10 * 117px + 9 * 10px);
+  }
 }
 
 .admin-bid-item {

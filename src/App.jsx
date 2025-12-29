@@ -15,6 +15,7 @@ function App() {
   const [userRole, setUserRole] = useState("farmer"); // rol stocat în Supabase
   const [roleView, setRoleView] = useState("farmer"); // tab-ul activ din dashboard
   const [darkMode, setDarkMode] = useState(false);
+  const [authError, setAuthError] = useState(null);
 
   // LOAD SESSION + USER ROLE
   useEffect(() => {
@@ -59,6 +60,19 @@ function App() {
       window.localStorage.setItem("theme", "light");
     }
   }, [darkMode]);
+
+  useEffect(() => {
+    setAuthError(null);
+  }, [authRole]);
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error && error.message !== "Auth session missing!") {
+      window.alert("Eroare la logout: " + error.message);
+      return;
+    }
+    setSession(null);
+  };
 
   // ============= PAGE: LOGIN =============
   if (!session) {
@@ -111,7 +125,12 @@ function App() {
             {/* Login + Register Grid */}
             <div className="grid">
               <div>
-                <LoginForm role={authRole} />
+                <LoginForm
+                  role={authRole}
+                  externalError={authError}
+                  onAuthError={setAuthError}
+                  onLogin={() => setAuthError(null)}
+                />
               </div>
               <div>
                 <RegisterForm role={authRole} />
@@ -171,7 +190,7 @@ function App() {
             </button>
           )}
 
-          <button className="btn small outline" onClick={() => supabase.auth.signOut()}>
+          <button className="btn small outline" type="button" onClick={handleLogout}>
             Logout
           </button>
         </div>

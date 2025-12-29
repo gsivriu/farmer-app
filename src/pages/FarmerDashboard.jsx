@@ -349,13 +349,6 @@ export default function FarmerDashboard() {
                 {loading && <p>Se încarcă datele...</p>}
                 {error && <p className="badge rejected">{error}</p>}
 
-                <div className="dashboard-section">
-                  <p>
-                    <strong>Volum total:</strong>{" "}
-                    {Number(totalQty || 0).toFixed(2)} t
-                  </p>
-                </div>
-
             <div className="dashboard-section">
               <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
                 <h3 style={{ margin: "10px 0 8px", fontSize: 16 }}>

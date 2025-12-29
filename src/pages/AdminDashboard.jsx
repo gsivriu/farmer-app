@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { supabase } from "../supabaseClient";
 import { useAppContext } from "../context/AppContext.jsx";
 import MarketTicker from "../components/MarketTicker.jsx";
+import SiloPriceTable from "../components/SiloPriceTable.jsx";
 
 const PRODUCT_LABELS = {
   wheat: "Grâu",
@@ -16,6 +17,7 @@ export default function AdminDashboard() {
   const { commodities, updateCommodityPrice } = useAppContext();
 
   const [draftPrices, setDraftPrices] = useState({});
+  const [priceNotice, setPriceNotice] = useState("");
   const [activeTab, setActiveTab] = useState("home");
 
   useEffect(() => {
@@ -51,6 +53,9 @@ export default function AdminDashboard() {
       ...prev,
       [id]: String(num),
     }));
+
+    const label = PRODUCT_LABELS[id] || id;
+    setPriceNotice(`Noul preț de listă pentru ${label} a fost setat.`);
   };
 
   // === BIDS DIN SUPABASE ===
@@ -306,6 +311,7 @@ export default function AdminDashboard() {
               <p className="market-subtitle">
                 Introdu și confirmă prețurile interne. Fermierii vor vedea automat noile valori.
               </p>
+              {priceNotice && <p className="admin-price-notice">{priceNotice}</p>}
             </div>
 
             <div className="admin-grid">
@@ -338,6 +344,9 @@ export default function AdminDashboard() {
                 </div>
               ))}
             </div>
+
+            <div className="section-divider" />
+            <SiloPriceTable commodities={commodities} />
           </div>
         </div>
 
