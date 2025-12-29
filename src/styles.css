@@ -1007,6 +1007,20 @@ select.input:focus {
   font-size: 13px;
 }
 
+@media (max-width: 768px) {
+  .bid-modal-backdrop {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+  }
+
+  .bid-modal {
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+}
+
 /* =========================
    NEWS
    ========================= */
