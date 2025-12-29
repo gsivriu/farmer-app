@@ -1008,6 +1008,27 @@ select.input:focus {
 }
 
 @media (max-width: 768px) {
+  .silo-table-wrap {
+    position: relative;
+  }
+
+  .silo-table-wrap .bid-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+  }
+
+  .silo-table-wrap .bid-modal {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    max-height: 90dvh;
+  }
+
   .bid-modal-backdrop {
     display: block;
     padding: 0;
