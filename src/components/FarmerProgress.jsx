@@ -1,7 +1,6 @@
 // src/components/FarmerProgress.jsx
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../supabaseClient";
-import ProgressRing from "./ProgressRing";
 
 const TARGETS = [
   { t: 1000, title: "1,000 t", desc: "+2 EUR/t on the next 500 t sold" },
@@ -12,8 +11,6 @@ const TARGETS = [
   },
   { t: 5000, title: "5,000 t", desc: "+5 EUR/t on the next 2,000 t sold" },
 ];
-
-const MAX_TARGET = TARGETS[TARGETS.length - 1].t;
 
 const fmt = (n) =>
   Number(n || 0).toLocaleString("en-GB", {
@@ -64,71 +61,57 @@ export default function FarmerProgress({ embedded = false }) {
     const onVis = () => {
       if (document.visibilityState === "visible") loadAcceptedVolume();
     };
+    const onRefresh = () => {
+      loadAcceptedVolume();
+    };
     document.addEventListener("visibilitychange", onVis);
-    return () => document.removeEventListener("visibilitychange", onVis);
+    window.addEventListener("farmer-progress-refresh", onRefresh);
+    return () => {
+      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("farmer-progress-refresh", onRefresh);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
- const progress = useMemo(() => {
-  const targetsOnly = TARGETS.map((x) => x.t);
-  const maxTarget = targetsOnly[targetsOnly.length - 1];
+  const progress = useMemo(() => {
+    const targetsOnly = TARGETS.map((x) => x.t);
+    const maxTarget = targetsOnly[targetsOnly.length - 1];
 
-  // dacă ești peste ultimul target -> complete
-  if (totalAccepted >= maxTarget) {
+    // dacă ești peste ultimul target -> complete
+    if (totalAccepted >= maxTarget) {
+      return {
+        complete: true,
+        nextT: maxTarget,
+        remaining: 0,
+        pct: 100,
+      };
+    }
+
+    // următorul target (cel mai mic target mai mare decât totalAccepted)
+    const nextT = targetsOnly.find((t) => totalAccepted < t) ?? maxTarget;
+
+    const pctRaw = (Number(totalAccepted) / Number(nextT)) * 100;
+    const pct = Math.max(0, Math.min(100, Math.round(pctRaw)));
+
+    const remaining = Math.max(nextT - totalAccepted, 0);
+
     return {
-      complete: true,
-      nextT: maxTarget,
-      remaining: 0,
-      pct: 100,
+      complete: false,
+      nextT,
+      remaining,
+      pct,
     };
-  }
-
-  // următorul target (cel mai mic target mai mare decât totalAccepted)
-  const nextT = targetsOnly.find((t) => totalAccepted < t) ?? maxTarget;
-
-  const pctRaw = (Number(totalAccepted) / Number(maxTarget)) * 100;
-  const pct = Math.max(0, Math.min(100, Math.round(pctRaw)));
-
-  const remaining = Math.max(nextT - totalAccepted, 0);
-
-  return {
-    complete: false,
-    nextT,
-    remaining,
-    pct,
-  };
   }, [totalAccepted]);
-
-
-  // Text alb dacă centrul etichetei e în zona roșie (fill)
-  const labelInFill = useMemo(() => {
-    const center = 50; // text e centrat
-    return progress.pct >= center;
-  }, [progress.pct]);
 
   return (
   <div className={(embedded ? "progress-card" : "card progress-card")}>
     {/* Header */}
     <div className="progress-head">
       <div className="progress-title-group">
-        <h2 className="progress-title">Your Delivery Progress</h2>
-        <div className="small-text">
-          Total accepted volume: <b>{fmt(totalAccepted)} t</b>
+        <div className="progress-meta">
+          Total livrat: <b>{fmt0(totalAccepted)}</b> /{" "}
+          <b>{fmt0(progress.nextT)}</b> t
         </div>
-        <div className="progress-meta small-text">
-          {progress.complete ? (
-            <b>Congrats — you have reached all targets.</b>
-          ) : (
-            <>
-              Progress: <b>{fmt0(totalAccepted)} t</b> /{" "}
-              <b>{fmt0(MAX_TARGET)} t</b>
-              <br />
-              </>
-          )}
-        </div>
-      </div>
-      <div className="progress-ring-center">
-        <ProgressRing percent={progress.pct} />
       </div>
       <div className="progress-head-spacer" aria-hidden="true" />
     </div>
@@ -137,34 +120,6 @@ export default function FarmerProgress({ embedded = false }) {
     <div className="uv-loader" style={{ "--pct": `${progress.pct}%` }}>
       <div className="uv-bar" />
 
-      <div className="uv-checks">
-        {TARGETS.map((r) => {
-          const active = totalAccepted >= r.t;
-          return (
-            <div
-              key={r.t}
-              className={"uv-check " + (active ? "is-active" : "")}
-              title={r.title}
-              aria-hidden="true"
-            >
-              <svg
-                className="uv-check-icon"
-                stroke="white"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="m4.5 12.75 6 6 9-13.5"
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </div>
-          );
-        })}
-      </div>
     </div>
 
     {/* Rewards */}
@@ -182,8 +137,54 @@ export default function FarmerProgress({ embedded = false }) {
                 <div className="small-text">{r.desc}</div>
               </div>
 
-              <span className={"badge " + (unlocked ? "accepted" : "pending")}>
-                {unlocked ? "Unlocked" : "Locked"}
+              <span
+                className={"reward-lock " + (unlocked ? "is-unlocked" : "is-locked")}
+                aria-label={unlocked ? "Unlocked" : "Locked"}
+                title={unlocked ? "Unlocked" : "Locked"}
+              >
+                {unlocked ? (
+                  <svg viewBox="0 0 24 24" className="lock-icon" aria-hidden="true">
+                    <path
+                      d="M7 11V8a5 5 0 0 1 9.5-2"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <rect
+                      x="5"
+                      y="11"
+                      width="14"
+                      height="10"
+                      rx="2"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                    />
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" className="lock-icon" aria-hidden="true">
+                    <rect
+                      x="5"
+                      y="11"
+                      width="14"
+                      height="10"
+                      rx="2"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                    />
+                    <path
+                      d="M8 11V8a4 4 0 0 1 8 0v3"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                )}
               </span>
             </div>
           </div>

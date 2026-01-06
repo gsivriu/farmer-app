@@ -234,7 +234,7 @@ export default function SiloPriceTable({ commodities = [], readOnly = false }) {
   }
 
   return (
-    <div className="silo-table-wrap">
+    <div className={"silo-table-wrap" + (selectedCell ? " is-modal-open" : "")}>
       <div className="silo-table-header">
         <h3>Prețuri per siloz</h3>
         {!readOnly && (
@@ -292,11 +292,19 @@ export default function SiloPriceTable({ commodities = [], readOnly = false }) {
         >
           <div className="bid-modal" onClick={(event) => event.stopPropagation()}>
             <div className="bid-modal-header">
-              <h3>Override preț siloz</h3>
+              <h3>Preț siloz</h3>
               <button
                 type="button"
                 className="btn small ghost"
-                onClick={() => setSelectedCell(null)}
+                onMouseDown={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  setSelectedCell(null);
+                }}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setSelectedCell(null);
+                }}
               >
                 Închide
               </button>
@@ -305,10 +313,10 @@ export default function SiloPriceTable({ commodities = [], readOnly = false }) {
               <div><b>Siloz:</b> {selectedCell.siloName}</div>
               <div><b>Produs:</b> {selectedCell.product.name}</div>
               <div>
-                <b>Preț CPT:</b> {selectedCell.product.price.toFixed(2)}{" "}
+                <b>Preț CPT Constanța:</b> {selectedCell.product.price.toFixed(2)}{" "}
                 {selectedCell.currency}
               </div>
-              <div><b>Offset:</b> -{Number(selectedCell.offset || 0).toFixed(2)}</div>
+              <div><b>Spread:</b> -{Number(selectedCell.offset || 0).toFixed(2)}</div>
               <div>
                 <b>Calculat:</b> {Number(selectedCell.computed || 0).toFixed(2)}{" "}
                 {selectedCell.currency}
@@ -321,6 +329,7 @@ export default function SiloPriceTable({ commodities = [], readOnly = false }) {
                 step="0.01"
                 placeholder="Preț final"
                 value={overrideValue}
+                onClick={(event) => event.stopPropagation()}
                 onChange={(event) => setOverrideValue(event.target.value)}
               />
               <button type="button" className="btn small ghost" onClick={handleSaveOverride}>

@@ -1,6 +1,9 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 const AppContext = createContext(null);
+
+const COMMODITIES_STORAGE_KEY = "ameropa-commodities-v1";
+const BIDS_STORAGE_KEY = "ameropa-bids-v1";
 
 // Lista inițială de produse + prețuri de pornire
 const initialCommodities = [
@@ -51,15 +54,75 @@ const initialCommodities = [
   },
 ];
 
+const loadStoredCommodities = () => {
+  if (typeof window === "undefined") return initialCommodities;
+  try {
+    const raw = window.localStorage.getItem(COMMODITIES_STORAGE_KEY);
+    if (!raw) return initialCommodities;
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return initialCommodities;
+
+    const byId = new Map(
+      parsed
+        .filter((item) => item && typeof item.id === "string")
+        .map((item) => [item.id, item])
+    );
+
+    return initialCommodities.map((base) => {
+      const stored = byId.get(base.id);
+      if (!stored) return base;
+
+      const price = Number(stored.price);
+      const lastPrice = stored.lastPrice == null ? null : Number(stored.lastPrice);
+      const priceChange =
+        stored.priceChange == null ? base.priceChange : Number(stored.priceChange);
+
+      return {
+        ...base,
+        name: stored.name || base.name,
+        basis: stored.basis || base.basis,
+        price: Number.isFinite(price) ? price : base.price,
+        lastPrice: Number.isFinite(lastPrice) ? lastPrice : base.lastPrice,
+        priceChange: Number.isFinite(priceChange) ? priceChange : base.priceChange,
+        trend: stored.trend || base.trend,
+      };
+    });
+  } catch {
+    return initialCommodities;
+  }
+};
+
 export function AppProvider({ children }) {
   // utilizatorul curent: { name, role: "farmer" | "admin" }
   const [currentUser, setCurrentUser] = useState(null);
 
   // prețuri zilnice la produse
-  const [commodities, setCommodities] = useState(initialCommodities);
+  const [commodities, setCommodities] = useState(loadStoredCommodities);
 
   // lista de bid-uri
-  const [bids, setBids] = useState([]);
+  const [bids, setBids] = useState(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const raw = window.localStorage.getItem(BIDS_STORAGE_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(
+      COMMODITIES_STORAGE_KEY,
+      JSON.stringify(commodities)
+    );
+  }, [commodities]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(BIDS_STORAGE_KEY, JSON.stringify(bids));
+  }, [bids]);
 
   // =========================
   // LOGIN / LOGOUT

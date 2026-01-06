@@ -11,6 +11,10 @@ const PRODUCT_OPTIONS = [
 ];
 
 const PARITY_OPTIONS = ["CPT", "DAP", "FCA", "FOR", "FOB", "CIF"];
+const isFreightParity = (parity) => {
+  const p = String(parity || "").toUpperCase();
+  return p === "FCA" || p === "FOR" || p === "FOB";
+};
 
 export default function BidForm({ onBidCreated, embedded = false }) {
   const [product, setProduct] = useState("wheat");
@@ -20,7 +24,6 @@ export default function BidForm({ onBidCreated, embedded = false }) {
   const [quantity, setQuantity] = useState("");
   const [price, setPrice] = useState("");
   const [parity, setParity] = useState("CPT");
-  const [freightCost, setFreightCost] = useState("");
   const [locations, setLocations] = useState([]);
   const [location, setLocation] = useState("Port Constanța");
   const [loadingLocation, setLoadingLocation] = useState("");
@@ -61,13 +64,6 @@ export default function BidForm({ onBidCreated, embedded = false }) {
     setMessage(null);
     setError(null);
 
-    // Validare paritate
-    if ((parity === "FCA" || parity === "FOR" || parity === "FOB") && !freightCost) {
-      setLoading(false);
-      setError("Completează tariful de transport pentru paritatea selectată.");
-      return;
-    }
-
     const qtyNum = Number(quantity);
     const priceNum = Number(price);
 
@@ -105,9 +101,9 @@ export default function BidForm({ onBidCreated, embedded = false }) {
       quantity: qtyNum,
       price: priceNum,
       parity,
-      delivery_location: location || "Port Constanța",
-      loading_location: loadingLocation || null,
-      freight_cost: freightCost ? Number(freightCost) : null,
+      delivery_location: isFreightParity(parity) ? null : location || "Port Constanța",
+      loading_location: isFreightParity(parity) ? loadingLocation || null : null,
+      freight_cost: null,
       delivery_start: deliveryStart || null,
       delivery_end: deliveryEnd || null,
       status: "pending",
@@ -126,7 +122,6 @@ export default function BidForm({ onBidCreated, embedded = false }) {
     setQuantity("");
     setPrice("");
     setParity("CPT");
-    setFreightCost("");
     setLocation("Port Constanța");
     setLoadingLocation("");
     setDeliveryStart("");
@@ -205,40 +200,29 @@ export default function BidForm({ onBidCreated, embedded = false }) {
             </select>
           </div>
 
-          <div>
-            <label className="label">Locație descarcare</label>
-            <select
-              className="input"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-            >
-              {locations.length === 0 && (
-                <option value="Port Constanța">Port Constanța</option>
-              )}
-              {locations.map((loc) => (
-                <option key={loc} value={loc}>
-                  {loc}
-                </option>
-              ))}
-            </select>
-          </div>
+          {!isFreightParity(parity) && (
+            <div>
+              <label className="label">Locație descarcare</label>
+              <select
+                className="input"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+              >
+                {locations.length === 0 && (
+                  <option value="Port Constanța">Port Constanța</option>
+                )}
+                {locations.map((loc) => (
+                  <option key={loc} value={loc}>
+                    {loc}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
 
-        {(parity === "FCA" || parity === "FOR" || parity === "FOB") && (
+        {isFreightParity(parity) && (
           <div className="bid-form-grid-2">
-            <div>
-              <label className="label">Tarif transport (EUR/t)</label>
-              <input
-                className="input"
-                type="number"
-                min="0"
-                step="0.5"
-                value={freightCost}
-                onChange={(e) => setFreightCost(e.target.value)}
-                placeholder="ex: 15"
-              />
-            </div>
-
             <div>
               <label className="label">Locație încărcare</label>
               <input
@@ -276,7 +260,7 @@ export default function BidForm({ onBidCreated, embedded = false }) {
         </div>
 
         <button
-          className="btn primary-btn full-width"
+          className="btn primary-btn full-width bid-submit-btn"
           type="submit"
           disabled={loading}
         >

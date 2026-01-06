@@ -44,7 +44,7 @@ export default function LoginForm({
     onLogin?.();
   };
 
-  const roleLabel = role === "admin" ? "Trader / Admin" : "Fermier";
+  const roleLabel = role === "admin" ? "Admin" : "Fermier";
 
   return (
     <form className="login-form" onSubmit={handleLogin}>

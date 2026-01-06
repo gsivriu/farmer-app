@@ -69,12 +69,10 @@ const FUTURES = [
   
   export default function MarketTicker() {
     return (
-      <div className="market-card">
+      <div className="market-card market-ticker">
         <div className="market-card-header">
           <h3 className="market-title">Market overview</h3>
-          <p className="market-subtitle">
-            MATIF / CBOT – mișcare zilnică față de sesiunea anterioară.
-          </p>
+          <p className="market-subtitle"></p>
         </div>
   
         <div className="market-grid">

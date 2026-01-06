@@ -3,6 +3,7 @@ import { useAppContext } from "../context/AppContext.jsx";
 
 export default function PricesGrid() {
   const { commodities } = useAppContext();
+  const todayLabel = new Date().toLocaleDateString("ro-RO");
 
   const getTrendClass = (trend, lastPrice) => {
     if (trend === "up") return "market-item-up";
@@ -13,11 +14,11 @@ export default function PricesGrid() {
   };
 
   return (
-    <div className="market-card">
+    <div className="market-card prices-card">
       <div className="market-card-header">
-        <h3 className="market-title">Prețuri de achiziție Ameropa</h3>
+        <h3 className="market-title">Prețuri Ameropa CPT Constanța</h3>
         <p className="market-subtitle">
-          Indicative, actualizate zilnic după ora 12:00.
+          Actualizate astăzi {todayLabel} după ora 12:00.
         </p>
       </div>
 
@@ -27,10 +28,10 @@ export default function PricesGrid() {
           // ----------------------
           // USD pentru floarea soarelui
           // ----------------------
-          const unit = c.id === "sunflower" ? "USD / t" : "EUR / t";
+          const unit = c.id === "sunflower" ? "USD/t" : "EUR/t";
 
           // Pentru afișare săgeată + schimbare
-          let trendText = "indicativ";
+          let trendText = "";
           if (c.lastPrice !== null) {
             if (c.trend === "up") trendText = `↑ +${c.priceChange}`;
             if (c.trend === "down") trendText = `↓ ${c.priceChange}`;
@@ -43,15 +44,18 @@ export default function PricesGrid() {
             <div key={c.id} className={"market-item " + trendClass}>
               <div className="market-line-1">
                 <span className="market-product">{c.name}</span>
-                <span className="market-tag">{c.basis || "CPT Constanța"}</span>
-              </div>
-
-              <div className="market-line-2">
-                <span className="market-price">
+                <span className="market-price-cell">
                   {Number(c.price).toFixed(2)} {unit}
-                </span>
-                <span className={"small-text market-trend " + trendClass}>
-                  {trendText}
+                  <span
+                    className={
+                      "market-diff " +
+                      trendClass +
+                      (trendText ? "" : " market-diff-placeholder")
+                    }
+                    aria-hidden={!trendText}
+                  >
+                    {trendText || "↑ +0"}
+                  </span>
                 </span>
               </div>
             </div>

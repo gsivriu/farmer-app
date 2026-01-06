@@ -32,12 +32,12 @@ export default function RegisterForm({ onRegister, role = "farmer" }) {
     }
 
     setMessage(
-      `Cont de ${role === "admin" ? "admin/trader" : "fermier"} creat. Verifică email-ul pentru confirmare.`
+      `Cont de ${role === "admin" ? "admin" : "fermier"} creat. Verifică email-ul pentru confirmare.`
     );
     onRegister?.();
   };
 
-  const roleLabel = role === "admin" ? "Trader / Admin" : "Fermier";
+  const roleLabel = role === "admin" ? "Admin" : "Fermier";
 
   return (
     <form className="login-form" onSubmit={handleRegister}>

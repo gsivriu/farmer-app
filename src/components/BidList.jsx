@@ -8,6 +8,31 @@ export default function BidList({ bids, isAdmin }) {
   // HELPERS
   // =====================================================================
 
+  const formatDateDMY = (value) => {
+    if (!value) return "-";
+    const str = String(value);
+    if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+      const [y, m, d] = str.slice(0, 10).split("-");
+      return `${d}/${m}/${y}`;
+    }
+    const dt = new Date(str);
+    if (Number.isNaN(dt.getTime())) return str;
+    const dd = String(dt.getDate()).padStart(2, "0");
+    const mm = String(dt.getMonth() + 1).padStart(2, "0");
+    const yyyy = String(dt.getFullYear());
+    return `${dd}/${mm}/${yyyy}`;
+  };
+
+  const formatDeliveryPeriod = (value) => {
+    if (!value) return "-";
+    const str = String(value);
+    if (str.includes("→")) {
+      const [start, end] = str.split("→").map((part) => part.trim());
+      return `${formatDateDMY(start)} - ${formatDateDMY(end)}`;
+    }
+    return formatDateDMY(str);
+  };
+
   // Preț activ de negociere (counter dacă există, altfel preț inițial)
   const getNegotiatedPrice = (bid) => bid.counterPrice ?? bid.price;
 
@@ -111,7 +136,7 @@ export default function BidList({ bids, isAdmin }) {
         </td>
 
         <td>{bid.quantity}</td>
-        <td>{bid.deliveryPeriod}</td>
+        <td>{formatDeliveryPeriod(bid.deliveryPeriod)}</td>
 
         <td>
           <span
@@ -164,7 +189,7 @@ export default function BidList({ bids, isAdmin }) {
         </div>
 
         <div>Cantitate: {bid.quantity} t</div>
-        <div>Perioadă: {bid.deliveryPeriod}</div>
+        <div>Perioadă: {formatDeliveryPeriod(bid.deliveryPeriod)}</div>
         <div>Status: {bid.status}</div>
 
         <div className="mobile-actions">{renderActions(bid)}</div>
