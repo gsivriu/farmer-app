@@ -3,7 +3,7 @@ import { supabase } from "../supabaseClient";
 
 export default function LoginForm({
   onLogin,
-  role = "farmer",
+  role = "farmer", // Păstrăm prop-ul ca să nu crape App.jsx, dar îl ignorăm vizual
   externalError,
   onAuthError,
 }) {
@@ -18,25 +18,14 @@ export default function LoginForm({
     setError(null);
     onAuthError?.(null);
 
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (error) {
+    if (authError) {
       setLoading(false);
-      setError(error.message);
-      return;
-    }
-
-    const user = data?.user;
-    const actualRole = user?.user_metadata?.role || "farmer";
-    if (actualRole !== role) {
-      setLoading(false);
-      const message = `Nu ai autorizație să te autentifici ca ${roleLabel}. Selectează rolul corect și încearcă din nou.`;
-      setError(message);
-      onAuthError?.(message);
-      await supabase.auth.signOut();
+      setError("Email sau parolă incorectă.");
       return;
     }
 
@@ -44,12 +33,11 @@ export default function LoginForm({
     onLogin?.();
   };
 
-  const roleLabel = role === "admin" ? "Admin" : "Fermier";
-
   return (
     <form className="login-form" onSubmit={handleLogin}>
-      <div className="small-text">
-        Login ca <strong>{roleLabel}</strong>
+      {/* AICI AM SCHIMBAT: Text generic, să nu mai inducă în eroare */}
+      <div className="small-text" style={{ textAlign: "center", marginBottom: "15px" }}>
+        <strong>Autentificare în platformă</strong>
       </div>
 
       <label className="label">
@@ -57,7 +45,7 @@ export default function LoginForm({
         <input
           className="input"
           type="email"
-          placeholder={`Email ${roleLabel.toLowerCase()}`}
+          placeholder="Adresa de email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
