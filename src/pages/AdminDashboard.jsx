@@ -302,6 +302,24 @@ export default function AdminDashboard() {
     await loadBids();
   };
 
+  const openAdminModal = (bid, confirmAction = null) => {
+    setAdminSelectedBid(bid);
+    const counterValue =
+      Number(bid.counter_price || 0) > 0 ? String(bid.counter_price) : "";
+    const freightValue =
+      Number(bid.freight_cost || 0) > 0 ? String(bid.freight_cost) : "";
+    const deliveryValue = bid.delivery_location ?? "";
+    setAdminModalCounter(counterValue);
+    setAdminModalFreight(freightValue);
+    setAdminModalDelivery(deliveryValue);
+    setAdminModalOriginal({
+      counter: counterValue,
+      freight: freightValue,
+      delivery: deliveryValue,
+    });
+    setAdminConfirmAction(confirmAction);
+  };
+
   const formatDateOnly = (value) => {
     if (!value) return "-";
     const dt = new Date(value);
@@ -619,44 +637,12 @@ export default function AdminDashboard() {
                       className={"bid-row admin-bid-row " + statusClass}
                       key={b.id}
                       onClick={() => {
-                        setAdminSelectedBid(b);
-                        const counterValue =
-                          Number(b.counter_price || 0) > 0 ? String(b.counter_price) : "";
-                        const freightValue =
-                          Number(b.freight_cost || 0) > 0 ? String(b.freight_cost) : "";
-                        const deliveryValue = b.delivery_location ?? "";
-                        setAdminModalCounter(counterValue);
-                        setAdminModalFreight(freightValue);
-                        setAdminModalDelivery(deliveryValue);
-                        setAdminModalOriginal({
-                          counter: counterValue,
-                          freight: freightValue,
-                          delivery: deliveryValue,
-                        });
-                        setAdminConfirmAction(null);
+                        openAdminModal(b, null);
                       }}
                       onKeyDown={(event) => {
                         if (event.key === "Enter" || event.key === " ") {
                           event.preventDefault();
-                          const counterValue =
-                            Number(b.counter_price || 0) > 0
-                              ? String(b.counter_price)
-                              : "";
-                          const freightValue =
-                            Number(b.freight_cost || 0) > 0
-                              ? String(b.freight_cost)
-                              : "";
-                          const deliveryValue = b.delivery_location ?? "";
-                          setAdminSelectedBid(b);
-                          setAdminModalCounter(counterValue);
-                          setAdminModalFreight(freightValue);
-                          setAdminModalDelivery(deliveryValue);
-                          setAdminModalOriginal({
-                            counter: counterValue,
-                            freight: freightValue,
-                            delivery: deliveryValue,
-                          });
-                          setAdminConfirmAction(null);
+                          openAdminModal(b, null);
                         }
                       }}
                     >
@@ -714,7 +700,7 @@ export default function AdminDashboard() {
                           className="btn small ghost admin-reject-btn"
                           onClick={(event) => {
                             event.stopPropagation();
-                            submitAdminDecision("rejected", b);
+                            openAdminModal(b, "rejected");
                           }}
                         >
                           Reject
@@ -722,10 +708,9 @@ export default function AdminDashboard() {
                         <button
                           type="button"
                           className="btn small ghost admin-counter-btn"
-                          disabled={!hasCounterPrice}
                           onClick={(event) => {
                             event.stopPropagation();
-                            submitAdminDecision("countered", b);
+                            openAdminModal(b, "countered");
                           }}
                         >
                           Counter
@@ -736,7 +721,7 @@ export default function AdminDashboard() {
                           disabled={acceptDisabled}
                           onClick={(event) => {
                             event.stopPropagation();
-                            submitAdminDecision("accepted", b);
+                            openAdminModal(b, "accepted");
                           }}
                         >
                           Accept
