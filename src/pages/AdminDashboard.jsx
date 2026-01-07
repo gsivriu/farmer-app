@@ -583,7 +583,7 @@ export default function AdminDashboard() {
             {error && <p className="badge rejected" style={{ marginTop: 12 }}>{error}</p>}
 
             {!loading && !error && (
-              <div className="admin-bid-grid" style={{ marginTop: 14 }}>
+              <div className="admin-bid-list" style={{ marginTop: 14 }}>
                 {filteredBids.map((b) => {
                   const unit = b.product === "sunflower" ? "USD/t" : "EUR/t";
                   const statusClass =
@@ -616,7 +616,7 @@ export default function AdminDashboard() {
                     <div
                       role="button"
                       tabIndex={0}
-                      className={"bid-row admin-bid-card " + statusClass}
+                      className={"bid-row admin-bid-row " + statusClass}
                       key={b.id}
                       onClick={() => {
                         setAdminSelectedBid(b);
@@ -660,55 +660,55 @@ export default function AdminDashboard() {
                         }
                       }}
                     >
-                      <div className="admin-bid-card-header">
-                        <div>
-                          <div className="bid-title">
-                            {PRODUCT_LABELS[b.product] || b.product}
-                          </div>
+                      <div className="admin-bid-row-left">
+                        <div className="admin-bid-crop">
+                          {PRODUCT_LABELS[b.product] || b.product}
                         </div>
                         <span className={`status-badge status-${statusClass.slice(3)}`}>
                           {getStatusLabel(b.status)}
                         </span>
                       </div>
-                      <div className="admin-bid-card-body">
-                        <div className="admin-bid-field">
-                          <span className="bid-label">Fermier</span>
-                          <span className="bid-value">
-                            {b.farmer_email || b.farmer_id}
-                          </span>
-                        </div>
-                        <div className="admin-bid-field">
-                          <span className="bid-label">Cantitate</span>
-                          <span className="bid-value">
-                            {Number(b.quantity || 0).toFixed(2)} t
-                          </span>
-                        </div>
-                        <div className="admin-bid-field">
-                          <span className="bid-label">Preț</span>
-                          <span className="bid-value">
-                            {showCounter ? (
-                              <span className="admin-bid-counter-value">
-                                {Number(b.counter_price || 0).toFixed(2)} {unit}
-                              </span>
-                            ) : showAccepted ? (
-                              `${acceptedPrice.toFixed(2)} ${unit}`
-                            ) : showRejected ? (
-                              `${acceptedPrice.toFixed(2)} ${unit}`
-                            ) : showPending ? (
-                              `${Number(b.price || 0).toFixed(2)} ${unit}`
-                            ) : (
-                              "-"
-                            )}
-                          </span>
-                        </div>
-                        <div className="admin-bid-field">
-                          <span className="bid-label">Data</span>
-                          <span className="bid-value">
-                            {formatDateOnly(b.created_at)}
-                          </span>
+                      <div className="admin-bid-row-middle">
+                        <div className="admin-bid-details-grid">
+                          <div className="admin-bid-field">
+                            <span className="bid-label">Fermier</span>
+                            <span className="bid-value">
+                              {b.farmer_email || b.farmer_id}
+                            </span>
+                          </div>
+                          <div className="admin-bid-field">
+                            <span className="bid-label">Cantitate</span>
+                            <span className="bid-value">
+                              {Number(b.quantity || 0).toFixed(2)} t
+                            </span>
+                          </div>
+                          <div className="admin-bid-field">
+                            <span className="bid-label">Preț</span>
+                            <span className="admin-bid-price">
+                              {showCounter ? (
+                                <span className="admin-bid-counter-value">
+                                  {Number(b.counter_price || 0).toFixed(2)} {unit}
+                                </span>
+                              ) : showAccepted ? (
+                                `${acceptedPrice.toFixed(2)} ${unit}`
+                              ) : showRejected ? (
+                                `${acceptedPrice.toFixed(2)} ${unit}`
+                              ) : showPending ? (
+                                `${Number(b.price || 0).toFixed(2)} ${unit}`
+                              ) : (
+                                "-"
+                              )}
+                            </span>
+                          </div>
+                          <div className="admin-bid-field">
+                            <span className="bid-label">Data</span>
+                            <span className="bid-value">
+                              {formatDateOnly(b.created_at)}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                      <div className="admin-bid-card-footer">
+                      <div className="admin-bid-row-actions">
                         <button
                           type="button"
                           className="btn small ghost admin-reject-btn"
