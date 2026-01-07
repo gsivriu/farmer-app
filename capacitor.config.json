@@ -2,8 +2,5 @@
   "appId": "com.gsivriu.farmerapp",
   "appName": "Farmer App",
   "webDir": "dist",
-  "server": {
-    "url": "http://192.168.100.230:5173",
-    "cleartext": true
-  }
+  "bundledWebRuntime": false
 }
