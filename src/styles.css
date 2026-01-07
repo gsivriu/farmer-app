@@ -2983,54 +2983,75 @@ select.input:focus {
   color: inherit;
 }
 
-.admin-bid-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  max-height: none;
-  overflow-y: auto;
-  padding-right: 6px;
+.admin-bid-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 14px;
 }
 
-@media (min-width: 769px) {
-  .admin-bid-list {
-    max-height: calc(10 * 117px + 9 * 10px);
+@media (min-width: 720px) {
+  .admin-bid-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-.admin-bid-item {
-  flex-direction: column;
-  align-items: stretch;
-  gap: 12px;
-  padding: 16px;
-  min-height: 120px;
+@media (min-width: 1024px) {
+  .admin-bid-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
-.admin-bid-info {
+@media (min-width: 1280px) {
+  .admin-bid-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.admin-bid-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid #eef2f7;
+  background: #fff;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+}
+
+.theme-dark .admin-bid-card {
+  background: #0f172a;
+  border-color: #1f2937;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+}
+
+.admin-bid-card-header {
   display: flex;
   align-items: flex-start;
+  justify-content: space-between;
   gap: 12px;
-  width: 100%;
-  flex-wrap: nowrap;
 }
 
-.admin-bid-details {
-  flex: 1;
+.admin-bid-card-body {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 12px;
 }
 
-.admin-bid-side {
+.admin-bid-card-footer {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-left: auto;
-  align-self: center;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
-.admin-bid-actions-row {
+.admin-bid-card-footer .btn {
+  flex: 1 1 120px;
+}
+
+.admin-bid-field {
   display: flex;
-  flex-wrap: nowrap;
-  gap: 6px;
-  align-items: center;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .admin-bid-item .bid-left {
