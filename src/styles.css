@@ -5197,6 +5197,39 @@ select.input:focus {
     height: 1px;
   }
 
+  .sale-card .market-grid {
+    gap: 14px;
+  }
+
+  .sale-card .market-item {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .sale-card .market-item:last-child {
+    padding-bottom: 16px;
+  }
+
+  .sale-card .section-divider {
+    margin: 30px 0;
+  }
+
+  .sale-card .bid-form-embedded + .section-divider {
+    margin-top: 30px;
+  }
+
+  .sale-card .bid-form-embedded .form {
+    gap: 18px;
+  }
+
+  .sale-card .bid-form-grid-2 {
+    gap: 18px 24px;
+  }
+
+  .sale-card .bid-submit-btn {
+    margin-top: 22px;
+  }
+
   /* Remove dividers in desktop grid layout */
   .dashboard-home-grid .section-divider {
     display: none;
