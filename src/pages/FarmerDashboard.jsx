@@ -426,6 +426,31 @@ export default function FarmerDashboard() {
 
   return (
     <div className="dashboard-inner">
+      <style>{`
+        @media screen and (min-width: 1024px) {
+          .dashboard-home-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+          }
+
+          .dashboard-home-progress {
+            order: 1;
+          }
+
+          .dashboard-home-market {
+            order: 2;
+          }
+
+          .dashboard-home-exchange {
+            order: 3;
+          }
+
+          .dashboard-home-weather {
+            order: 4;
+          }
+        }
+      `}</style>
       <nav className="desktop-nav">
         <button
           type="button"
@@ -459,28 +484,28 @@ export default function FarmerDashboard() {
 
       <div className="farmer-dashboard-layout">
         <div className={"tab-content " + (activeTab === "home" ? "active" : "")}>
-          {/* PROGRESS + MARKET OVERVIEW - Desktop Grid Layout */}
+          {/* PROGRESS + MARKET OVERVIEW - Desktop Single Column */}
           <div className="dashboard-row full">
-            <div className="dashboard-home-grid">
-              {/* PRIMARY: Progress/Gamification - Larger, Left */}
-              <div className="dashboard-home-primary">
+            <div className="dashboard-home-stack">
+              <div className="dashboard-home-section dashboard-home-progress">
                 <div className="card dashboard-card home-card-primary">
                   <FarmerProgress embedded />
                 </div>
               </div>
 
-              {/* SECONDARY: FX + Weather - Compact, Right */}
-              <div className="dashboard-home-secondary">
+              <div className="dashboard-home-section dashboard-home-exchange">
                 <div className="card dashboard-card home-card-secondary">
                   <ExchangeRatesCard />
                 </div>
+              </div>
+
+              <div className="dashboard-home-section dashboard-home-weather">
                 <div className="card dashboard-card home-card-secondary">
                   <WeatherWidget />
                 </div>
               </div>
 
-              {/* TERTIARY: Market Ticker - Full Width Below */}
-              <div className="dashboard-home-tertiary">
+              <div className="dashboard-home-section dashboard-home-market">
                 <div className="card dashboard-card home-card-tertiary">
                   <MarketTicker />
                 </div>
