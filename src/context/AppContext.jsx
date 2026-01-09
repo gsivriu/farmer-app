@@ -88,6 +88,7 @@ export function AppProvider({ children }) {
         if (match == null || !Number.isFinite(match)) return c;
         const oldPrice = Number(c.price || 0);
         const nextPrice = Number(match);
+        if (nextPrice === oldPrice) return c;
         const diff = nextPrice - oldPrice;
         let trend = "flat";
         if (diff > 0) trend = "up";
