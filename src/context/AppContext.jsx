@@ -1,9 +1,8 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { supabase } from "../supabaseClient";
 
 const AppContext = createContext(null);
 
-const COMMODITIES_STORAGE_KEY = "ameropa-commodities-v1";
-const BIDS_STORAGE_KEY = "ameropa-bids-v1";
 
 // Lista inițială de produse + prețuri de pornire
 const initialCommodities = [
@@ -54,75 +53,85 @@ const initialCommodities = [
   },
 ];
 
-const loadStoredCommodities = () => {
-  if (typeof window === "undefined") return initialCommodities;
-  try {
-    const raw = window.localStorage.getItem(COMMODITIES_STORAGE_KEY);
-    if (!raw) return initialCommodities;
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return initialCommodities;
-
-    const byId = new Map(
-      parsed
-        .filter((item) => item && typeof item.id === "string")
-        .map((item) => [item.id, item])
-    );
-
-    return initialCommodities.map((base) => {
-      const stored = byId.get(base.id);
-      if (!stored) return base;
-
-      const price = Number(stored.price);
-      const lastPrice = stored.lastPrice == null ? null : Number(stored.lastPrice);
-      const priceChange =
-        stored.priceChange == null ? base.priceChange : Number(stored.priceChange);
-
-      return {
-        ...base,
-        name: stored.name || base.name,
-        basis: stored.basis || base.basis,
-        price: Number.isFinite(price) ? price : base.price,
-        lastPrice: Number.isFinite(lastPrice) ? lastPrice : base.lastPrice,
-        priceChange: Number.isFinite(priceChange) ? priceChange : base.priceChange,
-        trend: stored.trend || base.trend,
-      };
-    });
-  } catch {
-    return initialCommodities;
-  }
-};
+const normalizeName = (value) =>
+  String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
 
 export function AppProvider({ children }) {
   // utilizatorul curent: { name, role: "farmer" | "admin" }
   const [currentUser, setCurrentUser] = useState(null);
 
   // prețuri zilnice la produse
-  const [commodities, setCommodities] = useState(loadStoredCommodities);
+  const [commodities, setCommodities] = useState(initialCommodities);
 
   // lista de bid-uri
-  const [bids, setBids] = useState(() => {
-    if (typeof window === "undefined") return [];
-    try {
-      const raw = window.localStorage.getItem(BIDS_STORAGE_KEY);
-      const parsed = raw ? JSON.parse(raw) : [];
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
+  const [bids, setBids] = useState([]);
+  const [farmerRewards, setFarmerRewards] = useState({});
+
+  useEffect(() => {
+    const fetchCommodities = async () => {
+      const { data, error } = await supabase
+        .from("commodities")
+        .select("name, price");
+
+      if (error || !Array.isArray(data)) return;
+
+      const byName = new Map(
+        data.map((row) => [normalizeName(row.name), Number(row.price)])
+      );
+
+      setCommodities((prev) =>
+        (prev.length ? prev : initialCommodities).map((c) => {
+          const match = byName.get(normalizeName(c.name));
+          if (match == null || !Number.isFinite(match)) return c;
+          return {
+            ...c,
+            price: match,
+            lastPrice: c.lastPrice,
+            priceChange: 0,
+            trend: "flat",
+          };
+        })
+      );
+    };
+
+    fetchCommodities();
+  }, []);
+
+  const fetchBids = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("bids")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (!error && data) {
+      setBids(data);
     }
-  });
+  }, []);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem(
-      COMMODITIES_STORAGE_KEY,
-      JSON.stringify(commodities)
-    );
-  }, [commodities]);
+    fetchBids();
+  }, [fetchBids]);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem(BIDS_STORAGE_KEY, JSON.stringify(bids));
-  }, [bids]);
+    const bidsSubscription = supabase
+      .channel("public:bids")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "bids" },
+        () => {
+          fetchBids();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(bidsSubscription);
+    };
+  }, [fetchBids]);
 
   // =========================
   // LOGIN / LOGOUT
@@ -219,7 +228,16 @@ export function AppProvider({ children }) {
   // =========================
   // UPDATE PREȚ PRODUS (admin)
   // =========================
-  const updateCommodityPrice = (id, newPrice) => {
+  const updateCommodityPrice = async (id, newPrice) => {
+    const target = commodities.find((c) => c.id === id);
+    const targetName = target?.name || id;
+    const { error } = await supabase
+      .from("commodities")
+      .update({ price: newPrice, last_updated: new Date().toISOString() })
+      .eq("name", targetName);
+
+    if (error) return { error };
+
     setCommodities((prev) =>
       prev.map((c) => {
         if (c.id !== id) return c;
@@ -242,7 +260,50 @@ export function AppProvider({ children }) {
         };
       })
     );
+
+    return { error: null };
   };
+
+  const fetchFarmerRewards = useCallback(async (farmerId) => {
+    if (!farmerId) return null;
+    const { data, error } = await supabase
+      .from("farmer_rewards")
+      .select("farmer_id, points")
+      .eq("farmer_id", farmerId)
+      .single();
+
+    if (error) return null;
+
+    setFarmerRewards((prev) => ({
+      ...prev,
+      [farmerId]: Number(data?.points || 0),
+    }));
+    return data;
+  }, []);
+
+  const addFarmerRewardsPoints = useCallback(async (farmerId, deltaPoints) => {
+    if (!farmerId) return { error: null };
+    const delta = Number(deltaPoints || 0);
+    if (!Number.isFinite(delta) || delta <= 0) return { error: null };
+
+    const current = farmerRewards[farmerId] ?? 0;
+    const nextPoints = Number(current) + delta;
+
+    const { error } = await supabase
+      .from("farmer_rewards")
+      .upsert(
+        { farmer_id: farmerId, points: nextPoints, updated_at: new Date().toISOString() },
+        { onConflict: "farmer_id" }
+      );
+
+    if (error) return { error };
+
+    setFarmerRewards((prev) => ({
+      ...prev,
+      [farmerId]: nextPoints,
+    }));
+    return { error: null };
+  }, [farmerRewards]);
 
   // =========================
   // VALOAREA CONTEXTULUI
@@ -254,6 +315,10 @@ export function AppProvider({ children }) {
     logout,
     commodities,
     bids,
+    fetchBids,
+    farmerRewards,
+    fetchFarmerRewards,
+    addFarmerRewardsPoints,
     createBid,
     updateBidStatus,
     updateCommodityPrice,

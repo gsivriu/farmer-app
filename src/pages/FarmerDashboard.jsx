@@ -57,8 +57,8 @@ const formatParityDisplay = (bid) => {
 };
 
 export default function FarmerDashboard() {
-  const { commodities } = useAppContext();
-  const [bids, setBids] = useState([]);
+  const { commodities, bids, fetchBids, addFarmerRewardsPoints } = useAppContext();
+  const [localBids, setLocalBids] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [farmerActionLocks, setFarmerActionLocks] = useState({});
@@ -82,44 +82,21 @@ export default function FarmerDashboard() {
   const [newsLoading, setNewsLoading] = useState(false);
   const [newsError, setNewsError] = useState(null);
 
-  const loadBids = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-    if (userError || !userData?.user) {
-      setError("Nu am putut identifica utilizatorul curent.");
-      setLoading(false);
-      return;
-    }
-
-    const userId = userData.user.id;
-
-    const { data, error: bidsError } = await supabase
-      .from("bids")
-      .select("*")
-      .eq("farmer_id", userId) // ✅ important
-      .order("created_at", { ascending: false });
-
-    if (bidsError) {
-      setError("Eroare la încărcarea bid-urilor: " + bidsError.message);
-      setLoading(false);
-      return;
-    }
-
-    setBids(data || []);
-    setLoading(false);
-  }, []);
+  useEffect(() => {
+    fetchBids();
+  }, [fetchBids]);
 
   useEffect(() => {
-    loadBids();
-  }, [loadBids]);
+    if (!Array.isArray(bids)) return;
+    setLocalBids(bids);
+    setLoading(false);
+  }, [bids]);
 
   useEffect(() => {
     setFarmerActionLocks((prev) => {
       let changed = false;
       const next = { ...prev };
-      bids.forEach((bid) => {
+      localBids.forEach((bid) => {
         const lock = next[bid.id];
         if (!lock || !lock.locked) return;
         if (
@@ -133,7 +110,7 @@ export default function FarmerDashboard() {
       });
       return changed ? next : prev;
     });
-  }, [bids]);
+  }, [localBids]);
 
   useEffect(() => {
     window.localStorage.setItem("farmer-active-tab", activeTab);
@@ -261,8 +238,8 @@ export default function FarmerDashboard() {
   // CALCULE: accepted only
   // ============================
   const acceptedBids = useMemo(
-    () => bids.filter((b) => b.status === "accepted"),
-    [bids]
+    () => localBids.filter((b) => b.status === "accepted"),
+    [localBids]
   );
 
   const filteredAcceptedBids = useMemo(() => {
@@ -271,7 +248,7 @@ export default function FarmerDashboard() {
   }, [acceptedBids, productFilter]);
 
   const filteredBids = useMemo(() => {
-    return bids.filter((b) => {
+    return localBids.filter((b) => {
       if (productFilter !== "all" && b.product !== productFilter) return false;
       if (statusFilter !== "all") {
         if (statusFilter === "pending") {
@@ -288,7 +265,7 @@ export default function FarmerDashboard() {
       }
       return true;
     });
-  }, [bids, productFilter, statusFilter, dateFrom, dateTo]);
+  }, [localBids, productFilter, statusFilter, dateFrom, dateTo]);
 
   const totalQty = useMemo(() => {
     return acceptedBids.reduce((acc, b) => acc + Number(b.quantity || 0), 0);
@@ -349,11 +326,14 @@ export default function FarmerDashboard() {
       return;
     }
 
-    setBids((prev) =>
+    setLocalBids((prev) =>
       prev.map((x) =>
         x.id === bid.id ? { ...x, status: "accepted", final_price: finalPrice } : x
       )
     );
+    if (bid.farmer_id) {
+      await addFarmerRewardsPoints(bid.farmer_id, Number(bid.quantity || 0));
+    }
     window.dispatchEvent(new Event("farmer-progress-refresh"));
     setFarmerConfirmAction(null);
     setFarmerActionLocks((prev) => ({
@@ -373,7 +353,9 @@ export default function FarmerDashboard() {
       return;
     }
 
-    setBids((prev) => prev.map((x) => (x.id === bid.id ? { ...x, status: "rejected" } : x)));
+    setLocalBids((prev) =>
+      prev.map((x) => (x.id === bid.id ? { ...x, status: "rejected" } : x))
+    );
     setFarmerConfirmAction(null);
     setFarmerActionLocks((prev) => ({
       ...prev,
@@ -398,7 +380,7 @@ export default function FarmerDashboard() {
       return;
     }
 
-    setBids((prev) =>
+    setLocalBids((prev) =>
       prev.map((x) =>
         x.id === bid.id ? { ...x, counter_price: value, status: "countered" } : x
       )

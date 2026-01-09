@@ -35,7 +35,13 @@ const formatDeliveryRange = (start, end) => {
 
 export default function AdminDashboard() {
   // === PREȚURI INTERNE (CONTEXT) ===
-  const { commodities, updateCommodityPrice } = useAppContext();
+  const {
+    commodities,
+    updateCommodityPrice,
+    bids,
+    fetchBids,
+    addFarmerRewardsPoints,
+  } = useAppContext();
 
   const [draftPrices, setDraftPrices] = useState({});
   const [priceNotice, setPriceNotice] = useState("");
@@ -56,7 +62,7 @@ export default function AdminDashboard() {
     }));
   };
 
-  const handleSavePrice = (id) => {
+  const handleSavePrice = async (id) => {
     const raw = draftPrices[id];
     const num = Number(raw);
 
@@ -70,7 +76,11 @@ export default function AdminDashboard() {
       return;
     }
 
-    updateCommodityPrice(id, num);
+    const { error } = await updateCommodityPrice(id, num);
+    if (error) {
+      alert("Eroare la actualizarea prețului: " + error.message);
+      return;
+    }
 
     setDraftPrices((prev) => ({
       ...prev,
@@ -82,7 +92,6 @@ export default function AdminDashboard() {
   };
 
   // === BIDS DIN SUPABASE ===
-  const [bids, setBids] = useState([]);
   const [farmers, setFarmers] = useState([]); // listă unică de fermieri
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -117,42 +126,25 @@ export default function AdminDashboard() {
   const startInputRef = useRef(null);
   const endInputRef = useRef(null);
 
-  const loadBids = async () => {
-    setLoading(true);
-    setError(null);
-
-    const { data, error } = await supabase
-      .from("bids")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      setError(error.message);
-      setBids([]);
-      setFarmers([]);
-    } else {
-      setBids(data || []);
-
-      // listă unică de fermieri (id + email)
-      const map = new Map();
-      (data || []).forEach((b) => {
-        if (!b.farmer_id) return;
-        if (!map.has(b.farmer_id)) {
-          map.set(b.farmer_id, {
-            id: b.farmer_id,
-            email: b.farmer_email || b.farmer_id,
-          });
-        }
-      });
-      setFarmers(Array.from(map.values()));
-    }
-
-    setLoading(false);
-  };
+  useEffect(() => {
+    fetchBids();
+  }, [fetchBids]);
 
   useEffect(() => {
-    loadBids();
-  }, []);
+    if (!Array.isArray(bids)) return;
+    const map = new Map();
+    bids.forEach((b) => {
+      if (!b.farmer_id) return;
+      if (!map.has(b.farmer_id)) {
+        map.set(b.farmer_id, {
+          id: b.farmer_id,
+          email: b.farmer_email || b.farmer_id,
+        });
+      }
+    });
+    setFarmers(Array.from(map.values()));
+    setLoading(false);
+  }, [bids]);
 
   useEffect(() => {
     const loadDeliveryLocations = async () => {
@@ -292,6 +284,10 @@ export default function AdminDashboard() {
       return;
     }
 
+    if (action === "accepted" && bid.farmer_id) {
+      await addFarmerRewardsPoints(bid.farmer_id, Number(bid.quantity || 0));
+    }
+
     if (useModal) {
       setAdminSelectedBid(null);
       setAdminConfirmAction(null);
@@ -299,7 +295,7 @@ export default function AdminDashboard() {
       setAdminModalFreight("");
       setAdminModalDelivery("");
     }
-    await loadBids();
+    await fetchBids();
   };
 
   const openAdminModal = (bid, confirmAction = null) => {
