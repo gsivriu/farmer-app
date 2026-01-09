@@ -14,6 +14,7 @@ const initialCommodities = [
     lastPrice: null,
     priceChange: 0,
     trend: "flat", // "up" | "down" | "flat"
+    lastUpdated: null,
   },
   {
     id: "barley",
@@ -23,6 +24,7 @@ const initialCommodities = [
     lastPrice: null,
     priceChange: 0,
     trend: "flat",
+    lastUpdated: null,
   },
   {
     id: "corn",
@@ -32,6 +34,7 @@ const initialCommodities = [
     lastPrice: null,
     priceChange: 0,
     trend: "flat",
+    lastUpdated: null,
   },
   {
     id: "rapeseed",
@@ -41,6 +44,7 @@ const initialCommodities = [
     lastPrice: null,
     priceChange: 0,
     trend: "flat",
+    lastUpdated: null,
   },
   {
     id: "sunflower",
@@ -50,6 +54,7 @@ const initialCommodities = [
     lastPrice: null,
     priceChange: 0,
     trend: "flat",
+    lastUpdated: null,
   },
 ];
 
@@ -74,21 +79,30 @@ export function AppProvider({ children }) {
   const fetchCommodities = useCallback(async () => {
     const { data, error } = await supabase
       .from("commodities")
-      .select("name, price");
+      .select("name, price, last_updated");
 
     if (error || !Array.isArray(data)) return;
 
     const byName = new Map(
-      data.map((row) => [normalizeName(row.name), Number(row.price)])
+      data.map((row) => [
+        normalizeName(row.name),
+        {
+          price: Number(row.price),
+          lastUpdated: row.last_updated ? String(row.last_updated) : null,
+        },
+      ])
     );
 
     setCommodities((prev) =>
       (prev.length ? prev : initialCommodities).map((c) => {
         const match = byName.get(normalizeName(c.name));
-        if (match == null || !Number.isFinite(match)) return c;
+        if (!match || !Number.isFinite(match.price)) return c;
         const oldPrice = Number(c.price || 0);
-        const nextPrice = Number(match);
-        if (nextPrice === oldPrice) return c;
+        const nextPrice = Number(match.price);
+        const nextUpdated = match.lastUpdated;
+        if (nextUpdated && c.lastUpdated && nextUpdated === c.lastUpdated) {
+          return c;
+        }
         const diff = nextPrice - oldPrice;
         let trend = "flat";
         if (diff > 0) trend = "up";
@@ -100,6 +114,7 @@ export function AppProvider({ children }) {
           lastPrice: oldPrice,
           priceChange: diff,
           trend,
+          lastUpdated: nextUpdated || c.lastUpdated,
         };
       })
     );
@@ -256,10 +271,11 @@ export function AppProvider({ children }) {
   const updateCommodityPrice = async (id, newPrice) => {
     const target = commodities.find((c) => c.id === id);
     const targetName = target?.name || id;
+    const updatedAt = new Date().toISOString();
     const { error } = await supabase
       .from("commodities")
       .upsert(
-        { name: targetName, price: newPrice, last_updated: new Date().toISOString() },
+        { name: targetName, price: newPrice, last_updated: updatedAt },
         { onConflict: "name" }
       );
 
@@ -284,6 +300,7 @@ export function AppProvider({ children }) {
           lastPrice: oldPrice,
           priceChange: diff,
           trend,
+          lastUpdated: updatedAt,
         };
       })
     );
