@@ -434,6 +434,14 @@ export default function FarmerDashboard() {
             width: 100%;
             gap: 0;
           }
+
+          .dashboard-home-stack .dashboard-section {
+            margin-bottom: 24px;
+          }
+
+          .dashboard-home-stack .dashboard-section:last-child {
+            margin-bottom: 0;
+          }
         }
       `}</style>
       <nav className="desktop-nav">
