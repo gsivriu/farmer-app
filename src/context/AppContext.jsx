@@ -86,12 +86,19 @@ export function AppProvider({ children }) {
       (prev.length ? prev : initialCommodities).map((c) => {
         const match = byName.get(normalizeName(c.name));
         if (match == null || !Number.isFinite(match)) return c;
+        const oldPrice = Number(c.price || 0);
+        const nextPrice = Number(match);
+        const diff = nextPrice - oldPrice;
+        let trend = "flat";
+        if (diff > 0) trend = "up";
+        else if (diff < 0) trend = "down";
+
         return {
           ...c,
-          price: match,
-          lastPrice: c.lastPrice,
-          priceChange: 0,
-          trend: "flat",
+          price: nextPrice,
+          lastPrice: oldPrice,
+          priceChange: diff,
+          trend,
         };
       })
     );
@@ -99,6 +106,23 @@ export function AppProvider({ children }) {
 
   useEffect(() => {
     fetchCommodities();
+  }, [fetchCommodities]);
+
+  useEffect(() => {
+    const commoditiesSubscription = supabase
+      .channel("public:commodities")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "commodities" },
+        () => {
+          fetchCommodities();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(commoditiesSubscription);
+    };
   }, [fetchCommodities]);
 
   const fetchBids = useCallback(async () => {
