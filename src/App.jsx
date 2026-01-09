@@ -84,8 +84,12 @@ function App() {
 
   useEffect(() => {
     const handleWeatherTheme = (event) => {
-      if (!event?.detail) return;
-      setDarkMode(Boolean(event.detail.isNight));
+      if (event?.detail && "isNight" in event.detail) {
+        setDarkMode(Boolean(event.detail.isNight));
+        return;
+      }
+      const stored = window.localStorage.getItem("theme");
+      if (stored) setDarkMode(stored === "dark");
     };
 
     window.addEventListener("weather-theme-change", handleWeatherTheme);

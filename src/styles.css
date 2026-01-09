@@ -4235,6 +4235,318 @@ select.input:focus {
 }
 
 /* =========================
+   DESKTOP-ONLY OPTIMIZATIONS (≥1024px)
+   ========================= */
+@media screen and (min-width: 1024px) {
+  /* Weather Card - Desktop */
+  .weather-card {
+    padding: 24px 32px;
+    border-radius: 16px;
+    margin-bottom: 32px;
+    min-height: 140px;
+  }
+
+  .weather-info {
+    gap: 24px;
+  }
+
+  .weather-primary {
+    gap: 16px;
+  }
+
+  .weather-icon-main {
+    font-size: 40px;
+  }
+
+  .weather-temp {
+    font-size: 42px;
+  }
+
+  .weather-desc {
+    font-size: 14px;
+    margin-top: 4px;
+  }
+
+  .weather-details-mini {
+    gap: 8px;
+    align-items: flex-end;
+  }
+
+  .location-name {
+    font-size: 16px;
+    max-width: 200px;
+  }
+
+  .min-max {
+    font-size: 13px;
+  }
+
+  /* Weather Modal - Desktop Layout */
+  .weather-modal-backdrop {
+    padding: 32px;
+  }
+
+  .weather-modal-content {
+    max-width: 800px;
+    max-height: 90vh;
+    border-radius: 24px;
+    padding: 32px;
+  }
+
+  .weather-layout {
+    max-width: 720px;
+    margin: 0 auto;
+    gap: 32px;
+    padding-top: 8px;
+  }
+
+  /* Location Header - Desktop */
+  .location-and-date {
+    margin-bottom: 8px;
+  }
+
+  .location-header {
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+
+  .location-and-date__location {
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .location-and-date__date {
+    font-size: 14px;
+    margin-top: 4px;
+    opacity: 0.85;
+  }
+
+  .location-search {
+    --size-button: 40px;
+    width: var(--size-button);
+    height: var(--size-button);
+    padding: 12px;
+    margin-left: 0;
+  }
+
+  .modal-close-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    padding: 0;
+  }
+
+  /* Current Temperature - Desktop */
+  .current-temperature {
+    gap: 24px;
+    padding: 24px 0;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .current-temperature__icon-container {
+    flex: 0 0 auto;
+  }
+
+  .current-temperature__icon {
+    font-size: 96px;
+  }
+
+  .current-temperature__content-container {
+    flex: 0 0 auto;
+    text-align: center;
+  }
+
+  .current-temperature__value {
+    font-size: 72px;
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  .current-temperature__summary {
+    font-size: 18px;
+    margin-top: 8px;
+    font-weight: 500;
+  }
+
+  /* Summary Grid - Desktop */
+  .summary-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0 24px;
+    padding: 24px 16px;
+    margin-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .summary-item {
+    padding: 16px 0;
+    gap: 8px;
+  }
+
+  .summary-item:not(:last-child) {
+    border-right: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .current-stats__value {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .current-stats__label {
+    font-size: 12px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+
+  /* Weather By Hour - Desktop */
+  .weather-by-hour {
+    margin-top: 8px;
+  }
+
+  .weather-by-hour__heading,
+  .next-5-days__heading {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 16px;
+  }
+
+  .weather-by-hour__container {
+    gap: 8px;
+    justify-content: space-between;
+    padding: 0 8px;
+  }
+
+  .weather-by-hour__item {
+    flex: 1;
+    padding: 16px 8px;
+    border-radius: 12px;
+    min-width: 0;
+  }
+
+  .weather-by-hour__hour {
+    font-size: 12px;
+    margin-bottom: 8px;
+    font-weight: 500;
+    opacity: 0.9;
+  }
+
+  .weather-by-hour__icon {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+
+  .weather-by-hour__item > div:last-child {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  /* Next 7 Days - Desktop */
+  .next-5-days {
+    margin-top: 8px;
+  }
+
+  .next-5-days__container {
+    gap: 8px;
+    flex-direction: column;
+  }
+
+  .next-5-days__row {
+    display: grid;
+    grid-template-columns: 140px 80px 80px 60px 80px 100px;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    text-align: left;
+  }
+
+  .next-5-days__date,
+  .next-5-days__high,
+  .next-5-days__low,
+  .next-5-days__icon,
+  .next-5-days__rain,
+  .next-5-days__wind {
+    width: auto;
+    margin-bottom: 0;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .next-5-days__date {
+    order: 0;
+  }
+
+  .next-5-days__icon {
+    order: 0;
+    font-size: 24px;
+    text-align: center;
+  }
+
+  .next-5-days__label {
+    font-size: 11px;
+    margin-top: 4px;
+    opacity: 0.7;
+  }
+
+  /* Search Container - Desktop */
+  .search-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding-top: 40px;
+  }
+
+  .city-search-input {
+    padding: 16px 20px;
+    font-size: 15px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    min-height: 48px;
+  }
+
+  .cancel-search {
+    min-height: 44px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 12px;
+    margin-bottom: 24px;
+  }
+
+  .search-item {
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin-bottom: 4px;
+    transition: background 0.15s ease;
+  }
+
+  .search-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  .search-item strong {
+    font-size: 15px;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .search-item small {
+    font-size: 12px;
+    opacity: 0.8;
+  }
+
+  /* Modal Scroll Body - Desktop */
+  .modal-scroll-body {
+    padding-bottom: 32px;
+  }
+}
+
+/* =========================
    CURRENCY CONVERTER MODAL
    ========================= */
 .converter-modal-overlay {
@@ -4713,6 +5025,392 @@ select.input:focus {
 
 .progress-card {
   padding-top: 14px;
+}
+
+/* =========================
+   DESKTOP-ONLY OPTIMIZATIONS (≥1024px) - FARMER DASHBOARD
+   ========================= */
+@media screen and (min-width: 1024px) {
+  /* Dashboard Container & Layout */
+  .dashboard-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .farmer-dashboard-layout {
+    gap: 32px;
+  }
+
+  /* Desktop Navigation */
+  .desktop-nav {
+    padding: 0 24px;
+    margin: 0 0 8px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .nav-item {
+    padding: 16px 32px;
+    font-size: 15px;
+    font-weight: 600;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Dashboard Cards & Sections */
+  .dashboard-row.full > .card {
+    max-width: 100%;
+    border-radius: 16px;
+    padding: 32px;
+  }
+
+  .dashboard-card.single-card,
+  .dashboard-card.sale-card {
+    padding: 32px;
+  }
+
+  .section-divider {
+    margin: 32px 0;
+    height: 1px;
+  }
+
+  /* Card Headers */
+  .card-header {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+  }
+
+  .card-header .market-title {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 0;
+  }
+
+  .activity-header-compact {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+  }
+
+  /* Activity Section */
+  .activity-header {
+    margin-top: 24px;
+    margin-bottom: 24px;
+    gap: 16px;
+  }
+
+  .activity-header h3 {
+    margin: 0 !important;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .admin-bids-actions {
+    gap: 12px;
+  }
+
+  .filter-btn {
+    min-height: 44px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 12px;
+  }
+
+  /* Bid List */
+  .bid-list {
+    gap: 16px;
+  }
+
+  .bid-row {
+    padding: 20px 24px;
+    border-radius: 16px;
+    gap: 16px;
+  }
+
+  .bid-header {
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+
+  .bid-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .bid-contract {
+    font-size: 12px;
+    margin-top: 4px;
+  }
+
+  .bid-details {
+    gap: 16px 24px;
+    margin-top: 8px;
+  }
+
+  .bid-field {
+    gap: 8px;
+  }
+
+  .bid-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .bid-value {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .bid-qty,
+  .bid-price {
+    font-size: 14px;
+  }
+
+  .bid-footer {
+    margin-top: 12px;
+    padding-top: 12px;
+    font-size: 12px;
+  }
+
+  .bid-hint {
+    margin-top: 8px;
+    font-size: 12px;
+  }
+
+  .status-badge {
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    min-height: 28px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* Stats Table */
+  .table-wrapper {
+    margin-top: 16px;
+  }
+
+  .stats-table th,
+  .stats-table td {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  .stats-table th {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* News Section */
+  .news-list {
+    gap: 0;
+  }
+
+  .news-item {
+    padding: 20px 24px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    gap: 20px;
+    transition: all 0.15s ease;
+  }
+
+  .news-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .news-thumb {
+    width: 120px;
+    height: 80px;
+    border-radius: 12px;
+  }
+
+  .news-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    line-height: 1.5;
+  }
+
+  .news-content .small-text {
+    font-size: 12px;
+  }
+
+  /* Modals */
+  .bid-modal-backdrop {
+    padding: 32px;
+  }
+
+  .bid-modal {
+    max-width: 560px;
+    padding: 24px;
+    border-radius: 16px;
+  }
+
+  .bid-modal-header {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+  }
+
+  .bid-modal-header h3 {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .bid-modal-body {
+    gap: 16px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .bid-modal-body b {
+    font-weight: 600;
+    display: inline-block;
+    min-width: 140px;
+  }
+
+  .modal-actions {
+    margin-top: 24px;
+    gap: 12px;
+  }
+
+  .modal-actions .btn {
+    min-height: 44px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 12px;
+    flex: 1;
+  }
+
+  /* Filter Modal */
+  .filter-group {
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .filter-group .label {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 0;
+  }
+
+  .filter-group .input,
+  .filter-group select.input {
+    min-height: 44px;
+    padding: 12px 16px;
+    font-size: 14px;
+    border-radius: 12px;
+  }
+
+  .filter-actions {
+    margin-top: 24px;
+    gap: 12px;
+    justify-content: flex-end;
+  }
+
+  .filter-actions .btn {
+    min-height: 44px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 12px;
+  }
+
+  /* Typography Consolidation */
+  .card-body {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .small-text {
+    font-size: 13px;
+  }
+
+  /* Dashboard Sections */
+  .dashboard-section {
+    margin-bottom: 32px;
+  }
+
+  .dashboard-section:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Card Body Spacing */
+  .card-body {
+    padding: 0;
+  }
+
+  /* Activity Section - Better alignment */
+  .card-body > .dashboard-section:first-child {
+    margin-top: 0;
+  }
+
+  /* Stats Table - Better spacing */
+  .stats-table {
+    width: 100%;
+  }
+
+  .stats-total-row td {
+    font-weight: 700;
+    padding-top: 16px;
+    border-top: 2px solid var(--gray-light);
+  }
+
+  .theme-dark .stats-total-row td {
+    border-top-color: #1f2937;
+  }
+
+  /* News Item Improvements */
+  .news-content {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .news-item:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Button Improvements */
+  .btn.small.ghost,
+  .btn.small.outline {
+    min-height: 44px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  /* Better alignment for bid modal */
+  .bid-modal-body > div {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+
+  .bid-modal-body > div b {
+    min-width: 140px;
+  }
+
+  /* Input improvements */
+  .inline-input {
+    min-height: 40px;
+    padding: 10px 12px;
+    font-size: 14px;
+  }
 }
 
 /* =========================
