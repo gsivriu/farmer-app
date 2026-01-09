@@ -73,6 +73,14 @@ const WeatherWidget = () => {
     return () => clearInterval(intervalId);
   }, [coords]);
 
+  useEffect(() => {
+    if (!weather) return;
+    const isNight = weather.isDay === 0;
+    window.dispatchEvent(
+      new CustomEvent("weather-theme-change", { detail: { isNight } })
+    );
+  }, [weather]);
+
   const handleSearch = async (text) => {
     setSearchQuery(text);
     const results = await searchCity(text);

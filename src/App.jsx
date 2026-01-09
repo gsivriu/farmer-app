@@ -82,6 +82,18 @@ function App() {
     }
   }, [darkMode]);
 
+  useEffect(() => {
+    const handleWeatherTheme = (event) => {
+      if (!event?.detail) return;
+      setDarkMode(Boolean(event.detail.isNight));
+    };
+
+    window.addEventListener("weather-theme-change", handleWeatherTheme);
+    return () => {
+      window.removeEventListener("weather-theme-change", handleWeatherTheme);
+    };
+  }, []);
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setSession(null);
