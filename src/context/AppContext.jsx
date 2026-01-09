@@ -233,8 +233,10 @@ export function AppProvider({ children }) {
     const targetName = target?.name || id;
     const { error } = await supabase
       .from("commodities")
-      .update({ price: newPrice, last_updated: new Date().toISOString() })
-      .eq("name", targetName);
+      .upsert(
+        { name: targetName, price: newPrice, last_updated: new Date().toISOString() },
+        { onConflict: "name" }
+      );
 
     if (error) return { error };
 
