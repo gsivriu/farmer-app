@@ -107,12 +107,13 @@ export function AppProvider({ children }) {
         let trend = "flat";
         if (diff > 0) trend = "up";
         else if (diff < 0) trend = "down";
+        const priceChange = diff === 0 ? 0 : diff;
 
         return {
           ...c,
           price: nextPrice,
           lastPrice: oldPrice,
-          priceChange: diff,
+          priceChange,
           trend,
           lastUpdated: nextUpdated || c.lastUpdated,
         };
@@ -290,15 +291,15 @@ export function AppProvider({ children }) {
 
         let trend = "flat";
         const diff = nextPrice - oldPrice;
-
         if (diff > 0) trend = "up";
         else if (diff < 0) trend = "down";
+        const priceChange = diff === 0 ? 0 : diff;
 
         return {
           ...c,
           price: nextPrice,
           lastPrice: oldPrice,
-          priceChange: diff,
+          priceChange,
           trend,
           lastUpdated: updatedAt,
         };
