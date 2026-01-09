@@ -459,16 +459,32 @@ export default function FarmerDashboard() {
 
       <div className="farmer-dashboard-layout">
         <div className={"tab-content " + (activeTab === "home" ? "active" : "")}>
-          {/* PROGRESS + MARKET OVERVIEW */}
+          {/* PROGRESS + MARKET OVERVIEW - Desktop Grid Layout */}
           <div className="dashboard-row full">
-            <div className="card dashboard-card single-card">
-              <FarmerProgress embedded />
-              <div className="section-divider" />
-              <ExchangeRatesCard />
-              <div className="section-divider exchange-divider" />
-              <WeatherWidget />
-              <div className="section-divider exchange-divider" />
-              <MarketTicker />
+            <div className="dashboard-home-grid">
+              {/* PRIMARY: Progress/Gamification - Larger, Left */}
+              <div className="dashboard-home-primary">
+                <div className="card dashboard-card home-card-primary">
+                  <FarmerProgress embedded />
+                </div>
+              </div>
+
+              {/* SECONDARY: FX + Weather - Compact, Right */}
+              <div className="dashboard-home-secondary">
+                <div className="card dashboard-card home-card-secondary">
+                  <ExchangeRatesCard />
+                </div>
+                <div className="card dashboard-card home-card-secondary">
+                  <WeatherWidget />
+                </div>
+              </div>
+
+              {/* TERTIARY: Market Ticker - Full Width Below */}
+              <div className="dashboard-home-tertiary">
+                <div className="card dashboard-card home-card-tertiary">
+                  <MarketTicker />
+                </div>
+              </div>
             </div>
           </div>
         </div>
