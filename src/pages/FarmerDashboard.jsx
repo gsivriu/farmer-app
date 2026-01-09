@@ -484,7 +484,7 @@ export default function FarmerDashboard() {
             <div className="card dashboard-card sale-card">
               <PricesGrid />
               <div className="section-divider" />
-              <BidForm onBidCreated={loadBids} embedded />
+              <BidForm onBidCreated={fetchBids} embedded />
               <div className="section-divider" />
               <SiloPriceTable commodities={commodities} readOnly />
             </div>
