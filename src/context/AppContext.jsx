@@ -71,35 +71,35 @@ export function AppProvider({ children }) {
   const [bids, setBids] = useState([]);
   const [farmerRewards, setFarmerRewards] = useState({});
 
-  useEffect(() => {
-    const fetchCommodities = async () => {
-      const { data, error } = await supabase
-        .from("commodities")
-        .select("name, price");
+  const fetchCommodities = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("commodities")
+      .select("name, price");
 
-      if (error || !Array.isArray(data)) return;
+    if (error || !Array.isArray(data)) return;
 
-      const byName = new Map(
-        data.map((row) => [normalizeName(row.name), Number(row.price)])
-      );
+    const byName = new Map(
+      data.map((row) => [normalizeName(row.name), Number(row.price)])
+    );
 
-      setCommodities((prev) =>
-        (prev.length ? prev : initialCommodities).map((c) => {
-          const match = byName.get(normalizeName(c.name));
-          if (match == null || !Number.isFinite(match)) return c;
-          return {
-            ...c,
-            price: match,
-            lastPrice: c.lastPrice,
-            priceChange: 0,
-            trend: "flat",
-          };
-        })
-      );
-    };
-
-    fetchCommodities();
+    setCommodities((prev) =>
+      (prev.length ? prev : initialCommodities).map((c) => {
+        const match = byName.get(normalizeName(c.name));
+        if (match == null || !Number.isFinite(match)) return c;
+        return {
+          ...c,
+          price: match,
+          lastPrice: c.lastPrice,
+          priceChange: 0,
+          trend: "flat",
+        };
+      })
+    );
   }, []);
+
+  useEffect(() => {
+    fetchCommodities();
+  }, [fetchCommodities]);
 
   const fetchBids = useCallback(async () => {
     const { data, error } = await supabase
@@ -314,6 +314,7 @@ export function AppProvider({ children }) {
     login,
     logout,
     commodities,
+    fetchCommodities,
     bids,
     fetchBids,
     farmerRewards,

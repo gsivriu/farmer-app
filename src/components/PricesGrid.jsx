@@ -2,7 +2,7 @@ import React from "react";
 import { useAppContext } from "../context/AppContext.jsx";
 
 export default function PricesGrid() {
-  const { commodities } = useAppContext();
+  const { commodities = [] } = useAppContext() || {};
   const todayLabel = new Date().toLocaleDateString("ro-RO");
 
   const getTrendClass = (trend, lastPrice) => {
