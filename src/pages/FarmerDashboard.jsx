@@ -432,19 +432,11 @@ export default function FarmerDashboard() {
             display: flex;
             flex-direction: column;
             width: 100%;
-            gap: 0;
+            gap: 16px;
           }
 
           .dashboard-home-stack .dashboard-section {
-            margin-bottom: 24px;
-          }
-
-          .dashboard-home-stack .dashboard-section:last-child {
             margin-bottom: 0;
-          }
-
-          .dashboard-home-stack .dashboard-section:first-child {
-            margin-bottom: 16px;
           }
         }
       `}</style>
