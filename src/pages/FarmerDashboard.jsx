@@ -454,6 +454,8 @@ export default function FarmerDashboard() {
             border: 1px solid #e2e8f0 !important;
             padding: 24px !important;
             background-color: #ffffff !important;
+            width: 100%;
+            box-sizing: border-box;
             /* Păstrăm resetarea marginilor */
             margin-top: 0 !important;
             margin-bottom: 0 !important;
@@ -507,7 +509,7 @@ export default function FarmerDashboard() {
                 <FarmerProgress embedded />
               </div>
 
-              <div className="card dashboard-card home-card-secondary exchange-card">
+              <div className="home-card-secondary exchange-card">
                 <ExchangeRatesCard />
               </div>
 
