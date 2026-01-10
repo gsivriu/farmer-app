@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback, useRef } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { supabase } from "../supabaseClient";
 
 import MarketTicker from "../components/MarketTicker";
@@ -228,16 +228,6 @@ export default function FarmerDashboard() {
     return localBids.filter((b) => b.farmer_id === farmerId);
   }, [localBids, farmerId]);
 
-  const acceptedBids = useMemo(
-    () => userBids.filter((b) => b.status === "accepted"),
-    [userBids]
-  );
-
-  const filteredAcceptedBids = useMemo(() => {
-    if (productFilter === "all") return acceptedBids;
-    return acceptedBids.filter((b) => b.product === productFilter);
-  }, [acceptedBids, productFilter]);
-
   const filteredBids = useMemo(() => {
     return userBids.filter((b) => {
       if (productFilter !== "all" && b.product !== productFilter) return false;
@@ -256,11 +246,7 @@ export default function FarmerDashboard() {
       }
       return true;
     });
-  }, [localBids, productFilter, statusFilter, dateFrom, dateTo]);
-
-  const totalQty = useMemo(() => {
-    return acceptedBids.reduce((acc, b) => acc + Number(b.quantity || 0), 0);
-  }, [filteredAcceptedBids]);
+  }, [userBids, productFilter, statusFilter, dateFrom, dateTo]);
 
   const statsRows = useMemo(() => {
     const map = new Map();

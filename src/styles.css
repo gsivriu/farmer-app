@@ -1006,11 +1006,6 @@ label {
   font-weight: 500;
 }
 
-.bid-input-field,
-select.bid-input-field {
-  background-color: #f2f2f2;
-}
-
 select.bid-input-field {
   -webkit-appearance: none;
   -moz-appearance: none;
