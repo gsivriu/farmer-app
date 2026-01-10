@@ -5436,6 +5436,7 @@ select.input:focus {
   }
 
   .news-item {
+    grid-template-columns: 120px 1fr;
     padding: 20px 24px;
     border-radius: 12px;
     margin-bottom: 12px;
