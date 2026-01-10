@@ -195,17 +195,25 @@ export default function FarmerDashboard() {
         "trading",
       ];
 
+      const normalizeTerm = (term) =>
+        String(term || "")
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .trim();
+
       const buildQuery = (terms, maxLen) => {
         const suffix = " -fotbal -sport -pariuri";
         const maxBodyLen = maxLen - suffix.length;
         let result = "";
         for (const term of terms) {
-          const next = result ? `${result} OR ${term}` : term;
+          const clean = normalizeTerm(term);
+          if (!clean) continue;
+          const next = result ? `${result} OR ${clean}` : clean;
           if (next.length > maxBodyLen) break;
           result = next;
         }
         if (!result) {
-          result = terms[0] || "agricultura";
+          result = normalizeTerm(terms[0]) || "agricultura";
         }
         return `${result}${suffix}`;
       };
