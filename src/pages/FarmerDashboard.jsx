@@ -432,11 +432,15 @@ export default function FarmerDashboard() {
             display: flex;
             flex-direction: column;
             width: 100%;
-            gap: 32px;
+            gap: 16px;
           }
 
           .dashboard-home-stack .card {
             margin-bottom: 0;
+          }
+
+          .home-card-primary {
+            padding-bottom: 12px;
           }
 
           .dashboard-home-stack .progress-card {
