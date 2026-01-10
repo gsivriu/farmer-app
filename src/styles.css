@@ -1023,6 +1023,21 @@ select.bid-input-field {
   box-shadow: 0 0 0 2px #242424;
 }
 
+.theme-dark .bid-input-label {
+  color: #9aa3b2;
+}
+
+.theme-dark .bid-input-field {
+  background-color: #111827;
+  color: #e5e7eb;
+  border-color: transparent;
+}
+
+.theme-dark .bid-input-field:focus {
+  background-color: #0b1220;
+  box-shadow: 0 0 0 2px #e5e7eb;
+}
+
 .bid-input-field::-webkit-outer-spin-button,
 .bid-input-field::-webkit-inner-spin-button {
   -webkit-appearance: none;
