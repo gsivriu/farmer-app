@@ -214,11 +214,16 @@ export default function FarmerDashboard() {
       const q = buildQuery(keywords, 200);
       try {
         const { data, error } = await supabase.functions.invoke("gnews", {
-          body: { q, lang: "ro", max: 10 },
+          body: JSON.stringify({ q, lang: "ro", max: 10 }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+          method: "POST",
         });
 
         if (error) {
-          throw new Error(error.message || "GNews error");
+          console.error("Supabase invoke error:", error);
+          throw new Error(error.message || "Eroare la comunicarea cu serverul.");
         }
 
         if (data?.error) {
@@ -239,7 +244,7 @@ export default function FarmerDashboard() {
         setNewsItems(deduped);
       } catch (err) {
         if (err.name !== "AbortError") {
-          console.error("GNews fetch failed:", err);
+          console.error("GNews fetch failed details:", err);
           setNewsError(err?.message || "Nu am putut încărca știrile.");
         }
       } finally {
