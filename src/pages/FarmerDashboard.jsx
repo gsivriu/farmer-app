@@ -196,13 +196,15 @@ export default function FarmerDashboard() {
       ];
 
       const buildQuery = (terms, maxLen) => {
+        const suffix = " AND -fotbal -sport -pariuri";
+        const maxBodyLen = maxLen - suffix.length;
         let result = "";
         for (const term of terms) {
           const next = result ? `${result} OR ${term}` : term;
-          if (next.length > maxLen) break;
+          if (next.length > maxBodyLen) break;
           result = next;
         }
-        return result;
+        return result ? `${result}${suffix}` : "-fotbal -sport -pariuri";
       };
 
       const q = buildQuery(keywords, 200);
