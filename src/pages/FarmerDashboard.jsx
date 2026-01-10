@@ -435,7 +435,11 @@ export default function FarmerDashboard() {
             gap: 32px;
           }
 
-          .dashboard-home-stack .dashboard-section {
+          .dashboard-home-stack .card {
+            margin-bottom: 0;
+          }
+
+          .dashboard-home-stack .progress-card {
             margin-bottom: 0;
           }
         }
@@ -476,28 +480,20 @@ export default function FarmerDashboard() {
           {/* PROGRESS + MARKET OVERVIEW - Desktop Single Column */}
           <div className="dashboard-row full">
             <div className="dashboard-home-stack">
-              <div className="dashboard-section">
-                <div className="card dashboard-card home-card-primary">
-                  <FarmerProgress embedded />
-                </div>
+              <div className="card dashboard-card home-card-primary">
+                <FarmerProgress embedded />
               </div>
 
-              <div className="dashboard-section">
-                <div className="card dashboard-card home-card-secondary">
-                  <ExchangeRatesCard />
-                </div>
+              <div className="card dashboard-card home-card-secondary">
+                <ExchangeRatesCard />
               </div>
 
-              <div className="dashboard-section">
-                <div className="card dashboard-card home-card-secondary">
-                  <WeatherWidget />
-                </div>
+              <div className="card dashboard-card home-card-secondary">
+                <WeatherWidget />
               </div>
 
-              <div className="dashboard-section">
-                <div className="card dashboard-card home-card-tertiary">
-                  <MarketTicker />
-                </div>
+              <div className="card dashboard-card home-card-tertiary">
+                <MarketTicker />
               </div>
             </div>
           </div>
