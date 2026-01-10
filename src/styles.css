@@ -973,6 +973,55 @@ label {
   color: var(--gray);
 }
 
+/* Stiluri Input Bid Form */
+.bid-input-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.bid-input-label {
+  font-size: 12px;
+  color: #8b8e98;
+  font-weight: 600;
+  margin-left: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.bid-input-field {
+  width: 100%;
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 9px;
+  outline: none;
+  background-color: #f2f2f2;
+  border: 1px solid transparent;
+  transition: all 0.2s ease-in-out;
+  box-sizing: border-box;
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+.bid-input-field:focus {
+  background-color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 0 0 2px #242424;
+}
+
+.bid-input-field::-webkit-outer-spin-button,
+.bid-input-field::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.bid-input-field[type="number"] {
+  -moz-appearance: textfield;
+}
+
 .input,
 select.input {
   width: 100%;

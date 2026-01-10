@@ -139,10 +139,10 @@ export default function BidForm({ onBidCreated, embedded = false }) {
 
       <form className="form" onSubmit={handleSubmit}>
         {/* PRODUS */}
-        <div>
-          <label className="label">Produs</label>
+        <div className="bid-input-container">
+          <label className="bid-input-label">Produs</label>
           <select
-            className="input"
+            className="bid-input-field"
             value={product}
             onChange={(e) => setProduct(e.target.value)}
           >
@@ -156,10 +156,10 @@ export default function BidForm({ onBidCreated, embedded = false }) {
 
         {/* CANTITATE + PREȚ */}
         <div className="bid-form-grid-2">
-          <div>
-            <label className="label">Cantitate (t)</label>
+          <div className="bid-input-container">
+            <label className="bid-input-label">Cantitate (t)</label>
             <input
-              className="input"
+              className="bid-input-field"
               type="number"
               min="0"
               step="0.01"
@@ -169,10 +169,10 @@ export default function BidForm({ onBidCreated, embedded = false }) {
             />
           </div>
 
-          <div>
-            <label className="label">{priceLabel}</label>
+          <div className="bid-input-container">
+            <label className="bid-input-label">{priceLabel}</label>
             <input
-              className="input"
+              className="bid-input-field"
               type="number"
               min="0"
               step="0.5"
@@ -185,10 +185,10 @@ export default function BidForm({ onBidCreated, embedded = false }) {
 
         {/* PARITATE + LOCAȚIE */}
         <div className="bid-form-grid-2">
-          <div>
-            <label className="label">Paritate</label>
+          <div className="bid-input-container">
+            <label className="bid-input-label">Paritate</label>
             <select
-              className="input"
+              className="bid-input-field"
               value={parity}
               onChange={(e) => setParity(e.target.value)}
             >
@@ -201,10 +201,10 @@ export default function BidForm({ onBidCreated, embedded = false }) {
           </div>
 
           {!isFreightParity(parity) && (
-            <div>
-              <label className="label">Locație descarcare</label>
+            <div className="bid-input-container">
+              <label className="bid-input-label">Locație descarcare</label>
               <select
-                className="input"
+                className="bid-input-field"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
               >
@@ -223,10 +223,10 @@ export default function BidForm({ onBidCreated, embedded = false }) {
 
         {isFreightParity(parity) && (
           <div className="bid-form-grid-2">
-            <div>
-              <label className="label">Locație încărcare</label>
+            <div className="bid-input-container">
+              <label className="bid-input-label">Locație încărcare</label>
               <input
-                className="input"
+                className="bid-input-field"
                 type="text"
                 value={loadingLocation}
                 onChange={(e) => setLoadingLocation(e.target.value)}
@@ -238,21 +238,21 @@ export default function BidForm({ onBidCreated, embedded = false }) {
 
         {/* DATE LIVRARE – NATIV, MOBILE SAFE */}
         <div className="bid-form-grid-2">
-          <div>
-            <label className="label">Start livrare</label>
+          <div className="bid-input-container">
+            <label className="bid-input-label">Start livrare</label>
             <input
               type="date"
-              className="input"
+              className="bid-input-field"
               value={deliveryStart}
               onChange={(e) => setDeliveryStart(e.target.value)}
             />
           </div>
 
-          <div>
-            <label className="label">Final livrare</label>
+          <div className="bid-input-container">
+            <label className="bid-input-label">Final livrare</label>
             <input
               type="date"
-              className="input"
+              className="bid-input-field"
               value={deliveryEnd}
               onChange={(e) => setDeliveryEnd(e.target.value)}
             />
