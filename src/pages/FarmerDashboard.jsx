@@ -452,7 +452,7 @@ export default function FarmerDashboard() {
             margin-bottom: 0;
           }
 
-          .exchange-highlight {
+          .exchange-highlight .exchange-card {
             background-color: #fff;
             border: 1px solid #cbd5e1;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
