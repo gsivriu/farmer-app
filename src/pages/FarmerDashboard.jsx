@@ -446,6 +446,11 @@ export default function FarmerDashboard() {
           .dashboard-home-stack .progress-card {
             margin-bottom: 0;
           }
+
+          .dashboard-home-stack .exchange-card {
+            margin-top: 0;
+            margin-bottom: 0;
+          }
         }
       `}</style>
       <nav className="desktop-nav">
