@@ -469,8 +469,9 @@ export default function FarmerDashboard() {
           }
         }
 
-        .tab-content .bid-field {
-          gap: 2px;
+        .tab-content.active .bid-details .bid-field,
+        .tab-content.active .bid-details-compact .bid-field {
+          gap: 2px !important;
         }
       `}</style>
       <nav className="desktop-nav">
