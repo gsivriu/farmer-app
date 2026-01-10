@@ -812,16 +812,18 @@ export default function FarmerDashboard() {
               <div><b>Cantitate:</b> {Number(selectedBid.quantity || 0).toFixed(2)} t</div>
               <div>
                 <b>Preț (Counter):</b>{" "}
-                <input
-                  className="input inline-input"
-                  type="number"
-                  step="0.01"
-                  inputMode="decimal"
-                  placeholder="-"
-                  value={farmerModalCounter}
-                  onChange={(e) => setFarmerModalCounter(e.target.value)}
-                />{" "}
-                {selectedBid.product === "sunflower" ? "USD/t" : "EUR/t"}
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                  <input
+                    className="input inline-input"
+                    type="number"
+                    step="0.01"
+                    inputMode="decimal"
+                    placeholder="-"
+                    value={farmerModalCounter}
+                    onChange={(e) => setFarmerModalCounter(e.target.value)}
+                  />
+                  {selectedBid.product === "sunflower" ? "USD/t" : "EUR/t"}
+                </span>
               </div>
               <div>
                 <b>Status:</b> {selectedBid.status}
