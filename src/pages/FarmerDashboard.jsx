@@ -219,6 +219,7 @@ export default function FarmerDashboard() {
       };
 
       const q = buildQuery(keywords, 200);
+      console.log("GNews query:", q, q.length);
       try {
         const { data, error } = await supabase.functions.invoke("gnews", {
           body: { q, lang: "ro", max: 10 },
