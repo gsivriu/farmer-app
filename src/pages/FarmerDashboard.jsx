@@ -500,7 +500,7 @@ export default function FarmerDashboard() {
                 <FarmerProgress embedded />
               </div>
 
-              <div className="card dashboard-card home-card-secondary exchange-card exchange-highlight">
+              <div className="card dashboard-card home-card-secondary exchange-card">
                 <ExchangeRatesCard />
               </div>
 
