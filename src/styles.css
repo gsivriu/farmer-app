@@ -998,7 +998,7 @@ label {
   border-radius: 9px;
   outline: none;
   background-color: #f2f2f2;
-  border: 1px solid transparent;
+  border: 1px solid #e4e4e4;
   transition: all 0.2s ease-in-out;
   box-sizing: border-box;
   font-size: 14px;
@@ -1030,7 +1030,7 @@ select.bid-input-field {
 .theme-dark .bid-input-field {
   background-color: #111827;
   color: #e5e7eb;
-  border-color: transparent;
+  border-color: #263143;
 }
 
 .theme-dark .bid-input-field:focus {
