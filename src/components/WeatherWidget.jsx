@@ -4,15 +4,18 @@ import { fetchWeather, searchCity } from "../services/weatherService";
 const STORAGE_COORDS_KEY = "savedWeatherCoords";
 const STORAGE_NAME_KEY = "savedWeatherName";
 
-const getWeatherEmoji = (code, isDay) => {
+const getWeatherCondition = (code, isDay) => {
   const value = Number(code);
-  if (value === 0) return isDay ? "☀️" : "🌙";
-  if (value >= 1 && value <= 3) return isDay ? "⛅" : "☁️";
-  if (value === 45 || value === 48) return "🌫️";
-  if ((value >= 51 && value <= 67) || (value >= 80 && value <= 82)) return "🌧️";
-  if ((value >= 71 && value <= 77) || (value >= 85 && value <= 86)) return "❄️";
-  if (value >= 95 && value <= 99) return "⛈️";
-  return isDay ? "☀️" : "🌙";
+  if (value === 0) return { label: "Cer senin", icon: isDay ? "☀️" : "🌙" };
+  if (value >= 1 && value <= 3)
+    return { label: value === 3 ? "Înnorat" : "Parțial noros", icon: isDay ? "⛅" : "☁️" };
+  if (value === 45 || value === 48) return { label: "Ceață", icon: "🌫️" };
+  if ((value >= 51 && value <= 67) || (value >= 80 && value <= 82))
+    return { label: "Ploaie", icon: "🌧️" };
+  if ((value >= 71 && value <= 77) || (value >= 85 && value <= 86))
+    return { label: "Ninsoare", icon: "❄️" };
+  if (value >= 95 && value <= 99) return { label: "Furtună", icon: "⛈️" };
+  return { label: "Cer senin", icon: isDay ? "☀️" : "🌙" };
 };
 
 const WeatherWidget = () => {
@@ -128,7 +131,7 @@ const WeatherWidget = () => {
   if (!weather) return <div className="weather-card loading">Se încarcă...</div>;
 
   const cardTheme = weather.isDay === 0 ? "night" : "day";
-  const weatherIcon = getWeatherEmoji(
+  const condition = getWeatherCondition(
     weather.weathercode ?? weather.code,
     weather.isDay !== 0
   );
@@ -152,11 +155,11 @@ const WeatherWidget = () => {
       >
         <div className="weather-info">
           <div className="weather-primary">
-            <span className="weather-icon-main">{weatherIcon}</span>
+            <span className="weather-icon-main">{condition.icon}</span>
             <div>
               <span className="weather-temp">{weather.temp}°</span>
               <span className="weather-desc">
-                {weather.isDay === 0 ? "Noapte" : weather.type}
+                {condition.label}
               </span>
             </div>
           </div>
