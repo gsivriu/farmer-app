@@ -202,24 +202,24 @@ export default function FarmerDashboard() {
           .trim();
 
       const buildQuery = (terms, maxLen) => {
-        const suffix = " -fotbal -sport -pariuri";
+        const suffixTerms = ["-fotbal", "-sport", "-pariuri"];
+        const suffix = ` ${suffixTerms.join(" ")}`;
         const maxBodyLen = maxLen - suffix.length;
-        let result = "";
+        const chunks = [];
         for (const term of terms) {
           const clean = normalizeTerm(term);
           if (!clean) continue;
-          const next = result ? `${result} OR ${clean}` : clean;
+          const next = [...chunks, clean].join(" ");
           if (next.length > maxBodyLen) break;
-          result = next;
+          chunks.push(clean);
         }
-        if (!result) {
-          result = normalizeTerm(terms[0]) || "agricultura";
+        if (chunks.length === 0) {
+          chunks.push(normalizeTerm(terms[0]) || "agricultura");
         }
-        return `${result}${suffix}`;
+        return `${chunks.join(" ")}${suffix}`;
       };
 
       const q = buildQuery(keywords, 200);
-      console.log("GNews query:", q, q.length);
       try {
         const { data, error } = await supabase.functions.invoke("gnews", {
           body: { q, lang: "ro", max: 10 },
