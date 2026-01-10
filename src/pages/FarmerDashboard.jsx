@@ -480,11 +480,10 @@ export default function FarmerDashboard() {
             margin-bottom: 0 !important;
           }
 
-          .exchange-highlight .exchange-card {
-            background-color: #fff;
-            border: 1px solid #cbd5e1;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-              0 4px 6px -2px rgba(0, 0, 0, 0.05);
+          .theme-dark .dashboard-home-stack .exchange-card {
+            background-color: #0f172a !important;
+            border-color: #1f2937 !important;
+            box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.55) !important;
           }
         }
 
