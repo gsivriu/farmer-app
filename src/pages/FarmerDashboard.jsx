@@ -448,8 +448,15 @@ export default function FarmerDashboard() {
           }
 
           .dashboard-home-stack .exchange-card {
-            margin-top: 0;
-            margin-bottom: 0;
+            border-radius: 24px !important;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+              0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+            border: 1px solid #e2e8f0 !important;
+            padding: 24px !important;
+            background-color: #ffffff !important;
+            /* Păstrăm resetarea marginilor */
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
           }
 
           .exchange-highlight .exchange-card {
