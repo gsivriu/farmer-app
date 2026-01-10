@@ -468,6 +468,10 @@ export default function FarmerDashboard() {
               0 4px 6px -2px rgba(0, 0, 0, 0.05);
           }
         }
+
+        .tab-content .bid-field {
+          gap: 2px;
+        }
       `}</style>
       <nav className="desktop-nav">
         <button
