@@ -174,25 +174,16 @@ export default function FarmerDashboard() {
       setNewsError(null);
 
       const keywords = [
-        "agricultură",
-        "cereale",
-        "bursă",
         "MATIF",
+        "Euronext",
+        "CBOT",
+        "USDA",
+        "cotații cereale",
         "grâu",
         "porumb",
         "rapiță",
-        "preț",
-        "agribusiness",
-        "economic",
-        "tranzacții",
-        "piață",
-        "APIA",
-        "export",
-        "logistică",
-        "euro",
-        "dolar",
-        "inflație",
-        "trading",
+        "floarea soarelui",
+        "bursa agricolă",
       ];
 
       const normalizeTerm = (term) =>
@@ -202,21 +193,22 @@ export default function FarmerDashboard() {
           .trim();
 
       const buildQuery = (terms, maxLen) => {
-        const suffixTerms = ["-fotbal", "-sport", "-pariuri"];
-        const suffix = ` ${suffixTerms.join(" ")}`;
-        const maxBodyLen = maxLen - suffix.length;
-        const chunks = [];
+        const negatives = " -fotbal -sport -pariuri -meci -liga";
+        const overhead = negatives.length + 2;
+        const maxBodyLen = maxLen - overhead;
+        let currentQuery = "";
+        const separator = " OR ";
+
         for (const term of terms) {
           const clean = normalizeTerm(term);
           if (!clean) continue;
-          const next = [...chunks, clean].join(" ");
-          if (next.length > maxBodyLen) break;
-          chunks.push(clean);
+          const sizeToAdd = (currentQuery ? separator.length : 0) + clean.length;
+          if (currentQuery.length + sizeToAdd > maxBodyLen) break;
+          currentQuery += (currentQuery ? separator : "") + clean;
         }
-        if (chunks.length === 0) {
-          chunks.push(normalizeTerm(terms[0]) || "agricultura");
-        }
-        return `${chunks.join(" ")}${suffix}`;
+
+        if (!currentQuery) currentQuery = "agricultura";
+        return `(${currentQuery})${negatives}`;
       };
 
       const q = buildQuery(keywords, 200);
