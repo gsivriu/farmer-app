@@ -4,6 +4,17 @@ import { fetchWeather, searchCity } from "../services/weatherService";
 const STORAGE_COORDS_KEY = "savedWeatherCoords";
 const STORAGE_NAME_KEY = "savedWeatherName";
 
+const getWeatherEmoji = (code, isDay) => {
+  const value = Number(code);
+  if (value === 0) return isDay ? "☀️" : "🌙";
+  if (value >= 1 && value <= 3) return isDay ? "⛅" : "☁️";
+  if (value === 45 || value === 48) return "🌫️";
+  if ((value >= 51 && value <= 67) || (value >= 80 && value <= 82)) return "🌧️";
+  if ((value >= 71 && value <= 77) || (value >= 85 && value <= 86)) return "❄️";
+  if (value >= 95 && value <= 99) return "⛈️";
+  return isDay ? "☀️" : "🌙";
+};
+
 const WeatherWidget = () => {
   const [weather, setWeather] = useState(null);
   const [locationName, setLocationName] = useState(() => {
@@ -117,7 +128,10 @@ const WeatherWidget = () => {
   if (!weather) return <div className="weather-card loading">Se încarcă...</div>;
 
   const cardTheme = weather.isDay === 0 ? "night" : "day";
-  const weatherIcon = weather.isDay === 0 ? "🌙" : "☀️";
+  const weatherIcon = getWeatherEmoji(
+    weather.weathercode ?? weather.code,
+    weather.isDay !== 0
+  );
   const currentRainProb = Math.round(weather.daily?.[0]?.prob || 0);
   const soilLayer10 = Math.round(weather.soil?.layer10 || 0);
   const soilLayer30 = Math.round(weather.soil?.layer30 || 0);
