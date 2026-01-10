@@ -432,7 +432,7 @@ export default function FarmerDashboard() {
             display: flex;
             flex-direction: column;
             width: 100%;
-            gap: 24px;
+            gap: 32px;
           }
 
           .dashboard-home-stack .card {
