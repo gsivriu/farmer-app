@@ -451,6 +451,13 @@ export default function FarmerDashboard() {
             margin-top: 0;
             margin-bottom: 0;
           }
+
+          .exchange-highlight {
+            background-color: #fff;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+              0 4px 6px -2px rgba(0, 0, 0, 0.05);
+          }
         }
       `}</style>
       <nav className="desktop-nav">
@@ -493,7 +500,7 @@ export default function FarmerDashboard() {
                 <FarmerProgress embedded />
               </div>
 
-              <div className="card dashboard-card home-card-secondary exchange-card">
+              <div className="card dashboard-card home-card-secondary exchange-card exchange-highlight">
                 <ExchangeRatesCard />
               </div>
 
