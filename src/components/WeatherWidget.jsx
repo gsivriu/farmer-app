@@ -264,12 +264,12 @@ const WeatherWidget = () => {
                       <div className="location-and-date__date">{formattedDate}</div>
                     </div>
 
-                    <div className="current-temperature">
-                      <div className="current-temperature__icon-container">
-                        <span className="current-temperature__icon" aria-hidden>
-                          {weatherIcon}
-                        </span>
-                      </div>
+                      <div className="current-temperature">
+                        <div className="current-temperature__icon-container">
+                          <span className="current-temperature__icon" aria-hidden>
+                          {condition.icon}
+                          </span>
+                        </div>
                       <div className="current-temperature__content-container">
                         <div className="current-temperature__value">
                           {weather.temp}°
