@@ -81,6 +81,7 @@ export default function FarmerDashboard() {
   const [newsItems, setNewsItems] = useState([]);
   const [newsLoading, setNewsLoading] = useState(false);
   const [newsError, setNewsError] = useState(null);
+  const [farmerId, setFarmerId] = useState(null);
 
   useEffect(() => {
     fetchBids();
@@ -91,6 +92,19 @@ export default function FarmerDashboard() {
     setLocalBids(bids);
     setLoading(false);
   }, [bids]);
+
+  useEffect(() => {
+    let mounted = true;
+    const loadFarmerId = async () => {
+      const { data, error: userErr } = await supabase.auth.getUser();
+      if (userErr || !data?.user) return;
+      if (mounted) setFarmerId(data.user.id);
+    };
+    loadFarmerId();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     setFarmerActionLocks((prev) => {
@@ -237,9 +251,14 @@ export default function FarmerDashboard() {
   // ============================
   // CALCULE: accepted only
   // ============================
+  const userBids = useMemo(() => {
+    if (!farmerId) return [];
+    return localBids.filter((b) => b.farmer_id === farmerId);
+  }, [localBids, farmerId]);
+
   const acceptedBids = useMemo(
-    () => localBids.filter((b) => b.status === "accepted"),
-    [localBids]
+    () => userBids.filter((b) => b.status === "accepted"),
+    [userBids]
   );
 
   const filteredAcceptedBids = useMemo(() => {
@@ -248,7 +267,7 @@ export default function FarmerDashboard() {
   }, [acceptedBids, productFilter]);
 
   const filteredBids = useMemo(() => {
-    return localBids.filter((b) => {
+    return userBids.filter((b) => {
       if (productFilter !== "all" && b.product !== productFilter) return false;
       if (statusFilter !== "all") {
         if (statusFilter === "pending") {
