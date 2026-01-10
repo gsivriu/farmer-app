@@ -1,66 +1,68 @@
-/// <reference path="./deno.d.ts" />
+// supabase/functions/gnews/index.ts
+
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
 };
 
-Deno.serve(async (req: Request) => {
+serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   try {
-    const url = new URL(req.url);
-    let q = url.searchParams.get("q") ?? "";
-    let lang = url.searchParams.get("lang") ?? "ro";
-    let max = Number(url.searchParams.get("max") ?? "10");
+    console.log("--- START GNEWS FUNCTION ---");
 
-    if (!q && req.method !== "GET") {
-      try {
-        const body = await req.json();
-        if (body && typeof body.q === "string") q = body.q;
-        if (body && typeof body.lang === "string") lang = body.lang;
-        if (body && body.max != null) max = Number(body.max);
-      } catch {
-        // ignore JSON parse errors, fall back to query params
-      }
+    const apiKey = Deno.env.get("GNEWS_API_KEY");
+    if (!apiKey) {
+      console.error("EROARE: Lipsește GNEWS_API_KEY din Secrets");
+      throw new Error("Server configuration error: Missing API Key");
     }
 
-    if (!q || typeof q !== "string") {
-      return new Response(JSON.stringify({ error: "Missing query" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    let body;
+    try {
+      body = await req.json();
+    } catch (err) {
+      console.error("Eroare la parsarea JSON:", err);
+      throw new Error("Invalid JSON body");
     }
 
-    const token = Deno.env.get("GNEWS_TOKEN");
-    if (!token) {
-      return new Response(JSON.stringify({ error: "Missing GNEWS_TOKEN" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const { q, lang, max } = body || {};
+    console.log(`Cautare pentru: ${q}, Limba: ${lang}`);
+
+    const queryTerm = encodeURIComponent(q || "agricultura");
+    const url = `https://gnews.io/api/v4/search?q=${queryTerm}&lang=${
+      lang || "ro"
+    }&max=${max || 10}&apikey=${apiKey}`;
+
+    const apiRes = await fetch(url);
+    const data = await apiRes.json();
+
+    if (!apiRes.ok) {
+      console.error("GNews a returnat eroare:", data);
+      return new Response(
+        JSON.stringify({
+          error: data.errors || "Eroare de la furnizorul de știri",
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        }
+      );
     }
 
-    const maxClamped = Number.isFinite(max) ? Math.min(Math.max(max, 1), 10) : 10;
-    const apiUrl = new URL("https://gnews.io/api/v4/search");
-    apiUrl.searchParams.set("q", q);
-    apiUrl.searchParams.set("lang", lang);
-    apiUrl.searchParams.set("max", String(maxClamped));
-    apiUrl.searchParams.set("token", token);
-
-    const res = await fetch(apiUrl.toString());
-    const data = await res.json();
-
+    console.log(`Succes! S-au găsit ${data.articles?.length || 0} articole.`);
     return new Response(JSON.stringify(data), {
-      status: res.ok ? 200 : res.status,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 200,
     });
-  } catch (_err) {
-    return new Response(JSON.stringify({ error: "Unexpected error" }), {
-      status: 500,
+  } catch (error) {
+    console.error("CRITICAL ERROR:", error.message);
+    return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500,
     });
   }
 });

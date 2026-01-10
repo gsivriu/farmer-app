@@ -173,57 +173,18 @@ export default function FarmerDashboard() {
       setNewsLoading(true);
       setNewsError(null);
 
-      const keywords = [
-        "MATIF",
-        "Euronext",
-        "CBOT",
-        "USDA",
-        "cotații cereale",
-        "grâu",
-        "porumb",
-        "rapiță",
-        "floarea soarelui",
-        "bursa agricolă",
-      ];
-
-      const normalizeTerm = (term) =>
-        String(term || "")
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .trim();
-
-      const buildQuery = (terms, maxLen) => {
-        const negatives = " -fotbal -sport -pariuri -meci -liga";
-        const overhead = negatives.length + 2;
-        const maxBodyLen = maxLen - overhead;
-        let currentQuery = "";
-        const separator = " OR ";
-
-        for (const term of terms) {
-          const clean = normalizeTerm(term);
-          if (!clean) continue;
-          const sizeToAdd = (currentQuery ? separator.length : 0) + clean.length;
-          if (currentQuery.length + sizeToAdd > maxBodyLen) break;
-          currentQuery += (currentQuery ? separator : "") + clean;
-        }
-
-        if (!currentQuery) currentQuery = "agricultura";
-        return `(${currentQuery})${negatives}`;
-      };
-
-      const q = buildQuery(keywords, 200);
       try {
+        const simpleQuery = "agricultura OR cereale OR preturi";
         const { data, error } = await supabase.functions.invoke("gnews", {
-          body: JSON.stringify({ q, lang: "ro", max: 10 }),
-          headers: {
-            "Content-Type": "application/json",
+          body: {
+            q: simpleQuery,
+            lang: "ro",
+            max: 10,
           },
-          method: "POST",
         });
 
         if (error) {
-          console.error("Supabase invoke error:", error);
-          throw new Error(error.message || "Eroare la comunicarea cu serverul.");
+          throw error;
         }
 
         if (data?.error) {
@@ -244,8 +205,8 @@ export default function FarmerDashboard() {
         setNewsItems(deduped);
       } catch (err) {
         if (err.name !== "AbortError") {
-          console.error("GNews fetch failed details:", err);
-          setNewsError(err?.message || "Nu am putut încărca știrile.");
+          console.error("News error:", err);
+          setNewsError(err?.message || "Eroare la încărcare");
         }
       } finally {
         setNewsLoading(false);
