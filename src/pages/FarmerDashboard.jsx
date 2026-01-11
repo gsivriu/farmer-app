@@ -694,7 +694,10 @@ export default function FarmerDashboard() {
                       </div>
 
                       <div className="bid-footer">
-                        Data ofertei: {formatDateOnly(b.created_at)}
+                        Data ofertei:{" "}
+                        <span className="bid-date-value">
+                          {formatDateOnly(b.created_at)}
+                        </span>
                       </div>
                             <div className="bid-hint">Vezi detalii &gt;</div>
                           </div>

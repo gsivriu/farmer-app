@@ -679,7 +679,7 @@ export default function AdminDashboard() {
                           </div>
                           <div className="bid-field bid-field-right">
                             <span className="bid-label">Data</span>
-                            <span className="bid-value">
+                            <span className="bid-value bid-date-value">
                               {formatDateOnly(b.created_at)}
                             </span>
                           </div>

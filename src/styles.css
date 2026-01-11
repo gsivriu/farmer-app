@@ -1332,6 +1332,10 @@ select.input:focus {
   font-size: 12px;
 }
 
+.bid-date-value {
+  font-size: 12px;
+}
+
 .bid-transport-value {
   font-weight: 700;
   color: #0f172a;
