@@ -3093,6 +3093,14 @@ select.input:focus {
   min-width: 0;
 }
 
+.admin-bid-row-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  min-width: 160px;
+}
+
 .admin-bid-details-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3129,9 +3137,19 @@ select.input:focus {
   color: #0f172a;
 }
 
+.admin-bid-parity {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
 .theme-dark .admin-bid-crop,
 .theme-dark .admin-bid-price {
   color: #f1f5f9;
+}
+
+.theme-dark .admin-bid-parity {
+  color: #94a3b8;
 }
 
 @media (max-width: 900px) {
@@ -3148,6 +3166,11 @@ select.input:focus {
     width: 100%;
     flex-wrap: wrap;
     justify-content: flex-start;
+  }
+
+  .admin-bid-row-right {
+    align-items: flex-start;
+    min-width: 0;
   }
 
   .admin-bid-row-actions .btn {
