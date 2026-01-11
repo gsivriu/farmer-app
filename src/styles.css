@@ -1541,6 +1541,8 @@ select.input:focus {
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
   padding: 16px;
   pointer-events: auto;
+  position: relative;
+  z-index: 1;
 }
 
 .theme-dark .bid-modal {
@@ -1556,6 +1558,7 @@ select.input:focus {
   justify-content: space-between;
   margin-bottom: 12px;
   position: relative;
+  z-index: 2;
 }
 
 .bid-modal-header h3 {
@@ -1565,7 +1568,7 @@ select.input:focus {
 
 .bid-modal-header .btn.small.ghost {
   position: relative;
-  z-index: 2;
+  z-index: 3;
   pointer-events: auto;
   cursor: pointer;
 }
