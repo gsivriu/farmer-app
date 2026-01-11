@@ -3103,6 +3103,13 @@ select.input:focus {
 
 .admin-bid-column-right {
   align-items: flex-end;
+  text-align: right;
+}
+
+.admin-bid-column-right .bid-label,
+.admin-bid-column-right .bid-value {
+  text-align: right;
+  width: 100%;
 }
 
 .admin-bid-row-actions {
