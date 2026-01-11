@@ -614,18 +614,6 @@ export default function AdminDashboard() {
                   const showCounter =
                     !showAccepted && !showRejected && b.counter_price != null;
                   const showPending = !showCounter && !showAccepted && !showRejected;
-                  const counterNum = Number(b.counter_price);
-                  const priceNum = Number(b.price);
-                  const hasCounterPrice =
-                    b.counter_price != null &&
-                    Number.isFinite(counterNum) &&
-                    counterNum > 0;
-                  const isCounterSameAsPrice =
-                    hasCounterPrice &&
-                    Number.isFinite(priceNum) &&
-                    counterNum === priceNum;
-                  const acceptDisabled = hasCounterPrice && !isCounterSameAsPrice;
-
                   return (
                     <div
                       role="button"
@@ -689,39 +677,6 @@ export default function AdminDashboard() {
                             </span>
                           </div>
                         </div>
-                      </div>
-                      <div className="admin-bid-row-actions">
-                        <button
-                          type="button"
-                          className="btn small ghost admin-reject-btn"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            openAdminModal(b, "rejected");
-                          }}
-                        >
-                          Reject
-                        </button>
-                        <button
-                          type="button"
-                          className="btn small ghost admin-counter-btn"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            openAdminModal(b, "countered");
-                          }}
-                        >
-                          Counter
-                        </button>
-                        <button
-                          type="button"
-                          className="btn small ghost admin-accept-btn"
-                          disabled={acceptDisabled}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            openAdminModal(b, "accepted");
-                          }}
-                        >
-                          Accept
-                        </button>
                       </div>
                     </div>
                   );
