@@ -296,11 +296,6 @@ export default function SiloPriceTable({ commodities = [], readOnly = false }) {
               <button
                 type="button"
                 className="btn small ghost"
-                onMouseDown={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  setSelectedCell(null);
-                }}
                 onClick={(event) => {
                   event.stopPropagation();
                   setSelectedCell(null);
