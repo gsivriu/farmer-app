@@ -630,22 +630,24 @@ export default function AdminDashboard() {
                         }
                       }}
                     >
-                      <div className="admin-bid-row-left">
-                        <div className="admin-bid-crop">
-                          {PRODUCT_LABELS[b.product] || b.product}
-                        </div>
-                      </div>
-                      <div className="admin-bid-row-middle">
-                        <div className="admin-bid-details-grid">
-                          <div className="admin-bid-field">
-                            <span className="bid-label">Fermier</span>
-                            <span className="bid-value">
-                              {b.farmer_email || b.farmer_id}
-                            </span>
+                      <div className="bid-header">
+                        <div>
+                          <div className="bid-title">
+                            {PRODUCT_LABELS[b.product] || b.product}
                           </div>
-                          <div className="admin-bid-field">
-                            <span className="bid-label">Preț</span>
-                            <span className="admin-bid-price">
+                          <div className="bid-contract">
+                            Fermier: {b.farmer_email || b.farmer_id}
+                          </div>
+                        </div>
+                        <span className={`status-badge status-${statusClass.slice(3)}`}>
+                          {getStatusLabel(b.status)}
+                        </span>
+                      </div>
+                      <div className="admin-bid-info">
+                        <div className="admin-bid-column">
+                          <div className="bid-field">
+                            <span className="bid-label">Preț / tonă</span>
+                            <span className="bid-value admin-bid-price">
                               {showCounter ? (
                                 <span className="admin-bid-counter-value">
                                   {Number(b.counter_price || 0).toFixed(2)} {unit}
@@ -660,27 +662,27 @@ export default function AdminDashboard() {
                                 "-"
                               )}
                             </span>
-                            <span className="admin-bid-parity">
+                          </div>
+                          <div className="bid-field">
+                            <span className="bid-label">Paritate</span>
+                            <span className="bid-value">
                               {formatParityDisplay(b, { detailed: true })}
                             </span>
                           </div>
                         </div>
-                      </div>
-                      <div className="admin-bid-row-right">
-                        <span className={`status-badge status-${statusClass.slice(3)}`}>
-                          {getStatusLabel(b.status)}
-                        </span>
-                        <div className="admin-bid-field">
-                          <span className="bid-label">Cantitate</span>
-                          <span className="bid-value">
-                            {Number(b.quantity || 0).toFixed(2)} t
-                          </span>
-                        </div>
-                        <div className="admin-bid-field">
-                          <span className="bid-label">Data</span>
-                          <span className="bid-value">
-                            {formatDateOnly(b.created_at)}
-                          </span>
+                        <div className="admin-bid-column admin-bid-column-right">
+                          <div className="bid-field bid-field-right">
+                            <span className="bid-label">Cantitate</span>
+                            <span className="bid-value">
+                              {Number(b.quantity || 0).toFixed(2)} t
+                            </span>
+                          </div>
+                          <div className="bid-field bid-field-right">
+                            <span className="bid-label">Data</span>
+                            <span className="bid-value">
+                              {formatDateOnly(b.created_at)}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>

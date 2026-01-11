@@ -3059,52 +3059,42 @@ select.input:focus {
 .admin-bid-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
 }
 
 .admin-bid-row {
   position: relative;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: stretch;
-  gap: 16px;
-  padding: 18px 20px;
-  border-radius: 14px;
-  border: 1px solid #eef2f7;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid #f1f5f9;
   background: #fff;
-  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
 }
 
 .theme-dark .admin-bid-row {
-  background: #0f172a;
+  background: #111827;
   border-color: #1f2937;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
 }
 
-.admin-bid-row-left {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 160px;
-}
-
-.admin-bid-row-middle {
-  flex: 1;
-  min-width: 0;
-}
-
-.admin-bid-row-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 8px;
-  min-width: 160px;
-}
-
-.admin-bid-details-grid {
+.admin-bid-info {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 16px;
+}
+
+.admin-bid-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-bid-column-right {
+  align-items: flex-end;
 }
 
 .admin-bid-row-actions {
