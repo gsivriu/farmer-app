@@ -665,7 +665,7 @@ export default function AdminDashboard() {
                           </div>
                           <div className="bid-field">
                             <span className="bid-label">Paritate</span>
-                            <span className="bid-value">
+                            <span className="bid-value bid-parity-value">
                               {formatParityDisplay(b, { detailed: true })}
                             </span>
                           </div>

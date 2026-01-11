@@ -1328,6 +1328,10 @@ select.input:focus {
   color: #334155;
 }
 
+.bid-parity-value {
+  font-size: 12px;
+}
+
 .bid-transport-value {
   font-weight: 700;
   color: #0f172a;

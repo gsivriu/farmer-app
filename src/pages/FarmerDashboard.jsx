@@ -687,7 +687,9 @@ export default function FarmerDashboard() {
                       <div className="bid-details bid-details-compact">
                         <div className="bid-field">
                           <span className="bid-label">Paritate</span>
-                          <span className="bid-value">{formatParityDisplay(b)}</span>
+                          <span className="bid-value bid-parity-value">
+                            {formatParityDisplay(b)}
+                          </span>
                         </div>
                       </div>
 
