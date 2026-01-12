@@ -888,6 +888,9 @@ export default function AdminDashboard() {
                 const originalFreight = parseOptionalNumber(adminModalOriginal.freight);
                 const currentDelivery = normalizeOptionalText(adminModalDelivery);
                 const originalDelivery = normalizeOptionalText(adminModalOriginal.delivery);
+                const isDecisionLocked =
+                  adminSelectedBid.status === "accepted" ||
+                  adminSelectedBid.status === "rejected";
                 const counterInvalid =
                   currentCounter != null && !Number.isFinite(currentCounter);
                 const freightInvalid =
@@ -918,6 +921,7 @@ export default function AdminDashboard() {
                     <button
                       type="button"
                       className="btn small ghost admin-reject-btn"
+                      disabled={isDecisionLocked}
                       onClick={(event) => {
                         event.stopPropagation();
                         if (adminConfirmAction !== "rejected") {
@@ -932,7 +936,9 @@ export default function AdminDashboard() {
                     <button
                       type="button"
                       className="btn small ghost admin-counter-btn"
-                      disabled={!hasChanges || counterInvalid || freightInvalid}
+                      disabled={
+                        isDecisionLocked || !hasChanges || counterInvalid || freightInvalid
+                      }
                       onClick={(event) => {
                         event.stopPropagation();
                         if (adminConfirmAction !== "countered") {
@@ -947,7 +953,7 @@ export default function AdminDashboard() {
                     <button
                       type="button"
                       className="btn small ghost admin-accept-btn"
-                      disabled={hasChanges}
+                      disabled={isDecisionLocked || hasChanges}
                       onClick={(event) => {
                         event.stopPropagation();
                         if (adminConfirmAction !== "accepted") {
