@@ -514,7 +514,7 @@ export default function AdminDashboard() {
             <div className="admin-grid">
               {(commodities || []).map((c) => (
                 <div className="admin-price-item" key={c.id}>
-                  <div className="admin-label">{c.name || PRODUCT_LABELS[c.id] || c.id}</div>
+                  <div className="admin-label">{PRODUCT_LABELS[c.id] || c.name || c.id}</div>
 
                   <div className="admin-row">
                     <input
