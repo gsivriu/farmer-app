@@ -6,11 +6,11 @@ import SiloPriceTable from "../components/SiloPriceTable.jsx";
 import ExchangeRatesCard from "../components/ExchangeRatesCard.jsx";
 
 const PRODUCT_LABELS = {
-  wheat: "Grâu",
-  barley: "Orz",
-  corn: "Porumb",
-  rapeseed: "Rapiță",
-  sunflower: "Floarea soarelui",
+  wheat: "Wheat",
+  barley: "Barley",
+  corn: "Corn",
+  rapeseed: "Rapeseed",
+  sunflower: "Sunflower",
 };
 
 const formatDateDMY = (value) => {
@@ -33,8 +33,19 @@ const formatDeliveryRange = (start, end) => {
   return `${formatDateDMY(start)} ${formatDateDMY(end)}`;
 };
 
+const formatLocationDisplay = (value) => {
+  const raw = String(value || "").trim();
+  if (!raw || raw === "-") return raw || "-";
+  const normalized = raw
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+  if (normalized === "port constanta") return "Constanta Port";
+  return raw;
+};
+
 export default function AdminDashboard() {
-  // === PREȚURI INTERNE (CONTEXT) ===
+  // === INTERNAL PRICES (CONTEXT) ===
   const {
     commodities,
     updateCommodityPrice,
@@ -67,18 +78,18 @@ export default function AdminDashboard() {
     const num = Number(raw);
 
     if (!raw || raw.trim() === "") {
-      alert("Introdu un preț înainte de a confirma.");
+      alert("Enter a price before confirming.");
       return;
     }
 
     if (!Number.isFinite(num) || num <= 0) {
-      alert("Introduceți un preț valid, mai mare ca 0.");
+      alert("Enter a valid price greater than 0.");
       return;
     }
 
     const { error } = await updateCommodityPrice(id, num);
     if (error) {
-      alert("Eroare la actualizarea prețului: " + error.message);
+      alert("Error updating price: " + error.message);
       return;
     }
 
@@ -88,15 +99,15 @@ export default function AdminDashboard() {
     }));
 
     const label = PRODUCT_LABELS[id] || id;
-    setPriceNotice(`Noul preț de listă pentru ${label} a fost setat.`);
+    setPriceNotice(`New list price for ${label} has been set.`);
   };
 
-  // === BIDS DIN SUPABASE ===
-  const [farmers, setFarmers] = useState([]); // listă unică de fermieri
+  // === BIDS FROM SUPABASE ===
+  const [farmers, setFarmers] = useState([]); // unique farmer list
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // filtre listă principală
+  // Main list filters
   const [listFarmerFilter, setListFarmerFilter] = useState("all");
   const [filterProduct, setFilterProduct] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
@@ -122,7 +133,7 @@ export default function AdminDashboard() {
   const [adminConfirmAction, setAdminConfirmAction] = useState(null);
   const [deliveryLocations, setDeliveryLocations] = useState([]);
 
-  // referințe pentru date (pentru fake picker)
+  // Date refs (for native picker behavior)
   const startInputRef = useRef(null);
   const endInputRef = useRef(null);
 
@@ -212,13 +223,13 @@ export default function AdminDashboard() {
     const hasDelivery = String(deliveryRaw || "").trim() !== "";
 
     if (!hasFreight && !hasDelivery) {
-      return "Bid-ul nu a fost transmis. Vă rugăm completați tariful transport și locația de descărcare.";
+      return "Bid not submitted. Please complete transport fee and delivery location.";
     }
     if (!hasFreight) {
-      return "Bid-ul nu a fost transmis. Vă rugăm completați tariful transport.";
+      return "Bid not submitted. Please complete transport fee.";
     }
     if (!hasDelivery) {
-      return "Bid-ul nu a fost transmis. Vă rugăm completați locația de descărcare.";
+      return "Bid not submitted. Please complete delivery location.";
     }
     return null;
   };
@@ -259,14 +270,14 @@ export default function AdminDashboard() {
     if (action === "countered") {
       const counterNum = parseOptionalNumber(counterValue);
       if (!Number.isFinite(counterNum) || counterNum <= 0) {
-        alert("Introdu un preț de counter valid.");
+        alert("Enter a valid counter price.");
         return;
       }
       payload.counter_price = counterNum;
       if (isFreightParity(bid.parity)) {
         const freightNum = parseOptionalNumber(freightValue);
         if (!Number.isFinite(freightNum) || freightNum <= 0) {
-          alert("Introdu un tarif de transport valid.");
+          alert("Enter a valid transport fee.");
           return;
         }
         payload.freight_cost = freightNum;
@@ -280,7 +291,7 @@ export default function AdminDashboard() {
       .eq("id", bid.id);
 
     if (error) {
-      alert("Eroare la trimiterea actualizării: " + error.message);
+      alert("Error while sending update: " + error.message);
       return;
     }
 
@@ -331,7 +342,7 @@ export default function AdminDashboard() {
     if (!value) return "-";
     const dt = new Date(value);
     if (Number.isNaN(dt.getTime())) return "-";
-    return dt.toLocaleString("ro-RO", {
+    return dt.toLocaleString("en-GB", {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
@@ -360,25 +371,25 @@ export default function AdminDashboard() {
   const formatParityDisplay = (bid, { detailed = false } = {}) => {
     if (!bid?.parity) return "-";
     const parity = String(bid.parity).toUpperCase();
-    const delivery = bid.delivery_location || "-";
-    const loading = bid.loading_location || "-";
+    const delivery = formatLocationDisplay(bid.delivery_location || "-");
+    const loading = formatLocationDisplay(bid.loading_location || "-");
     if (parity === "FCA" || parity === "FOB" || parity === "FOR") {
       return detailed
-        ? `${parity} ${loading} cu descarcare la ${delivery}`
-        : `${parity} ${loading} catre ${delivery}`;
+        ? `${parity} ${loading} with delivery at ${delivery}`
+        : `${parity} ${loading} to ${delivery}`;
     }
     return `${parity} ${delivery}`;
   };
 
   const getStatusLabel = (status) => {
     const value = String(status || "").toLowerCase();
-    if (value === "accepted") return "Acceptat";
-    if (value === "rejected") return "Respins";
-    if (value === "countered") return "Contra-ofertă";
-    return "În așteptare";
+    if (value === "accepted") return "Accepted";
+    if (value === "rejected") return "Rejected";
+    if (value === "countered") return "Counter offer";
+    return "Pending";
   };
 
-  // filtre pentru „Toate bid-urile”
+  // Filters for "All bids"
   const filteredBids = bids.filter((b) => {
     if (listFarmerFilter !== "all" && b.farmer_id !== listFarmerFilter) return false;
     if (filterProduct !== "all" && b.product !== filterProduct) return false;
@@ -410,7 +421,7 @@ export default function AdminDashboard() {
     return true;
   });
 
-  // statistici pe produs (după filtrele curente)
+  // Product stats based on current filters
   const statsRows = (() => {
     const map = new Map();
     filteredBids.forEach((b) => {
@@ -491,11 +502,11 @@ export default function AdminDashboard() {
 
             <div className="section-divider exchange-divider" />
 
-            {/* Setare prețuri */}
+            {/* Price setup */}
             <div className="card-header admin-price-header">
-              <h2 className="market-title">Setare prețuri zilnice</h2>
+              <h2 className="market-title">Daily price setup</h2>
               <p className="market-subtitle">
-                Introdu și confirmă prețurile interne. Fermierii vor vedea automat noile valori.
+                Enter and confirm internal prices. Farmers will automatically see updated values.
               </p>
               {priceNotice && <p className="admin-price-notice">{priceNotice}</p>}
             </div>
@@ -524,7 +535,7 @@ export default function AdminDashboard() {
                       className="btn primary-btn admin-btn"
                       onClick={() => handleSavePrice(c.id)}
                     >
-                      Confirmă
+                      Confirm
                     </button>
                   </div>
                 </div>
@@ -538,23 +549,23 @@ export default function AdminDashboard() {
 
         <div className={activeTab === "bids" ? "tab-pane active" : "tab-pane"}>
           <div className="card admin-card dashboard-card">
-            {/* Filtre + Toate bid-urile */}
+            {/* Filters + All bids */}
             <div className="card-header admin-bids-header">
-              <h2 className="market-title">Toate bid-urile</h2>
+              <h2 className="market-title">All bids</h2>
               <div className="admin-bids-actions">
                 <button
                   type="button"
                   className="btn small outline filter-btn"
                   onClick={() => setFiltersOpen(true)}
                 >
-                  Filtre
+                  Filters
                 </button>
                 <button
                   type="button"
                   className="btn small outline filter-btn"
                   onClick={() => setShowStats((prev) => !prev)}
                 >
-                  Statistici
+                  Stats
                 </button>
               </div>
             </div>
@@ -562,15 +573,15 @@ export default function AdminDashboard() {
             {showStats && (
               <div style={{ marginTop: 12 }}>
                 {statsRows.length === 0 ? (
-                  <p className="small-text">Nu există statistici pentru filtrele selectate.</p>
+                  <p className="small-text">No stats available for selected filters.</p>
                 ) : (
                   <div className="table-wrapper">
                     <table className="table stats-table">
                       <thead>
                         <tr>
-                          <th>Produs</th>
-                          <th>Volum (t)</th>
-                          <th>Preț mediu</th>
+                          <th>Product</th>
+                          <th>Volume (t)</th>
+                          <th>Average price</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -593,7 +604,7 @@ export default function AdminDashboard() {
               </div>
             )}
 
-            {loading && <p className="small-text" style={{ marginTop: 12 }}>Se încarcă...</p>}
+            {loading && <p className="small-text" style={{ marginTop: 12 }}>Loading...</p>}
             {error && <p className="badge rejected" style={{ marginTop: 12 }}>{error}</p>}
 
             {!loading && !error && (
@@ -636,7 +647,7 @@ export default function AdminDashboard() {
                             {PRODUCT_LABELS[b.product] || b.product}
                           </div>
                           <div className="bid-contract">
-                            Fermier: {b.farmer_email || b.farmer_id}
+                            Farmer: {b.farmer_email || b.farmer_id}
                           </div>
                         </div>
                         <span className={`status-badge status-${statusClass.slice(3)}`}>
@@ -646,7 +657,7 @@ export default function AdminDashboard() {
                       <div className="admin-bid-info">
                         <div className="admin-bid-column">
                           <div className="bid-field">
-                            <span className="bid-label">Preț / tonă</span>
+                            <span className="bid-label">Price / ton</span>
                             <span className="bid-value admin-bid-price">
                               {showCounter ? (
                                 <span className="admin-bid-counter-value">
@@ -664,7 +675,7 @@ export default function AdminDashboard() {
                             </span>
                           </div>
                           <div className="bid-field">
-                            <span className="bid-label">Paritate</span>
+                            <span className="bid-label">Parity</span>
                             <span className="bid-value bid-parity-value">
                               {formatParityDisplay(b, { detailed: true })}
                             </span>
@@ -672,13 +683,13 @@ export default function AdminDashboard() {
                         </div>
                         <div className="admin-bid-column admin-bid-column-right">
                           <div className="bid-field bid-field-right">
-                            <span className="bid-label">Cantitate</span>
+                            <span className="bid-label">Quantity</span>
                             <span className="bid-value">
                               {Number(b.quantity || 0).toFixed(2)} t
                             </span>
                           </div>
                           <div className="bid-field bid-field-right">
-                            <span className="bid-label">Data</span>
+                            <span className="bid-label">Date</span>
                             <span className="bid-value bid-date-value">
                               {formatDateOnly(b.created_at)}
                             </span>
@@ -691,7 +702,7 @@ export default function AdminDashboard() {
 
                 {filteredBids.length === 0 && (
                   <p className="small-text" style={{ padding: 12 }}>
-                    Nu există bid-uri pentru filtrele selectate.
+                    No bids found for selected filters.
                   </p>
                 )}
               </div>
@@ -713,23 +724,23 @@ export default function AdminDashboard() {
             onClick={(event) => event.stopPropagation()}
           >
             <div className="bid-modal-header">
-              <h3>Detalii bid</h3>
+              <h3>Bid details</h3>
               <button
                 type="button"
                 className="btn small ghost"
                 onClick={() => setSelectedBid(null)}
               >
-                Închide
+                Close
               </button>
             </div>
             <div className="bid-modal-body">
-              <div><b>Data:</b> {formatDateTime(selectedBid.created_at)}</div>
+              <div><b>Date:</b> {formatDateTime(selectedBid.created_at)}</div>
               <div>
-                <b>Produs:</b> {PRODUCT_LABELS[selectedBid.product] || selectedBid.product}
+                <b>Product:</b> {PRODUCT_LABELS[selectedBid.product] || selectedBid.product}
               </div>
-              <div><b>Cantitate:</b> {Number(selectedBid.quantity || 0).toFixed(2)} t</div>
+              <div><b>Quantity:</b> {Number(selectedBid.quantity || 0).toFixed(2)} t</div>
               <div>
-                <b>Preț:</b>{" "}
+                <b>Price:</b>{" "}
                 {selectedBid.status === "accepted" &&
                 getAcceptedPrice(selectedBid) != null ? (
                   <>
@@ -749,7 +760,7 @@ export default function AdminDashboard() {
                 </div>
               )}
               <div>
-                <b>Livrare:</b>{" "}
+                <b>Delivery:</b>{" "}
                 {formatDeliveryRange(
                   selectedBid.delivery_start,
                   selectedBid.delivery_end
@@ -775,25 +786,25 @@ export default function AdminDashboard() {
             }}
           >
             <div className="bid-modal-header">
-              <h3>Detalii bid</h3>
+              <h3>Bid details</h3>
               <button
                 type="button"
                 className="btn small ghost"
                 onClick={() => setAdminSelectedBid(null)}
               >
-                Închide
+                Close
               </button>
             </div>
             <div className="bid-modal-body">
-              <div><b>Data:</b> {formatDateTime(adminSelectedBid.created_at)}</div>
-              <div><b>Fermier:</b> {adminSelectedBid.farmer_email || adminSelectedBid.farmer_id}</div>
+              <div><b>Date:</b> {formatDateTime(adminSelectedBid.created_at)}</div>
+              <div><b>Farmer:</b> {adminSelectedBid.farmer_email || adminSelectedBid.farmer_id}</div>
               <div>
-                <b>Produs:</b>{" "}
+                <b>Product:</b>{" "}
                 {PRODUCT_LABELS[adminSelectedBid.product] || adminSelectedBid.product}
               </div>
-              <div><b>Cantitate:</b> {Number(adminSelectedBid.quantity || 0).toFixed(2)} t</div>
+              <div><b>Quantity:</b> {Number(adminSelectedBid.quantity || 0).toFixed(2)} t</div>
               <div>
-                <b>Preț:</b>{" "}
+                <b>Price:</b>{" "}
                 {adminSelectedBid.status === "accepted" &&
                 getAcceptedPrice(adminSelectedBid) != null ? (
                   <>
@@ -826,7 +837,7 @@ export default function AdminDashboard() {
               </div>
               {isFreightParity(adminSelectedBid.parity) && (
                 <div>
-                  <b>Transport:</b>{" "}
+                  <b>Freight:</b>{" "}
                   <input
                     className="input inline-input"
                     type="number"
@@ -840,26 +851,26 @@ export default function AdminDashboard() {
                 </div>
               )}
               <div>
-                <b>Paritate:</b>{" "}
+                <b>Parity:</b>{" "}
                 {isFreightParity(adminSelectedBid.parity) ? (
                   <>
                     {String(adminSelectedBid.parity || "").toUpperCase()}{" "}
-                    {adminSelectedBid.loading_location || "-"} cu descarcare la{" "}
+                    {adminSelectedBid.loading_location || "-"} with delivery at{" "}
                     <select
                       className="input inline-select"
                       value={adminModalDelivery}
                       onChange={(e) => setAdminModalDelivery(e.target.value)}
                     >
-                      <option value="">Locație descărcare</option>
+                      <option value="">Delivery location</option>
                       {adminModalDelivery &&
                         !deliveryLocations.includes(adminModalDelivery) && (
                           <option value={adminModalDelivery}>
-                            {adminModalDelivery}
+                            {formatLocationDisplay(adminModalDelivery)}
                           </option>
                         )}
                       {deliveryLocations.map((loc) => (
                         <option key={loc} value={loc}>
-                          {loc}
+                          {formatLocationDisplay(loc)}
                         </option>
                       ))}
                     </select>
@@ -869,7 +880,7 @@ export default function AdminDashboard() {
                 )}
               </div>
               <div>
-                <b>Livrare:</b>{" "}
+                <b>Delivery:</b>{" "}
                 {formatDeliveryRange(
                   adminSelectedBid.delivery_start,
                   adminSelectedBid.delivery_end
@@ -931,7 +942,7 @@ export default function AdminDashboard() {
                         submitAdminDecision("rejected");
                       }}
                     >
-                      {adminConfirmAction === "rejected" ? "Sigur?" : "Respinge"}
+                      {adminConfirmAction === "rejected" ? "Confirm?" : "Reject"}
                     </button>
                     <button
                       type="button"
@@ -948,7 +959,7 @@ export default function AdminDashboard() {
                         submitAdminDecision("countered");
                       }}
                     >
-                      {adminConfirmAction === "countered" ? "Sigur?" : "Contra-ofertă"}
+                      {adminConfirmAction === "countered" ? "Confirm?" : "Counter offer"}
                     </button>
                     <button
                       type="button"
@@ -963,7 +974,7 @@ export default function AdminDashboard() {
                         submitAdminDecision("accepted");
                       }}
                     >
-                      {adminConfirmAction === "accepted" ? "Sigur?" : "Acceptă"}
+                      {adminConfirmAction === "accepted" ? "Confirm?" : "Accept"}
                     </button>
                   </>
                 );
@@ -982,18 +993,18 @@ export default function AdminDashboard() {
         >
           <div className="bid-modal" onClick={(event) => event.stopPropagation()}>
             <div className="bid-modal-header">
-              <h3>Filtre</h3>
+              <h3>Filters</h3>
               <button
                 type="button"
                 className="btn small outline filter-btn"
                 onClick={() => setFiltersOpen(false)}
               >
-                Închide
+                Close
               </button>
             </div>
             <div className="bid-modal-body">
               <div className="filter-group">
-                <label className="label">Fermier</label>
+                <label className="label">Farmer</label>
                 <select
                   className="input"
                   value={listFarmerFilter}
@@ -1001,7 +1012,7 @@ export default function AdminDashboard() {
                     setListFarmerFilter(e.target.value);
                   }}
                 >
-                  <option value="all">Toți fermierii</option>
+                  <option value="all">All farmers</option>
                   {(farmers || []).map((f) => (
                     <option key={f.id} value={f.id}>
                       {f.email || f.id}
@@ -1011,13 +1022,13 @@ export default function AdminDashboard() {
               </div>
 
               <div className="filter-group">
-                <label className="label">Produs</label>
+                <label className="label">Product</label>
                 <select
                   className="input"
                   value={filterProduct}
                   onChange={(e) => setFilterProduct(e.target.value)}
                 >
-                  <option value="all">Toate</option>
+                  <option value="all">All</option>
                   {Object.keys(PRODUCT_LABELS).map((key) => (
                     <option key={key} value={key}>
                       {PRODUCT_LABELS[key]}
@@ -1027,13 +1038,13 @@ export default function AdminDashboard() {
               </div>
 
               <div className="filter-group">
-                <label className="label">Status bid</label>
+                <label className="label">Bid status</label>
                 <select
                   className="input"
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
                 >
-                  <option value="all">Toate</option>
+                  <option value="all">All</option>
                   <option value="accepted">Accepted</option>
                   <option value="rejected">Rejected</option>
                   <option value="pending">Pending</option>
@@ -1041,13 +1052,13 @@ export default function AdminDashboard() {
               </div>
 
               <div className="filter-group">
-                <label className="label">Paritate</label>
+                <label className="label">Parity</label>
                 <select
                   className="input"
                   value={filterParity}
                   onChange={(e) => setFilterParity(e.target.value)}
                 >
-                  <option value="all">Toate</option>
+                  <option value="all">All</option>
                   {["CPT", "DAP", "FCA", "FOR", "FOB", "CIF"].map((p) => (
                     <option key={p} value={p}>
                       {p}
@@ -1057,39 +1068,39 @@ export default function AdminDashboard() {
               </div>
 
               <div className="filter-group">
-                <label className="label">Locație descărcare</label>
+                <label className="label">Delivery location</label>
                 <select
                   className="input"
                   value={filterDeliveryLocation}
                   onChange={(e) => setFilterDeliveryLocation(e.target.value)}
                 >
-                  <option value="all">Toate</option>
+                  <option value="all">All</option>
                   {deliveryLocationOptions.map((loc) => (
                     <option key={loc} value={loc}>
-                      {loc}
+                      {formatLocationDisplay(loc)}
                     </option>
                   ))}
                 </select>
               </div>
 
               <div className="filter-group">
-                <label className="label">Locație încărcare</label>
+                <label className="label">Loading location</label>
                 <select
                   className="input"
                   value={filterLoadingLocation}
                   onChange={(e) => setFilterLoadingLocation(e.target.value)}
                 >
-                  <option value="all">Toate</option>
+                  <option value="all">All</option>
                   {loadingLocationOptions.map((loc) => (
                     <option key={loc} value={loc}>
-                      {loc}
+                      {formatLocationDisplay(loc)}
                     </option>
                   ))}
                 </select>
               </div>
 
               <div className="filter-group">
-                <label className="label">Livrare (de la)</label>
+                <label className="label">Delivery (from)</label>
                 <input
                   className="input"
                   type="date"
@@ -1099,7 +1110,7 @@ export default function AdminDashboard() {
               </div>
 
               <div className="filter-group">
-                <label className="label">Livrare (până la)</label>
+                <label className="label">Delivery (to)</label>
                 <input
                   className="input"
                   type="date"
@@ -1114,7 +1125,7 @@ export default function AdminDashboard() {
                   className="btn small outline filter-btn"
                   onClick={() => setFiltersOpen(false)}
                 >
-                  Ok
+                  Apply
                 </button>
                 <button
                   type="button"
@@ -1130,7 +1141,7 @@ export default function AdminDashboard() {
                     setFilterLoadingLocation("all");
                   }}
                 >
-                  Resetează
+                  Reset
                 </button>
               </div>
             </div>

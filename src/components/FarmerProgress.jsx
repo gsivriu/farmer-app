@@ -77,7 +77,7 @@ export default function FarmerProgress({ embedded = false }) {
     const targetsOnly = TARGETS.map((x) => x.t);
     const maxTarget = targetsOnly[targetsOnly.length - 1];
 
-    // dacă ești peste ultimul target -> complete
+    // If total exceeds the last target, mark as complete.
     if (totalAccepted >= maxTarget) {
       return {
         complete: true,
@@ -87,7 +87,7 @@ export default function FarmerProgress({ embedded = false }) {
       };
     }
 
-    // următorul target (cel mai mic target mai mare decât totalAccepted)
+    // Next target is the smallest target greater than totalAccepted.
     const nextT = targetsOnly.find((t) => totalAccepted < t) ?? maxTarget;
 
     const pctRaw = (Number(totalAccepted) / Number(nextT)) * 100;
@@ -109,7 +109,7 @@ export default function FarmerProgress({ embedded = false }) {
     <div className="progress-head">
       <div className="progress-title-group">
         <div className="progress-meta">
-          Total livrat: <b>{fmt0(totalAccepted)}</b> /{" "}
+          Total delivered: <b>{fmt0(totalAccepted)}</b> /{" "}
           <b>{fmt0(progress.nextT)}</b> t
         </div>
       </div>

@@ -1,12 +1,12 @@
 // src/components/MarketTicker.jsx
 
-// Valorile sunt demo – le poți înlocui cu API real
+// Demo values - can be replaced with live API data.
 const FUTURES = [
     // MATIF Wheat
     {
       id: 1,
       market: "MATIF",
-      product: "Grâu",
+      product: "Wheat",
       contract: "Mar 25",
       price: 221.25,
       change: +1.75,
@@ -16,27 +16,27 @@ const FUTURES = [
     {
       id: 2,
       market: "MATIF",
-      product: "Porumb",
+      product: "Corn",
       contract: "Jun 25",
       price: 205.50,
       change: -0.50,
     },
   
-    // MATIF Rapeseed (NOU)
+    // MATIF Rapeseed
     {
       id: 3,
       market: "MATIF",
-      product: "Rapiță",
+      product: "Rapeseed",
       contract: "May 25",
       price: 435.25,
       change: +3.25,
     },
   
-    // CBOT Corn (NOU)
+    // CBOT Corn
     {
       id: 4,
       market: "CBOT",
-      product: "Porumb",
+      product: "Corn",
       contract: "Jul 25",
       price: 492.75,
       change: +0.75,

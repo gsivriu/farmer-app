@@ -33,7 +33,7 @@ export default function BidList({ bids, isAdmin }) {
     return formatDateDMY(str);
   };
 
-  // Preț activ de negociere (counter dacă există, altfel preț inițial)
+  // Active negotiated price (counter if present, otherwise initial price)
   const getNegotiatedPrice = (bid) => bid.counterPrice ?? bid.price;
 
   // =====================================================================
@@ -53,7 +53,7 @@ export default function BidList({ bids, isAdmin }) {
     const lastPrice = getNegotiatedPrice(bid);
 
     const input = window.prompt(
-      `Introduceți un nou preț (EUR/t).\nUltima ofertă: ${lastPrice} EUR/t`,
+      `Enter a new price (EUR/t).\nLatest offer: ${lastPrice} EUR/t`,
       lastPrice
     );
 
@@ -61,7 +61,7 @@ export default function BidList({ bids, isAdmin }) {
 
     const value = Number(input);
     if (!Number.isFinite(value) || value <= 0) {
-      window.alert("Introduceți un preț valid.");
+      window.alert("Enter a valid price.");
       return;
     }
 
@@ -92,10 +92,10 @@ export default function BidList({ bids, isAdmin }) {
       return (
         <>
           <button className="btn small" onClick={() => handleAccept(bid)}>
-            Acceptă
+            Accept
           </button>{" "}
           <button className="btn small" onClick={() => handleReject(bid.id)}>
-            Respinge
+            Reject
           </button>{" "}
           <button className="btn small" onClick={() => handleCounter(bid)}>
             Counter
@@ -108,7 +108,7 @@ export default function BidList({ bids, isAdmin }) {
   };
 
   // =====================================================================
-  // DESKTOP ROW (AICI MODIFICĂM)
+  // DESKTOP ROW
   // =====================================================================
 
   const renderDesktopRow = (bid) => {
@@ -122,10 +122,10 @@ export default function BidList({ bids, isAdmin }) {
         <td>{bid.farmerName}</td>
         <td>{bid.product}</td>
 
-        {/* PREȚ INIȚIAL (Fermier) */}
+        {/* INITIAL PRICE (Farmer) */}
         <td>{bid.price} EUR/t</td>
 
-        {/* NOUA COLUMNĂ – Counter Price */}
+        {/* COUNTER PRICE COLUMN */}
         <td
           style={{
             color: isCounterDifferent ? "red" : "#555",
@@ -161,7 +161,7 @@ export default function BidList({ bids, isAdmin }) {
   };
 
   // =====================================================================
-  // MOBILE CARD (AICI MODIFICĂM)
+  // MOBILE CARD
   // =====================================================================
 
   const renderMobileCard = (bid) => {
@@ -175,10 +175,10 @@ export default function BidList({ bids, isAdmin }) {
           <strong>{bid.farmerName}</strong> – {bid.product}
         </div>
 
-        {/* Preț inițial */}
-        <div>Preț inițial: {bid.price} EUR/t</div>
+        {/* Initial price */}
+        <div>Initial price: {bid.price} EUR/t</div>
 
-        {/* Counter price roșu */}
+        {/* Counter price (highlighted if changed) */}
         <div
           style={{
             color: isCounterDifferent ? "red" : "#555",
@@ -188,8 +188,8 @@ export default function BidList({ bids, isAdmin }) {
           Counter: {bid.counterPrice ?? "-"}
         </div>
 
-        <div>Cantitate: {bid.quantity} t</div>
-        <div>Perioadă: {formatDeliveryPeriod(bid.deliveryPeriod)}</div>
+        <div>Quantity: {bid.quantity} t</div>
+        <div>Period: {formatDeliveryPeriod(bid.deliveryPeriod)}</div>
         <div>Status: {bid.status}</div>
 
         <div className="mobile-actions">{renderActions(bid)}</div>
@@ -202,7 +202,7 @@ export default function BidList({ bids, isAdmin }) {
   // =====================================================================
 
   if (!bids || bids.length === 0) {
-    return <p>Nu există bid-uri de afișat încă.</p>;
+    return <p>No bids to display yet.</p>;
   }
 
   return (
@@ -212,14 +212,14 @@ export default function BidList({ bids, isAdmin }) {
         <table className="table">
           <thead>
             <tr>
-              <th>Fermier</th>
-              <th>Produs</th>
-              <th>Preț inițial</th>
-              <th>Counter Price</th> {/* <--- NOU */}
-              <th>Cantitate</th>
-              <th>Livrare</th>
+              <th>Farmer</th>
+              <th>Product</th>
+              <th>Initial price</th>
+              <th>Counter Price</th> {/* New */}
+              <th>Quantity</th>
+              <th>Delivery</th>
               <th>Status</th>
-              <th>Acțiuni</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>{bids.map((bid) => renderDesktopRow(bid))}</tbody>

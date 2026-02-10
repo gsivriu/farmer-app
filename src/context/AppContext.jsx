@@ -4,7 +4,7 @@ import { supabase } from "../supabaseClient";
 const AppContext = createContext(null);
 
 
-// Lista inițială de produse + prețuri de pornire
+// Initial commodity list + starting prices
 const initialCommodities = [
   {
     id: "wheat",
@@ -66,13 +66,13 @@ const normalizeName = (value) =>
     .trim();
 
 export function AppProvider({ children }) {
-  // utilizatorul curent: { name, role: "farmer" | "admin" }
+  // current user: { name, role: "farmer" | "admin" }
   const [currentUser, setCurrentUser] = useState(null);
 
-  // prețuri zilnice la produse
+  // daily commodity prices
   const [commodities, setCommodities] = useState(initialCommodities);
 
-  // lista de bid-uri
+  // bids list
   const [bids, setBids] = useState([]);
   const [farmerRewards, setFarmerRewards] = useState({});
 
@@ -183,12 +183,12 @@ export function AppProvider({ children }) {
 
   const logout = () => {
     setCurrentUser(null);
-    // dacă vrei să golești bid-urile la logout, decomentezi linia de mai jos:
+    // if you want to clear bids on logout, uncomment the line below:
     // setBids([]);
   };
 
   // =========================
-  // CREATE BID (fermieri)
+  // CREATE BID (farmers)
   // =========================
   const createBid = ({ commodityId, price, quantity, deliveryPeriod }) => {
     if (!currentUser) return;
@@ -209,9 +209,9 @@ export function AppProvider({ children }) {
       farmerName: currentUser.name,
       product: commodity.name,
 
-      // preț inițial fermier
+      // initial farmer price
       price: numericPrice,
-      // prețul ACTIV din negociere (pleacă de la inițial)
+      // active negotiated price (starts from initial)
       currentPrice: numericPrice,
 
       quantity: numericQty,
@@ -225,10 +225,10 @@ export function AppProvider({ children }) {
   };
 
   // =========================
-  // UPDATE BID STATUS (admin + fermier)
+  // UPDATE BID STATUS (admin + farmer)
   // =========================
   // status: "Pending" | "Counter Offer" | "Completed" | "Rejected"
-  // newPrice: doar când facem Counter sau Accept la un anumit preț
+  // newPrice: used only for Counter or Accept at a specific price
   const updateBidStatus = (bidId, status, newPrice = null) => {
     setBids((prevBids) =>
       prevBids.map((bid) => {
@@ -236,26 +236,26 @@ export function AppProvider({ children }) {
 
         const updated = { ...bid, status };
 
-        // Ultimul preț negociat curent
+        // Current negotiated price
         const currentNegotiatedPrice =
           newPrice !== null && newPrice !== undefined
             ? Number(newPrice)
             : bid.currentPrice ?? bid.price;
 
-        // Dacă avem Counter Offer (admin sau fermier)
+        // Counter Offer (admin or farmer)
         if (status === "Counter Offer") {
           return {
             ...updated,
-            currentPrice: currentNegotiatedPrice, // acesta devine prețul activ
+            currentPrice: currentNegotiatedPrice, // becomes the active price
           };
         }
 
-        // Dacă se Acceptă oferta => Completed la prețul activ
+        // Accept offer => Completed at active price
         if (status === "Completed") {
           return {
             ...updated,
             finalPrice: currentNegotiatedPrice,
-            // prețul activ rămâne în currentPrice
+            // active price remains in currentPrice
             currentPrice: currentNegotiatedPrice,
           };
         }
@@ -267,7 +267,7 @@ export function AppProvider({ children }) {
   };
 
   // =========================
-  // UPDATE PREȚ PRODUS (admin)
+  // UPDATE PRODUCT PRICE (admin)
   // =========================
   const updateCommodityPrice = async (id, newPrice) => {
     const target = commodities.find((c) => c.id === id);

@@ -19,7 +19,7 @@ export default function RegisterForm({ onRegister, role = "farmer" }) {
       password,
       options: {
         data: {
-          role, // fermier / admin în user_metadata
+          role, // farmer / admin in user_metadata
         },
       },
     });
@@ -32,17 +32,17 @@ export default function RegisterForm({ onRegister, role = "farmer" }) {
     }
 
     setMessage(
-      `Cont de ${role === "admin" ? "admin" : "fermier"} creat. Verifică email-ul pentru confirmare.`
+      `${role === "admin" ? "Admin" : "Farmer"} account created. Check your email to confirm.`
     );
     onRegister?.();
   };
 
-  const roleLabel = role === "admin" ? "Admin" : "Fermier";
+  const roleLabel = role === "admin" ? "Admin" : "Farmer";
 
   return (
     <form className="login-form" onSubmit={handleRegister}>
       <div className="small-text">
-        Cont nou <strong>{roleLabel}</strong>
+        New <strong>{roleLabel}</strong> account
       </div>
 
       <label className="label">
@@ -50,7 +50,7 @@ export default function RegisterForm({ onRegister, role = "farmer" }) {
         <input
           className="input"
           type="email"
-          placeholder={`Email ${roleLabel.toLowerCase()}`}
+          placeholder={`${roleLabel.toLowerCase()} email`}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -58,11 +58,11 @@ export default function RegisterForm({ onRegister, role = "farmer" }) {
       </label>
 
       <label className="label">
-        Parolă
+        Password
         <input
           className="input"
           type="password"
-          placeholder="Minim 6 caractere"
+          placeholder="Minimum 6 characters"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -77,7 +77,7 @@ export default function RegisterForm({ onRegister, role = "farmer" }) {
         type="submit"
         disabled={loading}
       >
-        {loading ? "Creare cont..." : "Creează cont"}
+        {loading ? "Creating account..." : "Create account"}
       </button>
     </form>
   );

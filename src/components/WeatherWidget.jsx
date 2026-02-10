@@ -6,25 +6,25 @@ const STORAGE_NAME_KEY = "savedWeatherName";
 
 const getWeatherCondition = (code, isDay) => {
   const value = Number(code);
-  if (value === 0) return { label: "Cer senin", icon: isDay ? "☀️" : "🌙" };
+  if (value === 0) return { label: "Clear sky", icon: isDay ? "☀️" : "🌙" };
   if (value >= 1 && value <= 3)
-    return { label: value === 3 ? "Înnorat" : "Parțial noros", icon: isDay ? "⛅" : "☁️" };
-  if (value === 45 || value === 48) return { label: "Ceață", icon: "🌫️" };
+    return { label: value === 3 ? "Overcast" : "Partly cloudy", icon: isDay ? "⛅" : "☁️" };
+  if (value === 45 || value === 48) return { label: "Fog", icon: "🌫️" };
   if ((value >= 51 && value <= 67) || (value >= 80 && value <= 82))
-    return { label: "Ploaie", icon: "🌧️" };
+    return { label: "Rain", icon: "🌧️" };
   if ((value >= 71 && value <= 77) || (value >= 85 && value <= 86))
-    return { label: "Ninsoare", icon: "❄️" };
-  if (value >= 95 && value <= 99) return { label: "Furtună", icon: "⛈️" };
-  return { label: "Cer senin", icon: isDay ? "☀️" : "🌙" };
+    return { label: "Snow", icon: "❄️" };
+  if (value >= 95 && value <= 99) return { label: "Storm", icon: "⛈️" };
+  return { label: "Clear sky", icon: isDay ? "☀️" : "🌙" };
 };
 
 const WeatherWidget = () => {
   const [weather, setWeather] = useState(null);
   const [locationName, setLocationName] = useState(() => {
     try {
-      return localStorage.getItem(STORAGE_NAME_KEY) || "Se localizează...";
+      return localStorage.getItem(STORAGE_NAME_KEY) || "Locating...";
     } catch {
-      return "Se localizează...";
+      return "Locating...";
     }
   });
   const [coords, setCoords] = useState(() => {
@@ -59,16 +59,16 @@ const WeatherWidget = () => {
         (pos) => {
           const nextCoords = { lat: pos.coords.latitude, lon: pos.coords.longitude };
           setCoords(nextCoords);
-          setLocationName("Locația ta");
+          setLocationName("Your location");
           try {
             localStorage.setItem(STORAGE_COORDS_KEY, JSON.stringify(nextCoords));
-            localStorage.setItem(STORAGE_NAME_KEY, "Locația ta");
+            localStorage.setItem(STORAGE_NAME_KEY, "Your location");
           } catch {
             // ignore storage errors
           }
         },
         () => {
-          setLocationName("București");
+          setLocationName("Bucharest");
         }
       );
     }
@@ -128,7 +128,7 @@ const WeatherWidget = () => {
     }
   };
 
-  if (!weather) return <div className="weather-card loading">Se încarcă...</div>;
+  if (!weather) return <div className="weather-card loading">Loading...</div>;
 
   const cardTheme = weather.isDay === 0 ? "night" : "day";
   const condition = getWeatherCondition(
@@ -139,7 +139,7 @@ const WeatherWidget = () => {
   const soilLayer10 = Math.round(weather.soil?.layer10 || 0);
   const soilLayer30 = Math.round(weather.soil?.layer30 || 0);
   const soilLayer100 = Math.round(weather.soil?.layer100 || 0);
-  const formattedDate = new Intl.DateTimeFormat("ro-RO", {
+  const formattedDate = new Intl.DateTimeFormat("en-GB", {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -149,7 +149,7 @@ const WeatherWidget = () => {
     <>
       <div
         className={`weather-card ${cardTheme} ${
-          weather.type.toLowerCase().includes("ploaie") ? "rain" : ""
+          weather.type.toLowerCase().includes("rain") ? "rain" : ""
         }`}
         onClick={() => setModalOpen(true)}
       >
@@ -169,7 +169,7 @@ const WeatherWidget = () => {
               Min {weather.min}° / Max {weather.max}°
             </span>
             <span className="min-max">
-              Vânt: {Math.round(weather.windSpeed || 0)} km/h
+              Wind: {Math.round(weather.windSpeed || 0)} km/h
             </span>
           </div>
         </div>
@@ -197,13 +197,13 @@ const WeatherWidget = () => {
                   <input
                     type="text"
                     className="city-search-input"
-                    placeholder="Caută oraș..."
+                    placeholder="Search city..."
                     value={searchQuery}
                     onChange={(e) => handleSearch(e.target.value)}
                     autoFocus
                   />
                   <button className="cancel-search" onClick={() => setShowSearch(false)}>
-                    Anulează
+                    Cancel
                   </button>
                   <div className="search-results">
                     {searchResults.map((city) => (
@@ -225,7 +225,7 @@ const WeatherWidget = () => {
                         <button
                           className="location-search"
                           onClick={() => setShowSearch(true)}
-                          aria-label="Caută locație"
+                          aria-label="Search location"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
                             <title>Search</title>
@@ -339,7 +339,7 @@ const WeatherWidget = () => {
                       <h2 className="next-5-days__heading">Next 7 days</h2>
                       <div className="next-5-days__container">
                         {weather.daily.slice(0, 7).map((day, idx) => {
-                          const dateLabel = new Intl.DateTimeFormat("ro-RO", {
+                          const dateLabel = new Intl.DateTimeFormat("en-GB", {
                             day: "numeric",
                             month: "numeric",
                           }).format(new Date(day.date));

@@ -3,11 +3,11 @@ import { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
 
 const PRODUCT_OPTIONS = [
-  { value: "wheat", label: "Grâu" },
-  { value: "barley", label: "Orz" },
-  { value: "corn", label: "Porumb" },
-  { value: "rapeseed", label: "Rapiță" },
-  { value: "sunflower", label: "Floarea soarelui" },
+  { value: "wheat", label: "Wheat" },
+  { value: "barley", label: "Barley" },
+  { value: "corn", label: "Corn" },
+  { value: "rapeseed", label: "Rapeseed" },
+  { value: "sunflower", label: "Sunflower" },
 ];
 
 const PARITY_OPTIONS = ["CPT", "DAP", "FCA", "FOR", "FOB", "CIF"];
@@ -19,7 +19,7 @@ const isFreightParity = (parity) => {
 export default function BidForm({ onBidCreated, embedded = false }) {
   const [product, setProduct] = useState("wheat");
   const isSunflower = product === "sunflower";
-  const priceLabel = isSunflower ? "Preț (USD/t)" : "Preț (EUR/t)";
+  const priceLabel = isSunflower ? "Price (USD/t)" : "Price (EUR/t)";
 
   const [quantity, setQuantity] = useState("");
   const [price, setPrice] = useState("");
@@ -69,26 +69,26 @@ export default function BidForm({ onBidCreated, embedded = false }) {
 
     if (!qtyNum || qtyNum <= 0) {
       setLoading(false);
-      setError("Introdu o cantitate validă (> 0).");
+      setError("Enter a valid quantity (> 0).");
       return;
     }
 
     if (!priceNum || priceNum <= 0) {
       setLoading(false);
-      setError("Introdu un preț valid (> 0).");
+      setError("Enter a valid price (> 0).");
       return;
     }
 
     if (deliveryEnd && deliveryStart && deliveryEnd < deliveryStart) {
       setLoading(false);
-      setError("Data de final nu poate fi înainte de data de start.");
+      setError("End date cannot be earlier than start date.");
       return;
     }
 
     const { data: userData, error: userError } = await supabase.auth.getUser();
     if (userError || !userData?.user) {
       setLoading(false);
-      setError("Trebuie să fii logat pentru a trimite un bid.");
+      setError("You must be logged in to submit a bid.");
       return;
     }
 
@@ -111,11 +111,11 @@ export default function BidForm({ onBidCreated, embedded = false }) {
 
     if (insertError) {
       setLoading(false);
-      setError("Eroare la trimiterea bid-ului: " + insertError.message);
+      setError("Error submitting bid: " + insertError.message);
       return;
     }
 
-    setMessage("Bid trimis cu succes. Vei fi contactat de trader.");
+    setMessage("Bid submitted successfully. A trader will contact you.");
     setLoading(false);
 
     // Reset
@@ -132,15 +132,15 @@ export default function BidForm({ onBidCreated, embedded = false }) {
 
   const content = (
     <>
-      <h2>Plasează un bid</h2>
+      <h2>Place a bid</h2>
 
       {message && <p className="badge accepted">{message}</p>}
       {error && <p className="badge rejected">{error}</p>}
 
       <form className="form" onSubmit={handleSubmit}>
-        {/* PRODUS */}
+        {/* PRODUCT */}
         <div className="bid-input-container">
-          <label className="bid-input-label">Produs</label>
+          <label className="bid-input-label">Product</label>
           <select
             className="bid-input-field"
             value={product}
@@ -154,10 +154,10 @@ export default function BidForm({ onBidCreated, embedded = false }) {
           </select>
         </div>
 
-        {/* CANTITATE + PREȚ */}
+        {/* QUANTITY + PRICE */}
         <div className="bid-form-grid-2">
           <div className="bid-input-container">
-            <label className="bid-input-label">Cantitate (t)</label>
+            <label className="bid-input-label">Quantity (t)</label>
             <input
               className="bid-input-field"
               type="number"
@@ -183,10 +183,10 @@ export default function BidForm({ onBidCreated, embedded = false }) {
           </div>
         </div>
 
-        {/* PARITATE + LOCAȚIE */}
+        {/* PARITY + LOCATION */}
         <div className="bid-form-grid-2">
           <div className="bid-input-container">
-            <label className="bid-input-label">Paritate</label>
+            <label className="bid-input-label">Parity</label>
             <select
               className="bid-input-field"
               value={parity}
@@ -202,18 +202,18 @@ export default function BidForm({ onBidCreated, embedded = false }) {
 
           {!isFreightParity(parity) && (
             <div className="bid-input-container">
-              <label className="bid-input-label">Locație descarcare</label>
+              <label className="bid-input-label">Delivery location</label>
               <select
                 className="bid-input-field"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
               >
                 {locations.length === 0 && (
-                  <option value="Port Constanța">Port Constanța</option>
+                  <option value="Port Constanța">Constanta Port</option>
                 )}
                 {locations.map((loc) => (
                   <option key={loc} value={loc}>
-                    {loc}
+                    {loc === "Port Constanța" ? "Constanta Port" : loc}
                   </option>
                 ))}
               </select>
@@ -224,22 +224,22 @@ export default function BidForm({ onBidCreated, embedded = false }) {
         {isFreightParity(parity) && (
           <div className="bid-form-grid-2">
             <div className="bid-input-container">
-              <label className="bid-input-label">Locație încărcare</label>
+              <label className="bid-input-label">Loading location</label>
               <input
                 className="bid-input-field"
                 type="text"
                 value={loadingLocation}
                 onChange={(e) => setLoadingLocation(e.target.value)}
-                placeholder="ex: Fermă / Siloz"
+                placeholder="e.g. Farm / Silo"
               />
             </div>
           </div>
         )}
 
-        {/* DATE LIVRARE – NATIV, MOBILE SAFE */}
+        {/* DELIVERY DATES - NATIVE, MOBILE SAFE */}
         <div className="bid-form-grid-2">
           <div className="bid-input-container">
-            <label className="bid-input-label">Start livrare</label>
+            <label className="bid-input-label">Delivery start</label>
             <input
               type="date"
               className="bid-input-field"
@@ -249,7 +249,7 @@ export default function BidForm({ onBidCreated, embedded = false }) {
           </div>
 
           <div className="bid-input-container">
-            <label className="bid-input-label">Final livrare</label>
+            <label className="bid-input-label">Delivery end</label>
             <input
               type="date"
               className="bid-input-field"
@@ -264,7 +264,7 @@ export default function BidForm({ onBidCreated, embedded = false }) {
           type="submit"
           disabled={loading}
         >
-          {loading ? "Se trimite..." : "Trimite bid"}
+          {loading ? "Submitting..." : "Submit bid"}
         </button>
       </form>
     </>

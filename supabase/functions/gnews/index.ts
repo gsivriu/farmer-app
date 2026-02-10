@@ -1,54 +1,54 @@
 // supabase/functions/gnews/index.ts
 
-// Definim headerele CORS manual
+// Define CORS headers manually.
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Folosim Deno.serve nativ (fără importuri externe care pot eșua)
+// Use native Deno.serve (no external imports required).
 Deno.serve(async (req) => {
-  // 1. Logăm imediat ce primim cererea pentru a confirma că serverul e viu
-  console.log("REQUEST PRIMIT - Funcția a pornit!");
+  // 1. Log request start for quick diagnostics.
+  console.log("REQUEST RECEIVED - function started.");
 
-  // 2. Gestionăm cererile de tip OPTIONS (verificarea browserului)
+  // 2. Handle browser preflight requests.
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   try {
-    // 3. Verificăm cheia API
+    // 3. Validate API key.
     const apiKey = Deno.env.get("GNEWS_API_KEY");
     if (!apiKey) {
-      console.error("Lipsește GNEWS_API_KEY!");
-      throw new Error("Serverul nu are cheia API configurată.");
+      console.error("Missing GNEWS_API_KEY.");
+      throw new Error("Server configuration error: missing API key.");
     }
 
-    // 4. Citim datele trimise (cu protecție la erori de parsare)
+    // 4. Parse request body safely.
     let requestBody = {};
     try {
       const text = await req.text();
       if (text) requestBody = JSON.parse(text);
     } catch (err) {
-      console.warn("Nu s-a putut parsa JSON-ul, folosim parametri default.");
+      console.warn("JSON parsing failed, using default params.");
     }
 
     const { q, lang, max } = requestBody;
 
-    // 5. Construim URL-ul și apelăm GNews
+    // 5. Build URL and call GNews.
     const searchTerm = encodeURIComponent(q || "agricultura");
     const url = `https://gnews.io/api/v4/search?q=${searchTerm}&lang=${
       lang || "ro"
     }&max=${max || 10}&apikey=${apiKey}`;
 
-    console.log(`Apelăm GNews: ${url.replace(apiKey, "HIDDEN_KEY")}`);
+    console.log(`Calling GNews: ${url.replace(apiKey, "HIDDEN_KEY")}`);
 
     const gnewsRes = await fetch(url);
     const data = await gnewsRes.json();
 
-    // 6. Returnăm rezultatul
+    // 6. Return response.
     if (!gnewsRes.ok) {
-      console.error("Eroare GNews:", data);
+      console.error("GNews error:", data);
       return new Response(JSON.stringify(data), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -60,8 +60,8 @@ Deno.serve(async (req) => {
       status: 200,
     });
   } catch (error) {
-    // Prindem orice eroare internă și o afișăm clar
-    console.error("EROARE CRITICĂ:", error.message);
+    // Catch any internal error and return a clear message.
+    console.error("CRITICAL ERROR:", error.message);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,

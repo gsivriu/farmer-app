@@ -3,7 +3,7 @@ import { useAppContext } from "../context/AppContext.jsx";
 
 export default function PricesGrid() {
   const { commodities = [] } = useAppContext() || {};
-  const todayLabel = new Date().toLocaleDateString("ro-RO");
+  const todayLabel = new Date().toLocaleDateString("en-GB");
 
   const getTrendClass = (trend, lastPrice) => {
     if (trend === "up") return "market-item-up";
@@ -16,21 +16,19 @@ export default function PricesGrid() {
   return (
     <div className="market-card prices-card">
       <div className="market-card-header">
-        <h3 className="market-title">Prețuri Ameropa CPT Constanța</h3>
+        <h3 className="market-title">Ameropa CPT Constanta prices</h3>
         <p className="market-subtitle">
-          Actualizate astăzi {todayLabel} după ora 12:00.
+          Updated today {todayLabel} after 12:00.
         </p>
       </div>
 
       <div className="market-grid">
         {commodities.map((c) => {
           
-          // ----------------------
-          // USD pentru floarea soarelui
-          // ----------------------
+          // Sunflower is quoted in USD.
           const unit = c.id === "sunflower" ? "USD/t" : "EUR/t";
 
-          // Pentru afișare săgeată + schimbare
+          // Display trend arrow and price delta.
           let trendText = "";
           if (c.lastPrice !== null) {
             if (c.trend === "up") trendText = `↑ +${c.priceChange}`;

@@ -77,10 +77,10 @@ export default function CurrencyConverterModal({ isOpen, onClose, rates }) {
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal="true"
-        aria-label="Calculator valutar"
+        aria-label="Currency converter"
       >
         <div className="converter-modal-header">
-          <h2>Calculator Valutar</h2>
+          <h2>Currency Converter</h2>
           <button type="button" className="converter-close-btn" onClick={onClose}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2">
               <line x1="18" y1="6" x2="6" y2="18" />
@@ -89,7 +89,7 @@ export default function CurrencyConverterModal({ isOpen, onClose, rates }) {
           </button>
         </div>
 
-        <p className="converter-modal-subtitle">Convertește rapid la cursul zilei</p>
+        <p className="converter-modal-subtitle">Quick conversion using today&apos;s rate</p>
 
         <div className="converter-swap-card">
           <div className="converter-card-row">
@@ -118,7 +118,7 @@ export default function CurrencyConverterModal({ isOpen, onClose, rates }) {
               ))}
             </select>
           </div>
-          <span className="converter-card-label">Suma trimisă</span>
+          <span className="converter-card-label">Amount sent</span>
         </div>
 
         <div className="converter-swap-separator">
@@ -147,7 +147,7 @@ export default function CurrencyConverterModal({ isOpen, onClose, rates }) {
               ))}
             </select>
           </div>
-          <span className="converter-card-label">Suma estimată</span>
+          <span className="converter-card-label">Estimated amount</span>
         </div>
 
         <div className="converter-actions">
@@ -163,7 +163,7 @@ export default function CurrencyConverterModal({ isOpen, onClose, rates }) {
               1 {fromCurrency} ≈ {formatNumber(safeRate, 4)} {toCurrency}
             </div>
             <div className="converter-rate-date">
-              Actualizat: {formatDateDMY(rates?.lastUpdated) || "Azi"}
+              Updated: {formatDateDMY(rates?.lastUpdated) || "Today"}
             </div>
           </div>
         </div>

@@ -10,58 +10,53 @@ export default function LoginPage() {
     e.preventDefault();
 
     if (!name.trim()) {
-      alert("Introduceți un nume / o firmă.");
+      alert("Enter a name / company.");
       return;
     }
 
-    // Folosim login(name, role) din context
+    // Use login(name, role) from context.
     login(name.trim(), role);
   };
 
   return (
     <div className="center">
       <div className="card login-card">
-        {/* Banda roșie AMEROPA */}
         <div className="login-header-band">
           <h1 className="ameropa-title">AMEROPA</h1>
         </div>
 
-        {/* Conținut card */}
         <div className="login-body">
           <h2 className="login-title">Ameropa Farmer Portal</h2>
           <p className="subtitle">
-            Loghează-te ca fermier sau admin pentru a continua.
+            Log in as farmer or admin to continue.
           </p>
 
           <form className="form login-form" onSubmit={handleSubmit}>
-            {/* NUME */}
             <label className="label">
-              Nume / Firmă
+              Name / Company
               <input
                 className="input"
                 type="text"
-                placeholder="Ex: Ferma Popescu"
+                placeholder="e.g. Popescu Farm"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
             </label>
 
-            {/* ROL */}
             <label className="label">
-              Rol
+              Role
               <select
                 className="input"
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
               >
-                <option value="farmer">Fermier</option>
+                <option value="farmer">Farmer</option>
                 <option value="admin">Trader</option>
               </select>
             </label>
 
-            {/* buton login */}
             <button className="btn primary-btn full-width" type="submit">
-              Intră în aplicație
+              Enter app
             </button>
           </form>
         </div>

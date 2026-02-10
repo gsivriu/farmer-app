@@ -13,35 +13,35 @@ import AdminDashboard from "./pages/AdminDashboard";
 function App() {
   const [session, setSession] = useState(null);
   const [authView, setAuthView] = useState("login");
-  const [authRole, setAuthRole] = useState("farmer"); 
-  const [userRole, setUserRole] = useState("farmer"); 
-  const [roleView, setRoleView] = useState("farmer"); 
+  const [authRole, setAuthRole] = useState("farmer");
+  const [userRole, setUserRole] = useState("farmer");
+  const [roleView, setRoleView] = useState("farmer");
   const [darkMode, setDarkMode] = useState(() => {
     return window.localStorage.getItem("theme") === "dark";
   });
   const [authError, setAuthError] = useState(null);
 
-  // --- LOGICA DETECTARE ADMIN ---
+  // --- ADMIN ROLE DETECTION ---
   const determineRole = (user) => {
     if (!user) return "farmer";
-    
-    // 1. Lista de Admini (scrie exact cu litere mici)
+
+    // 1. Admin email allowlist (lowercase).
     const superAdmins = [
-      "gsivriu@gmail.com", 
-      "admin1@test.com"
+      "gsivriu@gmail.com",
+      "admin1@test.com",
     ];
 
-    // 2. Curățăm emailul userului (fără spații, litere mici)
+    // 2. Normalize the user email.
     const email = String(user.email || "").trim().toLowerCase();
 
-    console.log("🔍 Verificare Rol pentru:", email); // DEBUG
+    console.log("Role check for:", email);
 
     if (superAdmins.includes(email)) {
-      console.log("✅ ESTE ADMIN!"); // DEBUG
+      console.log("Role detected: admin");
       return "admin";
     }
 
-    console.log("❌ Este doar Fermier."); // DEBUG
+    console.log("Role detected: farmer");
     return "farmer";
   };
 
@@ -52,17 +52,17 @@ function App() {
       if (currentSession?.user) {
         const role = determineRole(currentSession.user);
         setUserRole(role);
-        // Forțăm view-ul corect imediat
+        // Set the correct dashboard view immediately.
         setRoleView(role === "admin" ? "admin" : "farmer");
       }
     };
 
-    // 1. Verificăm sesiunea curentă la încărcare
+    // 1. Check current session on load.
     supabase.auth.getSession().then(({ data }) => {
       handleSession(data.session);
     });
 
-    // 2. Ascultăm schimbările (Login/Logout)
+    // 2. Listen to auth state changes (Login/Logout).
     const { data: listener } = supabase.auth.onAuthStateChange((_event, s) => {
       handleSession(s);
     });
@@ -101,7 +101,7 @@ function App() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setSession(null);
-    setRoleView("farmer"); // Reset la logout
+    setRoleView("farmer"); // Reset on logout.
   };
 
   // ============= PAGE: LOGIN =============
@@ -116,14 +116,11 @@ function App() {
           </div>
 
           <div className="login-body">
-            
-            {/* AM SCOS BUTOANELE DE AICI PENTRU LOGIN - ROLUL E AUTOMAT */}
-            {/* Le afișăm doar la Înregistrare dacă vrei să lași userul să aleagă (opțional) */}
-            
+
             {authView === "register" && (
               <div className="login-role-row" style={{ display: "flex", justifyContent: "center", gap: "10px", marginBottom: "10px" }}>
                 <div style={{ display: "flex", gap: "6px" }}>
-                  <button className={"btn small" + (authRole === "farmer" ? " primary-btn" : " outline")} type="button" onClick={() => setAuthRole("farmer")}>Fermier</button>
+                  <button className={"btn small" + (authRole === "farmer" ? " primary-btn" : " outline")} type="button" onClick={() => setAuthRole("farmer")}>Farmer</button>
                   <button className={"btn small" + (authRole === "admin" ? " primary-btn" : " outline")} type="button" onClick={() => setAuthRole("admin")}>Admin</button>
                 </div>
               </div>
@@ -133,15 +130,14 @@ function App() {
               <>
                 <RegisterForm role={authRole} />
                 <div className="login-switch">
-                  Ai deja un cont? <button type="button" className="login-link" onClick={() => setAuthView("login")}>Login</button>
+                  Already have an account? <button type="button" className="login-link" onClick={() => setAuthView("login")}>Login</button>
                 </div>
               </>
             ) : (
               <>
-                {/* La Login nu mai pasăm "role" că nu contează butonul, contează emailul */}
                 <LoginForm externalError={authError} onAuthError={setAuthError} onLogin={() => setAuthError(null)} />
                 <div className="login-switch">
-                  Nu ai un cont activ? <button type="button" className="login-link" onClick={() => setAuthView("register")}>Inregistreaza-te</button>
+                  No active account? <button type="button" className="login-link" onClick={() => setAuthView("register")}>Sign up</button>
                 </div>
               </>
             )}
@@ -159,9 +155,8 @@ function App() {
           <div className="header-left">
             <div>
               <div className="ameropa-title">AMEROPA</div>
-              {/* Debug vizual mic sub titlu ca să fii sigur */}
               <div style={{fontSize: '10px', opacity: 0.7}}>
-                {userRole === 'admin' ? 'Cont Admin' : 'Cont Fermier'}
+                {userRole === "admin" ? "Admin account" : "Farmer account"}
               </div>
             </div>
           </div>
@@ -183,7 +178,6 @@ function App() {
 
         <div className="surface-divider" />
 
-        {/* LOGICA STRICTĂ DE AFIȘARE */}
         {userRole === "admin" ? (
           <div className="section"><AdminDashboard /></div>
         ) : (

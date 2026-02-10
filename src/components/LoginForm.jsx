@@ -3,7 +3,7 @@ import { supabase } from "../supabaseClient";
 
 export default function LoginForm({
   onLogin,
-  role = "farmer", // Păstrăm prop-ul ca să nu crape App.jsx, dar îl ignorăm vizual
+  role = "farmer", // Keep the prop to preserve App.jsx compatibility.
   externalError,
   onAuthError,
 }) {
@@ -25,7 +25,7 @@ export default function LoginForm({
 
     if (authError) {
       setLoading(false);
-      setError("Email sau parolă incorectă.");
+      setError("Incorrect email or password.");
       return;
     }
 
@@ -35,9 +35,8 @@ export default function LoginForm({
 
   return (
     <form className="login-form" onSubmit={handleLogin}>
-      {/* AICI AM SCHIMBAT: Text generic, să nu mai inducă în eroare */}
       <div className="small-text" style={{ textAlign: "center", marginBottom: "15px" }}>
-        <strong>Autentificare în platformă</strong>
+        <strong>Platform sign in</strong>
       </div>
 
       <label className="label">
@@ -45,7 +44,7 @@ export default function LoginForm({
         <input
           className="input"
           type="email"
-          placeholder="Adresa de email"
+          placeholder="Email address"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -53,11 +52,11 @@ export default function LoginForm({
       </label>
 
       <label className="label">
-        Parolă
+        Password
         <input
           className="input"
           type="password"
-          placeholder="Minim 6 caractere"
+          placeholder="Minimum 6 characters"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -73,7 +72,7 @@ export default function LoginForm({
         type="submit"
         disabled={loading}
       >
-        {loading ? "Autentificare..." : "Login"}
+        {loading ? "Signing in..." : "Login"}
       </button>
     </form>
   );

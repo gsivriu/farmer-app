@@ -34,22 +34,22 @@ export default function ExchangeRatesCard() {
   }, []);
 
   if (!rates) {
-    return <p className="small-text">Se încarcă cursul BNR...</p>;
+    return <p className="small-text">Loading exchange rates...</p>;
   }
 
   return (
     <div className="exchange-card">
       <div className="card-header exchange-card-header">
-        <h3 className="market-title">Curs Valutar</h3>
+        <h3 className="market-title">Exchange Rates</h3>
         <div className="exchange-header-actions">
           <div className="small-text exchange-updated">
-            Actualizat: {formatDateDMY(rates.lastUpdated)}
+            Updated: {formatDateDMY(rates.lastUpdated)}
           </div>
           <button
             type="button"
             className="exchange-calc-btn"
             onClick={() => setIsModalOpen(true)}
-            aria-label="Deschide calculatorul valutar"
+            aria-label="Open currency converter"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <rect x="5" y="3" width="14" height="18" rx="2" />
@@ -77,7 +77,7 @@ export default function ExchangeRatesCard() {
       </div>
       <div className="exchange-divider" />
       <div className="exchange-row exchange-row-muted">
-        <span>Paritate EUR/USD</span>
+        <span>EUR/USD parity</span>
         <span className="exchange-value">{rates.eurToUsd}</span>
       </div>
 

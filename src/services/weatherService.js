@@ -1,12 +1,12 @@
 const getWeatherType = (code) => {
-  if (code === 0) return "Senin";
-  if (code === 1 || code === 2 || code === 3) return "Parțial Noros";
-  if ([45, 48].includes(code)) return "Ceață";
-  if (code >= 51 && code <= 67) return "Ploaie";
-  if (code >= 80 && code <= 82) return "Averse";
-  if (code >= 71 && code <= 77) return "Zăpadă";
-  if (code >= 95) return "Furtună";
-  return "Noros";
+  if (code === 0) return "Clear sky";
+  if (code === 1 || code === 2 || code === 3) return "Partly cloudy";
+  if ([45, 48].includes(code)) return "Fog";
+  if (code >= 51 && code <= 67) return "Rain";
+  if (code >= 80 && code <= 82) return "Showers";
+  if (code >= 71 && code <= 77) return "Snow";
+  if (code >= 95) return "Storm";
+  return "Cloudy";
 };
 
 const getWeatherIcon = (code, isDay) => {
@@ -19,7 +19,7 @@ const getWeatherIcon = (code, isDay) => {
 
 const formatDayName = (dateStr) => {
   const date = new Date(dateStr);
-  return new Intl.DateTimeFormat("ro-RO", { weekday: "short" }).format(date);
+  return new Intl.DateTimeFormat("en-GB", { weekday: "short" }).format(date);
 };
 
 export const fetchWeather = async (lat, lon) => {
@@ -51,7 +51,7 @@ export const fetchWeather = async (lat, lon) => {
 
     const dailyData = data.daily.time.map((time, index) => ({
       date: time,
-      day: index === 0 ? "Azi" : formatDayName(time),
+      day: index === 0 ? "Today" : formatDayName(time),
       min: Math.round(data.daily.temperature_2m_min[index]),
       max: Math.round(data.daily.temperature_2m_max[index]),
       code: data.daily.weather_code[index],
@@ -94,7 +94,7 @@ export const fetchWeather = async (lat, lon) => {
       daily: dailyData,
     };
   } catch (error) {
-    console.error("Eroare meteo:", error);
+    console.error("Weather error:", error);
     return null;
   }
 };
@@ -105,7 +105,7 @@ export const searchCity = async (query) => {
     const response = await fetch(
       `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
         query
-      )}&count=5&language=ro&format=json`
+      )}&count=5&language=en&format=json`
     );
     const data = await response.json();
     return data.results || [];

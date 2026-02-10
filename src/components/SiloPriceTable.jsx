@@ -17,6 +17,14 @@ const PRODUCT_ID_ALIASES = {
   sfs: "sunflower",
 };
 
+const PRODUCT_LABELS = {
+  wheat: "Wheat",
+  barley: "Barley",
+  corn: "Corn",
+  rapeseed: "Rapeseed",
+  sunflower: "Sunflower",
+};
+
 const normalizeProductType = (value) => {
   const key = String(value || "")
     .trim()
@@ -136,7 +144,7 @@ export default function SiloPriceTable({ commodities = [], readOnly = false }) {
     const value = overrideValue.trim();
     const nextValue = value === "" ? null : Number(value);
     if (nextValue !== null && (!Number.isFinite(nextValue) || nextValue <= 0)) {
-      window.alert("Introduceți un preț valid.");
+      window.alert("Enter a valid price.");
       return;
     }
 
@@ -161,7 +169,7 @@ export default function SiloPriceTable({ commodities = [], readOnly = false }) {
           .upsert(payload, { onConflict: "silo_name,product_type" });
 
     if (error) {
-      window.alert("Eroare la salvare: " + error.message);
+      window.alert("Error while saving: " + error.message);
       return;
     }
 
@@ -203,7 +211,7 @@ export default function SiloPriceTable({ commodities = [], readOnly = false }) {
           .upsert(payload, { onConflict: "silo_name,product_type" });
 
     if (error) {
-      window.alert("Eroare la resetare: " + error.message);
+      window.alert("Error while resetting: " + error.message);
       return;
     }
 
@@ -222,7 +230,7 @@ export default function SiloPriceTable({ commodities = [], readOnly = false }) {
   };
 
   if (loading) {
-    return <p className="small-text">Se încarcă prețurile pe siloz...</p>;
+    return <p className="small-text">Loading silo prices...</p>;
   }
 
   if (error) {
@@ -230,16 +238,16 @@ export default function SiloPriceTable({ commodities = [], readOnly = false }) {
   }
 
   if (silos.length === 0 || productList.length === 0) {
-    return <p className="small-text">Nu există date pentru prețurile pe siloz.</p>;
+    return <p className="small-text">No silo price data available.</p>;
   }
 
   return (
     <div className={"silo-table-wrap" + (selectedCell ? " is-modal-open" : "")}>
       <div className="silo-table-header">
-        <h3>Prețuri per siloz</h3>
+        <h3>Silo prices</h3>
         {!readOnly && (
           <p className="small-text">
-            Prețurile se calculează automat din CPT. Click pe o celulă pentru override.
+            Prices are calculated automatically from CPT. Click a cell to override.
           </p>
         )}
       </div>
@@ -248,9 +256,11 @@ export default function SiloPriceTable({ commodities = [], readOnly = false }) {
         <table className="silo-table">
           <thead>
             <tr>
-              <th className="silo-sticky-head">Siloz</th>
+              <th className="silo-sticky-head">Silo</th>
               {productList.map((product) => (
-                <th key={product.id}>{product.name}</th>
+                <th key={product.id}>
+                  {PRODUCT_LABELS[product.id] || product.name}
+                </th>
               ))}
             </tr>
           </thead>
@@ -292,7 +302,7 @@ export default function SiloPriceTable({ commodities = [], readOnly = false }) {
         >
           <div className="bid-modal" onClick={(event) => event.stopPropagation()}>
             <div className="bid-modal-header">
-              <h3>Preț siloz</h3>
+              <h3>Silo price</h3>
               <button
                 type="button"
                 className="btn small ghost"
@@ -301,19 +311,19 @@ export default function SiloPriceTable({ commodities = [], readOnly = false }) {
                   setSelectedCell(null);
                 }}
               >
-                Închide
+                Close
               </button>
             </div>
             <div className="bid-modal-body">
-              <div><b>Siloz:</b> {selectedCell.siloName}</div>
-              <div><b>Produs:</b> {selectedCell.product.name}</div>
+              <div><b>Silo:</b> {selectedCell.siloName}</div>
+              <div><b>Product:</b> {PRODUCT_LABELS[selectedCell.product.id] || selectedCell.product.name}</div>
               <div>
-                <b>Preț CPT Constanța:</b> {selectedCell.product.price.toFixed(2)}{" "}
+                <b>CPT Constanta price:</b> {selectedCell.product.price.toFixed(2)}{" "}
                 {selectedCell.currency}
               </div>
               <div><b>Spread:</b> -{Number(selectedCell.offset || 0).toFixed(2)}</div>
               <div>
-                <b>Calculat:</b> {Number(selectedCell.computed || 0).toFixed(2)}{" "}
+                <b>Calculated:</b> {Number(selectedCell.computed || 0).toFixed(2)}{" "}
                 {selectedCell.currency}
               </div>
             </div>
@@ -322,20 +332,20 @@ export default function SiloPriceTable({ commodities = [], readOnly = false }) {
                 className="input"
                 type="number"
                 step="0.01"
-                placeholder="Preț final"
+                placeholder="Final price"
                 value={overrideValue}
                 onClick={(event) => event.stopPropagation()}
                 onChange={(event) => setOverrideValue(event.target.value)}
               />
               <button type="button" className="btn small ghost" onClick={handleSaveOverride}>
-                Salvează
+                Save
               </button>
               <button
                 type="button"
                 className="btn small outline"
                 onClick={handleResetOverride}
               >
-                Revenire la calcul automat
+                Reset to automatic calculation
               </button>
             </div>
           </div>

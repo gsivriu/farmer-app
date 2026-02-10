@@ -13,11 +13,11 @@ import { useAppContext } from "../context/AppContext.jsx";
 
 
 const PRODUCT_LABELS = {
-  wheat: "Grâu",
-  barley: "Orz",
-  corn: "Porumb",
-  rapeseed: "Rapiță",
-  sunflower: "Floarea soarelui",
+  wheat: "Wheat",
+  barley: "Barley",
+  corn: "Corn",
+  rapeseed: "Rapeseed",
+  sunflower: "Sunflower",
 };
 
 const formatDateDMY = (value) => {
@@ -45,11 +45,22 @@ const isFreightParity = (parity) => {
   return p === "FCA" || p === "FOB" || p === "FOR";
 };
 
+const formatLocationDisplay = (value) => {
+  const raw = String(value || "").trim();
+  if (!raw || raw === "-") return raw || "-";
+  const normalized = raw
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+  if (normalized === "port constanta") return "Constanta Port";
+  return raw;
+};
+
 const formatParityDisplay = (bid) => {
   if (!bid?.parity) return "-";
   const parity = String(bid.parity).toUpperCase();
-  const delivery = bid.delivery_location || "-";
-  const loading = bid.loading_location || "-";
+  const delivery = formatLocationDisplay(bid.delivery_location || "-");
+  const loading = formatLocationDisplay(bid.loading_location || "-");
   if (isFreightParity(parity)) {
     return `${parity} ${loading}`;
   }
@@ -206,7 +217,7 @@ export default function FarmerDashboard() {
       } catch (err) {
         if (err.name !== "AbortError") {
           console.error("News error:", err);
-          setNewsError(err?.message || "Eroare la încărcare");
+          setNewsError(err?.message || "Loading error");
         }
       } finally {
         setNewsLoading(false);
@@ -299,7 +310,7 @@ export default function FarmerDashboard() {
       .eq("id", bid.id);
 
     if (updErr) {
-      window.alert("Eroare la acceptare: " + updErr.message);
+      window.alert("Error while accepting: " + updErr.message);
       return;
     }
 
@@ -326,7 +337,7 @@ export default function FarmerDashboard() {
       .eq("id", bid.id);
 
     if (updErr) {
-      window.alert("Eroare la respingere: " + updErr.message);
+      window.alert("Error while rejecting: " + updErr.message);
       return;
     }
 
@@ -343,7 +354,7 @@ export default function FarmerDashboard() {
   const handleCounterBack = async (bid) => {
     const value = Number(farmerModalCounter);
     if (!Number.isFinite(value) || value <= 0) {
-      window.alert("Introduceți un preț valid.");
+      window.alert("Enter a valid price.");
       return;
     }
 
@@ -353,7 +364,7 @@ export default function FarmerDashboard() {
       .eq("id", bid.id);
 
     if (updErr) {
-      window.alert("Eroare la counter: " + updErr.message);
+      window.alert("Error while countering: " + updErr.message);
       return;
     }
 
@@ -373,7 +384,7 @@ export default function FarmerDashboard() {
     if (!value) return "-";
     const dt = new Date(value);
     if (Number.isNaN(dt.getTime())) return "-";
-    return dt.toLocaleString("ro-RO", {
+    return dt.toLocaleString("en-GB", {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
@@ -395,10 +406,10 @@ export default function FarmerDashboard() {
 
   const getStatusLabel = (status) => {
     const value = String(status || "").toLowerCase();
-    if (value === "accepted") return "Acceptat";
-    if (value === "rejected") return "Respins";
-    if (value === "countered") return "Contra-ofertă";
-    return "În așteptare";
+    if (value === "accepted") return "Accepted";
+    if (value === "rejected") return "Rejected";
+    if (value === "countered") return "Counter offer";
+    return "Pending";
   };
 
   return (
@@ -433,7 +444,7 @@ export default function FarmerDashboard() {
             background-color: #ffffff !important;
             width: 100%;
             box-sizing: border-box;
-            /* Păstrăm resetarea marginilor */
+            /* Keep margin reset active. */
             margin-top: 0 !important;
             margin-bottom: 0 !important;
           }
@@ -470,7 +481,7 @@ export default function FarmerDashboard() {
           className={"nav-item " + (activeTab === "activity" ? "active" : "")}
           onClick={() => setActiveTab("activity")}
         >
-          Activitatea mea
+          My Activity
         </button>
         <button
           type="button"
@@ -528,27 +539,27 @@ export default function FarmerDashboard() {
           <div className="dashboard-row full">
             <div className="card">
               <div className="card-header activity-header-compact">
-                <h2 className="market-title">Activitatea mea</h2>
+                <h2 className="market-title">My Activity</h2>
               </div>
 
               <div className="card-body">
-                {loading && <p>Se încarcă datele...</p>}
+                {loading && <p>Loading data...</p>}
                 {error && <p className="badge rejected">{error}</p>}
 
             {showStats && (
               <div className="dashboard-section">
                 {statsRows.length === 0 ? (
                   <p className="small-text">
-                    Nu există statistici pentru filtrele selectate.
+                    No stats available for the selected filters.
                   </p>
                 ) : (
                   <div className="table-wrapper">
                     <table className="table stats-table">
                       <thead>
                         <tr>
-                          <th>Produs</th>
-                          <th>Volum (t)</th>
-                          <th>Preț mediu</th>
+                          <th>Product</th>
+                          <th>Volume (t)</th>
+                          <th>Average price</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -574,7 +585,7 @@ export default function FarmerDashboard() {
                 <div className="dashboard-section">
                   <div className="activity-header">
                     <h3 style={{ margin: "10px 0 8px", fontSize: 16 }}>
-                      Bid-urile mele
+                      My Bids
                     </h3>
                     <div className="admin-bids-actions">
                       <button
@@ -582,21 +593,21 @@ export default function FarmerDashboard() {
                         className="btn small outline filter-btn"
                         onClick={() => setFiltersOpen(true)}
                       >
-                        Filtre
+                        Filters
                       </button>
                       <button
                         type="button"
                         className="btn small outline filter-btn"
                         onClick={() => setShowStats((prev) => !prev)}
                       >
-                        Statistici
+                        Stats
                       </button>
                     </div>
                   </div>
 
                   {filteredBids.length === 0 ? (
                     <p className="small-text">
-                      Nu ai încă bid-uri plasate.
+                      You have no bids yet.
                     </p>
                   ) : (
                     <div className="bid-list">
@@ -664,13 +675,13 @@ export default function FarmerDashboard() {
 
                       <div className="bid-details bid-details-compact">
                         <div className="bid-field">
-                          <span className="bid-label">Cantitate</span>
+                          <span className="bid-label">Quantity</span>
                           <span className="bid-value bid-qty">
                             {Number(b.quantity || 0).toFixed(2)} t
                           </span>
                         </div>
                         <div className="bid-field bid-field-right">
-                          <span className="bid-label">Preț / tonă</span>
+                          <span className="bid-label">Price / ton</span>
                           <span
                             className={[
                               "bid-value",
@@ -686,7 +697,7 @@ export default function FarmerDashboard() {
                       </div>
                       <div className="bid-details bid-details-compact">
                         <div className="bid-field">
-                          <span className="bid-label">Paritate</span>
+                          <span className="bid-label">Parity</span>
                           <span className="bid-value bid-parity-value">
                             {formatParityDisplay(b)}
                           </span>
@@ -694,12 +705,12 @@ export default function FarmerDashboard() {
                       </div>
 
                       <div className="bid-footer">
-                        Data ofertei:{" "}
+                        Offer date:{" "}
                         <span className="bid-date-value">
                           {formatDateOnly(b.created_at)}
                         </span>
                       </div>
-                            <div className="bid-hint">Vezi detalii &gt;</div>
+                            <div className="bid-hint">View details &gt;</div>
                           </div>
                         );
                       })}
@@ -719,10 +730,10 @@ export default function FarmerDashboard() {
                 <h2 className="market-title">News</h2>
               </div>
               <div className="card-body">
-                {newsLoading && <p className="small-text">Se încarcă știrile...</p>}
+                {newsLoading && <p className="small-text">Loading news...</p>}
                 {newsError && <p className="badge rejected">{newsError}</p>}
                 {!newsLoading && !newsError && newsItems.length === 0 && (
-                  <p className="small-text">Nu am găsit știri relevante.</p>
+                  <p className="small-text">No relevant news found.</p>
                 )}
                 {!newsLoading && !newsError && newsItems.length > 0 && (
                   <div className="news-list">
@@ -747,7 +758,7 @@ export default function FarmerDashboard() {
                           <div className="small-text">
                             {item.source?.name ? item.source.name + " • " : ""}
                             {item.publishedAt
-                              ? new Date(item.publishedAt).toLocaleDateString("ro-RO")
+                              ? new Date(item.publishedAt).toLocaleDateString("en-GB")
                               : ""}
                           </div>
                         </div>
@@ -776,23 +787,23 @@ export default function FarmerDashboard() {
             }}
           >
             <div className="bid-modal-header">
-              <h3>Detalii bid</h3>
+              <h3>Bid details</h3>
               <button
                 type="button"
                 className="btn small ghost"
                 onClick={() => setSelectedBid(null)}
               >
-                Închide
+                Close
               </button>
             </div>
             <div className="bid-modal-body">
-              <div><b>Data:</b> {formatDateTime(selectedBid.created_at)}</div>
+              <div><b>Date:</b> {formatDateTime(selectedBid.created_at)}</div>
               <div>
-                <b>Produs:</b> {PRODUCT_LABELS[selectedBid.product] || selectedBid.product}
+                <b>Product:</b> {PRODUCT_LABELS[selectedBid.product] || selectedBid.product}
               </div>
-              <div><b>Cantitate:</b> {Number(selectedBid.quantity || 0).toFixed(2)} t</div>
+              <div><b>Quantity:</b> {Number(selectedBid.quantity || 0).toFixed(2)} t</div>
               <div>
-                <b>Preț (Counter):</b>{" "}
+                <b>Price (Counter):</b>{" "}
                 <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
                   <input
                     className="input inline-input"
@@ -816,11 +827,11 @@ export default function FarmerDashboard() {
               )}
               {isFreightParity(selectedBid.parity) && (
                 <div>
-                  <b>Încărcare:</b> {selectedBid.loading_location || "-"}
+                  <b>Loading:</b> {formatLocationDisplay(selectedBid.loading_location || "-")}
                 </div>
               )}
               <div>
-                <b>Livrare:</b>{" "}
+                <b>Delivery:</b>{" "}
                 {formatDeliveryRange(
                   selectedBid.delivery_start,
                   selectedBid.delivery_end
@@ -863,7 +874,7 @@ export default function FarmerDashboard() {
                           handleRejectCounter(selectedBid);
                         }}
                       >
-                        {farmerConfirmAction === "rejected" ? "Sigur?" : "Respinge"}
+                        {farmerConfirmAction === "rejected" ? "Confirm?" : "Reject"}
                       </button>
                       <button
                         type="button"
@@ -878,7 +889,7 @@ export default function FarmerDashboard() {
                           handleCounterBack(selectedBid);
                         }}
                       >
-                        {farmerConfirmAction === "countered" ? "Sigur?" : "Contra-ofertă"}
+                        {farmerConfirmAction === "countered" ? "Confirm?" : "Counter offer"}
                       </button>
                       <button
                         type="button"
@@ -893,7 +904,7 @@ export default function FarmerDashboard() {
                           handleAcceptCounter(selectedBid);
                         }}
                       >
-                        {farmerConfirmAction === "accepted" ? "Sigur?" : "Acceptă"}
+                        {farmerConfirmAction === "accepted" ? "Confirm?" : "Accept"}
                       </button>
                     </>
                   );
@@ -913,24 +924,24 @@ export default function FarmerDashboard() {
         >
           <div className="bid-modal" onClick={(event) => event.stopPropagation()}>
             <div className="bid-modal-header">
-              <h3>Filtre</h3>
+              <h3>Filters</h3>
               <button
                 type="button"
                 className="btn small outline filter-btn"
                 onClick={() => setFiltersOpen(false)}
               >
-                Închide
+                Close
               </button>
             </div>
             <div className="bid-modal-body">
               <div className="filter-group">
-                <label className="label">Produs</label>
+                <label className="label">Product</label>
                 <select
                   className="input"
                   value={productFilter}
                   onChange={(e) => setProductFilter(e.target.value)}
                 >
-                  <option value="all">Toate</option>
+                  <option value="all">All</option>
                   {Object.keys(PRODUCT_LABELS).map((key) => (
                     <option key={key} value={key}>
                       {PRODUCT_LABELS[key]}
@@ -940,13 +951,13 @@ export default function FarmerDashboard() {
               </div>
 
               <div className="filter-group">
-                <label className="label">Status bid</label>
+                <label className="label">Bid status</label>
                 <select
                   className="input"
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
                 >
-                  <option value="all">Toate</option>
+                  <option value="all">All</option>
                   <option value="accepted">Accepted</option>
                   <option value="rejected">Rejected</option>
                   <option value="pending">Pending</option>
@@ -954,7 +965,7 @@ export default function FarmerDashboard() {
               </div>
 
               <div className="filter-group">
-                <label className="label">Data bid (de la)</label>
+                <label className="label">Bid date (from)</label>
                 <input
                   className="input"
                   type="date"
@@ -964,7 +975,7 @@ export default function FarmerDashboard() {
               </div>
 
               <div className="filter-group">
-                <label className="label">Data bid (până la)</label>
+                <label className="label">Bid date (to)</label>
                 <input
                   className="input"
                   type="date"
@@ -979,7 +990,7 @@ export default function FarmerDashboard() {
                   className="btn small outline filter-btn"
                   onClick={() => setFiltersOpen(false)}
                 >
-                  Ok
+                  Apply
                 </button>
                 <button
                   type="button"
@@ -991,7 +1002,7 @@ export default function FarmerDashboard() {
                     setDateTo("");
                   }}
                 >
-                  Resetează
+                  Reset
                 </button>
               </div>
             </div>
