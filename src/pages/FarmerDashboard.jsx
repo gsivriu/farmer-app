@@ -10,15 +10,7 @@ import BidForm from "../components/BidForm";
 import FarmerProgress from "../components/FarmerProgress";
 import SiloPriceTable from "../components/SiloPriceTable";
 import { useAppContext } from "../context/AppContext.jsx";
-
-
-const PRODUCT_LABELS = {
-  wheat: "Wheat",
-  barley: "Barley",
-  corn: "Corn",
-  rapeseed: "Rapeseed",
-  sunflower: "Sunflower",
-};
+import { getProductLabelSafe, PRODUCT_FILTER_KEYS } from "../utils/productLabels";
 
 const formatDateDMY = (value) => {
   if (!value) return "-";
@@ -565,7 +557,7 @@ export default function FarmerDashboard() {
                       <tbody>
                         {statsRows.map((row) => (
                           <tr key={row.product}>
-                            <td>{PRODUCT_LABELS[row.product] || row.product}</td>
+                            <td>{getProductLabelSafe(row.product)}</td>
                             <td>{Number(row.totalQty || 0).toFixed(2)}</td>
                             <td>{Number(row.avgPrice || 0).toFixed(2)}</td>
                           </tr>
@@ -660,7 +652,7 @@ export default function FarmerDashboard() {
                             <div className="bid-header">
                               <div>
                                 <div className="bid-title">
-                                  {PRODUCT_LABELS[b.product] || b.product}
+                                  {getProductLabelSafe(b.product)}
                                 </div>
                                 {b.status === "accepted" && b.contract_no && (
                                   <div className="bid-contract">
@@ -799,7 +791,7 @@ export default function FarmerDashboard() {
             <div className="bid-modal-body">
               <div><b>Date:</b> {formatDateTime(selectedBid.created_at)}</div>
               <div>
-                <b>Product:</b> {PRODUCT_LABELS[selectedBid.product] || selectedBid.product}
+                <b>Product:</b> {getProductLabelSafe(selectedBid.product)}
               </div>
               <div><b>Quantity:</b> {Number(selectedBid.quantity || 0).toFixed(2)} t</div>
               <div>
@@ -942,9 +934,9 @@ export default function FarmerDashboard() {
                   onChange={(e) => setProductFilter(e.target.value)}
                 >
                   <option value="all">All</option>
-                  {Object.keys(PRODUCT_LABELS).map((key) => (
+                  {PRODUCT_FILTER_KEYS.map((key) => (
                     <option key={key} value={key}>
-                      {PRODUCT_LABELS[key]}
+                      {getProductLabelSafe(key)}
                     </option>
                   ))}
                 </select>

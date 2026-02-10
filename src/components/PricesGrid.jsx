@@ -1,13 +1,6 @@
 import React from "react";
 import { useAppContext } from "../context/AppContext.jsx";
-
-const PRODUCT_LABELS = {
-  wheat: "Wheat",
-  barley: "Barley",
-  corn: "Corn",
-  rapeseed: "Rapeseed",
-  sunflower: "Sunflower",
-};
+import { getProductLabelSafe } from "../utils/productLabels";
 
 export default function PricesGrid() {
   const { commodities = [] } = useAppContext() || {};
@@ -45,7 +38,7 @@ export default function PricesGrid() {
           }
 
           const trendClass = getTrendClass(c.trend, c.lastPrice);
-          const displayName = PRODUCT_LABELS[c.id] || c.name;
+          const displayName = getProductLabelSafe(c.id, c.name);
 
           return (
             <div key={c.id} className={"market-item " + trendClass}>

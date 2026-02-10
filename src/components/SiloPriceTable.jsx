@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../supabaseClient";
+import { getProductLabelSafe } from "../utils/productLabels";
 
 const SILO_PRICE_TABLE = "silo_price_configs";
 
@@ -15,14 +16,6 @@ const PRODUCT_ID_ALIASES = {
   sunflower: "sunflower",
   "floarea soarelui": "sunflower",
   sfs: "sunflower",
-};
-
-const PRODUCT_LABELS = {
-  wheat: "Wheat",
-  barley: "Barley",
-  corn: "Corn",
-  rapeseed: "Rapeseed",
-  sunflower: "Sunflower",
 };
 
 const normalizeProductType = (value) => {
@@ -259,7 +252,7 @@ export default function SiloPriceTable({ commodities = [], readOnly = false }) {
               <th className="silo-sticky-head">Silo</th>
               {productList.map((product) => (
                 <th key={product.id}>
-                  {PRODUCT_LABELS[product.id] || product.name}
+                  {getProductLabelSafe(product.id, product.name)}
                 </th>
               ))}
             </tr>
@@ -316,7 +309,7 @@ export default function SiloPriceTable({ commodities = [], readOnly = false }) {
             </div>
             <div className="bid-modal-body">
               <div><b>Silo:</b> {selectedCell.siloName}</div>
-              <div><b>Product:</b> {PRODUCT_LABELS[selectedCell.product.id] || selectedCell.product.name}</div>
+              <div><b>Product:</b> {getProductLabelSafe(selectedCell.product.id, selectedCell.product.name)}</div>
               <div>
                 <b>CPT Constanta price:</b> {selectedCell.product.price.toFixed(2)}{" "}
                 {selectedCell.currency}

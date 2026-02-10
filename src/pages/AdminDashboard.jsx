@@ -4,14 +4,7 @@ import { useAppContext } from "../context/AppContext.jsx";
 import MarketTicker from "../components/MarketTicker.jsx";
 import SiloPriceTable from "../components/SiloPriceTable.jsx";
 import ExchangeRatesCard from "../components/ExchangeRatesCard.jsx";
-
-const PRODUCT_LABELS = {
-  wheat: "Wheat",
-  barley: "Barley",
-  corn: "Corn",
-  rapeseed: "Rapeseed",
-  sunflower: "Sunflower",
-};
+import { getProductLabelSafe, PRODUCT_FILTER_KEYS } from "../utils/productLabels";
 
 const formatDateDMY = (value) => {
   if (!value) return "-";
@@ -98,7 +91,7 @@ export default function AdminDashboard() {
       [id]: String(num),
     }));
 
-    const label = PRODUCT_LABELS[id] || id;
+    const label = getProductLabelSafe(id);
     setPriceNotice(`New list price for ${label} has been set.`);
   };
 
@@ -514,7 +507,7 @@ export default function AdminDashboard() {
             <div className="admin-grid">
               {(commodities || []).map((c) => (
                 <div className="admin-price-item" key={c.id}>
-                  <div className="admin-label">{PRODUCT_LABELS[c.id] || c.name || c.id}</div>
+                  <div className="admin-label">{getProductLabelSafe(c.id, c.name)}</div>
 
                   <div className="admin-row">
                     <input
@@ -587,7 +580,7 @@ export default function AdminDashboard() {
                       <tbody>
                         {statsRows.map((row) => (
                           <tr key={row.product}>
-                            <td>{PRODUCT_LABELS[row.product] || row.product}</td>
+                            <td>{getProductLabelSafe(row.product)}</td>
                             <td>{Number(row.totalQty || 0).toFixed(2)}</td>
                             <td>{Number(row.avgPrice || 0).toFixed(2)}</td>
                           </tr>
@@ -644,7 +637,7 @@ export default function AdminDashboard() {
                       <div className="bid-header">
                         <div>
                           <div className="bid-title">
-                            {PRODUCT_LABELS[b.product] || b.product}
+                            {getProductLabelSafe(b.product)}
                           </div>
                           <div className="bid-contract">
                             Farmer: {b.farmer_email || b.farmer_id}
@@ -736,7 +729,7 @@ export default function AdminDashboard() {
             <div className="bid-modal-body">
               <div><b>Date:</b> {formatDateTime(selectedBid.created_at)}</div>
               <div>
-                <b>Product:</b> {PRODUCT_LABELS[selectedBid.product] || selectedBid.product}
+                <b>Product:</b> {getProductLabelSafe(selectedBid.product)}
               </div>
               <div><b>Quantity:</b> {Number(selectedBid.quantity || 0).toFixed(2)} t</div>
               <div>
@@ -800,7 +793,7 @@ export default function AdminDashboard() {
               <div><b>Farmer:</b> {adminSelectedBid.farmer_email || adminSelectedBid.farmer_id}</div>
               <div>
                 <b>Product:</b>{" "}
-                {PRODUCT_LABELS[adminSelectedBid.product] || adminSelectedBid.product}
+                {getProductLabelSafe(adminSelectedBid.product)}
               </div>
               <div><b>Quantity:</b> {Number(adminSelectedBid.quantity || 0).toFixed(2)} t</div>
               <div>
@@ -1029,9 +1022,9 @@ export default function AdminDashboard() {
                   onChange={(e) => setFilterProduct(e.target.value)}
                 >
                   <option value="all">All</option>
-                  {Object.keys(PRODUCT_LABELS).map((key) => (
+                  {PRODUCT_FILTER_KEYS.map((key) => (
                     <option key={key} value={key}>
-                      {PRODUCT_LABELS[key]}
+                      {getProductLabelSafe(key)}
                     </option>
                   ))}
                 </select>
