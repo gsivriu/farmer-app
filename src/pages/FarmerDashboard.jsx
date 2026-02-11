@@ -673,7 +673,7 @@ export default function FarmerDashboard() {
                           </span>
                         </div>
                         <div className="bid-field bid-field-right">
-                          <span className="bid-label">Price / ton</span>
+                          <span className="bid-label">Price</span>
                           <span
                             className={[
                               "bid-value",
@@ -689,7 +689,6 @@ export default function FarmerDashboard() {
                       </div>
                       <div className="bid-details bid-details-compact">
                         <div className="bid-field">
-                          <span className="bid-label">Parity</span>
                           <span className="bid-value bid-parity-value">
                             {formatParityDisplay(b)}
                           </span>

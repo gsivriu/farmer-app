@@ -238,11 +238,6 @@ export default function SiloPriceTable({ commodities = [], readOnly = false }) {
     <div className={"silo-table-wrap" + (selectedCell ? " is-modal-open" : "")}>
       <div className="silo-table-header">
         <h3>Silo prices</h3>
-        {!readOnly && (
-          <p className="small-text">
-            Prices are calculated automatically from CPT. Click a cell to override.
-          </p>
-        )}
       </div>
 
       <div className="silo-table-scroll">

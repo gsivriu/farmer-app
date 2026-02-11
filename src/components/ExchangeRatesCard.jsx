@@ -40,7 +40,7 @@ export default function ExchangeRatesCard() {
   return (
     <div className="exchange-card">
       <div className="card-header exchange-card-header">
-        <h3 className="market-title">Exchange Rates</h3>
+        <h3 className="market-title">Exchange</h3>
         <div className="exchange-header-actions">
           <div className="small-text exchange-updated">
             Updated: {formatDateDMY(rates.lastUpdated)}

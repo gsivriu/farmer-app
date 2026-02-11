@@ -497,10 +497,7 @@ export default function AdminDashboard() {
 
             {/* Price setup */}
             <div className="card-header admin-price-header">
-              <h2 className="market-title">Daily price setup</h2>
-              <p className="market-subtitle">
-                Enter and confirm internal prices. Farmers will automatically see updated values.
-              </p>
+              <h2 className="market-title">List price</h2>
               {priceNotice && <p className="admin-price-notice">{priceNotice}</p>}
             </div>
 
@@ -650,7 +647,6 @@ export default function AdminDashboard() {
                       <div className="admin-bid-info">
                         <div className="admin-bid-column">
                           <div className="bid-field">
-                            <span className="bid-label">Price / ton</span>
                             <span className="bid-value admin-bid-price">
                               {showCounter ? (
                                 <span className="admin-bid-counter-value">
@@ -668,7 +664,6 @@ export default function AdminDashboard() {
                             </span>
                           </div>
                           <div className="bid-field">
-                            <span className="bid-label">Parity</span>
                             <span className="bid-value bid-parity-value">
                               {formatParityDisplay(b, { detailed: true })}
                             </span>
