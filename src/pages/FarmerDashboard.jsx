@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../supabaseClient";
 
 import MarketTicker from "../components/MarketTicker";
@@ -11,6 +11,7 @@ import FarmerProgress from "../components/FarmerProgress";
 import SiloPriceTable from "../components/SiloPriceTable";
 import { useAppContext } from "../context/AppContext.jsx";
 import { getProductLabelSafe, PRODUCT_FILTER_KEYS } from "../utils/productLabels";
+import { formatCompactNumber, hasPositiveNumber } from "../utils/numberFormat";
 
 const formatDateDMY = (value) => {
   if (!value) return "-";
@@ -68,6 +69,8 @@ export default function FarmerDashboard() {
   const [farmerModalCounter, setFarmerModalCounter] = useState("");
   const [farmerModalOriginal, setFarmerModalOriginal] = useState({ counter: "" });
   const [farmerConfirmAction, setFarmerConfirmAction] = useState(null);
+  const [farmerActionError, setFarmerActionError] = useState(null);
+  const [farmerCounterSent, setFarmerCounterSent] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
     return window.localStorage.getItem("farmer-active-tab") || "home";
   });
@@ -78,9 +81,6 @@ export default function FarmerDashboard() {
   const [dateTo, setDateTo] = useState("");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [showStats, setShowStats] = useState(false);
-  const saleTouchStartYRef = useRef(0);
-  const saleTouchDeltaRef = useRef(0);
-  const salePullingRef = useRef(false);
   const [newsItems, setNewsItems] = useState([]);
   const [newsLoading, setNewsLoading] = useState(false);
   const [newsError, setNewsError] = useState(null);
@@ -88,6 +88,23 @@ export default function FarmerDashboard() {
 
   useEffect(() => {
     fetchBids();
+  }, [fetchBids]);
+
+  // Re-fetch when farmer switches to bids tab or returns to app
+  useEffect(() => {
+    if (activeTab === "bids") {
+      fetchBids();
+    }
+  }, [activeTab, fetchBids]);
+
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        fetchBids();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, [fetchBids]);
 
   useEffect(() => {
@@ -117,9 +134,8 @@ export default function FarmerDashboard() {
         const lock = next[bid.id];
         if (!lock || !lock.locked) return;
         if (
-          bid.status === "countered" &&
-          lock.lastCounter != null &&
-          Number(bid.counter_price) !== Number(lock.lastCounter)
+          (bid.status === "countered" || bid.status === "accepted" || bid.status === "rejected") &&
+          lock.lastCounter != null
         ) {
           next[bid.id] = { locked: false, lastCounter: null };
           changed = true;
@@ -132,31 +148,6 @@ export default function FarmerDashboard() {
   useEffect(() => {
     window.localStorage.setItem("farmer-active-tab", activeTab);
   }, [activeTab]);
-
-  const handleSaleTouchStart = (event) => {
-    if (!event.touches || event.touches.length !== 1) return;
-    if (window.scrollY > 0) return;
-    saleTouchStartYRef.current = event.touches[0].clientY;
-    saleTouchDeltaRef.current = 0;
-    salePullingRef.current = true;
-  };
-
-  const handleSaleTouchMove = (event) => {
-    if (!salePullingRef.current) return;
-    if (!event.touches || event.touches.length !== 1) return;
-    saleTouchDeltaRef.current = event.touches[0].clientY - saleTouchStartYRef.current;
-  };
-
-  const handleSaleTouchEnd = () => {
-    if (!salePullingRef.current) return;
-    const delta = saleTouchDeltaRef.current;
-    salePullingRef.current = false;
-    saleTouchDeltaRef.current = 0;
-    saleTouchStartYRef.current = 0;
-    if (delta > 80) {
-      window.location.reload();
-    }
-  };
 
   useEffect(() => {
     const html = document.documentElement;
@@ -236,7 +227,7 @@ export default function FarmerDashboard() {
       if (productFilter !== "all" && b.product !== productFilter) return false;
       if (statusFilter !== "all") {
         if (statusFilter === "pending") {
-          if (b.status !== "pending" && b.status !== "countered") return false;
+          if (b.status !== "pending" && b.status !== "countered" && b.status !== "farmer_countered") return false;
         } else if (b.status !== statusFilter) {
           return false;
         }
@@ -302,7 +293,7 @@ export default function FarmerDashboard() {
       .eq("id", bid.id);
 
     if (updErr) {
-      window.alert("Error while accepting: " + updErr.message);
+      setFarmerActionError("Error while accepting: " + updErr.message);
       return;
     }
 
@@ -329,7 +320,7 @@ export default function FarmerDashboard() {
       .eq("id", bid.id);
 
     if (updErr) {
-      window.alert("Error while rejecting: " + updErr.message);
+      setFarmerActionError("Error while rejecting: " + updErr.message);
       return;
     }
 
@@ -346,26 +337,27 @@ export default function FarmerDashboard() {
   const handleCounterBack = async (bid) => {
     const value = Number(farmerModalCounter);
     if (!Number.isFinite(value) || value <= 0) {
-      window.alert("Enter a valid price.");
+      setFarmerActionError("Enter a valid price.");
       return;
     }
 
     const { error: updErr } = await supabase
       .from("bids")
-      .update({ counter_price: value, status: "countered" })
+      .update({ counter_price: value, status: "farmer_countered" })
       .eq("id", bid.id);
 
     if (updErr) {
-      window.alert("Error while countering: " + updErr.message);
+      setFarmerActionError("Error while countering: " + updErr.message);
       return;
     }
 
     setLocalBids((prev) =>
       prev.map((x) =>
-        x.id === bid.id ? { ...x, counter_price: value, status: "countered" } : x
+        x.id === bid.id ? { ...x, counter_price: value, status: "farmer_countered" } : x
       )
     );
     setFarmerConfirmAction(null);
+    setFarmerCounterSent(true);
     setFarmerActionLocks((prev) => ({
       ...prev,
       [bid.id]: { locked: true, lastCounter: value },
@@ -401,6 +393,7 @@ export default function FarmerDashboard() {
     if (value === "accepted") return "Accepted";
     if (value === "rejected") return "Rejected";
     if (value === "countered") return "Counter offer";
+    if (value === "farmer_countered") return "Counter sent";
     return "Pending";
   };
 
@@ -508,12 +501,7 @@ export default function FarmerDashboard() {
           </div>
         </div>
 
-        <div
-          className={"tab-content " + (activeTab === "sale" ? "active" : "")}
-          onTouchStart={activeTab === "sale" ? handleSaleTouchStart : undefined}
-          onTouchMove={activeTab === "sale" ? handleSaleTouchMove : undefined}
-          onTouchEnd={activeTab === "sale" ? handleSaleTouchEnd : undefined}
-        >
+        <div className={"tab-content " + (activeTab === "sale" ? "active" : "")}>
           {/* PRICES + BID FORM */}
           <div className="dashboard-row full">
             <div className="card dashboard-card sale-card">
@@ -532,6 +520,22 @@ export default function FarmerDashboard() {
             <div className="card">
               <div className="card-header activity-header-compact">
                 <h2 className="market-title">My Activity</h2>
+                <div className="activity-header-actions">
+                  <button
+                    type="button"
+                    className="btn small outline filter-btn"
+                    onClick={() => setFiltersOpen(true)}
+                  >
+                    Filters
+                  </button>
+                  <button
+                    type="button"
+                    className="btn small outline filter-btn"
+                    onClick={() => setShowStats((prev) => !prev)}
+                  >
+                    Stats
+                  </button>
+                </div>
               </div>
 
               <div className="card-body">
@@ -575,28 +579,6 @@ export default function FarmerDashboard() {
             )}
 
                 <div className="dashboard-section">
-                  <div className="activity-header">
-                    <h3 style={{ margin: "10px 0 8px", fontSize: 16 }}>
-                      My Bids
-                    </h3>
-                    <div className="admin-bids-actions">
-                      <button
-                        type="button"
-                        className="btn small outline filter-btn"
-                        onClick={() => setFiltersOpen(true)}
-                      >
-                        Filters
-                      </button>
-                      <button
-                        type="button"
-                        className="btn small outline filter-btn"
-                        onClick={() => setShowStats((prev) => !prev)}
-                      >
-                        Stats
-                      </button>
-                    </div>
-                  </div>
-
                   {filteredBids.length === 0 ? (
                     <p className="small-text">
                       You have no bids yet.
@@ -612,8 +594,9 @@ export default function FarmerDashboard() {
                             : b.status === "countered"
                             ? "is-countered"
                             : "is-pending";
+                        const hasCounterPrice = hasPositiveNumber(b.counter_price);
                         const activePrice =
-                          b.counter_price != null
+                          hasCounterPrice
                             ? Number(b.counter_price)
                             : Number(b.price);
                         const unit = b.product === "sunflower" ? "USD/t" : "EUR/t";
@@ -628,7 +611,7 @@ export default function FarmerDashboard() {
                             onClick={() => {
                               setSelectedBid(b);
                               const counterValue =
-                                Number(b.counter_price || 0) > 0
+                                hasPositiveNumber(b.counter_price)
                                   ? String(b.counter_price)
                                   : "";
                               setFarmerModalCounter(counterValue);
@@ -639,7 +622,7 @@ export default function FarmerDashboard() {
                               if (event.key === "Enter" || event.key === " ") {
                                 event.preventDefault();
                                 const counterValue =
-                                  Number(b.counter_price || 0) > 0
+                                  hasPositiveNumber(b.counter_price)
                                     ? String(b.counter_price)
                                     : "";
                                 setSelectedBid(b);
@@ -669,7 +652,7 @@ export default function FarmerDashboard() {
                         <div className="bid-field">
                           <span className="bid-label">Quantity</span>
                           <span className="bid-value bid-qty">
-                            {Number(b.quantity || 0).toFixed(2)} t
+                            {formatCompactNumber(b.quantity)} t
                           </span>
                         </div>
                         <div className="bid-field bid-field-right">
@@ -678,12 +661,12 @@ export default function FarmerDashboard() {
                             className={[
                               "bid-value",
                               "bid-price",
-                              b.counter_price != null && b.status === "countered"
+                              hasCounterPrice && b.status === "countered"
                                 ? "farmer-bid-counter-value"
                                 : "",
                             ].join(" ")}
                           >
-                            {Number(activePrice || 0).toFixed(2)} EUR/t
+                            {formatCompactNumber(activePrice)} {unit}
                           </span>
                         </div>
                       </div>
@@ -717,7 +700,7 @@ export default function FarmerDashboard() {
           {/* NEWS */}
           <div className="dashboard-row full">
             <div className="card">
-              <div className="card-header">
+              <div className="card-header news-header-balanced">
                 <h2 className="market-title">News</h2>
               </div>
               <div className="card-body">
@@ -768,10 +751,10 @@ export default function FarmerDashboard() {
           className="bid-modal-backdrop"
           role="dialog"
           aria-modal="true"
-          onClick={() => setSelectedBid(null)}
+          onClick={() => { setSelectedBid(null); setFarmerActionError(null); setFarmerCounterSent(false); }}
         >
           <div
-            className="bid-modal"
+            className="bid-modal bid-modal-details"
             onClick={(event) => {
               event.stopPropagation();
               setFarmerConfirmAction(null);
@@ -782,20 +765,33 @@ export default function FarmerDashboard() {
               <button
                 type="button"
                 className="btn small ghost"
-                onClick={() => setSelectedBid(null)}
+                onClick={() => { setSelectedBid(null); setFarmerActionError(null); setFarmerCounterSent(false); }}
               >
                 Close
               </button>
             </div>
             <div className="bid-modal-body">
-              <div><b>Date:</b> {formatDateTime(selectedBid.created_at)}</div>
-              <div>
-                <b>Product:</b> {getProductLabelSafe(selectedBid.product)}
+              <div className="bid-modal-row">
+                <span className="bid-modal-label">Date</span>
+                <span className="bid-modal-value">
+                  {formatDateTime(selectedBid.created_at)}
+                </span>
               </div>
-              <div><b>Quantity:</b> {Number(selectedBid.quantity || 0).toFixed(2)} t</div>
-              <div>
-                <b>Price (Counter):</b>{" "}
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <div className="bid-modal-row">
+                <span className="bid-modal-label">Product</span>
+                <span className="bid-modal-value">
+                  {getProductLabelSafe(selectedBid.product)}
+                </span>
+              </div>
+              <div className="bid-modal-row">
+                <span className="bid-modal-label">Quantity</span>
+                <span className="bid-modal-value">
+                  {formatCompactNumber(selectedBid.quantity)} t
+                </span>
+              </div>
+              <div className="bid-modal-row">
+                <span className="bid-modal-label">Price (Counter)</span>
+                <span className="bid-modal-value bid-modal-counter">
                   <input
                     className="input inline-input"
                     type="number"
@@ -805,31 +801,48 @@ export default function FarmerDashboard() {
                     value={farmerModalCounter}
                     onChange={(e) => setFarmerModalCounter(e.target.value)}
                   />
-                  {selectedBid.product === "sunflower" ? "USD/t" : "EUR/t"}
+                  <span className="bid-modal-unit">
+                    {selectedBid.product === "sunflower" ? "USD/t" : "EUR/t"}
+                  </span>
                 </span>
               </div>
-              <div>
-                <b>Status:</b> {selectedBid.status}
+              <div className="bid-modal-row">
+                <span className="bid-modal-label">Status</span>
+                <span className="bid-modal-value">
+                  {getStatusLabel(selectedBid.status)}
+                </span>
               </div>
               {selectedBid.status === "accepted" && selectedBid.contract_no && (
-                <div>
-                  <b>Contract:</b> {selectedBid.contract_no}
+                <div className="bid-modal-row">
+                  <span className="bid-modal-label">Contract</span>
+                  <span className="bid-modal-value">{selectedBid.contract_no}</span>
                 </div>
               )}
               {isFreightParity(selectedBid.parity) && (
-                <div>
-                  <b>Loading:</b> {formatLocationDisplay(selectedBid.loading_location || "-")}
+                <div className="bid-modal-row">
+                  <span className="bid-modal-label">Loading</span>
+                  <span className="bid-modal-value">
+                    {formatLocationDisplay(selectedBid.loading_location || "-")}
+                  </span>
                 </div>
               )}
-              <div>
-                <b>Delivery:</b>{" "}
-                {formatDeliveryRange(
-                  selectedBid.delivery_start,
-                  selectedBid.delivery_end
-                )}
+              <div className="bid-modal-row">
+                <span className="bid-modal-label">Delivery</span>
+                <span className="bid-modal-value">
+                  {formatDeliveryRange(
+                    selectedBid.delivery_start,
+                    selectedBid.delivery_end
+                  )}
+                </span>
               </div>
             </div>
-            {selectedBid.status === "countered" && (
+            {farmerActionError && (
+              <p className="badge rejected" style={{ margin: "8px 0 0 0" }}>{farmerActionError}</p>
+            )}
+            {farmerCounterSent && (
+              <p className="badge accepted" style={{ margin: "8px 0 0 0" }}>Counter offer sent to admin.</p>
+            )}
+            {selectedBid.status === "countered" && !farmerCounterSent && (
               <div className="modal-actions">
                 {(() => {
                   const lockInfo = farmerActionLocks[selectedBid.id];
@@ -860,6 +873,7 @@ export default function FarmerDashboard() {
                           event.stopPropagation();
                           if (farmerConfirmAction !== "rejected") {
                             setFarmerConfirmAction("rejected");
+                            setFarmerActionError(null);
                             return;
                           }
                           handleRejectCounter(selectedBid);
@@ -875,6 +889,7 @@ export default function FarmerDashboard() {
                           event.stopPropagation();
                           if (farmerConfirmAction !== "countered") {
                             setFarmerConfirmAction("countered");
+                            setFarmerActionError(null);
                             return;
                           }
                           handleCounterBack(selectedBid);
@@ -890,6 +905,7 @@ export default function FarmerDashboard() {
                           event.stopPropagation();
                           if (farmerConfirmAction !== "accepted") {
                             setFarmerConfirmAction("accepted");
+                            setFarmerActionError(null);
                             return;
                           }
                           handleAcceptCounter(selectedBid);

@@ -5,6 +5,7 @@ import MarketTicker from "../components/MarketTicker.jsx";
 import SiloPriceTable from "../components/SiloPriceTable.jsx";
 import ExchangeRatesCard from "../components/ExchangeRatesCard.jsx";
 import { getProductLabelSafe, PRODUCT_FILTER_KEYS } from "../utils/productLabels";
+import { formatCompactNumber, hasPositiveNumber } from "../utils/numberFormat";
 
 const formatDateDMY = (value) => {
   if (!value) return "-";
@@ -132,6 +133,24 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchBids();
+  }, [fetchBids]);
+
+  // Re-fetch when admin switches to bids tab (catches realtime gaps)
+  useEffect(() => {
+    if (activeTab === "bids") {
+      fetchBids();
+    }
+  }, [activeTab, fetchBids]);
+
+  // Re-fetch when the page becomes visible (user returns to app)
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        fetchBids();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, [fetchBids]);
 
   useEffect(() => {
@@ -346,10 +365,11 @@ export default function AdminDashboard() {
 
   const getAcceptedPrice = (bid) => {
     if (!bid) return null;
+    const hasCounterPrice = hasPositiveNumber(bid.counter_price);
     const raw =
       bid.final_price != null
         ? bid.final_price
-        : bid.counter_price != null
+        : hasCounterPrice
         ? bid.counter_price
         : bid.price;
     const num = Number(raw);
@@ -379,6 +399,7 @@ export default function AdminDashboard() {
     if (value === "accepted") return "Accepted";
     if (value === "rejected") return "Rejected";
     if (value === "countered") return "Counter offer";
+    if (value === "farmer_countered") return "Farmer counter";
     return "Pending";
   };
 
@@ -388,7 +409,7 @@ export default function AdminDashboard() {
     if (filterProduct !== "all" && b.product !== filterProduct) return false;
     if (filterStatus !== "all") {
       if (filterStatus === "pending") {
-        if (b.status !== "pending" && b.status !== "countered") return false;
+        if (b.status !== "pending" && b.status !== "countered" && b.status !== "farmer_countered") return false;
       } else if (b.status !== filterStatus) {
         return false;
       }
@@ -424,7 +445,9 @@ export default function AdminDashboard() {
       if (b.status === "accepted") {
         price = Number(getAcceptedPrice(b) || 0);
       } else {
-        price = Number(b.counter_price ?? b.price ?? 0);
+        price = Number(
+          hasPositiveNumber(b.counter_price) ? b.counter_price : b.price ?? 0
+        );
       }
       if (!map.has(product)) {
         map.set(product, { product, totalQty: 0, totalValue: 0 });
@@ -545,6 +568,13 @@ export default function AdminDashboard() {
               <div className="admin-bids-actions">
                 <button
                   type="button"
+                  className="btn small outline"
+                  onClick={() => fetchBids()}
+                >
+                  Refresh
+                </button>
+                <button
+                  type="button"
                   className="btn small outline filter-btn"
                   onClick={() => setFiltersOpen(true)}
                 >
@@ -608,12 +638,15 @@ export default function AdminDashboard() {
                       ? "is-rejected"
                       : b.status === "countered"
                       ? "is-countered"
+                      : b.status === "farmer_countered"
+                      ? "is-farmer-countered"
                       : "is-pending";
                   const acceptedPrice = getAcceptedPrice(b);
                   const showAccepted = b.status === "accepted" && acceptedPrice != null;
                   const showRejected = b.status === "rejected" && acceptedPrice != null;
+                  const hasCounterPrice = hasPositiveNumber(b.counter_price);
                   const showCounter =
-                    !showAccepted && !showRejected && b.counter_price != null;
+                    !showAccepted && !showRejected && hasCounterPrice;
                   const showPending = !showCounter && !showAccepted && !showRejected;
                   return (
                     <div
@@ -650,14 +683,14 @@ export default function AdminDashboard() {
                             <span className="bid-value admin-bid-price">
                               {showCounter ? (
                                 <span className="admin-bid-counter-value">
-                                  {Number(b.counter_price || 0).toFixed(2)} {unit}
+                                  {formatCompactNumber(b.counter_price)} {unit}
                                 </span>
                               ) : showAccepted ? (
-                                `${acceptedPrice.toFixed(2)} ${unit}`
+                                `${formatCompactNumber(acceptedPrice)} ${unit}`
                               ) : showRejected ? (
-                                `${acceptedPrice.toFixed(2)} ${unit}`
+                                `${formatCompactNumber(acceptedPrice)} ${unit}`
                               ) : showPending ? (
-                                `${Number(b.price || 0).toFixed(2)} ${unit}`
+                                `${formatCompactNumber(b.price)} ${unit}`
                               ) : (
                                 "-"
                               )}
@@ -673,7 +706,7 @@ export default function AdminDashboard() {
                           <div className="bid-field bid-field-right">
                             <span className="bid-label">Quantity</span>
                             <span className="bid-value">
-                              {Number(b.quantity || 0).toFixed(2)} t
+                              {formatCompactNumber(b.quantity)} t
                             </span>
                           </div>
                           <div className="bid-field bid-field-right">
@@ -708,7 +741,7 @@ export default function AdminDashboard() {
           onClick={() => setSelectedBid(null)}
         >
           <div
-            className="bid-modal"
+            className="bid-modal bid-modal-details"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="bid-modal-header">
@@ -722,37 +755,58 @@ export default function AdminDashboard() {
               </button>
             </div>
             <div className="bid-modal-body">
-              <div><b>Date:</b> {formatDateTime(selectedBid.created_at)}</div>
-              <div>
-                <b>Product:</b> {getProductLabelSafe(selectedBid.product)}
+              <div className="bid-modal-row">
+                <span className="bid-modal-label">Date</span>
+                <span className="bid-modal-value">
+                  {formatDateTime(selectedBid.created_at)}
+                </span>
               </div>
-              <div><b>Quantity:</b> {Number(selectedBid.quantity || 0).toFixed(2)} t</div>
-              <div>
-                <b>Price:</b>{" "}
-                {selectedBid.status === "accepted" &&
-                getAcceptedPrice(selectedBid) != null ? (
-                  <>
-                    {Number(getAcceptedPrice(selectedBid)).toFixed(2)}{" "}
-                    {selectedBid.product === "sunflower" ? "USD/t" : "EUR/t"}
-                  </>
-                ) : (
-                  "-"
-                )}
+              <div className="bid-modal-row">
+                <span className="bid-modal-label">Product</span>
+                <span className="bid-modal-value">
+                  {getProductLabelSafe(selectedBid.product)}
+                </span>
               </div>
-              <div>
-                <b>Status:</b> {selectedBid.status}
+              <div className="bid-modal-row">
+                <span className="bid-modal-label">Quantity</span>
+                <span className="bid-modal-value">
+                  {formatCompactNumber(selectedBid.quantity)} t
+                </span>
+              </div>
+              <div className="bid-modal-row">
+                <span className="bid-modal-label">Price</span>
+                <span className="bid-modal-value">
+                  {selectedBid.status === "accepted" &&
+                  getAcceptedPrice(selectedBid) != null ? (
+                    <>
+                      {formatCompactNumber(getAcceptedPrice(selectedBid))}{" "}
+                      {selectedBid.product === "sunflower" ? "USD/t" : "EUR/t"}
+                    </>
+                  ) : (
+                    "-"
+                  )}
+                </span>
+              </div>
+              <div className="bid-modal-row">
+                <span className="bid-modal-label">Status</span>
+                <span className="bid-modal-value">
+                  {getStatusLabel(selectedBid.status)}
+                </span>
               </div>
               {selectedBid.status === "accepted" && selectedBid.contract_no && (
-                <div>
-                  <b>Contract:</b> {selectedBid.contract_no}
+                <div className="bid-modal-row">
+                  <span className="bid-modal-label">Contract</span>
+                  <span className="bid-modal-value">{selectedBid.contract_no}</span>
                 </div>
               )}
-              <div>
-                <b>Delivery:</b>{" "}
-                {formatDeliveryRange(
-                  selectedBid.delivery_start,
-                  selectedBid.delivery_end
-                )}
+              <div className="bid-modal-row">
+                <span className="bid-modal-label">Delivery</span>
+                <span className="bid-modal-value">
+                  {formatDeliveryRange(
+                    selectedBid.delivery_start,
+                    selectedBid.delivery_end
+                  )}
+                </span>
               </div>
             </div>
           </div>
@@ -767,7 +821,7 @@ export default function AdminDashboard() {
           onClick={() => setAdminSelectedBid(null)}
         >
           <div
-            className="bid-modal"
+            className="bid-modal bid-modal-details"
             onClick={(event) => {
               event.stopPropagation();
               setAdminConfirmAction(null);
@@ -784,99 +838,142 @@ export default function AdminDashboard() {
               </button>
             </div>
             <div className="bid-modal-body">
-              <div><b>Date:</b> {formatDateTime(adminSelectedBid.created_at)}</div>
-              <div><b>Farmer:</b> {adminSelectedBid.farmer_email || adminSelectedBid.farmer_id}</div>
-              <div>
-                <b>Product:</b>{" "}
-                {getProductLabelSafe(adminSelectedBid.product)}
+              <div className="bid-modal-row">
+                <span className="bid-modal-label">Date</span>
+                <span className="bid-modal-value">
+                  {formatDateTime(adminSelectedBid.created_at)}
+                </span>
               </div>
-              <div><b>Quantity:</b> {Number(adminSelectedBid.quantity || 0).toFixed(2)} t</div>
-              <div>
-                <b>Price:</b>{" "}
-                {adminSelectedBid.status === "accepted" &&
-                getAcceptedPrice(adminSelectedBid) != null ? (
-                  <>
-                    {Number(getAcceptedPrice(adminSelectedBid)).toFixed(2)}{" "}
-                    {adminSelectedBid.product === "sunflower" ? "USD/t" : "EUR/t"}
-                  </>
-                ) : adminSelectedBid.counter_price != null ? (
-                  <>
-                    {Number(adminSelectedBid.counter_price).toFixed(2)}{" "}
-                    {adminSelectedBid.product === "sunflower" ? "USD/t" : "EUR/t"}
-                  </>
-                ) : (
-                  <>
-                    {Number(adminSelectedBid.price || 0).toFixed(2)}{" "}
-                    {adminSelectedBid.product === "sunflower" ? "USD/t" : "EUR/t"}
-                  </>
-                )}
+              <div className="bid-modal-row">
+                <span className="bid-modal-label">Farmer</span>
+                <span className="bid-modal-value">
+                  {adminSelectedBid.farmer_email || adminSelectedBid.farmer_id}
+                </span>
               </div>
-              <div>
-                <b>Counter:</b>{" "}
-                <input
-                  className="input inline-input"
-                  type="number"
-                  step="0.01"
-                  inputMode="decimal"
-                  placeholder="-"
-                  value={adminModalCounter}
-                  onChange={(e) => setAdminModalCounter(e.target.value)}
-                />
+              <div className="bid-modal-row">
+                <span className="bid-modal-label">Product</span>
+                <span className="bid-modal-value">
+                  {getProductLabelSafe(adminSelectedBid.product)}
+                </span>
               </div>
-              {isFreightParity(adminSelectedBid.parity) && (
-                <div>
-                  <b>Freight:</b>{" "}
+              <div className="bid-modal-row">
+                <span className="bid-modal-label">Quantity</span>
+                <span className="bid-modal-value">
+                  {formatCompactNumber(adminSelectedBid.quantity)} t
+                </span>
+              </div>
+              <div className="bid-modal-row">
+                <span className="bid-modal-label">Price</span>
+                <span className="bid-modal-value">
+                  {adminSelectedBid.status === "accepted" &&
+                  getAcceptedPrice(adminSelectedBid) != null ? (
+                    <>
+                      {formatCompactNumber(getAcceptedPrice(adminSelectedBid))}{" "}
+                      {adminSelectedBid.product === "sunflower" ? "USD/t" : "EUR/t"}
+                    </>
+                  ) : hasPositiveNumber(adminSelectedBid.counter_price) ? (
+                    <>
+                      {formatCompactNumber(adminSelectedBid.counter_price)}{" "}
+                      {adminSelectedBid.product === "sunflower" ? "USD/t" : "EUR/t"}
+                    </>
+                  ) : (
+                    <>
+                      {formatCompactNumber(adminSelectedBid.price)}{" "}
+                      {adminSelectedBid.product === "sunflower" ? "USD/t" : "EUR/t"}
+                    </>
+                  )}
+                </span>
+              </div>
+              <div className="bid-modal-row">
+                <span className="bid-modal-label">Counter</span>
+                <span className="bid-modal-value bid-modal-counter">
                   <input
                     className="input inline-input"
                     type="number"
                     step="0.01"
                     inputMode="decimal"
                     placeholder="-"
-                    value={adminModalFreight}
-                    onChange={(e) => setAdminModalFreight(e.target.value)}
-                  />{" "}
-                  {adminSelectedBid.product === "sunflower" ? "USD/t" : "EUR/t"}
+                    value={adminModalCounter}
+                    onChange={(e) => setAdminModalCounter(e.target.value)}
+                  />
+                  <span className="bid-modal-unit">
+                    {adminSelectedBid.product === "sunflower" ? "USD/t" : "EUR/t"}
+                  </span>
+                </span>
+              </div>
+              {isFreightParity(adminSelectedBid.parity) && (
+                <div className="bid-modal-row">
+                  <span className="bid-modal-label">Freight</span>
+                  <span className="bid-modal-value bid-modal-counter">
+                    <input
+                      className="input inline-input"
+                      type="number"
+                      step="0.01"
+                      inputMode="decimal"
+                      placeholder="-"
+                      value={adminModalFreight}
+                      onChange={(e) => setAdminModalFreight(e.target.value)}
+                    />
+                    <span className="bid-modal-unit">
+                      {adminSelectedBid.product === "sunflower" ? "USD/t" : "EUR/t"}
+                    </span>
+                  </span>
                 </div>
               )}
-              <div>
-                <b>Parity:</b>{" "}
-                {isFreightParity(adminSelectedBid.parity) ? (
-                  <>
-                    {String(adminSelectedBid.parity || "").toUpperCase()}{" "}
-                    {adminSelectedBid.loading_location || "-"} with delivery at{" "}
-                    <select
-                      className="input inline-select"
-                      value={adminModalDelivery}
-                      onChange={(e) => setAdminModalDelivery(e.target.value)}
-                    >
-                      <option value="">Delivery location</option>
-                      {adminModalDelivery &&
-                        !deliveryLocations.includes(adminModalDelivery) && (
-                          <option value={adminModalDelivery}>
-                            {formatLocationDisplay(adminModalDelivery)}
+              <div className="bid-modal-row">
+                <span className="bid-modal-label">Parity</span>
+                <span className="bid-modal-value">
+                  {isFreightParity(adminSelectedBid.parity) ? (
+                    <span className="bid-modal-parity-edit">
+                      <span>
+                        {String(adminSelectedBid.parity || "").toUpperCase()}{" "}
+                        {adminSelectedBid.loading_location || "-"}
+                      </span>
+                      <span className="bid-modal-parity-separator">to</span>
+                      <select
+                        className="input inline-select bid-modal-inline-select"
+                        value={adminModalDelivery}
+                        onChange={(e) => setAdminModalDelivery(e.target.value)}
+                      >
+                        <option value="">Delivery location</option>
+                        {adminModalDelivery &&
+                          !deliveryLocations.includes(adminModalDelivery) && (
+                            <option value={adminModalDelivery}>
+                              {formatLocationDisplay(adminModalDelivery)}
+                            </option>
+                          )}
+                        {deliveryLocations.map((loc) => (
+                          <option key={loc} value={loc}>
+                            {formatLocationDisplay(loc)}
                           </option>
-                        )}
-                      {deliveryLocations.map((loc) => (
-                        <option key={loc} value={loc}>
-                          {formatLocationDisplay(loc)}
-                        </option>
-                      ))}
-                    </select>
-                  </>
-                ) : (
-                  formatParityDisplay(adminSelectedBid, { detailed: true })
-                )}
+                        ))}
+                      </select>
+                    </span>
+                  ) : (
+                    formatParityDisplay(adminSelectedBid, { detailed: true })
+                  )}
+                </span>
               </div>
-              <div>
-                <b>Delivery:</b>{" "}
-                {formatDeliveryRange(
-                  adminSelectedBid.delivery_start,
-                  adminSelectedBid.delivery_end
-                )}
+              <div className="bid-modal-row">
+                <span className="bid-modal-label">Delivery</span>
+                <span className="bid-modal-value">
+                  {formatDeliveryRange(
+                    adminSelectedBid.delivery_start,
+                    adminSelectedBid.delivery_end
+                  )}
+                </span>
               </div>
-              <div><b>Status:</b> {adminSelectedBid.status}</div>
+              <div className="bid-modal-row">
+                <span className="bid-modal-label">Status</span>
+                <span className="bid-modal-value">
+                  {getStatusLabel(adminSelectedBid.status)}
+                </span>
+              </div>
               {adminSelectedBid.status === "accepted" && adminSelectedBid.contract_no && (
-                <div><b>Contract:</b> {adminSelectedBid.contract_no}</div>
+                <div className="bid-modal-row">
+                  <span className="bid-modal-label">Contract</span>
+                  <span className="bid-modal-value">{adminSelectedBid.contract_no}</span>
+                </div>
               )}
             </div>
             <div className="modal-actions">
@@ -889,7 +986,8 @@ export default function AdminDashboard() {
                 const originalDelivery = normalizeOptionalText(adminModalOriginal.delivery);
                 const isDecisionLocked =
                   adminSelectedBid.status === "accepted" ||
-                  adminSelectedBid.status === "rejected";
+                  adminSelectedBid.status === "rejected" ||
+                  adminSelectedBid.status === "countered";
                 const counterInvalid =
                   currentCounter != null && !Number.isFinite(currentCounter);
                 const freightInvalid =

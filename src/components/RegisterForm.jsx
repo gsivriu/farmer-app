@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { supabase } from "../supabaseClient";
 
-export default function RegisterForm({ onRegister, role = "farmer" }) {
+export default function RegisterForm({ onRegister }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -14,15 +14,7 @@ export default function RegisterForm({ onRegister, role = "farmer" }) {
     setError(null);
     setMessage(null);
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          role, // farmer / admin in user_metadata
-        },
-      },
-    });
+    const { error } = await supabase.auth.signUp({ email, password });
 
     setLoading(false);
 
@@ -31,18 +23,14 @@ export default function RegisterForm({ onRegister, role = "farmer" }) {
       return;
     }
 
-    setMessage(
-      `${role === "admin" ? "Admin" : "Farmer"} account created. Check your email to confirm.`
-    );
+    setMessage("Account created. Check your email to confirm.");
     onRegister?.();
   };
-
-  const roleLabel = role === "admin" ? "Admin" : "Farmer";
 
   return (
     <form className="login-form" onSubmit={handleRegister}>
       <div className="small-text">
-        New <strong>{roleLabel}</strong> account
+        New <strong>account</strong>
       </div>
 
       <label className="label">
@@ -50,7 +38,7 @@ export default function RegisterForm({ onRegister, role = "farmer" }) {
         <input
           className="input"
           type="email"
-          placeholder={`${roleLabel.toLowerCase()} email`}
+          placeholder="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required

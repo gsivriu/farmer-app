@@ -13,7 +13,6 @@ import AdminDashboard from "./pages/AdminDashboard";
 function App() {
   const [session, setSession] = useState(null);
   const [authView, setAuthView] = useState("login");
-  const [authRole, setAuthRole] = useState("farmer");
   const [userRole, setUserRole] = useState("farmer");
   const [roleView, setRoleView] = useState("farmer");
   const [darkMode, setDarkMode] = useState(() => {
@@ -117,18 +116,9 @@ function App() {
 
           <div className="login-body">
 
-            {authView === "register" && (
-              <div className="login-role-row" style={{ display: "flex", justifyContent: "center", gap: "10px", marginBottom: "10px" }}>
-                <div style={{ display: "flex", gap: "6px" }}>
-                  <button className={"btn small" + (authRole === "farmer" ? " primary-btn" : " outline")} type="button" onClick={() => setAuthRole("farmer")}>Farmer</button>
-                  <button className={"btn small" + (authRole === "admin" ? " primary-btn" : " outline")} type="button" onClick={() => setAuthRole("admin")}>Admin</button>
-                </div>
-              </div>
-            )}
-
             {authView === "register" ? (
               <>
-                <RegisterForm role={authRole} />
+                <RegisterForm />
                 <div className="login-switch">
                   Already have an account? <button type="button" className="login-link" onClick={() => setAuthView("login")}>Login</button>
                 </div>
