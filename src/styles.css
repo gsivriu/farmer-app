@@ -6417,40 +6417,80 @@ select.input:focus {
 .mb-chip-wait    { background: #fef9c3; color: #854d0e; }
 .mb-chip-done    { background: #dcfce7; color: #166534; }
 
-/* ── Logistics — grouped by transport type ───────────────────────────────── */
-.mb-logistics-group {
-  padding-bottom: 4px;
-  margin-bottom: 4px;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
-}
-.mb-logistics-group:last-child { border-bottom: none; margin-bottom: 0; }
-.theme-dark .mb-logistics-group { border-bottom-color: rgba(255,255,255,0.06); }
+/* ── Logistics — group wrapper ───────────────────────────────────────────── */
+.mb-logistics-group { margin-top: 16px; }
+.mb-logistics-group:first-child { margin-top: 0; }
 
-/* Type section header: icon + LABEL + count badge */
-.mb-logistics-type-head {
+/* Group header: [icon-box] LABEL (gri uppercase)           count */
+.tr-group-header {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 0 5px;
+  gap: 10px;
+  padding: 12px 0 8px;
+  border-bottom: 1px solid var(--gray-light);
 }
-.mb-logistics-type-head > span:first-of-type {
-  font-size: 11px;
+.theme-dark .tr-group-header { border-bottom-color: #1f2937; }
+
+/* 32×32 neutral icon container */
+.tr-type-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.theme-dark .tr-type-icon { background: #1f2937; }
+
+/* Label: TRAIN / BARGE / TRUCK */
+.tr-type-label {
+  font-size: 12px;
   font-weight: 600;
   color: #6b7280;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   flex: 1;
 }
-.mb-logistics-count {
+.theme-dark .tr-type-label { color: #9ca3af; }
+
+/* Count pill */
+.tr-type-count {
   font-size: 11px;
   font-weight: 600;
   color: #6b7280;
   background: #f3f4f6;
-  border-radius: 10px;
-  padding: 1px 7px;
-  flex-shrink: 0;
+  border-radius: 20px;
+  padding: 2px 8px;
+  min-width: 24px;
+  text-align: center;
 }
-.theme-dark .mb-logistics-count { background: #1f2937; color: #6b7280; }
+.theme-dark .tr-type-count { background: #1f2937; color: #9ca3af; }
+
+/* Individual transport row */
+.tr-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 4px;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  border-radius: 6px;
+  margin: 0 -4px;
+  transition: background 0.15s ease;
+}
+.tr-item-row:last-child { border-bottom: none; }
+.tr-item-row:hover { background: #f9fafb; }
+.theme-dark .tr-item-row { border-bottom-color: rgba(255,255,255,0.04); }
+.theme-dark .tr-item-row:hover { background: #0f172a; }
+
+.tr-item-info { display: flex; flex-direction: column; }
+.tr-item-name  { font-size: 13px; font-weight: 500; color: #111827; display: block; }
+.tr-item-route { font-size: 11px; font-weight: 400; color: #6b7280; display: block; margin-top: 1px; }
+.tr-item-qty   { font-size: 13px; font-weight: 600; color: #111827; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.theme-dark .tr-item-name  { color: #e5e7eb; }
+.theme-dark .tr-item-route { color: #6b7280; }
+.theme-dark .tr-item-qty   { color: #e5e7eb; }
 
 /* ── Contracts — totals row ──────────────────────────────────────────────── */
 .mb-totals-row {

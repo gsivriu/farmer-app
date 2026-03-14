@@ -33,66 +33,41 @@ function IconCart() {
   );
 }
 
-// Transport icons: front-facing filled, accept color prop
+// Transport icons: outline, monochrome, spec-exact paths (16×16 inside 32×32 container)
 
-function IconTruck({ color = "#374151" }) {
+function IconTruck() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill={color}>
-      {/* Cargo box body */}
-      <rect x="2.5" y="1.5" width="19" height="10" rx="2" />
-      {/* Windshield */}
-      <rect x="5" y="3" width="14" height="6.5" rx="1.5" fill="white" fillOpacity="0.28" />
-      {/* Cab / bumper row */}
-      <rect x="1.5" y="11.5" width="21" height="5.5" rx="1.5" />
-      {/* Headlights */}
-      <rect x="3" y="13" width="4" height="2.5" rx="0.5" fill="white" fillOpacity="0.55" />
-      <rect x="17" y="13" width="4" height="2.5" rx="0.5" fill="white" fillOpacity="0.55" />
-      {/* Wheels */}
-      <circle cx="6.5" cy="21" r="3" />
-      <circle cx="17.5" cy="21" r="3" />
-      <circle cx="6.5" cy="21" r="1.4" fill="white" fillOpacity="0.32" />
-      <circle cx="17.5" cy="21" r="1.4" fill="white" fillOpacity="0.32" />
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="1" y="3" width="15" height="13" />
+      <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
+      <circle cx="5.5" cy="18.5" r="2.5" />
+      <circle cx="18.5" cy="18.5" r="2.5" />
     </svg>
   );
 }
 
-function IconTrain({ color = "#374151" }) {
+function IconTrain() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill={color}>
-      {/* Main body */}
-      <rect x="3" y="2" width="18" height="14" rx="3.5" />
-      {/* Windshield */}
-      <rect x="5.5" y="4" width="13" height="8" rx="2" fill="white" fillOpacity="0.28" />
-      {/* Headlights */}
-      <circle cx="8" cy="15" r="2" fill="white" fillOpacity="0.55" />
-      <circle cx="16" cy="15" r="2" fill="white" fillOpacity="0.55" />
-      {/* Lower nose panel */}
-      <rect x="4" y="17" width="16" height="3.5" rx="1.5" />
-      {/* Rails */}
-      <rect x="0.5" y="21.5" width="8" height="2" rx="0.5" />
-      <rect x="15.5" y="21.5" width="8" height="2" rx="0.5" />
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="6" width="17" height="11" rx="2" />
+      <path d="M19 10h2l1 4h-3" />
+      <circle cx="6" cy="18" r="1.5" />
+      <circle cx="14" cy="18" r="1.5" />
+      <line x1="2" y1="10" x2="19" y2="10" />
+      <line x1="8" y1="6" x2="8" y2="10" />
+      <line x1="14" y1="6" x2="14" y2="10" />
     </svg>
   );
 }
 
-function IconBarge({ color = "#374151" }) {
+function IconBarge() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill={color}>
-      {/* Superstructure / bridge */}
-      <rect x="7.5" y="2" width="9" height="6.5" rx="1.5" />
-      {/* Bridge windows */}
-      <rect x="9.5" y="3.5" width="5" height="3.5" rx="0.5" fill="white" fillOpacity="0.28" />
-      {/* Hull body */}
-      <rect x="3" y="8.5" width="18" height="6" rx="1" />
-      {/* Portholes */}
-      <circle cx="8.5" cy="11.5" r="1.5" fill="white" fillOpacity="0.35" />
-      <circle cx="15.5" cy="11.5" r="1.5" fill="white" fillOpacity="0.35" />
-      {/* Bow — hull tapers inward at bottom */}
-      <path d="M3 14.5 L1 19.5 Q12 23.5 23 19.5 L21 14.5 Z" />
-      {/* Waves */}
-      <path d="M2 21 Q7 19.5 12 21 Q17 22.5 22 21"
-        fill="none" stroke="white" strokeWidth="1.3"
-        strokeLinecap="round" strokeOpacity="0.45" />
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 20a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0" />
+      <path d="M4 14v-3l4-2 4 2v3" />
+      <path d="M12 14V9" />
+      <path d="M8 9h8" />
+      <line x1="12" y1="5" x2="12" y2="9" />
     </svg>
   );
 }
@@ -164,9 +139,9 @@ const TRANSPORT_DATA = [
 
 // Transport type definitions — order determines display order
 const TRANSPORT_TYPES = [
-  { type: "train", label: "Train", Icon: IconTrain, color: "#b9101e" },
-  { type: "barge", label: "Barge", Icon: IconBarge, color: "#1d4ed8" },
-  { type: "truck", label: "Truck", Icon: IconTruck, color: "#16a34a" },
+  { type: "train", label: "Train", Icon: IconTrain },
+  { type: "barge", label: "Barge", Icon: IconBarge },
+  { type: "truck", label: "Truck", Icon: IconTruck },
 ];
 
 const ACQ_DATA = [
@@ -274,28 +249,27 @@ function CardLogistics() {
       </div>
 
       <div className="mb-card-body" style={{ maxHeight: 260 }}>
-        {TRANSPORT_TYPES.map(({ type, label, Icon, color }) => {
+        {TRANSPORT_TYPES.map(({ type, label, Icon }) => {
           const items = TRANSPORT_DATA.filter((t) => t.type === type);
           if (items.length === 0) return null;
           return (
             <div key={type} className="mb-logistics-group">
-              {/* Type section header — colored per transport mode */}
-              <div className="mb-logistics-type-head">
-                <Icon color={color} />
-                <span style={{ color }}>{label}</span>
-                <span className="mb-logistics-count"
-                  style={{ background: color + "18", color }}>
-                  {items.length}
-                </span>
+              {/* Group header: neutral icon box + uppercase label + count */}
+              <div className="tr-group-header">
+                <div className="tr-type-icon">
+                  <Icon />
+                </div>
+                <span className="tr-type-label">{label}</span>
+                <span className="tr-type-count">{items.length}</span>
               </div>
-              {/* Rows: commodity + route | qty */}
+              {/* Individual transport rows */}
               {items.map((t) => (
-                <div key={t.id} className="mb-row" style={{ gridTemplateColumns: "1fr auto" }}>
-                  <div>
-                    <div className="mb-row-label">{t.commodity}</div>
-                    <div className="mb-row-meta">{t.from} → {t.to}</div>
+                <div key={t.id} className="tr-item-row">
+                  <div className="tr-item-info">
+                    <span className="tr-item-name">{t.commodity}</span>
+                    <span className="tr-item-route">{t.from} → {t.to}</span>
                   </div>
-                  <span className="mb-row-value">{t.qty}</span>
+                  <span className="tr-item-qty">{t.qty}</span>
                 </div>
               ))}
             </div>
