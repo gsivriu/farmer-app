@@ -4,6 +4,7 @@ import { useAppContext } from "../context/AppContext.jsx";
 import MarketTicker from "../components/MarketTicker.jsx";
 import SiloPriceTable from "../components/SiloPriceTable.jsx";
 import ExchangeRatesCard from "../components/ExchangeRatesCard.jsx";
+import MotherboardPage from "./Motherboard";
 import { getProductLabelSafe, PRODUCT_FILTER_KEYS } from "../utils/productLabels";
 import { formatCompactNumber, hasPositiveNumber } from "../utils/numberFormat";
 
@@ -501,6 +502,13 @@ export default function AdminDashboard() {
         >
           Farmer Bids
         </button>
+        <button
+          type="button"
+          className={"nav-item " + (activeTab === "motherboard" ? "active" : "")}
+          onClick={() => setActiveTab("motherboard")}
+        >
+          Motherboard
+        </button>
       </nav>
 
       <div className="tab-content admin-tab-content">
@@ -730,6 +738,10 @@ export default function AdminDashboard() {
             )}
 
           </div>
+        </div>
+
+        <div className={"tab-pane admin-motherboard-pane" + (activeTab === "motherboard" ? " active" : "")}>
+          <MotherboardPage />
         </div>
       </div>
 
@@ -1264,6 +1276,28 @@ export default function AdminDashboard() {
             <path d="M14 4v6h6" />
           </svg>
           <span className="nav-label">Bids</span>
+        </button>
+        <button
+          type="button"
+          className={"nav-item " + (activeTab === "motherboard" ? "active" : "")}
+          onClick={() => setActiveTab("motherboard")}
+        >
+          <svg
+            className="nav-icon"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <rect x="3" y="3" width="7" height="7" rx="1" />
+            <rect x="14" y="3" width="7" height="7" rx="1" />
+            <rect x="3" y="14" width="7" height="7" rx="1" />
+            <rect x="14" y="14" width="7" height="7" rx="1" />
+          </svg>
+          <span className="nav-label">Motherboard</span>
         </button>
       </nav>
 
