@@ -6468,6 +6468,37 @@ select.input:focus {
 }
 .theme-dark .tr-type-count { background: #1f2937; color: #9ca3af; }
 
+/* ── Per-type colour modifiers (outline icons, pastel bg) ───────────────── */
+/* Train — red */
+.tr-group--train .tr-type-icon               { background: #fef2f2; }
+.tr-group--train .tr-type-icon svg           { stroke: #b9101e; }
+.tr-group--train .tr-type-label              { color: #b9101e; }
+.tr-group--train .tr-type-count              { background: #fef2f2; color: #b9101e; }
+/* Truck — green */
+.tr-group--truck .tr-type-icon               { background: #f0fdf4; }
+.tr-group--truck .tr-type-icon svg           { stroke: #15803d; }
+.tr-group--truck .tr-type-label              { color: #15803d; }
+.tr-group--truck .tr-type-count              { background: #f0fdf4; color: #15803d; }
+/* Barge — blue */
+.tr-group--barge .tr-type-icon               { background: #eff6ff; }
+.tr-group--barge .tr-type-icon svg           { stroke: #1d4ed8; }
+.tr-group--barge .tr-type-label              { color: #1d4ed8; }
+.tr-group--barge .tr-type-count              { background: #eff6ff; color: #1d4ed8; }
+
+/* Dark mode variants */
+.theme-dark .tr-group--train .tr-type-icon   { background: #2d1b1b; }
+.theme-dark .tr-group--train .tr-type-icon svg { stroke: #f87171; }
+.theme-dark .tr-group--train .tr-type-label  { color: #f87171; }
+.theme-dark .tr-group--train .tr-type-count  { background: #2d1b1b; color: #f87171; }
+.theme-dark .tr-group--truck .tr-type-icon   { background: #1a2e1a; }
+.theme-dark .tr-group--truck .tr-type-icon svg { stroke: #4ade80; }
+.theme-dark .tr-group--truck .tr-type-label  { color: #4ade80; }
+.theme-dark .tr-group--truck .tr-type-count  { background: #1a2e1a; color: #4ade80; }
+.theme-dark .tr-group--barge .tr-type-icon   { background: #1a1f2e; }
+.theme-dark .tr-group--barge .tr-type-icon svg { stroke: #60a5fa; }
+.theme-dark .tr-group--barge .tr-type-label  { color: #60a5fa; }
+.theme-dark .tr-group--barge .tr-type-count  { background: #1a1f2e; color: #60a5fa; }
+
 /* Individual transport row */
 .tr-item-row {
   display: flex;
