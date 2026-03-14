@@ -11,10 +11,7 @@ const chimpexDetailedData = [
   { commodity: "WHT HP 2025", origin: "RO", client: "AMEROPA GRAINS SA", silozChimpex: 18127.34, warehouseChimpex: 0, bargesThirdParty: null, niva: 0 },
   { commodity: "CORN 2025", origin: "RO", client: "AMEROPA GRAINS SA", silozChimpex: 5475.23, warehouseChimpex: 0, bargesThirdParty: null, niva: null },
   { commodity: "SFS 2025", origin: "RO", client: "AMEROPA GRAINS SA", silozChimpex: 0, warehouseChimpex: 0, bargesThirdParty: null, niva: null },
-  { commodity: "WHT EX NIVA 2025", origin: "RO", client: "AMEROPA GRAINS SA", silozChimpex: 0, warehouseChimpex: 0, bargesThirdParty: null, niva: null },
-  { commodity: "RPS EX NIVA 2025", origin: "RO", client: "AMEROPA GRAINS SA", silozChimpex: 0, warehouseChimpex: 0, bargesThirdParty: null, niva: null },
   { commodity: "RPS 2025 IMPORTED", origin: "MLD", client: "AMEROPA GRAINS SA", silozChimpex: 0, warehouseChimpex: 0, bargesThirdParty: null, niva: null },
-  { commodity: "RPS 2025 TRANZIT", origin: "MLD", client: "AMEROPA GRAINS SA", silozChimpex: 0, warehouseChimpex: 0, bargesThirdParty: null, niva: null },
   { commodity: "BLY 2025", origin: "RO", client: "AMS AMEROPA MARKETING AND SALES AG", silozChimpex: 0, warehouseChimpex: 0, bargesThirdParty: null, niva: 0 },
   { commodity: "RPS 2025", origin: "RO", client: "AMS AMEROPA MARKETING AND SALES AG", silozChimpex: 0, warehouseChimpex: 0, bargesThirdParty: null, niva: null },
   { commodity: "WHT LP 2025", origin: "RO", client: "AMS AMEROPA MARKETING AND SALES AG", silozChimpex: 1005.8, warehouseChimpex: 0, bargesThirdParty: null, niva: null },
@@ -22,8 +19,6 @@ const chimpexDetailedData = [
   { commodity: "SFS 2025", origin: "RO", client: "AMS AMEROPA MARKETING AND SALES AG", silozChimpex: 0, warehouseChimpex: 0, bargesThirdParty: null, niva: null },
   { commodity: "WHT 2025 TRANZIT", origin: "MLD", client: "AMS AMEROPA MARKETING AND SALES AG", silozChimpex: 0, warehouseChimpex: 0, bargesThirdParty: null, niva: null },
   { commodity: "CORN 2025", origin: "RO", client: "AMS AMEROPA MARKETING AND SALES AG", silozChimpex: 7741.81, warehouseChimpex: 0, bargesThirdParty: null, niva: null },
-  { commodity: "WHT 2025 IMPORTED", origin: "MLD", client: "AMS AMEROPA MARKETING AND SALES AG", silozChimpex: 0, warehouseChimpex: 0, bargesThirdParty: null, niva: null },
-  { commodity: "WHT 2025 IMPORTED", origin: "MLD", client: "AMEROPA GRAINS SA", silozChimpex: 0, warehouseChimpex: 0, bargesThirdParty: null, niva: null },
   { commodity: "WHT", origin: "RO", client: "AMEROPA GRAINS SA", silozChimpex: 0, warehouseChimpex: 0, bargesThirdParty: null, niva: null },
 ];
 
