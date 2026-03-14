@@ -82,30 +82,6 @@ function FillBar({ pct, height = 4 }) {
   );
 }
 
-// ── Transport chip ──────────────────────────────────────────────────────────
-
-function TransportChip({ status }) {
-  const cls =
-    status === "In Transit" ? "mb-chip mb-chip-transit" :
-    status === "Pending"    ? "mb-chip mb-chip-wait" :
-    "mb-chip mb-chip-done";
-  return <span className={cls}>{status}</span>;
-}
-
-// ── Transport progress bar (no vehicle icon) ─────────────────────────────────
-
-function TransportBar({ pct, status }) {
-  const fillColor =
-    status === "In Transit" ? "#1d4ed8" :
-    status === "Pending"    ? "#92400e" :
-    "#166534";
-  return (
-    <div className="mb-tr-bar-outer">
-      <div className="mb-tr-bar-fill" style={{ width: `${pct}%`, background: fillColor }} />
-    </div>
-  );
-}
-
 // ── Footer with total fill bar (stock cards) ──────────────────────────────────
 
 function TotalFillFooter({ label, total, capacity }) {
@@ -151,13 +127,20 @@ const INLAND_TOTAL    = 93800;
 const INLAND_CAPACITY = 302000;
 
 const TRANSPORT_DATA = [
-  { id: "TRN-2241",  type: "train", pct: 72,  from: "Slobozia",   to: "Chimpex",  status: "In Transit", qty: "1,840 t" },
-  { id: "TRN-2198",  type: "train", pct: 45,  from: "Alexandria", to: "Brăila",   status: "Pending",    qty: "2,100 t" },
-  { id: "B-44 XYZ",  type: "truck", pct: 88,  from: "Călărași",   to: "Chimpex",  status: "In Transit", qty: "28 t" },
-  { id: "CT-22 ABC", type: "truck", pct: 100, from: "Brăila",     to: "Slobozia", status: "Arrived",    qty: "28 t" },
-  { id: "Danube-7",  type: "barge", pct: 35,  from: "Galați",     to: "Chimpex",  status: "In Transit", qty: "2,500 t" },
-  { id: "Neptune-3", type: "barge", pct: 62,  from: "Tulcea",     to: "Brăila",   status: "Pending",    qty: "3,000 t" },
-  { id: "IF-33 MNO", type: "truck", pct: 55,  from: "Buzău",      to: "Chimpex",  status: "In Transit", qty: "28 t" },
+  { id: "TRN-2241",  type: "train", commodity: "Wheat",    from: "Slobozia",   to: "Chimpex",  qty: "1,840 t" },
+  { id: "TRN-2198",  type: "train", commodity: "Corn",     from: "Alexandria", to: "Brăila",   qty: "2,100 t" },
+  { id: "Danube-7",  type: "barge", commodity: "Wheat",    from: "Galați",     to: "Chimpex",  qty: "2,500 t" },
+  { id: "Neptune-3", type: "barge", commodity: "Rapeseed", from: "Tulcea",     to: "Brăila",   qty: "3,000 t" },
+  { id: "B-44 XYZ",  type: "truck", commodity: "Corn",     from: "Călărași",   to: "Chimpex",  qty: "28 t" },
+  { id: "CT-22 ABC", type: "truck", commodity: "Wheat",    from: "Brăila",     to: "Slobozia", qty: "28 t" },
+  { id: "IF-33 MNO", type: "truck", commodity: "Rapeseed", from: "Buzău",      to: "Chimpex",  qty: "28 t" },
+];
+
+// Transport type definitions — order determines display order
+const TRANSPORT_TYPES = [
+  { type: "train", label: "Train", Icon: IconTrain },
+  { type: "barge", label: "Barge", Icon: IconBarge },
+  { type: "truck", label: "Truck", Icon: IconTruck },
 ];
 
 const ACQ_DATA = [
@@ -241,6 +224,8 @@ function CardInland() {
 // ── Card: Logistics Underway ──────────────────────────────────────────────────
 
 function CardLogistics() {
+  const totalActive = TRANSPORT_DATA.length;
+
   return (
     <div className="mb-card">
       <div className="mb-card-head">
@@ -257,44 +242,46 @@ function CardLogistics() {
           </span>
           <span className="mb-head-meta" style={{ display: "flex", alignItems: "center", gap: 4 }}>
             <div className="mb-live-dot" />
-            23 active
+            {totalActive} active
           </span>
         </div>
       </div>
-      <div className="mb-col-headers">
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <span className="mb-col-cell">Transport / Route</span>
-          <span className="mb-col-cell">Status</span>
-        </div>
-      </div>
-      <div className="mb-card-body" style={{ maxHeight: 220 }}>
-        {TRANSPORT_DATA.map((t) => (
-          <div key={t.id} className="mb-row" style={{ display: "block" }}>
-            {/* Row 1: 28px icon | ID + route meta | chip */}
-            <div style={{ display: "grid", gridTemplateColumns: "28px 1fr auto", alignItems: "center", gap: 8 }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                {t.type === "train" ? <IconTrain /> : t.type === "barge" ? <IconBarge /> : <IconTruck />}
+
+      <div className="mb-card-body" style={{ maxHeight: 260 }}>
+        {TRANSPORT_TYPES.map(({ type, label, Icon }) => {
+          const items = TRANSPORT_DATA.filter((t) => t.type === type);
+          if (items.length === 0) return null;
+          return (
+            <div key={type} className="mb-logistics-group">
+              {/* Type section header */}
+              <div className="mb-logistics-type-head">
+                <Icon />
+                <span>{label}</span>
+                <span className="mb-logistics-count">{items.length}</span>
               </div>
-              <div>
-                <div className="mb-row-value">{t.id}</div>
-                <div className="mb-row-meta">{t.from} → {t.to} · {t.qty}</div>
-              </div>
-              <TransportChip status={t.status} />
+              {/* Rows: commodity + route | qty */}
+              {items.map((t) => (
+                <div key={t.id} className="mb-row" style={{ gridTemplateColumns: "1fr auto" }}>
+                  <div>
+                    <div className="mb-row-label">{t.commodity}</div>
+                    <div className="mb-row-meta">{t.from} → {t.to}</div>
+                  </div>
+                  <span className="mb-row-value">{t.qty}</span>
+                </div>
+              ))}
             </div>
-            {/* Row 2: progress bar + from/to points */}
-            <div style={{ paddingLeft: 36, marginTop: 6 }}>
-              <TransportBar pct={t.pct} status={t.status} />
-              <div className="mb-tr-pts">
-                <span className="mb-tr-pt">{t.from}</span>
-                <span className="mb-tr-pt">{t.to}</span>
-              </div>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
+
       <div className="mb-card-foot">
-        <span className="mb-foot-label">9 trains · 11 trucks · 3 barges</span>
-        <span className="mb-foot-val">23 active</span>
+        <span className="mb-foot-label">
+          {TRANSPORT_TYPES.map(({ type, label }) => {
+            const n = TRANSPORT_DATA.filter((t) => t.type === type).length;
+            return n > 0 ? `${n} ${label.toLowerCase()}${n > 1 ? "s" : ""}` : null;
+          }).filter(Boolean).join(" · ")}
+        </span>
+        <span className="mb-foot-val">{totalActive} active</span>
       </div>
     </div>
   );

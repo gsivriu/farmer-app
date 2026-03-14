@@ -6417,12 +6417,40 @@ select.input:focus {
 .mb-chip-wait    { background: #fef9c3; color: #854d0e; }
 .mb-chip-done    { background: #dcfce7; color: #166534; }
 
-/* ── Transport progress bar ──────────────────────────────────────────────── */
-.mb-tr-bar-outer { height: 6px; border-radius: 3px; background: #e5e7eb; }
-.mb-tr-bar-fill  { height: 100%; border-radius: 3px; }
-.theme-dark .mb-tr-bar-outer { background: #1f2937; }
-.mb-tr-pts { display: flex; justify-content: space-between; margin-top: 4px; }
-.mb-tr-pt  { font-size: 11px; color: #6b7280; }
+/* ── Logistics — grouped by transport type ───────────────────────────────── */
+.mb-logistics-group {
+  padding-bottom: 4px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.mb-logistics-group:last-child { border-bottom: none; margin-bottom: 0; }
+.theme-dark .mb-logistics-group { border-bottom-color: rgba(255,255,255,0.06); }
+
+/* Type section header: icon + LABEL + count badge */
+.mb-logistics-type-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 0 5px;
+}
+.mb-logistics-type-head > span:first-of-type {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  flex: 1;
+}
+.mb-logistics-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+  background: #f3f4f6;
+  border-radius: 10px;
+  padding: 1px 7px;
+  flex-shrink: 0;
+}
+.theme-dark .mb-logistics-count { background: #1f2937; color: #6b7280; }
 
 /* ── Contracts — totals row ──────────────────────────────────────────────── */
 .mb-totals-row {
