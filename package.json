@@ -5,9 +5,17 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:host": "vite --host",
+    "dev:host:5173": "vite --host 0.0.0.0 --port 5173",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "cap:sync:ios": "npx cap sync ios",
+    "cap:open:ios": "npx cap open ios",
+    "cap:dev:on": "node scripts/capacitor-dev-mode.mjs enable",
+    "cap:dev:off": "node scripts/capacitor-dev-mode.mjs disable",
+    "cap:live:on": "node scripts/capacitor-live-mode.mjs enable",
+    "cap:live:off": "node scripts/capacitor-live-mode.mjs disable"
   },
   "dependencies": {
     "@capacitor/cli": "^8.0.0",

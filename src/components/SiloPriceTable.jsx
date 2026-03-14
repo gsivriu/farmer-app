@@ -33,6 +33,7 @@ export default function SiloPriceTable({ commodities = [], readOnly = false }) {
   const [error, setError] = useState(null);
   const [selectedCell, setSelectedCell] = useState(null);
   const [overrideValue, setOverrideValue] = useState("");
+  const [modalError, setModalError] = useState(null);
 
   useEffect(() => {
     const loadRows = async () => {
@@ -129,6 +130,7 @@ export default function SiloPriceTable({ commodities = [], readOnly = false }) {
         ? String(cell.row.manual_price)
         : String(cell.computed);
     setOverrideValue(initial);
+    setModalError(null);
   };
 
   const handleSaveOverride = async () => {
@@ -137,7 +139,7 @@ export default function SiloPriceTable({ commodities = [], readOnly = false }) {
     const value = overrideValue.trim();
     const nextValue = value === "" ? null : Number(value);
     if (nextValue !== null && (!Number.isFinite(nextValue) || nextValue <= 0)) {
-      window.alert("Enter a valid price.");
+      setModalError("Enter a valid price.");
       return;
     }
 
@@ -162,10 +164,11 @@ export default function SiloPriceTable({ commodities = [], readOnly = false }) {
           .upsert(payload, { onConflict: "silo_name,product_type" });
 
     if (error) {
-      window.alert("Error while saving: " + error.message);
+      setModalError("Error while saving: " + error.message);
       return;
     }
 
+    setModalError(null);
     setRows((prev) =>
       prev.map((row) => {
         if (
@@ -204,10 +207,11 @@ export default function SiloPriceTable({ commodities = [], readOnly = false }) {
           .upsert(payload, { onConflict: "silo_name,product_type" });
 
     if (error) {
-      window.alert("Error while resetting: " + error.message);
+      setModalError("Error while resetting: " + error.message);
       return;
     }
 
+    setModalError(null);
     setRows((prev) =>
       prev.map((row) => {
         if (
@@ -323,8 +327,9 @@ export default function SiloPriceTable({ commodities = [], readOnly = false }) {
                 placeholder="Final price"
                 value={overrideValue}
                 onClick={(event) => event.stopPropagation()}
-                onChange={(event) => setOverrideValue(event.target.value)}
+                onChange={(event) => { setOverrideValue(event.target.value); setModalError(null); }}
               />
+              {modalError && <p className="badge rejected">{modalError}</p>}
               <button type="button" className="btn small ghost" onClick={handleSaveOverride}>
                 Save
               </button>

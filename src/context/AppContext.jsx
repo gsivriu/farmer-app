@@ -188,85 +188,6 @@ export function AppProvider({ children }) {
   };
 
   // =========================
-  // CREATE BID (farmers)
-  // =========================
-  const createBid = ({ commodityId, price, quantity, deliveryPeriod }) => {
-    if (!currentUser) return;
-
-    const commodity = commodities.find((c) => c.id === commodityId);
-    if (!commodity) return;
-
-    const id =
-      typeof crypto !== "undefined" && crypto.randomUUID
-        ? crypto.randomUUID()
-        : Date.now().toString();
-
-    const numericPrice = Number(price);
-    const numericQty = Number(quantity);
-
-    const newBid = {
-      id,
-      farmerName: currentUser.name,
-      product: commodity.name,
-
-      // initial farmer price
-      price: numericPrice,
-      // active negotiated price (starts from initial)
-      currentPrice: numericPrice,
-
-      quantity: numericQty,
-      deliveryPeriod,
-      status: "Pending", // Pending | Counter Offer | Completed | Rejected
-
-      finalPrice: null, // la Completed
-    };
-
-    setBids((prev) => [...prev, newBid]);
-  };
-
-  // =========================
-  // UPDATE BID STATUS (admin + farmer)
-  // =========================
-  // status: "Pending" | "Counter Offer" | "Completed" | "Rejected"
-  // newPrice: used only for Counter or Accept at a specific price
-  const updateBidStatus = (bidId, status, newPrice = null) => {
-    setBids((prevBids) =>
-      prevBids.map((bid) => {
-        if (bid.id !== bidId) return bid;
-
-        const updated = { ...bid, status };
-
-        // Current negotiated price
-        const currentNegotiatedPrice =
-          newPrice !== null && newPrice !== undefined
-            ? Number(newPrice)
-            : bid.currentPrice ?? bid.price;
-
-        // Counter Offer (admin or farmer)
-        if (status === "Counter Offer") {
-          return {
-            ...updated,
-            currentPrice: currentNegotiatedPrice, // becomes the active price
-          };
-        }
-
-        // Accept offer => Completed at active price
-        if (status === "Completed") {
-          return {
-            ...updated,
-            finalPrice: currentNegotiatedPrice,
-            // active price remains in currentPrice
-            currentPrice: currentNegotiatedPrice,
-          };
-        }
-
-        // Rejected sau Pending => doar status
-        return updated;
-      })
-    );
-  };
-
-  // =========================
   // UPDATE PRODUCT PRICE (admin)
   // =========================
   const updateCommodityPrice = async (id, newPrice) => {
@@ -365,8 +286,6 @@ export function AppProvider({ children }) {
     farmerRewards,
     fetchFarmerRewards,
     addFarmerRewardsPoints,
-    createBid,
-    updateBidStatus,
     updateCommodityPrice,
   };
 

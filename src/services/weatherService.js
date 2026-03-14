@@ -40,6 +40,7 @@ export const fetchWeather = async (lat, lon) => {
     const data = await response.json();
 
     const currentHour = new Date().getHours();
+    const now = new Date();
     const hourlyData = data.hourly.time
       .map((time, index) => ({
         time,
@@ -47,7 +48,8 @@ export const fetchWeather = async (lat, lon) => {
         code: data.hourly.weather_code[index],
         icon: getWeatherIcon(data.hourly.weather_code[index], 1),
       }))
-      .slice(currentHour, currentHour + 24);
+      .filter(item => new Date(item.time) >= now)
+      .slice(0, 24);
 
     const dailyData = data.daily.time.map((time, index) => ({
       date: time,

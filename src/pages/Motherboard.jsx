@@ -129,13 +129,13 @@ const INLAND_TOTAL    = 93800;
 const INLAND_CAPACITY = 302000;
 
 const TRANSPORT_DATA = [
-  { id: "TRN-2241",  type: "train", commodity: "Wheat",    from: "Slobozia",   to: "Chimpex",  qty: "1,840 t" },
-  { id: "TRN-2198",  type: "train", commodity: "Corn",     from: "Alexandria", to: "Brăila",   qty: "2,100 t" },
+  { id: "TRN-2241",  type: "train", commodity: "Wheat",    from: "Darmanesti",   to: "Chimpex",  qty: "1,840 t" },
+  { id: "TRN-2198",  type: "train", commodity: "Corn",     from: "Sarulesti", to: "Chimpex",   qty: "2,100 t" },
   { id: "Danube-7",  type: "barge", commodity: "Wheat",    from: "Galați",     to: "Chimpex",  qty: "2,500 t" },
-  { id: "Neptune-3", type: "barge", commodity: "Rapeseed", from: "Tulcea",     to: "Brăila",   qty: "3,000 t" },
-  { id: "B-44 XYZ",  type: "truck", commodity: "Corn",     from: "Călărași",   to: "Chimpex",  qty: "28 t" },
-  { id: "CT-22 ABC", type: "truck", commodity: "Wheat",    from: "Brăila",     to: "Slobozia", qty: "28 t" },
-  { id: "IF-33 MNO", type: "truck", commodity: "Rapeseed", from: "Buzău",      to: "Chimpex",  qty: "28 t" },
+  { id: "Neptune-3", type: "barge", commodity: "Rapeseed", from: "Macin",     to: "Chimpex",   qty: "3,000 t" },
+  { id: "B-44 XYZ",  type: "truck", commodity: "Corn",     from: "Vladeni",   to: "Silotrans",  qty: "28 t" },
+  { id: "CT-22 ABC", type: "truck", commodity: "Wheat",    from: "Ciresu",     to: "Babeni", qty: "28 t" },
+  { id: "IF-33 MNO", type: "truck", commodity: "Rapeseed", from: "Ciocarlia",      to: "Chimpex",  qty: "28 t" },
 ];
 
 // Transport type definitions — order determines display order
