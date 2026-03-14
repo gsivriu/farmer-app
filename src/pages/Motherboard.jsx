@@ -71,11 +71,11 @@ function IconCart() {
 // ── Commodity badge ─────────────────────────────────────────────────────────
 
 const BADGE_MAP = {
-  "Grâu":       "mb-badge mb-badge-wheat",
-  "Porumb":     "mb-badge mb-badge-corn",
-  "Floarea S.": "mb-badge mb-badge-sun",
-  "Rapiță":     "mb-badge mb-badge-rape",
-  "Orz":        "mb-badge mb-badge-barley",
+  "Wheat":     "mb-badge mb-badge-wheat",
+  "Corn":      "mb-badge mb-badge-corn",
+  "Sunflower": "mb-badge mb-badge-sun",
+  "Rapeseed":  "mb-badge mb-badge-rape",
+  "Barley":    "mb-badge mb-badge-barley",
 };
 
 function CommodityBadge({ name }) {
@@ -97,8 +97,8 @@ function FillBar({ pct }) {
 
 function TransportChip({ status }) {
   const cls =
-    status === "Tranzit" ? "mb-chip mb-chip-transit" :
-    status === "Avizare" ? "mb-chip mb-chip-wait" :
+    status === "In Transit" ? "mb-chip mb-chip-transit" :
+    status === "Pending"    ? "mb-chip mb-chip-wait" :
     "mb-chip mb-chip-done";
   return <span className={cls}>{status}</span>;
 }
@@ -107,11 +107,11 @@ function TransportChip({ status }) {
 
 function TransportBar({ pct, status, type }) {
   const fillColor =
-    status === "Tranzit" ? "#1d4ed8" :
-    status === "Avizare" ? "#92400e" :
+    status === "In Transit" ? "#1d4ed8" :
+    status === "Pending"    ? "#92400e" :
     "#166534";
 
-  const VehicleIcon = type === "tren" ? IconTrain : type === "barja" ? IconBarge : IconTruck;
+  const VehicleIcon = type === "train" ? IconTrain : type === "barge" ? IconBarge : IconTruck;
 
   return (
     <div className="mb-tr-bar-outer">
@@ -134,39 +134,39 @@ function Delta({ val }) {
 // ── Data ─────────────────────────────────────────────────────────────────────
 
 const CHIMPEX_DATA = [
-  { id: "C-01 Est",    commodity: "Grâu",       stock: 28400, cap: 30000 },
-  { id: "C-02 Vest",   commodity: "Porumb",     stock: 32100, cap: 40000 },
-  { id: "C-03 Nord",   commodity: "Floarea S.", stock: 19600, cap: 20000 },
-  { id: "C-04 Sud",    commodity: "Rapiță",     stock: 12300, cap: 22000 },
-  { id: "C-05 Centru", commodity: "Orz",        stock:  9800, cap: 15000 },
-  { id: "C-06 Est 2",  commodity: "Grâu",       stock: 10100, cap: 20000 },
+  { id: "C-01 East",    commodity: "Wheat",     stock: 28400, cap: 30000 },
+  { id: "C-02 West",    commodity: "Corn",      stock: 32100, cap: 40000 },
+  { id: "C-03 North",   commodity: "Sunflower", stock: 19600, cap: 20000 },
+  { id: "C-04 South",   commodity: "Rapeseed",  stock: 12300, cap: 22000 },
+  { id: "C-05 Central", commodity: "Barley",    stock:  9800, cap: 15000 },
+  { id: "C-06 East 2",  commodity: "Wheat",     stock: 10100, cap: 20000 },
 ];
 
 const INLAND_DATA = [
-  { silo: "Slobozia",   judet: "Ialomița",   commodity: "Grâu",       stock: 18200, cap: 25000 },
-  { silo: "Călărași",   judet: "Călărași",   commodity: "Porumb",     stock: 22500, cap: 30000 },
-  { silo: "Brăila",     judet: "Brăila",     commodity: "Floarea S.", stock: 11800, cap: 20000 },
-  { silo: "Alexandria", judet: "Teleorman",  commodity: "Rapiță",     stock: 21500, cap: 40000 },
-  { silo: "Galați",     judet: "Galați",     commodity: "Orz",        stock:  6400, cap: 15000 },
-  { silo: "Buzău",      judet: "Buzău",      commodity: "Grâu",       stock: 13400, cap: 20000 },
+  { silo: "Slobozia",   county: "Ialomița",   commodity: "Wheat",     stock: 18200, cap: 25000 },
+  { silo: "Călărași",   county: "Călărași",   commodity: "Corn",      stock: 22500, cap: 30000 },
+  { silo: "Brăila",     county: "Brăila",     commodity: "Sunflower", stock: 11800, cap: 20000 },
+  { silo: "Alexandria", county: "Teleorman",  commodity: "Rapeseed",  stock: 21500, cap: 40000 },
+  { silo: "Galați",     county: "Galați",     commodity: "Barley",    stock:  6400, cap: 15000 },
+  { silo: "Buzău",      county: "Buzău",      commodity: "Wheat",     stock: 13400, cap: 20000 },
 ];
 
 const TRANSPORT_DATA = [
-  { id: "TRN-2241", type: "tren",  pct: 72,  from: "Slobozia",  to: "Chimpex", status: "Tranzit",  qty: "1.840 t" },
-  { id: "TRN-2198", type: "tren",  pct: 45,  from: "Alexandria", to: "Brăila", status: "Avizare",  qty: "2.100 t" },
-  { id: "B-44 XYZ", type: "camion", pct: 88, from: "Călărași",  to: "Chimpex", status: "Tranzit",  qty: "28 t" },
-  { id: "CT-22 ABC",type: "camion", pct: 100, from: "Brăila",   to: "Slobozia",status: "Ajuns",    qty: "28 t" },
-  { id: "Dunărea-7",type: "barja",  pct: 35,  from: "Galați",   to: "Chimpex", status: "Tranzit",  qty: "2.500 t" },
-  { id: "Neptun-3", type: "barja",  pct: 62,  from: "Tulcea",   to: "Brăila",  status: "Avizare",  qty: "3.000 t" },
-  { id: "IF-33 MNO",type: "camion", pct: 55,  from: "Buzău",    to: "Chimpex", status: "Tranzit",  qty: "28 t" },
+  { id: "TRN-2241",  type: "train", pct: 72,  from: "Slobozia",   to: "Chimpex",  status: "In Transit", qty: "1,840 t" },
+  { id: "TRN-2198",  type: "train", pct: 45,  from: "Alexandria", to: "Brăila",   status: "Pending",    qty: "2,100 t" },
+  { id: "B-44 XYZ",  type: "truck", pct: 88,  from: "Călărași",   to: "Chimpex",  status: "In Transit", qty: "28 t" },
+  { id: "CT-22 ABC", type: "truck", pct: 100, from: "Brăila",     to: "Slobozia", status: "Arrived",    qty: "28 t" },
+  { id: "Danube-7",  type: "barge", pct: 35,  from: "Galați",     to: "Chimpex",  status: "In Transit", qty: "2,500 t" },
+  { id: "Neptune-3", type: "barge", pct: 62,  from: "Tulcea",     to: "Brăila",   status: "Pending",    qty: "3,000 t" },
+  { id: "IF-33 MNO", type: "truck", pct: 55,  from: "Buzău",      to: "Chimpex",  status: "In Transit", qty: "28 t" },
 ];
 
 const ACQ_DATA = [
-  { product: "Grâu",       contracts: 4, qty: "1.840 t", price: "208 €/t", delta: 2 },
-  { product: "Orz",        contracts: 2, qty: "640 t",   price: "185 €/t", delta: 0 },
-  { product: "Porumb",     contracts: 3, qty: "1.120 t", price: "172 €/t", delta: -3 },
-  { product: "Floarea S.", contracts: 5, qty: "2.100 t", price: "458 €/t", delta: 5 },
-  { product: "Rapiță",     contracts: 2, qty: "680 t",   price: "487 €/t", delta: 1 },
+  { product: "Wheat",     contracts: 4, qty: "1,840 t", price: "208 €/t", delta: 2 },
+  { product: "Barley",    contracts: 2, qty: "640 t",   price: "185 €/t", delta: 0 },
+  { product: "Corn",      contracts: 3, qty: "1,120 t", price: "172 €/t", delta: -3 },
+  { product: "Sunflower", contracts: 5, qty: "2,100 t", price: "458 €/t", delta: 5 },
+  { product: "Rapeseed",  contracts: 2, qty: "680 t",   price: "487 €/t", delta: 1 },
 ];
 
 // ── Card: Chimpex ─────────────────────────────────────────────────────────────
@@ -181,10 +181,10 @@ function CardChimpex() {
         </div>
       </div>
       <div className="mb-col-headers">
-        <div className="mb-col-row" style={{ gridTemplateColumns: "56px 1fr 72px 64px" }}>
-          <span className="mb-col-cell">Celulă</span>
-          <span className="mb-col-cell">Marfă</span>
-          <span className="mb-col-cell">Stoc</span>
+        <div className="mb-col-row" style={{ gridTemplateColumns: "72px 1fr 72px 56px" }}>
+          <span className="mb-col-cell">Cell</span>
+          <span className="mb-col-cell">Commodity</span>
+          <span className="mb-col-cell">Stock</span>
           <span className="mb-col-cell">Cap.</span>
         </div>
       </div>
@@ -192,7 +192,7 @@ function CardChimpex() {
         {CHIMPEX_DATA.map((r) => {
           const pct = Math.round((r.stock / r.cap) * 100);
           return (
-            <div key={r.id} className="mb-row" style={{ gridTemplateColumns: "56px 1fr 72px 64px" }}>
+            <div key={r.id} className="mb-row" style={{ gridTemplateColumns: "72px 1fr 72px 56px" }}>
               <span style={{ fontSize: 11, fontWeight: 600, color: "#374151" }}>{r.id}</span>
               <CommodityBadge name={r.commodity} />
               <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -206,14 +206,14 @@ function CardChimpex() {
         })}
       </div>
       <div className="mb-card-foot">
-        <span className="mb-foot-label">Total stoc Chimpex</span>
-        <span className="mb-foot-val">112.400 t</span>
+        <span className="mb-foot-label">Total stock Chimpex</span>
+        <span className="mb-foot-val">112,400 t</span>
       </div>
     </div>
   );
 }
 
-// ── Card: Silozuri Inland ─────────────────────────────────────────────────────
+// ── Card: Inland Silos ────────────────────────────────────────────────────────
 
 function CardInland() {
   return (
@@ -221,15 +221,15 @@ function CardInland() {
       <div className="mb-card-head">
         <div className="mb-card-title">
           <IconWarehouse />
-          Silozuri Inland
+          Inland Silos
         </div>
       </div>
       <div className="mb-col-headers">
         <div className="mb-col-row" style={{ gridTemplateColumns: "72px 68px 1fr 72px 56px" }}>
-          <span className="mb-col-cell">Siloz</span>
-          <span className="mb-col-cell">Județ</span>
-          <span className="mb-col-cell">Marfă</span>
-          <span className="mb-col-cell">Stoc</span>
+          <span className="mb-col-cell">Silo</span>
+          <span className="mb-col-cell">County</span>
+          <span className="mb-col-cell">Commodity</span>
+          <span className="mb-col-cell">Stock</span>
           <span className="mb-col-cell">Cap.</span>
         </div>
       </div>
@@ -239,7 +239,7 @@ function CardInland() {
           return (
             <div key={r.silo} className="mb-row" style={{ gridTemplateColumns: "72px 68px 1fr 72px 56px" }}>
               <span style={{ fontSize: 11, fontWeight: 600, color: "#374151" }}>{r.silo}</span>
-              <span style={{ fontSize: 10.5, color: "#6b7280" }}>{r.judet}</span>
+              <span style={{ fontSize: 10.5, color: "#6b7280" }}>{r.county}</span>
               <CommodityBadge name={r.commodity} />
               <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 <span style={{ fontSize: 11, fontWeight: 600 }}>{(r.stock / 1000).toFixed(1)}k t</span>
@@ -252,14 +252,14 @@ function CardInland() {
         })}
       </div>
       <div className="mb-card-foot">
-        <span className="mb-foot-label">Total stoc Inland</span>
-        <span className="mb-foot-val">74.000 t</span>
+        <span className="mb-foot-label">Total stock Inland</span>
+        <span className="mb-foot-val">74,000 t</span>
       </div>
     </div>
   );
 }
 
-// ── Card: Logistică Underway ─────────────────────────────────────────────────
+// ── Card: Logistics Underway ──────────────────────────────────────────────────
 
 function CardLogistics() {
   return (
@@ -274,14 +274,14 @@ function CardLogistics() {
               <line x1="9" y1="7" x2="13" y2="7" />
               <line x1="9" y1="10" x2="13" y2="12" />
             </svg>
-            Logistică Underway
+            Logistics Underway
           </span>
           <div className="mb-live-dot" />
         </div>
       </div>
       <div className="mb-col-headers">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span className="mb-col-cell">Transport / Rută</span>
+          <span className="mb-col-cell">Transport / Route</span>
           <span className="mb-col-cell">Status</span>
         </div>
       </div>
@@ -292,7 +292,7 @@ function CardLogistics() {
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <div style={{ flexShrink: 0, width: 22, height: 14, display: "flex", alignItems: "center" }}>
-                  {t.type === "tren" ? <IconTrain /> : t.type === "barja" ? <IconBarge /> : <IconTruck />}
+                  {t.type === "train" ? <IconTrain /> : t.type === "barge" ? <IconBarge /> : <IconTruck />}
                 </div>
                 <div>
                   <span style={{ fontSize: 11.5, fontWeight: 700, color: "#111827" }}>{t.id}</span>
@@ -313,14 +313,14 @@ function CardLogistics() {
         ))}
       </div>
       <div className="mb-card-foot">
-        <span className="mb-foot-label">9 trenuri · 11 auto · 3 barje</span>
+        <span className="mb-foot-label">9 trains · 11 trucks · 3 barges</span>
         <span className="mb-foot-val">23 active</span>
       </div>
     </div>
   );
 }
 
-// ── Card: Achiziții Live ──────────────────────────────────────────────────────
+// ── Card: Live Acquisitions ───────────────────────────────────────────────────
 
 function CardAcquisitions() {
   return (
@@ -329,17 +329,17 @@ function CardAcquisitions() {
         <div className="mb-card-title" style={{ justifyContent: "space-between" }}>
           <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <IconCart />
-            Achiziții Live
+            Live Acquisitions
           </span>
           <div className="mb-live-dot" />
         </div>
       </div>
       <div className="mb-col-headers">
         <div className="mb-col-row" style={{ gridTemplateColumns: "1fr 64px 60px 64px 56px" }}>
-          <span className="mb-col-cell">Produs</span>
+          <span className="mb-col-cell">Product</span>
           <span className="mb-col-cell">Ctrt.</span>
-          <span className="mb-col-cell">Cant.</span>
-          <span className="mb-col-cell">Preț med.</span>
+          <span className="mb-col-cell">Qty.</span>
+          <span className="mb-col-cell">Avg. Price</span>
           <span className="mb-col-cell">DAP Δ</span>
         </div>
       </div>
@@ -356,20 +356,20 @@ function CardAcquisitions() {
       </div>
       <div className="mb-acq-summary">
         <div className="mb-acq-kpi">
-          <span className="mb-acq-kpi-label">Contracte azi</span>
+          <span className="mb-acq-kpi-label">Contracts today</span>
           <span className="mb-acq-kpi-val">16</span>
         </div>
         <div className="mb-acq-kpi">
-          <span className="mb-acq-kpi-label">Cantitate</span>
-          <span className="mb-acq-kpi-val">6.380 t</span>
+          <span className="mb-acq-kpi-label">Quantity</span>
+          <span className="mb-acq-kpi-val">6,380 t</span>
         </div>
         <div className="mb-acq-kpi">
-          <span className="mb-acq-kpi-label">Valoare est.</span>
-          <span className="mb-acq-kpi-val">1,42 M€</span>
+          <span className="mb-acq-kpi-label">Est. value</span>
+          <span className="mb-acq-kpi-val">1.42 M€</span>
         </div>
         <div className="mb-acq-kpi">
           <span className="mb-acq-kpi-label">Dominant</span>
-          <span className="mb-acq-kpi-val" style={{ fontSize: 12 }}>Floarea S.</span>
+          <span className="mb-acq-kpi-val" style={{ fontSize: 12 }}>Sunflower</span>
         </div>
       </div>
     </div>
@@ -426,17 +426,17 @@ export default function MotherboardPage() {
 
       {/* Stocks */}
       {mbTab === "stocks" && (
-        <PlaceholderCard text="Stocks — detalii complete stocuri Chimpex & Inland (urmează a fi completat)" />
+        <PlaceholderCard text="Stocks — full stock details for Chimpex & Inland silos (coming soon)" />
       )}
 
       {/* Logistics */}
       {mbTab === "logistics" && (
-        <PlaceholderCard text="Logistics — plan transport detaliat, toate mijloacele de transport active" />
+        <PlaceholderCard text="Logistics — detailed transport plan, all active means of transport" />
       )}
 
       {/* Execution */}
       {mbTab === "execution" && (
-        <PlaceholderCard text="Execution — recepție, calculații, contracte per proprietar" />
+        <PlaceholderCard text="Execution — intake, calculations, contracts per owner" />
       )}
     </div>
   );
