@@ -22,33 +22,15 @@
   padding: 12px 14px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 
-.stocks-kpi-header {
-  display: flex;
-  align-items: center;
-}
-
-.stocks-kpi-badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 20px;
+.stocks-kpi-label {
   font-size: 11px;
   font-weight: 600;
-  font-family: var(--font-main);
-}
-
-.stocks-kpi-badge--wheat     { background: #fef9c3; color: #854d0e; }
-.stocks-kpi-badge--barley    { background: #eff6ff; color: #1e40af; }
-.stocks-kpi-badge--corn      { background: #f0fdf4; color: #166534; }
-.stocks-kpi-badge--sunflower { background: #fff7ed; color: #9a3412; }
-.stocks-kpi-badge--rapeseed  { background: #ecfdf5; color: #065f46; }
-
-.stocks-kpi-trend {
-  font-size: 11px;
-  font-weight: 600;
-  margin-left: auto;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .stocks-kpi-value {
@@ -61,7 +43,7 @@
 
 .stocks-kpi-sub {
   font-size: 11px;
-  color: #6b7280;
+  color: #9ca3af;
 }
 
 /* ── B) Toolbar ────────────────────────────────────────────────────────────── */
@@ -189,49 +171,70 @@
 
 .stocks-card-head {
   padding: 14px 16px 12px;
-  border-bottom: 1px solid var(--gray-light);
+  border-bottom: none;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
 
-/* ── Commodity product badges (Chimpex table) ──────────────────────────────── */
-
-.stocks-prod-badge {
-  display: inline-flex;
+.stocks-head-left {
+  display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-family: var(--font-main);
+  gap: 8px;
 }
 
-.stocks-prod-badge::before {
-  content: "";
-  display: block;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
+.stocks-head-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.stocks-head-meta {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 400;
+}
+
+.stocks-head-right {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.stocks-head-total {
+  font-size: 13px;
+  font-weight: 700;
+  color: #111827;
+  font-variant-numeric: tabular-nums;
+}
+
+.stocks-head-capacity {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 400;
+}
+
+.stocks-head-bar {
+  height: 3px;
+  background: var(--gray-light);
+  width: 100%;
   flex-shrink: 0;
 }
 
-.stocks-prod-badge--wheat     { background: #fefce8; color: #713f12; }
-.stocks-prod-badge--wheat::before     { background: #ca8a04; }
+.stocks-head-bar-fill {
+  height: 100%;
+  background: #10b981;
+  transition: width 0.8s ease;
+}
 
-.stocks-prod-badge--barley    { background: #eff6ff; color: #1e3a8a; }
-.stocks-prod-badge--barley::before    { background: #3b82f6; }
+/* ── Commodity column — plain text ─────────────────────────────────────────── */
 
-.stocks-prod-badge--corn      { background: #f0fdf4; color: #14532d; }
-.stocks-prod-badge--corn::before      { background: #16a34a; }
-
-.stocks-prod-badge--sunflower { background: #fff7ed; color: #7c2d12; }
-.stocks-prod-badge--sunflower::before { background: #ea580c; }
-
-.stocks-prod-badge--rapeseed  { background: #ecfdf5; color: #134e4a; }
-.stocks-prod-badge--rapeseed::before  { background: #059669; }
+.stocks-td-commodity {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+}
 
 /* ── Table wrapper + table base ────────────────────────────────────────────── */
 
@@ -431,12 +434,16 @@
   border-color: #1f2937;
 }
 
+.theme-dark .stocks-kpi-label {
+  color: #6b7280;
+}
+
 .theme-dark .stocks-kpi-value {
   color: #e5e7eb;
 }
 
 .theme-dark .stocks-kpi-sub {
-  color: #6b7280;
+  color: #4b5563;
 }
 
 .theme-dark .stocks-toolbar {
@@ -467,12 +474,22 @@
   border-color: #1f2937;
 }
 
-.theme-dark .stocks-card-head {
-  border-bottom-color: #1f2937;
+.theme-dark .stocks-head-title,
+.theme-dark .stocks-head-total {
+  color: #e5e7eb;
 }
 
-.theme-dark .stocks-card-head span[style] {
-  color: #e5e7eb !important;
+.theme-dark .stocks-head-meta,
+.theme-dark .stocks-head-capacity {
+  color: #6b7280;
+}
+
+.theme-dark .stocks-head-bar {
+  background: #1f2937;
+}
+
+.theme-dark .stocks-td-commodity {
+  color: #e5e7eb;
 }
 
 .theme-dark .stocks-table__th {

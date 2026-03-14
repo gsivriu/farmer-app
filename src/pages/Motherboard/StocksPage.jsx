@@ -3,9 +3,6 @@ import "./StocksPage.css";
 
 // ── Report metadata ───────────────────────────────────────────────────────────
 
-const CHIMPEX_REPORT_DATE = "13 Mar 2026";
-const INLAND_REPORT_DATE  = "13 Mar 2026";
-const INLAND_EXPORT_FILENAME = "inland-detailed-stocks-13-mar-2026";
 const CHIMPEX_COMMODITY_FILTERS = ["Wheat", "Barley", "Rapeseed", "SFS", "Corn"];
 
 // Chimpex overview totals (for header fill bar)
@@ -102,11 +99,11 @@ const inlandTotalsReference = {
 // ── KPI summary data (Chimpex overview + Inland overview totals) ──────────────
 
 const KPI_DATA = [
-  { key: "wheat",     label: "Wheat",     total: 70100, badge: "wheat",     trend: "+2.1%" },
-  { key: "barley",    label: "Barley",    total: 16200, badge: "barley",    trend: null    },
-  { key: "corn",      label: "Corn",      total: 54600, badge: "corn",      trend: "+0.8%" },
-  { key: "sunflower", label: "Sunflower", total: 31400, badge: "sunflower", trend: null    },
-  { key: "rapeseed",  label: "Rapeseed",  total: 33800, badge: "rapeseed",  trend: "-1.2%" },
+  { key: "wheat",     label: "Wheat",     total: 70100 },
+  { key: "barley",    label: "Barley",    total: 16200 },
+  { key: "corn",      label: "Corn",      total: 54600 },
+  { key: "sunflower", label: "Sunflower", total: 31400 },
+  { key: "rapeseed",  label: "Rapeseed",  total: 33800 },
 ];
 
 // ── Utility functions (unchanged) ─────────────────────────────────────────────
@@ -140,28 +137,6 @@ function formatAccountingNumber(value) {
   });
 }
 
-function downloadCSV(filename, rows, columns) {
-  const header = columns.map((column) => column.label).join(",");
-  const content = rows.map((row) =>
-    columns
-      .map((column) => {
-        const rawValue = typeof column.exportValue === "function" ? column.exportValue(row) : row[column.key];
-        const escaped = String(rawValue ?? "—").replace(/"/g, '""');
-        return `"${escaped}"`;
-      })
-      .join(",")
-  );
-  const csv = [header, ...content].join("\n");
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.setAttribute("download", `${filename}.csv`);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-}
 
 function matchesCommodityFilter(commodity, filterValue) {
   if (filterValue === "All") return true;
@@ -192,16 +167,6 @@ function computeInlandTotals(rows, fallbackTotal) {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function getCommodityBadge(commodity) {
-  const c = String(commodity || "").toLowerCase();
-  if (c.includes("wht") || c.includes("wheat"))     return "wheat";
-  if (c.includes("bly") || c.includes("barley"))    return "barley";
-  if (c.includes("corn") || c.includes("maize"))    return "corn";
-  if (c.includes("sfs") || c.includes("sunflower")) return "sunflower";
-  if (c.includes("rps") || c.includes("rapeseed"))  return "rapeseed";
-  return "";
-}
-
 function StorageIcon({ color = "currentColor" }) {
   return (
     <svg viewBox="0 0 14 14" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -213,25 +178,7 @@ function StorageIcon({ color = "currentColor" }) {
   );
 }
 
-function DownloadIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-      <polyline points="7 10 12 15 17 10" />
-      <line x1="12" y1="15" x2="12" y2="3" />
-    </svg>
-  );
-}
 
-function MiniBar({ total, capacity }) {
-  const pct = Math.min(Math.round((total / capacity) * 100), 100);
-  const color = pct > 80 ? "#b9101e" : pct >= 50 ? "#eab308" : "#10b981";
-  return (
-    <div style={{ width: 60, height: 4, background: "var(--gray-light)", borderRadius: 2, overflow: "hidden" }}>
-      <div style={{ width: `${pct}%`, height: "100%", background: color, borderRadius: 2 }} />
-    </div>
-  );
-}
 
 function renderTableCell(value, isPercent = false) {
   const content = isPercent ? formatPercent(value) : formatNumber(value);
@@ -251,14 +198,6 @@ function renderInlandValueCell(value) {
   );
 }
 
-function CommodityBadge({ commodity }) {
-  const variant = getCommodityBadge(commodity);
-  return (
-    <span className={`stocks-prod-badge${variant ? ` stocks-prod-badge--${variant}` : ""}`}>
-      {commodity}
-    </span>
-  );
-}
 
 // ── A) KPI Summary Bar ────────────────────────────────────────────────────────
 
@@ -266,27 +205,13 @@ function KpiSummaryBar() {
   const fmt = (n) => n.toLocaleString("en-US");
   return (
     <div className="stocks-kpi-row">
-      {KPI_DATA.map(({ key, label, total, badge, trend }) => {
-        const isPositive = trend && trend.startsWith("+");
-        const isNegative = trend && trend.startsWith("-");
-        return (
-          <div key={key} className="stocks-kpi-card">
-            <div className="stocks-kpi-header">
-              <span className={`stocks-kpi-badge stocks-kpi-badge--${badge}`}>{label}</span>
-              {trend && (
-                <span
-                  className="stocks-kpi-trend"
-                  style={{ color: isPositive ? "#10b981" : isNegative ? "#b9101e" : "#6b7280" }}
-                >
-                  {isPositive ? "▲" : "▼"} {trend.slice(1)}
-                </span>
-              )}
-            </div>
-            <div className="stocks-kpi-value">{fmt(total)} t</div>
-            <div className="stocks-kpi-sub">Chimpex + Inland</div>
-          </div>
-        );
-      })}
+      {KPI_DATA.map(({ key, label, total }) => (
+        <div key={key} className="stocks-kpi-card">
+          <span className="stocks-kpi-label">{label}</span>
+          <span className="stocks-kpi-value">{fmt(total)} t</span>
+          <span className="stocks-kpi-sub">Chimpex + Inland</span>
+        </div>
+      ))}
     </div>
   );
 }
@@ -298,7 +223,6 @@ function StocksToolbar({
   commodityFilter, onCommodity,
   originFilter, onOrigin,
   clientFilter, onClient,
-  onExport,
 }) {
   const originOptions = useMemo(
     () => [...new Set(chimpexDetailedData.map((r) => r.origin))].sort(),
@@ -332,11 +256,6 @@ function StocksToolbar({
         <option value="All">All Clients</option>
         {clientOptions.map((o) => <option key={o} value={o}>{o}</option>)}
       </select>
-      <div style={{ flex: 1 }} />
-      <button type="button" className="stocks-toolbar__export" onClick={onExport}>
-        <DownloadIcon />
-        Export CSV
-      </button>
     </div>
   );
 }
@@ -347,30 +266,27 @@ function ChimpexDetailedCard({ filteredRows }) {
   const pct = Math.min(Math.round((CHIMPEX_TOTAL / CHIMPEX_CAPACITY) * 100), 100);
   const fmt = (n) => n.toLocaleString("en-US");
 
+  const sortedRows = useMemo(
+    () => [...filteredRows].sort((a, b) => a.commodity.localeCompare(b.commodity)),
+    [filteredRows]
+  );
+
   return (
     <article className="stocks-page__card">
       {/* Card header */}
       <div className="stocks-card-head">
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div style={{ width: 14, height: 14, display: "flex", alignItems: "center", color: "#b9101e" }}>
-            <StorageIcon color="#b9101e" />
-          </div>
-          <span style={{ fontSize: 13, fontWeight: 700, color: "#111827" }}>Chimpex Siloz</span>
-          <span style={{ fontSize: 11, color: "#6b7280", marginLeft: 4 }}>
-            Constanța · {CHIMPEX_REPORT_DATE}
-          </span>
+        <div className="stocks-head-left">
+          <StorageIcon color="#b9101e" />
+          <span className="stocks-head-title">Chimpex Siloz</span>
+          <span className="stocks-head-meta">Constanța</span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: 18, fontWeight: 700, color: "#111827", letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums" }}>
-              {fmt(CHIMPEX_TOTAL)} t
-            </div>
-            <div style={{ fontSize: 11, color: "#6b7280" }}>
-              din {fmt(CHIMPEX_CAPACITY)} t · {pct}% utilizat
-            </div>
-          </div>
-          <MiniBar total={CHIMPEX_TOTAL} capacity={CHIMPEX_CAPACITY} />
+        <div className="stocks-head-right">
+          <span className="stocks-head-total">{fmt(CHIMPEX_TOTAL)} t</span>
+          <span className="stocks-head-capacity">/ {fmt(CHIMPEX_CAPACITY)} t</span>
         </div>
+      </div>
+      <div className="stocks-head-bar">
+        <div className="stocks-head-bar-fill" style={{ width: `${pct}%` }} />
       </div>
 
       {/* Table */}
@@ -395,11 +311,11 @@ function ChimpexDetailedCard({ filteredRows }) {
             </tr>
           </thead>
           <tbody>
-            {filteredRows.length > 0 ? (
-              filteredRows.map((row, i) => (
+            {sortedRows.length > 0 ? (
+              sortedRows.map((row, i) => (
                 <tr key={`${row.commodity}-${row.origin}-${row.client}-${i}`} className="stocks-table__row">
-                  <td className="stocks-table__td stocks-table__td--commodity">
-                    <CommodityBadge commodity={row.commodity} />
+                  <td className="stocks-table__td stocks-td-commodity">
+                    {row.commodity}
                   </td>
                   <td className="stocks-table__td">{displayCell(row.origin)}</td>
                   <td className="stocks-table__td">{displayCell(row.client)}</td>
@@ -481,44 +397,24 @@ function InlandDetailedCard() {
     return { ...computeInlandTotals(filteredRows), label: "TOTAL GENERAL" };
   }, [filteredRows, filialaFilter, groupFilter]);
 
-  const exportRows = useMemo(
-    () => filteredRows.map((r) => ({
-      ...r,
-      stocCustodie:     formatAccountingNumber(r.stocCustodie),
-      stocProprietate:  formatAccountingNumber(r.stocProprietate),
-      spatiuTehnicUtil: formatAccountingNumber(r.spatiuTehnicUtil),
-      spatiuDisponibil: formatAccountingNumber(r.spatiuDisponibil),
-      stocRec2024:      formatAccountingNumber(r.stocRec2024),
-    })),
-    [filteredRows]
-  );
-
   const handleReset = () => { setGroupFilter("All"); setFilialaFilter("All"); };
 
   return (
     <article className="stocks-page__card">
       {/* Card header */}
       <div className="stocks-card-head">
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div style={{ width: 14, height: 14, display: "flex", alignItems: "center", color: "#b9101e" }}>
-            <StorageIcon color="#b9101e" />
-          </div>
-          <span style={{ fontSize: 13, fontWeight: 700, color: "#111827" }}>Inland Silos</span>
-          <span style={{ fontSize: 11, color: "#6b7280", marginLeft: 4 }}>
-            Multiple locations · {INLAND_REPORT_DATE}
-          </span>
+        <div className="stocks-head-left">
+          <StorageIcon color="#b9101e" />
+          <span className="stocks-head-title">Inland Silos</span>
+          <span className="stocks-head-meta">Multiple locations</span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: 18, fontWeight: 700, color: "#111827", letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums" }}>
-              {fmt(INLAND_TOTAL)} t
-            </div>
-            <div style={{ fontSize: 11, color: "#6b7280" }}>
-              din {fmt(INLAND_CAPACITY)} t · {pct}% utilizat
-            </div>
-          </div>
-          <MiniBar total={INLAND_TOTAL} capacity={INLAND_CAPACITY} />
+        <div className="stocks-head-right">
+          <span className="stocks-head-total">{fmt(INLAND_TOTAL)} t</span>
+          <span className="stocks-head-capacity">/ {fmt(INLAND_CAPACITY)} t</span>
         </div>
+      </div>
+      <div className="stocks-head-bar">
+        <div className="stocks-head-bar-fill" style={{ width: `${pct}%` }} />
       </div>
 
       {/* Inline filters for inland (Group + Filiala) */}
@@ -542,14 +438,6 @@ function InlandDetailedCard() {
         <div style={{ flex: 1 }} />
         <button type="button" className="stocks-toolbar__reset" onClick={handleReset}>
           Clear filters
-        </button>
-        <button
-          type="button"
-          className="stocks-toolbar__export"
-          onClick={() => downloadCSV(INLAND_EXPORT_FILENAME, exportRows, inlandColumns)}
-        >
-          <DownloadIcon />
-          Export CSV
         </button>
       </div>
 
@@ -642,11 +530,6 @@ export default function StocksPage() {
     [searchText, commodityFilter, originFilter, clientFilter]
   );
 
-  const handleExportChimpex = () => {
-    const filename = `chimpex-stocks-${new Date().toISOString().slice(0, 10)}`;
-    downloadCSV(filename, filteredChimpexRows, chimpexColumns);
-  };
-
   return (
     <section className="stocks-page">
       {/* A) KPI bar */}
@@ -654,11 +537,10 @@ export default function StocksPage() {
 
       {/* B) Toolbar (filters Chimpex table) */}
       <StocksToolbar
-        searchText={searchText}       onSearch={setSearchText}
+        searchText={searchText}           onSearch={setSearchText}
         commodityFilter={commodityFilter} onCommodity={setCommodityFilter}
         originFilter={originFilter}       onOrigin={setOriginFilter}
         clientFilter={clientFilter}       onClient={setClientFilter}
-        onExport={handleExportChimpex}
       />
 
       {/* C) Chimpex card */}
