@@ -33,40 +33,66 @@ function IconCart() {
   );
 }
 
-// Transport icons: 18×18, strokeWidth 1.6, stroke #374151
+// Transport icons: front-facing filled, accept color prop
 
-function IconTruck() {
+function IconTruck({ color = "#374151" }) {
   return (
-    <svg width="18" height="18" viewBox="0 0 20 14" fill="none" stroke="#374151" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="1" y="3" width="11" height="8" rx="1" />
-      <path d="M12 6h4l2 3v2h-6V6z" />
-      <circle cx="5" cy="12" r="1.5" fill="#374151" stroke="none" />
-      <circle cx="15" cy="12" r="1.5" fill="#374151" stroke="none" />
+    <svg width="20" height="20" viewBox="0 0 24 24" fill={color}>
+      {/* Cargo box body */}
+      <rect x="2.5" y="1.5" width="19" height="10" rx="2" />
+      {/* Windshield */}
+      <rect x="5" y="3" width="14" height="6.5" rx="1.5" fill="white" fillOpacity="0.28" />
+      {/* Cab / bumper row */}
+      <rect x="1.5" y="11.5" width="21" height="5.5" rx="1.5" />
+      {/* Headlights */}
+      <rect x="3" y="13" width="4" height="2.5" rx="0.5" fill="white" fillOpacity="0.55" />
+      <rect x="17" y="13" width="4" height="2.5" rx="0.5" fill="white" fillOpacity="0.55" />
+      {/* Wheels */}
+      <circle cx="6.5" cy="21" r="3" />
+      <circle cx="17.5" cy="21" r="3" />
+      <circle cx="6.5" cy="21" r="1.4" fill="white" fillOpacity="0.32" />
+      <circle cx="17.5" cy="21" r="1.4" fill="white" fillOpacity="0.32" />
     </svg>
   );
 }
 
-function IconTrain() {
+function IconTrain({ color = "#374151" }) {
   return (
-    <svg width="18" height="18" viewBox="0 0 22 14" fill="none" stroke="#374151" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="1" y="2" width="6" height="9" rx="1" />
-      <rect x="8" y="2" width="6" height="9" rx="1" />
-      <rect x="15" y="2" width="6" height="9" rx="1" />
-      <line x1="1" y1="7" x2="21" y2="7" />
-      <circle cx="3.5" cy="12.5" r="1.5" fill="#374151" stroke="none" />
-      <circle cx="8.5" cy="12.5" r="1.5" fill="#374151" stroke="none" />
-      <circle cx="13.5" cy="12.5" r="1.5" fill="#374151" stroke="none" />
-      <circle cx="18.5" cy="12.5" r="1.5" fill="#374151" stroke="none" />
+    <svg width="20" height="20" viewBox="0 0 24 24" fill={color}>
+      {/* Main body */}
+      <rect x="3" y="2" width="18" height="14" rx="3.5" />
+      {/* Windshield */}
+      <rect x="5.5" y="4" width="13" height="8" rx="2" fill="white" fillOpacity="0.28" />
+      {/* Headlights */}
+      <circle cx="8" cy="15" r="2" fill="white" fillOpacity="0.55" />
+      <circle cx="16" cy="15" r="2" fill="white" fillOpacity="0.55" />
+      {/* Lower nose panel */}
+      <rect x="4" y="17" width="16" height="3.5" rx="1.5" />
+      {/* Rails */}
+      <rect x="0.5" y="21.5" width="8" height="2" rx="0.5" />
+      <rect x="15.5" y="21.5" width="8" height="2" rx="0.5" />
     </svg>
   );
 }
 
-function IconBarge() {
+function IconBarge({ color = "#374151" }) {
   return (
-    <svg width="18" height="18" viewBox="0 0 22 14" fill="none" stroke="#374151" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="4" y="4" width="14" height="6" rx="1" />
-      <path d="M7 4V2h8v2" />
-      <path d="M1 11 Q5.5 9 11 11 Q16.5 13 21 11" />
+    <svg width="20" height="20" viewBox="0 0 24 24" fill={color}>
+      {/* Superstructure / bridge */}
+      <rect x="7.5" y="2" width="9" height="6.5" rx="1.5" />
+      {/* Bridge windows */}
+      <rect x="9.5" y="3.5" width="5" height="3.5" rx="0.5" fill="white" fillOpacity="0.28" />
+      {/* Hull body */}
+      <rect x="3" y="8.5" width="18" height="6" rx="1" />
+      {/* Portholes */}
+      <circle cx="8.5" cy="11.5" r="1.5" fill="white" fillOpacity="0.35" />
+      <circle cx="15.5" cy="11.5" r="1.5" fill="white" fillOpacity="0.35" />
+      {/* Bow — hull tapers inward at bottom */}
+      <path d="M3 14.5 L1 19.5 Q12 23.5 23 19.5 L21 14.5 Z" />
+      {/* Waves */}
+      <path d="M2 21 Q7 19.5 12 21 Q17 22.5 22 21"
+        fill="none" stroke="white" strokeWidth="1.3"
+        strokeLinecap="round" strokeOpacity="0.45" />
     </svg>
   );
 }
@@ -138,9 +164,9 @@ const TRANSPORT_DATA = [
 
 // Transport type definitions — order determines display order
 const TRANSPORT_TYPES = [
-  { type: "train", label: "Train", Icon: IconTrain },
-  { type: "barge", label: "Barge", Icon: IconBarge },
-  { type: "truck", label: "Truck", Icon: IconTruck },
+  { type: "train", label: "Train", Icon: IconTrain, color: "#b9101e" },
+  { type: "barge", label: "Barge", Icon: IconBarge, color: "#1d4ed8" },
+  { type: "truck", label: "Truck", Icon: IconTruck, color: "#16a34a" },
 ];
 
 const ACQ_DATA = [
@@ -248,16 +274,19 @@ function CardLogistics() {
       </div>
 
       <div className="mb-card-body" style={{ maxHeight: 260 }}>
-        {TRANSPORT_TYPES.map(({ type, label, Icon }) => {
+        {TRANSPORT_TYPES.map(({ type, label, Icon, color }) => {
           const items = TRANSPORT_DATA.filter((t) => t.type === type);
           if (items.length === 0) return null;
           return (
             <div key={type} className="mb-logistics-group">
-              {/* Type section header */}
+              {/* Type section header — colored per transport mode */}
               <div className="mb-logistics-type-head">
-                <Icon />
-                <span>{label}</span>
-                <span className="mb-logistics-count">{items.length}</span>
+                <Icon color={color} />
+                <span style={{ color }}>{label}</span>
+                <span className="mb-logistics-count"
+                  style={{ background: color + "18", color }}>
+                  {items.length}
+                </span>
               </div>
               {/* Rows: commodity + route | qty */}
               {items.map((t) => (
