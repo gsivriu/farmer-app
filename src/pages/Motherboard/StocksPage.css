@@ -23,6 +23,29 @@
   font-size: 13px;
 }
 
+.stocks-page__header-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stocks-page__action-button {
+  border: 1px solid rgba(185, 16, 30, 0.12);
+  background: rgba(185, 16, 30, 0.06);
+  color: #b9101e;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.stocks-page__action-button:hover {
+  background: rgba(185, 16, 30, 0.12);
+  border-color: rgba(185, 16, 30, 0.2);
+}
+
 .stocks-page__stack {
   display: flex;
   flex-direction: column;
@@ -73,6 +96,10 @@
   gap: 12px;
   padding: 16px;
   border-bottom: 1px solid var(--gray-light);
+}
+
+.stocks-page__filters--inland {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .stocks-page__filter-group {
@@ -186,6 +213,11 @@
   text-align: right;
 }
 
+.stocks-table__th--center,
+.stocks-table__td--center {
+  text-align: center;
+}
+
 .stocks-table__td {
   padding: 12px 18px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
@@ -206,6 +238,21 @@
 
 .stocks-table__row:hover .stocks-table__td {
   background: #f9fafb;
+}
+
+.stocks-table__group-row td,
+.stocks-table__group-row th {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.stocks-table__group-cell {
+  padding: 12px 18px;
+  background: #f8f5ef;
+  color: #6b5b3f;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .stocks-page__cell-value,
@@ -263,8 +310,39 @@
 }
 
 .stocks-table__footer--success-strong .stocks-table__footer-label,
-.stocks-table__footer--success-strong .stocks-table__footer-merged {
+.stocks-table__footer--success-strong .stocks-table__footer-merged,
+.stocks-table__footer--success-strong .stocks-table__footer-value {
   background: #dcfce7;
+}
+
+.stocks-table__total-row th,
+.stocks-table__total-row td {
+  padding: 14px 18px;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.stocks-table__total-label {
+  text-align: left;
+  color: #111827;
+  letter-spacing: 0.03em;
+}
+
+.stocks-table__total-value {
+  text-align: right;
+  color: #111827;
+}
+
+.stocks-table__total-row--group th,
+.stocks-table__total-row--group td {
+  background: #fef3c7;
+}
+
+.stocks-table__total-row--general th,
+.stocks-table__total-row--general td {
+  background: #e0f2fe;
 }
 
 .stocks-table__empty {
@@ -290,6 +368,17 @@
   background: #0f172a;
   border-color: #1f2937;
   color: #e5e7eb;
+}
+
+.theme-dark .stocks-page__action-button {
+  background: rgba(248, 113, 113, 0.12);
+  border-color: rgba(248, 113, 113, 0.18);
+  color: #fca5a5;
+}
+
+.theme-dark .stocks-page__action-button:hover {
+  background: rgba(248, 113, 113, 0.18);
+  border-color: rgba(248, 113, 113, 0.24);
 }
 
 .theme-dark .stocks-page__card {
@@ -330,6 +419,11 @@
   background: #0f172a;
 }
 
+.theme-dark .stocks-table__group-cell {
+  background: #2d2418;
+  color: #fcd34d;
+}
+
 .theme-dark .stocks-table__footer--neutral .stocks-table__footer-label,
 .theme-dark .stocks-table__footer--neutral .stocks-table__footer-value {
   background: #111827;
@@ -346,8 +440,24 @@
 }
 
 .theme-dark .stocks-table__footer--success-strong .stocks-table__footer-label,
-.theme-dark .stocks-table__footer--success-strong .stocks-table__footer-merged {
+.theme-dark .stocks-table__footer--success-strong .stocks-table__footer-merged,
+.theme-dark .stocks-table__footer--success-strong .stocks-table__footer-value {
   background: #14532d;
+}
+
+.theme-dark .stocks-table__total-label,
+.theme-dark .stocks-table__total-value {
+  color: #e5e7eb;
+}
+
+.theme-dark .stocks-table__total-row--group th,
+.theme-dark .stocks-table__total-row--group td {
+  background: #3f2d10;
+}
+
+.theme-dark .stocks-table__total-row--general th,
+.theme-dark .stocks-table__total-row--general td {
+  background: #0c4a6e;
 }
 
 @media (max-width: 768px) {
@@ -356,6 +466,7 @@
   }
 
   .stocks-page__toolbar,
+  .stocks-page__header-meta,
   .stocks-page__subhead,
   .stocks-page__footer-top,
   .stocks-page__footer-bottom {
@@ -363,7 +474,8 @@
     align-items: stretch;
   }
 
-  .stocks-page__filters {
+  .stocks-page__filters,
+  .stocks-page__filters--inland {
     grid-template-columns: 1fr;
   }
 }

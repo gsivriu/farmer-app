@@ -1,7 +1,9 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import "./StocksPage.css";
 
 const CHIMPEX_REPORT_DATE = "13 Mar 2026";
+const INLAND_REPORT_DATE = "13 Mar 2026";
+const INLAND_EXPORT_FILENAME = "inland-detailed-stocks-13-mar-2026";
 const CHIMPEX_COMMODITY_FILTERS = ["Wheat", "Barley", "Rapeseed", "SFS", "Corn"];
 
 const chimpexDetailedData = [
@@ -43,7 +45,7 @@ const chimpexFooterRows = [
   },
   {
     label: "STORAGE SPACES STATUS (% FULL)",
-    tone: "success-soft",
+    tone: "success-strong",
     values: {
       silozChimpex: 22.28,
       warehouseChimpex: null,
@@ -51,20 +53,69 @@ const chimpexFooterRows = [
     },
     isPercent: true,
   },
-  {
-    label: "STORAGE SPACES STATUS (% FULL) - TOTAL",
-    tone: "success-strong",
-    mergedValue: "20.86%",
-  },
 ];
 
-const inlandSummaryData = [
-  { commodity: "Wheat", stock: 31600 },
-  { commodity: "Corn", stock: 22500 },
-  { commodity: "Sunflower", stock: 11800 },
-  { commodity: "Rapeseed", stock: 21500 },
-  { commodity: "Barley", stock: 6400 },
+const inlandDetailedData = [
+  { group: "Constanta Area", filiala: "Casicea", um: "To", totalCrop2025: 14447.58, stocCustodie: 0, stocProprietate: 0, spatiuTehnicUtil: 14400, spatiuDisponibil: 14400, stocRec2024: 0 },
+  { group: "Constanta Area", filiala: "Ciocarlia", um: "To", totalCrop2025: 25268.32, stocCustodie: 0, stocProprietate: 1441.31, spatiuTehnicUtil: 22692, spatiuDisponibil: 21250.69, stocRec2024: 0 },
+  { group: "Constanta Area", filiala: "Negru-Voda", um: "To", totalCrop2025: 24897.68, stocCustodie: 0, stocProprietate: 156.23, spatiuTehnicUtil: 30500, spatiuDisponibil: 30343.77, stocRec2024: 0 },
+  { group: "Constanta Area", filiala: "Nicolae Balcescu", um: "To", totalCrop2025: 12954.14, stocCustodie: 229.24, stocProprietate: 2616.06, spatiuTehnicUtil: 46320, spatiuDisponibil: 45182.52, stocRec2024: 577.08 },
+  { group: "Territory", filiala: "Carpinis", um: "To", totalCrop2025: 46723.26, stocCustodie: 0, stocProprietate: 0, spatiuTehnicUtil: 52200, spatiuDisponibil: 52200, stocRec2024: 0 },
+  { group: "Territory", filiala: "Dor Marunt", um: "To", totalCrop2025: 36580.72, stocCustodie: 0, stocProprietate: 0, spatiuTehnicUtil: 11000, spatiuDisponibil: 11000, stocRec2024: 0 },
+  { group: "Territory", filiala: "Plosca", um: "To", totalCrop2025: 63745.98, stocCustodie: 0, stocProprietate: 3039.73, spatiuTehnicUtil: 13000, spatiuDisponibil: 9960.27, stocRec2024: 0 },
+  { group: "Territory", filiala: "Harsova", um: "To", totalCrop2025: 31947.94, stocCustodie: 1239.08, stocProprietate: 12.09, spatiuTehnicUtil: 29000, spatiuDisponibil: 27742.19, stocRec2024: 1.2 },
+  { group: "Territory", filiala: "Macin", um: "To", totalCrop2025: 15049.12, stocCustodie: 0, stocProprietate: 744.71, spatiuTehnicUtil: 11000, spatiuDisponibil: 10255.29, stocRec2024: 0 },
+  { group: "Territory", filiala: "Vladeni", um: "To", totalCrop2025: 39109.7, stocCustodie: 0, stocProprietate: 5717.99, spatiuTehnicUtil: 14000, spatiuDisponibil: 8271.53, stocRec2024: 10.48 },
+  { group: "Territory", filiala: "Ciresu", um: "To", totalCrop2025: 56919.9, stocCustodie: 0, stocProprietate: 1.12, spatiuTehnicUtil: 10000, spatiuDisponibil: 9997.76, stocRec2024: 0 },
+  { group: "Territory", filiala: "Adancata", um: "To", totalCrop2025: 35964.26, stocCustodie: 0, stocProprietate: 1171.65, spatiuTehnicUtil: 22000, spatiuDisponibil: 20828.35, stocRec2024: 0 },
+  { group: "Territory", filiala: "Farcasele", um: "To", totalCrop2025: 57354.64, stocCustodie: 0, stocProprietate: 4555.35, spatiuTehnicUtil: 13500, spatiuDisponibil: 8944.65, stocRec2024: 0 },
+  { group: "Territory", filiala: "Sarulesti", um: "To", totalCrop2025: 70969.5, stocCustodie: 0, stocProprietate: 5607.48, spatiuTehnicUtil: 50750, spatiuDisponibil: 45138.78, stocRec2024: 8.68 },
+  { group: "Territory", filiala: "Mirosi", um: "To", totalCrop2025: 55213.44, stocCustodie: 0, stocProprietate: 3380.91, spatiuTehnicUtil: 28500, spatiuDisponibil: 24889.71, stocRec2024: 40.02 },
 ];
+
+const inlandColumns = [
+  { key: "filiala", label: "FILIALA", align: "left", width: "180px" },
+  { key: "um", label: "U/M", align: "center", width: "60px" },
+  { key: "totalCrop2025", label: "TOTAL RECEPTIONAT CROP 2025", align: "right", width: "170px" },
+  { key: "stocCustodie", label: "STOC CUSTODIE", align: "right", width: "140px" },
+  { key: "stocProprietate", label: "STOC PROPRIETATE", align: "right", width: "150px" },
+  { key: "spatiuTehnicUtil", label: "SPATIU TEHNIC UTIL", align: "right", width: "160px" },
+  { key: "spatiuDisponibil", label: "SPATIU DISPONIBIL", align: "right", width: "160px" },
+  { key: "stocRec2024", label: "STOC REC.2024", align: "right", width: "140px" },
+];
+
+const inlandTotalsReference = {
+  "Constanta Area": {
+    label: "TOTAL CONSTANTA",
+    um: "To",
+    totalCrop2025: 77567.72,
+    stocCustodie: 229.23,
+    stocProprietate: 4213.61,
+    spatiuTehnicUtil: 113912,
+    spatiuDisponibil: 111176.98,
+    stocRec2024: 577.08,
+  },
+  Territory: {
+    label: "TOTAL TERITORIU",
+    um: "To",
+    totalCrop2025: 509578.46,
+    stocCustodie: 1239.08,
+    stocProprietate: 24231.04,
+    spatiuTehnicUtil: 254950,
+    spatiuDisponibil: 229228.53,
+    stocRec2024: 60.38,
+  },
+  general: {
+    label: "TOTAL GENERAL",
+    um: "To",
+    totalCrop2025: 587146.18,
+    stocCustodie: 1468.31,
+    stocProprietate: 28444.65,
+    spatiuTehnicUtil: 368862,
+    spatiuDisponibil: 340405.5,
+    stocRec2024: 637.46,
+  },
+};
 
 export function formatNumber(value) {
   const numericValue = Number(value);
@@ -85,6 +136,38 @@ export function formatPercent(value) {
 export function displayCell(value) {
   if (value === null || value === undefined || value === "" || value === 0) return "—";
   return value;
+}
+
+function formatAccountingNumber(value) {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) return "—";
+  return Number(value).toLocaleString("ro-RO", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+function downloadCSV(filename, rows, columns) {
+  const header = columns.map((column) => column.label).join(",");
+  const content = rows.map((row) =>
+    columns
+      .map((column) => {
+        const rawValue = typeof column.exportValue === "function" ? column.exportValue(row) : row[column.key];
+        const escaped = String(rawValue ?? "—").replace(/"/g, '""');
+        return `"${escaped}"`;
+      })
+      .join(",")
+  );
+
+  const csv = [header, ...content].join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", `${filename}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }
 
 function matchesCommodityFilter(commodity, filterValue) {
@@ -138,53 +221,6 @@ function renderTableCell(value, isPercent = false) {
     <span className={isEmpty ? "stocks-page__cell-empty" : "stocks-page__cell-value"}>
       {content}
     </span>
-  );
-}
-
-function SummaryCard({ title, reportDate, data, location }) {
-  const totalStock = useMemo(
-    () => data.reduce((sum, row) => sum + Number(row.stock || 0), 0),
-    [data]
-  );
-
-  return (
-    <article className="mb-card stocks-page__card">
-      <div className="mb-card-head">
-        <div className="mb-card-title">
-          <span className="stocks-page__title">
-            <StorageIcon />
-            {title}
-          </span>
-          <span className="mb-head-meta">Report date: {reportDate}</span>
-        </div>
-        <div className="stocks-page__subhead">
-          <span className="stocks-page__location">{location}</span>
-        </div>
-      </div>
-
-      <div className="mb-col-headers">
-        <div className="mb-col-row" style={{ gridTemplateColumns: "minmax(0, 1fr) 120px" }}>
-          <span className="mb-col-cell">Commodity</span>
-          <span className="mb-col-cell stocks-page__align-right">Stock</span>
-        </div>
-      </div>
-
-      <div className="mb-card-body stocks-page__summary-body">
-        {data.map((row) => (
-          <div key={`${title}-${row.commodity}`} className="mb-row" style={{ gridTemplateColumns: "minmax(0, 1fr) 120px" }}>
-            <span className="mb-row-label">{row.commodity}</span>
-            <span className="mb-row-value stocks-page__align-right">{formatNumber(row.stock)}</span>
-          </div>
-        ))}
-      </div>
-
-      <div className="mb-card-foot stocks-page__footer">
-        <div className="stocks-page__footer-top">
-          <span className="mb-foot-label">Total stock Inland Silos</span>
-          <span className="mb-foot-val">{formatNumber(totalStock)} t</span>
-        </div>
-      </div>
-    </article>
   );
 }
 
@@ -331,6 +367,232 @@ function ChimpexDetailedCard() {
   );
 }
 
+function computeInlandTotals(rows, fallbackTotal) {
+  if (!rows.length && fallbackTotal) return fallbackTotal;
+
+  return {
+    label: fallbackTotal?.label || "TOTAL",
+    um: rows.length ? "To" : fallbackTotal?.um || "To",
+    totalCrop2025: rows.reduce((sum, row) => sum + row.totalCrop2025, 0),
+    stocCustodie: rows.reduce((sum, row) => sum + row.stocCustodie, 0),
+    stocProprietate: rows.reduce((sum, row) => sum + row.stocProprietate, 0),
+    spatiuTehnicUtil: rows.reduce((sum, row) => sum + row.spatiuTehnicUtil, 0),
+    spatiuDisponibil: rows.reduce((sum, row) => sum + row.spatiuDisponibil, 0),
+    stocRec2024: rows.reduce((sum, row) => sum + row.stocRec2024, 0),
+  };
+}
+
+function renderInlandValueCell(value) {
+  return (
+    <span className={value === null || value === undefined ? "stocks-page__cell-empty" : "stocks-page__cell-value"}>
+      {formatAccountingNumber(value)}
+    </span>
+  );
+}
+
+function InlandDetailedCard() {
+  const [groupFilter, setGroupFilter] = useState("All");
+  const [filialaFilter, setFilialaFilter] = useState("All");
+
+  const groupOptions = useMemo(
+    () => [...new Set(inlandDetailedData.map((row) => row.group))],
+    []
+  );
+
+  const filialaOptions = useMemo(() => {
+    const rows = inlandDetailedData.filter((row) => groupFilter === "All" || row.group === groupFilter);
+    return [...new Set(rows.map((row) => row.filiala))].sort();
+  }, [groupFilter]);
+
+  const filteredRows = useMemo(
+    () =>
+      inlandDetailedData.filter((row) => {
+        const matchesGroup = groupFilter === "All" || row.group === groupFilter;
+        const matchesFiliala = filialaFilter === "All" || row.filiala === filialaFilter;
+        return matchesGroup && matchesFiliala;
+      }),
+    [filialaFilter, groupFilter]
+  );
+
+  const groupedRows = useMemo(
+    () =>
+      groupOptions
+        .map((group) => {
+          const rows = filteredRows.filter((row) => row.group === group);
+          if (!rows.length) return null;
+
+          const useReferenceTotal = groupFilter === "All" && filialaFilter === "All";
+          return {
+            group,
+            rows,
+            total: useReferenceTotal
+              ? inlandTotalsReference[group]
+              : { ...computeInlandTotals(rows), label: inlandTotalsReference[group].label },
+          };
+        })
+        .filter(Boolean),
+    [filialaFilter, filteredRows, groupFilter, groupOptions]
+  );
+
+  const generalTotal = useMemo(() => {
+    if (groupFilter === "All" && filialaFilter === "All") return inlandTotalsReference.general;
+    return { ...computeInlandTotals(filteredRows), label: "TOTAL GENERAL" };
+  }, [filteredRows, filialaFilter, groupFilter]);
+
+  const exportRows = useMemo(
+    () =>
+      filteredRows.map((row) => ({
+        ...row,
+        totalCrop2025: formatAccountingNumber(row.totalCrop2025),
+        stocCustodie: formatAccountingNumber(row.stocCustodie),
+        stocProprietate: formatAccountingNumber(row.stocProprietate),
+        spatiuTehnicUtil: formatAccountingNumber(row.spatiuTehnicUtil),
+        spatiuDisponibil: formatAccountingNumber(row.spatiuDisponibil),
+        stocRec2024: formatAccountingNumber(row.stocRec2024),
+      })),
+    [filteredRows]
+  );
+
+  const handleReset = () => {
+    setGroupFilter("All");
+    setFilialaFilter("All");
+  };
+
+  return (
+    <article className="mb-card stocks-page__card stocks-page__detailed-card">
+      <div className="mb-card-head stocks-page__detailed-head">
+        <div className="mb-card-title">
+          <span className="stocks-page__title">
+            <StorageIcon />
+            Inland Silos — Detailed Stocks Report
+          </span>
+          <div className="stocks-page__header-meta">
+            <span className="mb-head-meta">Report date: {INLAND_REPORT_DATE}</span>
+            <button
+              type="button"
+              className="stocks-page__action-button"
+              onClick={() => downloadCSV(INLAND_EXPORT_FILENAME, exportRows, inlandColumns)}
+            >
+              Export CSV
+            </button>
+          </div>
+        </div>
+        <div className="stocks-page__subhead stocks-page__subhead--tight">
+          <span className="stocks-page__location">Branch-level inland custody, ownership and storage capacity visibility.</span>
+        </div>
+      </div>
+
+      <div className="stocks-page__filters stocks-page__filters--inland">
+        <FilterSelect
+          label="Group"
+          value={groupFilter}
+          options={groupOptions}
+          onChange={(event) => {
+            setGroupFilter(event.target.value);
+            setFilialaFilter("All");
+          }}
+        />
+        <FilterSelect
+          label="Filiala"
+          value={filialaFilter}
+          options={filialaOptions}
+          onChange={(event) => setFilialaFilter(event.target.value)}
+        />
+        <div className="stocks-page__filter-group stocks-page__filter-group--action">
+          <span className="stocks-page__filter-label">Reset</span>
+          <button type="button" className="stocks-page__reset-button" onClick={handleReset}>
+            Clear filters
+          </button>
+        </div>
+      </div>
+
+      <div className="stocks-table-wrap">
+        <table className="stocks-table inland-detailed-table">
+          <colgroup>
+            {inlandColumns.map((column) => (
+              <col key={column.key} style={{ width: column.width, minWidth: column.width }} />
+            ))}
+          </colgroup>
+          <thead>
+            <tr>
+              {inlandColumns.map((column) => (
+                <th
+                  key={column.key}
+                  className={[
+                    "stocks-table__th",
+                    column.align === "right" ? "stocks-table__th--numeric" : "",
+                    column.align === "center" ? "stocks-table__th--center" : "",
+                  ].join(" ").trim()}
+                  scope="col"
+                >
+                  {column.label}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {groupedRows.length ? (
+              groupedRows.map(({ group, rows, total }) => (
+                <Fragment key={group}>
+                  <tr className="stocks-table__group-row">
+                    <td className="stocks-table__group-cell" colSpan={inlandColumns.length}>
+                      {group}
+                    </td>
+                  </tr>
+                  {rows.map((row) => (
+                    <tr key={`${row.group}-${row.filiala}`} className="stocks-table__row">
+                      <td className="stocks-table__td stocks-table__td--commodity">{row.filiala}</td>
+                      <td className="stocks-table__td stocks-table__td--center">{row.um}</td>
+                      <td className="stocks-table__td stocks-table__td--numeric">{renderInlandValueCell(row.totalCrop2025)}</td>
+                      <td className="stocks-table__td stocks-table__td--numeric">{renderInlandValueCell(row.stocCustodie)}</td>
+                      <td className="stocks-table__td stocks-table__td--numeric">{renderInlandValueCell(row.stocProprietate)}</td>
+                      <td className="stocks-table__td stocks-table__td--numeric">{renderInlandValueCell(row.spatiuTehnicUtil)}</td>
+                      <td className="stocks-table__td stocks-table__td--numeric">{renderInlandValueCell(row.spatiuDisponibil)}</td>
+                      <td className="stocks-table__td stocks-table__td--numeric">{renderInlandValueCell(row.stocRec2024)}</td>
+                    </tr>
+                  ))}
+                  <tr className="stocks-table__total-row stocks-table__total-row--group">
+                    <th className="stocks-table__total-label" scope="row">
+                      {total.label}
+                    </th>
+                    <td className="stocks-table__total-value stocks-table__td--center">{total.um}</td>
+                    <td className="stocks-table__total-value">{formatAccountingNumber(total.totalCrop2025)}</td>
+                    <td className="stocks-table__total-value">{formatAccountingNumber(total.stocCustodie)}</td>
+                    <td className="stocks-table__total-value">{formatAccountingNumber(total.stocProprietate)}</td>
+                    <td className="stocks-table__total-value">{formatAccountingNumber(total.spatiuTehnicUtil)}</td>
+                    <td className="stocks-table__total-value">{formatAccountingNumber(total.spatiuDisponibil)}</td>
+                    <td className="stocks-table__total-value">{formatAccountingNumber(total.stocRec2024)}</td>
+                  </tr>
+                </Fragment>
+              ))
+            ) : (
+              <tr>
+                <td className="stocks-table__empty" colSpan={inlandColumns.length}>
+                  No inland rows match the current filters.
+                </td>
+              </tr>
+            )}
+          </tbody>
+          <tfoot>
+            <tr className="stocks-table__total-row stocks-table__total-row--general">
+              <th className="stocks-table__total-label" scope="row">
+                {generalTotal.label}
+              </th>
+              <td className="stocks-table__total-value stocks-table__td--center">{generalTotal.um}</td>
+              <td className="stocks-table__total-value">{formatAccountingNumber(generalTotal.totalCrop2025)}</td>
+              <td className="stocks-table__total-value">{formatAccountingNumber(generalTotal.stocCustodie)}</td>
+              <td className="stocks-table__total-value">{formatAccountingNumber(generalTotal.stocProprietate)}</td>
+              <td className="stocks-table__total-value">{formatAccountingNumber(generalTotal.spatiuTehnicUtil)}</td>
+              <td className="stocks-table__total-value">{formatAccountingNumber(generalTotal.spatiuDisponibil)}</td>
+              <td className="stocks-table__total-value">{formatAccountingNumber(generalTotal.stocRec2024)}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </article>
+  );
+}
+
 export default function StocksPage() {
   return (
     <section className="stocks-page">
@@ -343,12 +605,7 @@ export default function StocksPage() {
 
       <div className="stocks-page__stack">
         <ChimpexDetailedCard />
-        <SummaryCard
-          title="Inland Silos — Summary by Commodity"
-          reportDate={CHIMPEX_REPORT_DATE}
-          location="Multiple locations"
-          data={inlandSummaryData}
-        />
+        <InlandDetailedCard />
       </div>
     </section>
   );
