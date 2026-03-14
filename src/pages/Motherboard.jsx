@@ -366,7 +366,7 @@ function CardAcquisitions() {
 
 function CardVessels() {
   return (
-    <div className="vessels-section">
+    <div className="mb-card vessels-section">
       <div className="vessels-section-head">
         <div className="mb-card-title">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
@@ -402,11 +402,8 @@ function CardVessels() {
             <div
               key={vessel.id}
               className={"vessel-card" + (isOnRoads ? " vessel-card--muted" : "")}
+              style={{ borderLeft: `3px solid ${isOnRoads ? "#d1d5db" : colors.accent}` }}
             >
-              <div
-                className="vessel-accent"
-                style={{ background: isOnRoads ? "#d1d5db" : colors.accent }}
-              />
               <div className="vessel-body">
                 <div className="vessel-top">
                   <div className="vessel-name-wrap">
@@ -441,17 +438,19 @@ function CardVessels() {
                   <div className="vessel-progress-nums">
                     <span>
                       <span className="vessel-loaded" style={{ color: isOnRoads ? "#9ca3af" : "#111827" }}>
-                        {vessel.loadedTons.toLocaleString("ro-RO")}
+                        {vessel.loadedTons.toLocaleString("en-US")}
                       </span>
-                      <span className="vessel-total"> / {vessel.totalTons.toLocaleString("ro-RO")} t</span>
+                      <span className="vessel-total"> / {vessel.totalTons.toLocaleString("en-US")} t</span>
                     </span>
-                    <span className="vessel-pct">{isOnRoads ? "—" : `${pct}%`}</span>
                   </div>
                   <div className="vessel-bar-bg">
                     <div
                       className="vessel-bar-fill"
                       style={{ width: `${pct}%`, background: isOnRoads ? "#d1d5db" : colors.accent }}
                     />
+                  </div>
+                  <div className="vessel-pct" style={{ color: isOnRoads ? "#9ca3af" : colors.accent }}>
+                    {isOnRoads ? "—" : `${pct}%`}
                   </div>
                 </div>
               </div>
@@ -465,11 +464,14 @@ function CardVessels() {
                     {fmtDate(isOnRoads ? vessel.arrivedRoads : vessel.startedLoading)}
                   </div>
                 </div>
-                <div className="vessel-date-cell">
-                  <div className="vessel-date-label">
+                <div
+                  className="vessel-date-cell"
+                  style={isDemurrageWarning ? { background: "#fff7ed", borderRadius: 4, padding: "2px 4px", margin: "-2px -4px" } : undefined}
+                >
+                  <div className="vessel-date-label" style={isDemurrageWarning ? { color: "#c2410c" } : undefined}>
                     {isOnRoads ? "Est. berth" : "Layday expires"}
                   </div>
-                  <div className="vessel-date-val" style={{ color: isDemurrageWarning ? "#ea580c" : undefined }}>
+                  <div className="vessel-date-val" style={{ color: isDemurrageWarning ? "#ea580c" : undefined, fontWeight: isDemurrageWarning ? 700 : undefined }}>
                     {fmtDate(isOnRoads ? vessel.estBerth : vessel.laydayExpires)}
                   </div>
                 </div>
@@ -487,7 +489,7 @@ function CardVessels() {
                     <line x1="12" y1="17" x2="12.01" y2="17"/>
                   </svg>
                   {daysLeft} {daysLeft === 1 ? "day" : "days"} to demurrage
-                  · {remaining.toLocaleString("ro-RO")} t remaining
+                  · {remaining.toLocaleString("en-US")} t remaining
                 </div>
               )}
               {!isOnRoads && !isDemurrageWarning && daysLeft !== null && (

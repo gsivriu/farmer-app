@@ -6549,7 +6549,7 @@ select.input:focus {
 
 /* ── Vessels Underloading ────────────────────────────────────────────────── */
 .vessels-section {
-  padding: 0 16px 16px;
+  padding: 0;
 }
 .vessels-section-head {
   display: flex;
@@ -6642,7 +6642,7 @@ select.input:focus {
   font-variant-numeric: tabular-nums;
 }
 .vessel-total { font-size: 12px; color: #6b7280; }
-.vessel-pct   { font-size: 12px; font-weight: 600; color: #6b7280; }
+.vessel-pct   { font-size: 12px; font-weight: 600; text-align: right; margin-top: 3px; }
 .vessel-bar-bg {
   height: 6px;
   border-radius: 3px;
@@ -6707,7 +6707,7 @@ select.input:focus {
   .mb-subnav { padding: 0 12px; overflow-x: auto; justify-content: flex-start; }
   .mb-subnav .nav-item { padding: 10px 14px; white-space: nowrap; }
   .vessels-grid { grid-template-columns: 1fr; }
-  .vessels-section { padding: 0 12px 16px; }
+  .vessels-section { padding: 0; }
 }
 @media (min-width: 601px) and (max-width: 900px) {
   .vessels-grid { grid-template-columns: 1fr 1fr; }
