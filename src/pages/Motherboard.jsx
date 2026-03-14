@@ -402,7 +402,6 @@ function CardVessels() {
             <div
               key={vessel.id}
               className={"vessel-card" + (isOnRoads ? " vessel-card--muted" : "")}
-              style={{ borderLeft: `3px solid ${isOnRoads ? "#d1d5db" : colors.accent}` }}
             >
               <div className="vessel-body">
                 <div className="vessel-top">
@@ -464,11 +463,8 @@ function CardVessels() {
                     {fmtDate(isOnRoads ? vessel.arrivedRoads : vessel.startedLoading)}
                   </div>
                 </div>
-                <div
-                  className="vessel-date-cell"
-                  style={isDemurrageWarning ? { background: "#fff7ed", borderRadius: 4, padding: "2px 4px", margin: "-2px -4px" } : undefined}
-                >
-                  <div className="vessel-date-label" style={isDemurrageWarning ? { color: "#c2410c" } : undefined}>
+                <div className="vessel-date-cell">
+                  <div className="vessel-date-label">
                     {isOnRoads ? "Est. berth" : "Layday expires"}
                   </div>
                   <div className="vessel-date-val" style={{ color: isDemurrageWarning ? "#ea580c" : undefined, fontWeight: isDemurrageWarning ? 700 : undefined }}>
