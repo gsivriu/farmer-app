@@ -91,30 +91,17 @@ function TransportChip({ status }) {
 
 // ── Transport progress bar ───────────────────────────────────────────────────
 
-function TransportBar({ pct, status, type }) {
+function TransportBar({ pct, status }) {
   const fillColor =
     status === "In Transit" ? "#1d4ed8" :
     status === "Pending"    ? "#92400e" :
     "#166534";
 
-  const VehicleIcon = type === "train" ? IconTrain : type === "barge" ? IconBarge : IconTruck;
-
   return (
     <div className="mb-tr-bar-outer">
       <div className="mb-tr-bar-fill" style={{ width: `${pct}%`, background: fillColor }} />
-      <div className="mb-tr-vehicle" style={{ left: `${Math.min(Math.max(pct, 4), 96)}%` }}>
-        <VehicleIcon />
-      </div>
     </div>
   );
-}
-
-// ── Delta cell ───────────────────────────────────────────────────────────────
-
-function Delta({ val }) {
-  if (val > 0) return <span style={{ color: "#10b981", fontWeight: 600 }}>▲ +{val}€</span>;
-  if (val < 0) return <span style={{ color: "#b9101e", fontWeight: 600 }}>▼ {val}€</span>;
-  return <span style={{ color: "#6b7280" }}>— 0€</span>;
 }
 
 // ── Footer with total fill bar ────────────────────────────────────────────────
@@ -128,7 +115,7 @@ function TotalFillFooter({ label, total, capacity }) {
         <span className="mb-foot-label">{label}</span>
         <span className="mb-foot-val">
           {fmt(total)} t{" "}
-          <span style={{ fontSize: 11, fontWeight: 400, color: "#9ca3af" }}>/ {fmt(capacity)} t</span>
+          <span style={{ fontSize: 11, fontWeight: 700, color: "#9ca3af" }}>/ {fmt(capacity)} t</span>
         </span>
       </div>
       <FillBar pct={pct} height={6} />
@@ -174,11 +161,11 @@ const TRANSPORT_DATA = [
 ];
 
 const ACQ_DATA = [
-  { product: "Wheat",     contracts: 4, qty: "1,840 t", price: "208 €/t", delta: 2 },
-  { product: "Barley",    contracts: 2, qty: "640 t",   price: "185 €/t", delta: 0 },
-  { product: "Corn",      contracts: 3, qty: "1,120 t", price: "172 €/t", delta: -3 },
-  { product: "Sunflower", contracts: 5, qty: "2,100 t", price: "458 €/t", delta: 5 },
-  { product: "Rapeseed",  contracts: 2, qty: "680 t",   price: "487 €/t", delta: 1 },
+  { product: "Wheat",     contracts: 4, qty: "1,840 t", price: "208 €/t" },
+  { product: "Barley",    contracts: 2, qty: "640 t",   price: "185 €/t" },
+  { product: "Corn",      contracts: 3, qty: "1,120 t", price: "172 €/t" },
+  { product: "Sunflower", contracts: 5, qty: "2,100 t", price: "458 $/t" },
+  { product: "Rapeseed",  contracts: 2, qty: "680 t",   price: "487 €/t" },
 ];
 
 // ── Card: Chimpex ─────────────────────────────────────────────────────────────
@@ -202,7 +189,7 @@ function CardChimpex() {
       <div className="mb-card-body" style={{ maxHeight: 200 }}>
         {CHIMPEX_DATA.map((r) => (
           <div key={r.commodity} className="mb-row" style={{ gridTemplateColumns: "1fr 80px" }}>
-            <span style={{ fontSize: 12.5, color: "#374151" }}>{r.commodity}</span>
+            <span style={{ fontSize: 12.5, color: "#374151", fontWeight: 700 }}>{r.commodity}</span>
             <span style={{ fontSize: 12, fontWeight: 600, color: "#111827", textAlign: "right" }}>
               {fmt(r.stock)} t
             </span>
@@ -239,7 +226,7 @@ function CardInland() {
       <div className="mb-card-body" style={{ maxHeight: 200 }}>
         {INLAND_DATA.map((r) => (
           <div key={r.commodity} className="mb-row" style={{ gridTemplateColumns: "1fr 80px" }}>
-            <span style={{ fontSize: 12.5, color: "#374151" }}>{r.commodity}</span>
+            <span style={{ fontSize: 12.5, color: "#374151", fontWeight: 700 }}>{r.commodity}</span>
             <span style={{ fontSize: 12, fontWeight: 600, color: "#111827", textAlign: "right" }}>
               {fmt(r.stock)} t
             </span>
@@ -316,56 +303,55 @@ function CardLogistics() {
   );
 }
 
-// ── Card: Live Acquisitions ───────────────────────────────────────────────────
+// ── Card: Contracts Today ─────────────────────────────────────────────────────
 
 function CardAcquisitions() {
+  const today = new Date().toLocaleDateString("en-GB"); // dd/mm/yyyy
+  const COLS = "1fr 110px 80px 90px";
+  const totalContracts = ACQ_DATA.reduce((s, r) => s + r.contracts, 0);
+  const totalQty = "6,380 t";
+
   return (
     <div className="mb-card">
       <div className="mb-card-head">
         <div className="mb-card-title" style={{ justifyContent: "space-between" }}>
           <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <IconCart />
-            Live Acquisitions
+            Contracts Today — {today}
           </span>
           <div className="mb-live-dot" />
         </div>
       </div>
+
+      {/* Column headers */}
       <div className="mb-col-headers">
-        <div className="mb-col-row" style={{ gridTemplateColumns: "1fr 64px 60px 64px 56px" }}>
+        <div className="mb-col-row" style={{ gridTemplateColumns: COLS }}>
           <span className="mb-col-cell">Product</span>
-          <span className="mb-col-cell">Ctrt.</span>
+          <span className="mb-col-cell" style={{ textAlign: "center" }}>No. Contracts</span>
           <span className="mb-col-cell">Qty.</span>
-          <span className="mb-col-cell">Avg. Price</span>
-          <span className="mb-col-cell">DAP Δ</span>
+          <span className="mb-col-cell" style={{ textAlign: "right" }}>Avg. Price</span>
         </div>
       </div>
+
+      {/* Data rows */}
       <div className="mb-card-body" style={{ maxHeight: 220 }}>
         {ACQ_DATA.map((r) => (
-          <div key={r.product} className="mb-row" style={{ gridTemplateColumns: "1fr 64px 60px 64px 56px" }}>
-            <span style={{ fontSize: 12.5, color: "#374151" }}>{r.product}</span>
-            <span style={{ fontSize: 11, textAlign: "center" }}>{r.contracts}</span>
-            <span style={{ fontSize: 11, color: "#374151" }}>{r.qty}</span>
-            <span style={{ fontSize: 11, fontWeight: 600 }}>{r.price}</span>
-            <Delta val={r.delta} />
+          <div key={r.product} className="mb-row" style={{ gridTemplateColumns: COLS, padding: "11px 0" }}>
+            <span style={{ fontSize: 12.5, color: "#374151", fontWeight: 600 }}>{r.product}</span>
+            <span style={{ fontSize: 12, textAlign: "center", color: "#111827" }}>{r.contracts}</span>
+            <span style={{ fontSize: 12, color: "#374151" }}>{r.qty}</span>
+            <span style={{ fontSize: 12, fontWeight: 600, textAlign: "right" }}>{r.price}</span>
           </div>
         ))}
       </div>
-      <div className="mb-acq-summary">
-        <div className="mb-acq-kpi">
-          <span className="mb-acq-kpi-label">Contracts today</span>
-          <span className="mb-acq-kpi-val">16</span>
-        </div>
-        <div className="mb-acq-kpi">
-          <span className="mb-acq-kpi-label">Quantity</span>
-          <span className="mb-acq-kpi-val">6,380 t</span>
-        </div>
-        <div className="mb-acq-kpi">
-          <span className="mb-acq-kpi-label">Est. value</span>
-          <span className="mb-acq-kpi-val">1.42 M€</span>
-        </div>
-        <div className="mb-acq-kpi">
-          <span className="mb-acq-kpi-label">Dominant</span>
-          <span className="mb-acq-kpi-val" style={{ fontSize: 12 }}>Sunflower</span>
+
+      {/* Totals row — pinned below data, aligned to columns */}
+      <div style={{ borderTop: "1.5px solid #e5e7eb", padding: "8px 16px 10px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: COLS, alignItems: "center" }}>
+          <span style={{ fontSize: 10.5, color: "#9ca3af", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>Total</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: "#111827", textAlign: "center" }}>{totalContracts}</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: "#111827" }}>{totalQty}</span>
+          <span style={{ fontSize: 12, color: "#9ca3af", textAlign: "right" }}>—</span>
         </div>
       </div>
     </div>
