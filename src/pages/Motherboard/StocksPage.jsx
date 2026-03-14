@@ -56,11 +56,9 @@ const chimpexFooterRows = [
 ];
 
 const inlandDetailedData = [
-  { group: "Constanta Area", filiala: "Casicea", um: "To", totalCrop2025: 14447.58, stocCustodie: 0, stocProprietate: 0, spatiuTehnicUtil: 14400, spatiuDisponibil: 14400, stocRec2024: 0 },
   { group: "Constanta Area", filiala: "Ciocarlia", um: "To", totalCrop2025: 25268.32, stocCustodie: 0, stocProprietate: 1441.31, spatiuTehnicUtil: 22692, spatiuDisponibil: 21250.69, stocRec2024: 0 },
   { group: "Constanta Area", filiala: "Negru-Voda", um: "To", totalCrop2025: 24897.68, stocCustodie: 0, stocProprietate: 156.23, spatiuTehnicUtil: 30500, spatiuDisponibil: 30343.77, stocRec2024: 0 },
   { group: "Constanta Area", filiala: "Nicolae Balcescu", um: "To", totalCrop2025: 12954.14, stocCustodie: 229.24, stocProprietate: 2616.06, spatiuTehnicUtil: 46320, spatiuDisponibil: 45182.52, stocRec2024: 577.08 },
-  { group: "Territory", filiala: "Carpinis", um: "To", totalCrop2025: 46723.26, stocCustodie: 0, stocProprietate: 0, spatiuTehnicUtil: 52200, spatiuDisponibil: 52200, stocRec2024: 0 },
   { group: "Territory", filiala: "Dor Marunt", um: "To", totalCrop2025: 36580.72, stocCustodie: 0, stocProprietate: 0, spatiuTehnicUtil: 11000, spatiuDisponibil: 11000, stocRec2024: 0 },
   { group: "Territory", filiala: "Plosca", um: "To", totalCrop2025: 63745.98, stocCustodie: 0, stocProprietate: 3039.73, spatiuTehnicUtil: 13000, spatiuDisponibil: 9960.27, stocRec2024: 0 },
   { group: "Territory", filiala: "Harsova", um: "To", totalCrop2025: 31947.94, stocCustodie: 1239.08, stocProprietate: 12.09, spatiuTehnicUtil: 29000, spatiuDisponibil: 27742.19, stocRec2024: 1.2 },
@@ -74,14 +72,12 @@ const inlandDetailedData = [
 ];
 
 const inlandColumns = [
-  { key: "filiala", label: "FILIALA", align: "left", width: "180px" },
-  { key: "um", label: "U/M", align: "center", width: "60px" },
-  { key: "totalCrop2025", label: "TOTAL RECEPTIONAT CROP 2025", align: "right", width: "170px" },
-  { key: "stocCustodie", label: "STOC CUSTODIE", align: "right", width: "140px" },
-  { key: "stocProprietate", label: "STOC PROPRIETATE", align: "right", width: "150px" },
-  { key: "spatiuTehnicUtil", label: "SPATIU TEHNIC UTIL", align: "right", width: "160px" },
-  { key: "spatiuDisponibil", label: "SPATIU DISPONIBIL", align: "right", width: "160px" },
-  { key: "stocRec2024", label: "STOC REC.2024", align: "right", width: "140px" },
+  { key: "filiala", label: "SILO", align: "left", width: "180px" },
+  { key: "stocCustodie", label: "CUSTODY STOCK", align: "right", width: "140px" },
+  { key: "stocProprietate", label: "OWNED STOCK", align: "right", width: "150px" },
+  { key: "spatiuTehnicUtil", label: "TECHNICAL CAPACITY", align: "right", width: "160px" },
+  { key: "spatiuDisponibil", label: "AVAILABLE SPACE", align: "right", width: "160px" },
+  { key: "stocRec2024", label: "2024 CROP STOCK", align: "right", width: "140px" },
 ];
 
 const inlandTotalsReference = {
@@ -443,7 +439,6 @@ function InlandDetailedCard() {
     () =>
       filteredRows.map((row) => ({
         ...row,
-        totalCrop2025: formatAccountingNumber(row.totalCrop2025),
         stocCustodie: formatAccountingNumber(row.stocCustodie),
         stocProprietate: formatAccountingNumber(row.stocProprietate),
         spatiuTehnicUtil: formatAccountingNumber(row.spatiuTehnicUtil),
@@ -542,8 +537,6 @@ function InlandDetailedCard() {
                   {rows.map((row) => (
                     <tr key={`${row.group}-${row.filiala}`} className="stocks-table__row">
                       <td className="stocks-table__td stocks-table__td--commodity">{row.filiala}</td>
-                      <td className="stocks-table__td stocks-table__td--center">{row.um}</td>
-                      <td className="stocks-table__td stocks-table__td--numeric">{renderInlandValueCell(row.totalCrop2025)}</td>
                       <td className="stocks-table__td stocks-table__td--numeric">{renderInlandValueCell(row.stocCustodie)}</td>
                       <td className="stocks-table__td stocks-table__td--numeric">{renderInlandValueCell(row.stocProprietate)}</td>
                       <td className="stocks-table__td stocks-table__td--numeric">{renderInlandValueCell(row.spatiuTehnicUtil)}</td>
@@ -555,8 +548,6 @@ function InlandDetailedCard() {
                     <th className="stocks-table__total-label" scope="row">
                       {total.label}
                     </th>
-                    <td className="stocks-table__total-value stocks-table__td--center">{total.um}</td>
-                    <td className="stocks-table__total-value">{formatAccountingNumber(total.totalCrop2025)}</td>
                     <td className="stocks-table__total-value">{formatAccountingNumber(total.stocCustodie)}</td>
                     <td className="stocks-table__total-value">{formatAccountingNumber(total.stocProprietate)}</td>
                     <td className="stocks-table__total-value">{formatAccountingNumber(total.spatiuTehnicUtil)}</td>
@@ -578,8 +569,6 @@ function InlandDetailedCard() {
               <th className="stocks-table__total-label" scope="row">
                 {generalTotal.label}
               </th>
-              <td className="stocks-table__total-value stocks-table__td--center">{generalTotal.um}</td>
-              <td className="stocks-table__total-value">{formatAccountingNumber(generalTotal.totalCrop2025)}</td>
               <td className="stocks-table__total-value">{formatAccountingNumber(generalTotal.stocCustodie)}</td>
               <td className="stocks-table__total-value">{formatAccountingNumber(generalTotal.stocProprietate)}</td>
               <td className="stocks-table__total-value">{formatAccountingNumber(generalTotal.spatiuTehnicUtil)}</td>
