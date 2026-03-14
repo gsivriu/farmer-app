@@ -1,10 +1,11 @@
 import { useState } from "react";
 
 // ── SVG icons ──────────────────────────────────────────────────────────────
+// Section title icons: 14×14, strokeWidth 1.8, stroke="currentColor" → #b9101e via CSS
 
 function IconSilo() {
   return (
-    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <rect x="2" y="4" width="4" height="8" rx="0.5" />
       <rect x="8" y="4" width="4" height="8" rx="0.5" />
       <path d="M2 4 C2 2.5 6 2.5 6 4" />
@@ -15,16 +16,28 @@ function IconSilo() {
 
 function IconWarehouse() {
   return (
-    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M1 6L7 2l6 4v6H1V6z" />
       <rect x="5" y="8" width="4" height="4" />
     </svg>
   );
 }
 
+function IconCart() {
+  return (
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="5" cy="12" r="1" />
+      <circle cx="11" cy="12" r="1" />
+      <path d="M1 1h2l1.5 7h7L13 4H4" />
+    </svg>
+  );
+}
+
+// Transport icons: 18×18, strokeWidth 1.6, stroke #374151
+
 function IconTruck() {
   return (
-    <svg viewBox="0 0 20 14" fill="none" stroke="#374151" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 20 14" fill="none" stroke="#374151" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
       <rect x="1" y="3" width="11" height="8" rx="1" />
       <path d="M12 6h4l2 3v2h-6V6z" />
       <circle cx="5" cy="12" r="1.5" fill="#374151" stroke="none" />
@@ -35,7 +48,7 @@ function IconTruck() {
 
 function IconTrain() {
   return (
-    <svg viewBox="0 0 22 14" fill="none" stroke="#374151" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 22 14" fill="none" stroke="#374151" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
       <rect x="1" y="2" width="6" height="9" rx="1" />
       <rect x="8" y="2" width="6" height="9" rx="1" />
       <rect x="15" y="2" width="6" height="9" rx="1" />
@@ -50,7 +63,7 @@ function IconTrain() {
 
 function IconBarge() {
   return (
-    <svg viewBox="0 0 22 14" fill="none" stroke="#374151" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 22 14" fill="none" stroke="#374151" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
       <rect x="4" y="4" width="14" height="6" rx="1" />
       <path d="M7 4V2h8v2" />
       <path d="M1 11 Q5.5 9 11 11 Q16.5 13 21 11" />
@@ -58,22 +71,12 @@ function IconBarge() {
   );
 }
 
-function IconCart() {
-  return (
-    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="5" cy="12" r="1" />
-      <circle cx="11" cy="12" r="1" />
-      <path d="M1 1h2l1.5 7h7L13 4H4" />
-    </svg>
-  );
-}
-
 // ── Fill bar ────────────────────────────────────────────────────────────────
 
-function FillBar({ pct, height = 5 }) {
+function FillBar({ pct, height = 4 }) {
   const color = pct > 90 ? "#b9101e" : pct >= 60 ? "#eab308" : "#10b981";
   return (
-    <div className="mb-fill-bar" style={{ minWidth: 48, height }}>
+    <div className="mb-fill-bar" style={{ height }}>
       <div className="mb-fill-inner" style={{ width: `${pct}%`, background: color }} />
     </div>
   );
@@ -89,14 +92,13 @@ function TransportChip({ status }) {
   return <span className={cls}>{status}</span>;
 }
 
-// ── Transport progress bar ───────────────────────────────────────────────────
+// ── Transport progress bar (no vehicle icon) ─────────────────────────────────
 
 function TransportBar({ pct, status }) {
   const fillColor =
     status === "In Transit" ? "#1d4ed8" :
     status === "Pending"    ? "#92400e" :
     "#166534";
-
   return (
     <div className="mb-tr-bar-outer">
       <div className="mb-tr-bar-fill" style={{ width: `${pct}%`, background: fillColor }} />
@@ -104,7 +106,7 @@ function TransportBar({ pct, status }) {
   );
 }
 
-// ── Footer with total fill bar ────────────────────────────────────────────────
+// ── Footer with total fill bar (stock cards) ──────────────────────────────────
 
 function TotalFillFooter({ label, total, capacity }) {
   const pct = Math.min(Math.round((total / capacity) * 100), 100);
@@ -115,12 +117,12 @@ function TotalFillFooter({ label, total, capacity }) {
         <span className="mb-foot-label">{label}</span>
         <span className="mb-foot-val">
           {fmt(total)} t{" "}
-          <span style={{ fontSize: 11, fontWeight: 700, color: "#9ca3af" }}>/ {fmt(capacity)} t</span>
+          <span style={{ fontSize: 11, fontWeight: 600, color: "#9ca3af" }}>/ {fmt(capacity)} t</span>
         </span>
       </div>
-      <FillBar pct={pct} height={6} />
+      <FillBar pct={pct} height={4} />
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
-        <span style={{ fontSize: 10, color: "#9ca3af" }}>{pct}% utilized</span>
+        <span className="mb-row-meta">{pct}% utilized</span>
       </div>
     </div>
   );
@@ -128,24 +130,22 @@ function TotalFillFooter({ label, total, capacity }) {
 
 // ── Data ─────────────────────────────────────────────────────────────────────
 
-// Chimpex — aggregated by commodity (combining cells with same product)
 const CHIMPEX_DATA = [
-  { commodity: "Wheat",     stock: 38500 },  // C-01 East + C-06 East 2
-  { commodity: "Corn",      stock: 32100 },  // C-02 West
-  { commodity: "Sunflower", stock: 19600 },  // C-03 North
-  { commodity: "Rapeseed",  stock: 12300 },  // C-04 South
-  { commodity: "Barley",    stock:  9800 },  // C-05 Central
+  { commodity: "Wheat",     stock: 38500 },
+  { commodity: "Corn",      stock: 32100 },
+  { commodity: "Sunflower", stock: 19600 },
+  { commodity: "Rapeseed",  stock: 12300 },
+  { commodity: "Barley",    stock:  9800 },
 ];
 const CHIMPEX_TOTAL    = 112400;
 const CHIMPEX_CAPACITY = 235000;
 
-// Inland Silos — aggregated by commodity across all locations
 const INLAND_DATA = [
-  { commodity: "Wheat",     stock: 31600 },  // Slobozia + Buzău
-  { commodity: "Corn",      stock: 22500 },  // Călărași
-  { commodity: "Sunflower", stock: 11800 },  // Brăila
-  { commodity: "Rapeseed",  stock: 21500 },  // Alexandria
-  { commodity: "Barley",    stock:  6400 },  // Galați
+  { commodity: "Wheat",     stock: 31600 },
+  { commodity: "Corn",      stock: 22500 },
+  { commodity: "Sunflower", stock: 11800 },
+  { commodity: "Rapeseed",  stock: 21500 },
+  { commodity: "Barley",    stock:  6400 },
 ];
 const INLAND_TOTAL    = 93800;
 const INLAND_CAPACITY = 302000;
@@ -172,35 +172,33 @@ const ACQ_DATA = [
 
 function CardChimpex() {
   const fmt = (n) => n.toLocaleString("en-US");
+  const COLS = "1fr auto";
   return (
     <div className="mb-card">
       <div className="mb-card-head">
         <div className="mb-card-title">
-          <IconSilo />
-          Chimpex
+          <span style={{ display: "flex", alignItems: "center", gap: 6, flex: 1 }}>
+            <IconSilo />
+            Chimpex
+          </span>
+          <span className="mb-head-meta">Constanța</span>
         </div>
       </div>
       <div className="mb-col-headers">
-        <div className="mb-col-row" style={{ gridTemplateColumns: "1fr 80px" }}>
+        <div className="mb-col-row" style={{ gridTemplateColumns: COLS }}>
           <span className="mb-col-cell">Commodity</span>
           <span className="mb-col-cell" style={{ textAlign: "right" }}>Stock</span>
         </div>
       </div>
-      <div className="mb-card-body" style={{ maxHeight: 200 }}>
+      <div className="mb-card-body" style={{ maxHeight: 220 }}>
         {CHIMPEX_DATA.map((r) => (
-          <div key={r.commodity} className="mb-row" style={{ gridTemplateColumns: "1fr 80px" }}>
-            <span style={{ fontSize: 12.5, color: "#374151", fontWeight: 700 }}>{r.commodity}</span>
-            <span style={{ fontSize: 12, fontWeight: 600, color: "#111827", textAlign: "right" }}>
-              {fmt(r.stock)} t
-            </span>
+          <div key={r.commodity} className="mb-row" style={{ gridTemplateColumns: COLS }}>
+            <span className="mb-row-label">{r.commodity}</span>
+            <span className="mb-row-value" style={{ textAlign: "right" }}>{fmt(r.stock)} t</span>
           </div>
         ))}
       </div>
-      <TotalFillFooter
-        label="Total stock Chimpex"
-        total={CHIMPEX_TOTAL}
-        capacity={CHIMPEX_CAPACITY}
-      />
+      <TotalFillFooter label="Total stock Chimpex" total={CHIMPEX_TOTAL} capacity={CHIMPEX_CAPACITY} />
     </div>
   );
 }
@@ -209,35 +207,33 @@ function CardChimpex() {
 
 function CardInland() {
   const fmt = (n) => n.toLocaleString("en-US");
+  const COLS = "1fr auto";
   return (
     <div className="mb-card">
       <div className="mb-card-head">
         <div className="mb-card-title">
-          <IconWarehouse />
-          Inland Silos
+          <span style={{ display: "flex", alignItems: "center", gap: 6, flex: 1 }}>
+            <IconWarehouse />
+            Inland Silos
+          </span>
+          <span className="mb-head-meta">Multiple locations</span>
         </div>
       </div>
       <div className="mb-col-headers">
-        <div className="mb-col-row" style={{ gridTemplateColumns: "1fr 80px" }}>
+        <div className="mb-col-row" style={{ gridTemplateColumns: COLS }}>
           <span className="mb-col-cell">Commodity</span>
           <span className="mb-col-cell" style={{ textAlign: "right" }}>Stock</span>
         </div>
       </div>
-      <div className="mb-card-body" style={{ maxHeight: 200 }}>
+      <div className="mb-card-body" style={{ maxHeight: 220 }}>
         {INLAND_DATA.map((r) => (
-          <div key={r.commodity} className="mb-row" style={{ gridTemplateColumns: "1fr 80px" }}>
-            <span style={{ fontSize: 12.5, color: "#374151", fontWeight: 700 }}>{r.commodity}</span>
-            <span style={{ fontSize: 12, fontWeight: 600, color: "#111827", textAlign: "right" }}>
-              {fmt(r.stock)} t
-            </span>
+          <div key={r.commodity} className="mb-row" style={{ gridTemplateColumns: COLS }}>
+            <span className="mb-row-label">{r.commodity}</span>
+            <span className="mb-row-value" style={{ textAlign: "right" }}>{fmt(r.stock)} t</span>
           </div>
         ))}
       </div>
-      <TotalFillFooter
-        label="Total stock Inland"
-        total={INLAND_TOTAL}
-        capacity={INLAND_CAPACITY}
-      />
+      <TotalFillFooter label="Total stock Inland" total={INLAND_TOTAL} capacity={INLAND_CAPACITY} />
     </div>
   );
 }
@@ -248,9 +244,9 @@ function CardLogistics() {
   return (
     <div className="mb-card">
       <div className="mb-card-head">
-        <div className="mb-card-title" style={{ justifyContent: "space-between" }}>
-          <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14, color: "#b9101e", flexShrink: 0 }}>
+        <div className="mb-card-title">
+          <span style={{ display: "flex", alignItems: "center", gap: 6, flex: 1 }}>
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="5" cy="7" r="4" />
               <circle cx="5" cy="7" r="1.5" />
               <line x1="9" y1="4" x2="13" y2="2" />
@@ -259,35 +255,36 @@ function CardLogistics() {
             </svg>
             Logistics Underway
           </span>
-          <div className="mb-live-dot" />
+          <span className="mb-head-meta" style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <div className="mb-live-dot" />
+            23 active
+          </span>
         </div>
       </div>
       <div className="mb-col-headers">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
           <span className="mb-col-cell">Transport / Route</span>
           <span className="mb-col-cell">Status</span>
         </div>
       </div>
       <div className="mb-card-body" style={{ maxHeight: 220 }}>
         {TRANSPORT_DATA.map((t) => (
-          <div key={t.id} style={{ padding: "8px 0", borderBottom: "1px solid rgba(0,0,0,0.04)" }}>
-            {/* Row 1: icon + id + qty + chip */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <div style={{ flexShrink: 0, width: 22, height: 14, display: "flex", alignItems: "center" }}>
-                  {t.type === "train" ? <IconTrain /> : t.type === "barge" ? <IconBarge /> : <IconTruck />}
-                </div>
-                <div>
-                  <span style={{ fontSize: 11.5, fontWeight: 700, color: "#111827" }}>{t.id}</span>
-                  <span style={{ fontSize: 10.5, color: "#6b7280", marginLeft: 6 }}>{t.qty}</span>
-                </div>
+          <div key={t.id} className="mb-row" style={{ display: "block" }}>
+            {/* Row 1: 28px icon | ID + route meta | chip */}
+            <div style={{ display: "grid", gridTemplateColumns: "28px 1fr auto", alignItems: "center", gap: 8 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {t.type === "train" ? <IconTrain /> : t.type === "barge" ? <IconBarge /> : <IconTruck />}
+              </div>
+              <div>
+                <div className="mb-row-value">{t.id}</div>
+                <div className="mb-row-meta">{t.from} → {t.to} · {t.qty}</div>
               </div>
               <TransportChip status={t.status} />
             </div>
-            {/* Row 2: progress bar */}
-            <div style={{ paddingLeft: 30, marginTop: 6 }}>
-              <TransportBar pct={t.pct} status={t.status} type={t.type} />
-              <div className="mb-tr-pts" style={{ marginTop: 8 }}>
+            {/* Row 2: progress bar + from/to points */}
+            <div style={{ paddingLeft: 36, marginTop: 6 }}>
+              <TransportBar pct={t.pct} status={t.status} />
+              <div className="mb-tr-pts">
                 <span className="mb-tr-pt">{t.from}</span>
                 <span className="mb-tr-pt">{t.to}</span>
               </div>
@@ -307,51 +304,48 @@ function CardLogistics() {
 
 function CardAcquisitions() {
   const today = new Date().toLocaleDateString("en-GB"); // dd/mm/yyyy
-  const COLS = "1fr 110px 80px 90px";
+  const COLS = "1fr 48px 80px 72px";
   const totalContracts = ACQ_DATA.reduce((s, r) => s + r.contracts, 0);
-  const totalQty = "6,380 t";
 
   return (
     <div className="mb-card">
       <div className="mb-card-head">
-        <div className="mb-card-title" style={{ justifyContent: "space-between" }}>
-          <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        <div className="mb-card-title">
+          <span style={{ display: "flex", alignItems: "center", gap: 6, flex: 1 }}>
             <IconCart />
-            Contracts Today — {today}
+            Contracts Today
           </span>
-          <div className="mb-live-dot" />
+          <span className="mb-head-meta" style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <div className="mb-live-dot" />
+            {today}
+          </span>
         </div>
       </div>
-
-      {/* Column headers */}
       <div className="mb-col-headers">
         <div className="mb-col-row" style={{ gridTemplateColumns: COLS }}>
           <span className="mb-col-cell">Product</span>
-          <span className="mb-col-cell" style={{ textAlign: "center" }}>No. Contracts</span>
-          <span className="mb-col-cell">Qty.</span>
+          <span className="mb-col-cell" style={{ textAlign: "center" }}>No.</span>
+          <span className="mb-col-cell" style={{ textAlign: "right" }}>Qty.</span>
           <span className="mb-col-cell" style={{ textAlign: "right" }}>Avg. Price</span>
         </div>
       </div>
-
-      {/* Data rows */}
       <div className="mb-card-body" style={{ maxHeight: 220 }}>
         {ACQ_DATA.map((r) => (
-          <div key={r.product} className="mb-row" style={{ gridTemplateColumns: COLS, padding: "11px 0" }}>
-            <span style={{ fontSize: 12.5, color: "#374151", fontWeight: 600 }}>{r.product}</span>
-            <span style={{ fontSize: 12, textAlign: "center", color: "#111827" }}>{r.contracts}</span>
-            <span style={{ fontSize: 12, color: "#374151" }}>{r.qty}</span>
-            <span style={{ fontSize: 12, fontWeight: 600, textAlign: "right" }}>{r.price}</span>
+          <div key={r.product} className="mb-row" style={{ gridTemplateColumns: COLS }}>
+            <span className="mb-row-label">{r.product}</span>
+            <span className="mb-row-value" style={{ textAlign: "center" }}>{r.contracts}</span>
+            <span className="mb-row-value" style={{ textAlign: "right" }}>{r.qty}</span>
+            <span className="mb-row-value" style={{ textAlign: "right" }}>{r.price}</span>
           </div>
         ))}
       </div>
-
-      {/* Totals row — pinned below data, aligned to columns */}
-      <div style={{ borderTop: "1.5px solid #e5e7eb", padding: "8px 16px 10px" }}>
+      {/* Totals row — pinned, aligned to column grid */}
+      <div className="mb-totals-row">
         <div style={{ display: "grid", gridTemplateColumns: COLS, alignItems: "center" }}>
-          <span style={{ fontSize: 10.5, color: "#9ca3af", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>Total</span>
-          <span style={{ fontSize: 13, fontWeight: 700, color: "#111827", textAlign: "center" }}>{totalContracts}</span>
-          <span style={{ fontSize: 13, fontWeight: 700, color: "#111827" }}>{totalQty}</span>
-          <span style={{ fontSize: 12, color: "#9ca3af", textAlign: "right" }}>—</span>
+          <span className="mb-totals-label">Total</span>
+          <span className="mb-totals-value" style={{ textAlign: "center" }}>{totalContracts}</span>
+          <span className="mb-totals-value" style={{ textAlign: "right" }}>6,380 t</span>
+          <span className="mb-totals-dash" style={{ textAlign: "right" }}>—</span>
         </div>
       </div>
     </div>
@@ -382,7 +376,6 @@ export default function MotherboardPage() {
 
   return (
     <div className="motherboard-layout">
-      {/* Secondary sub-nav — centered on desktop */}
       <nav className="mb-subnav">
         {tabs.map((t) => (
           <button
@@ -396,7 +389,6 @@ export default function MotherboardPage() {
         ))}
       </nav>
 
-      {/* Overview */}
       {mbTab === "overview" && (
         <div className="mb-overview-grid">
           <CardChimpex />
@@ -406,17 +398,14 @@ export default function MotherboardPage() {
         </div>
       )}
 
-      {/* Stocks */}
       {mbTab === "stocks" && (
         <PlaceholderCard text="Stocks — full stock details for Chimpex & Inland silos (coming soon)" />
       )}
 
-      {/* Logistics */}
       {mbTab === "logistics" && (
         <PlaceholderCard text="Logistics — detailed transport plan, all active means of transport" />
       )}
 
-      {/* Execution */}
       {mbTab === "execution" && (
         <PlaceholderCard text="Execution — intake, calculations, contracts per owner" />
       )}
