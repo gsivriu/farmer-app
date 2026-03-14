@@ -255,7 +255,7 @@ function CardLogistics() {
           return (
             <div key={type} className="mb-logistics-group">
               {/* Group header: neutral icon box + uppercase label + count */}
-              <div className="tr-group-header">
+              <div className={`tr-group-header tr-group--${type}`}>
                 <div className="tr-type-icon">
                   <Icon />
                 </div>
