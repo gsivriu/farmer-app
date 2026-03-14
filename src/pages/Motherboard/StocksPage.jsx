@@ -1,79 +1,92 @@
 import { useMemo, useState } from "react";
 import "./StocksPage.css";
 
-const REPORT_DATE = "14/03/2026";
+const CHIMPEX_REPORT_DATE = "13 Mar 2026";
+const CHIMPEX_EXPORT_FILENAME = "chimpex-detailed-stocks-13-mar-2026";
 
-const STOCKS_COLUMNS = [
+const chimpexDetailedData = [
+  { commodity: "BLY 2025", origin: "RO", client: "AMEROPA GRAINS SA", silozChimpex: 0, warehouseChimpex: 0, bargesThirdParty: null, niva: 0 },
+  { commodity: "RPS 2025", origin: "RO", client: "AMEROPA GRAINS SA", silozChimpex: 0, warehouseChimpex: 0, bargesThirdParty: null, niva: 0 },
+  { commodity: "WHT LP 2025", origin: "RO", client: "AMEROPA GRAINS SA", silozChimpex: 311.04, warehouseChimpex: 0, bargesThirdParty: null, niva: null },
+  { commodity: "WHT HP 2025", origin: "RO", client: "AMEROPA GRAINS SA", silozChimpex: 18127.34, warehouseChimpex: 0, bargesThirdParty: null, niva: 0 },
+  { commodity: "CORN 2025", origin: "RO", client: "AMEROPA GRAINS SA", silozChimpex: 5475.23, warehouseChimpex: 0, bargesThirdParty: null, niva: null },
+  { commodity: "SFS 2025", origin: "RO", client: "AMEROPA GRAINS SA", silozChimpex: 0, warehouseChimpex: 0, bargesThirdParty: null, niva: null },
+  { commodity: "WHT EX NIVA 2025", origin: "RO", client: "AMEROPA GRAINS SA", silozChimpex: 0, warehouseChimpex: 0, bargesThirdParty: null, niva: null },
+  { commodity: "RPS EX NIVA 2025", origin: "RO", client: "AMEROPA GRAINS SA", silozChimpex: 0, warehouseChimpex: 0, bargesThirdParty: null, niva: null },
+  { commodity: "RPS 2025 IMPORTED", origin: "MLD", client: "AMEROPA GRAINS SA", silozChimpex: 0, warehouseChimpex: 0, bargesThirdParty: null, niva: null },
+  { commodity: "RPS 2025 TRANZIT", origin: "MLD", client: "AMEROPA GRAINS SA", silozChimpex: 0, warehouseChimpex: 0, bargesThirdParty: null, niva: null },
+  { commodity: "BLY 2025", origin: "RO", client: "AMS AMEROPA MARKETING AND SALES AG", silozChimpex: 0, warehouseChimpex: 0, bargesThirdParty: null, niva: 0 },
+  { commodity: "RPS 2025", origin: "RO", client: "AMS AMEROPA MARKETING AND SALES AG", silozChimpex: 0, warehouseChimpex: 0, bargesThirdParty: null, niva: null },
+  { commodity: "WHT LP 2025", origin: "RO", client: "AMS AMEROPA MARKETING AND SALES AG", silozChimpex: 1005.8, warehouseChimpex: 0, bargesThirdParty: null, niva: null },
+  { commodity: "WHT HP 2025", origin: "RO", client: "AMS AMEROPA MARKETING AND SALES AG", silozChimpex: 15028.97, warehouseChimpex: 0, bargesThirdParty: null, niva: null },
+  { commodity: "SFS 2025", origin: "RO", client: "AMS AMEROPA MARKETING AND SALES AG", silozChimpex: 0, warehouseChimpex: 0, bargesThirdParty: null, niva: null },
+  { commodity: "WHT 2025 TRANZIT", origin: "MLD", client: "AMS AMEROPA MARKETING AND SALES AG", silozChimpex: 0, warehouseChimpex: 0, bargesThirdParty: null, niva: null },
+  { commodity: "CORN 2025", origin: "RO", client: "AMS AMEROPA MARKETING AND SALES AG", silozChimpex: 7741.81, warehouseChimpex: 0, bargesThirdParty: null, niva: null },
+  { commodity: "WHT 2025 IMPORTED", origin: "MLD", client: "AMS AMEROPA MARKETING AND SALES AG", silozChimpex: 0, warehouseChimpex: 0, bargesThirdParty: null, niva: null },
+  { commodity: "WHT 2025 IMPORTED", origin: "MLD", client: "AMEROPA GRAINS SA", silozChimpex: 0, warehouseChimpex: 0, bargesThirdParty: null, niva: null },
+  { commodity: "WHT", origin: "RO", client: "AMEROPA GRAINS SA", silozChimpex: 0, warehouseChimpex: 0, bargesThirdParty: null, niva: null },
+];
+
+const chimpexColumns = [
+  { key: "commodity", label: "COMMODITY", align: "left", width: "150px" },
+  { key: "origin", label: "ORIGIN", align: "left", width: "80px" },
+  { key: "client", label: "CLIENT", align: "left", width: "260px" },
+  { key: "silozChimpex", label: "SILOZ CHIMPEX", align: "right", width: "130px" },
+  { key: "warehouseChimpex", label: "WAREHOUSE CHIMPEX", align: "right", width: "150px" },
+  { key: "bargesThirdParty", label: "BARGES LOADED FROM 3RD PARTY SUPPLIERS", align: "right", width: "210px" },
+  { key: "niva", label: "NIVA", align: "right", width: "100px" },
+];
+
+const chimpexFooterRows = [
   {
-    key: "commodity",
-    label: "Produs",
-    align: "left",
-    cellClassName: "stocks-page__commodity-cell",
-    render: (row, { wheatMatcher }) => (
-      <div className="stocks-page__commodity-wrap">
-        <span className="mb-row-label">{displayCell(row.commodity)}</span>
-        {wheatMatcher(row) ? <span className="stocks-page__tag">Grau</span> : null}
-      </div>
-    ),
+    label: "TOTAL",
+    tone: "neutral",
+    values: {
+      silozChimpex: 47690.19,
+      warehouseChimpex: 0,
+      bargesThirdParty: null,
+      niva: 0,
+    },
   },
   {
-    key: "stock",
-    label: "Stoc (t)",
-    align: "right",
-    render: (row) => <span className="mb-row-value">{formatNumber(row.stock)}</span>,
+    label: "WHEAT BASE",
+    tone: "wheat",
+    values: {
+      silozChimpex: 49011.894,
+      warehouseChimpex: 0,
+      bargesThirdParty: null,
+      niva: 0,
+    },
   },
   {
-    key: "share",
-    label: "% Total",
-    align: "right",
-    render: (row) => <span className="mb-row-value">{formatPercent(row.share)}</span>,
+    label: "STORAGE SPACES STATUS (% FULL)",
+    tone: "success-soft",
+    values: {
+      silozChimpex: 22.28,
+      warehouseChimpex: null,
+      bargesThirdParty: null,
+      niva: 0,
+    },
+    isPercent: true,
+  },
+  {
+    label: "STORAGE SPACES STATUS (% FULL) - TOTAL",
+    tone: "success-strong",
+    mergedValue: "20.86%",
   },
 ];
 
-const STOCKS_DATA = [
-  {
-    id: "chimpex",
-    title: "Chimpex Siloz — Stocuri Detaliate",
-    reportDate: REPORT_DATE,
-    exportFilename: "chimpex-stocuri-detaliate",
-    storageFooterConfig: {
-      label: "Total stoc Chimpex",
-      capacity: 235000,
-      location: "Constanta",
-    },
-    wheatMatcher: (row) => String(row.commodity || "").toLowerCase().includes("wheat"),
-    data: [
-      { commodity: "Wheat", stock: 38500 },
-      { commodity: "Corn", stock: 32100 },
-      { commodity: "Sunflower", stock: 19600 },
-      { commodity: "Rapeseed", stock: 12300 },
-      { commodity: "Barley", stock: 9800 },
-    ],
-  },
-  {
-    id: "inland",
-    title: "Inland Silos — Stocuri Detaliate",
-    reportDate: REPORT_DATE,
-    exportFilename: "inland-silos-stocuri-detaliate",
-    storageFooterConfig: {
-      label: "Total stoc Inland Silos",
-      capacity: 302000,
-      location: "Multiple locations",
-    },
-    wheatMatcher: (row) => String(row.commodity || "").toLowerCase().includes("wheat"),
-    data: [
-      { commodity: "Wheat", stock: 31600 },
-      { commodity: "Corn", stock: 22500 },
-      { commodity: "Sunflower", stock: 11800 },
-      { commodity: "Rapeseed", stock: 21500 },
-      { commodity: "Barley", stock: 6400 },
-    ],
-  },
+const inlandSummaryData = [
+  { commodity: "Wheat", stock: 31600 },
+  { commodity: "Corn", stock: 22500 },
+  { commodity: "Sunflower", stock: 11800 },
+  { commodity: "Rapeseed", stock: 21500 },
+  { commodity: "Barley", stock: 6400 },
 ];
 
 export function formatNumber(value) {
   const numericValue = Number(value);
-  if (!Number.isFinite(numericValue)) return "-";
+  if (!Number.isFinite(numericValue) || numericValue === 0) return "—";
   return numericValue.toLocaleString("ro-RO", {
     minimumFractionDigits: 3,
     maximumFractionDigits: 3,
@@ -81,16 +94,14 @@ export function formatNumber(value) {
 }
 
 export function formatPercent(value) {
+  if (value === null || value === undefined) return "—";
   const numericValue = Number(value);
-  if (!Number.isFinite(numericValue)) return "-";
-  return `${numericValue.toLocaleString("ro-RO", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}%`;
+  if (!Number.isFinite(numericValue) || numericValue === 0) return "—";
+  return `${numericValue.toFixed(2)}%`;
 }
 
 export function displayCell(value) {
-  if (value === null || value === undefined || value === "") return "-";
+  if (value === null || value === undefined || value === "" || value === 0) return "—";
   return value;
 }
 
@@ -134,57 +145,37 @@ function StorageIcon() {
   );
 }
 
-function FillBar({ percentage }) {
-  const width = Math.max(0, Math.min(percentage, 100));
-  const color = width >= 85 ? "#b9101e" : width >= 60 ? "#ca8a04" : "#10b981";
-
+function FilterSelect({ label, value, options, onChange }) {
   return (
-    <div className="mb-fill-bar stocks-page__fill-bar">
-      <div className="mb-fill-inner" style={{ width: `${width}%`, background: color }} />
-    </div>
+    <label className="stocks-page__filter-group">
+      <span className="stocks-page__filter-label">{label}</span>
+      <select className="stocks-page__filter-select" value={value} onChange={onChange}>
+        <option value="All">All</option>
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }
 
-function StocksCard({
-  title,
-  reportDate,
-  data,
-  columns,
-  exportFilename,
-  storageFooterConfig,
-  wheatMatcher,
-  highlightWheatOnly,
-}) {
-  const normalizedRows = useMemo(() => {
-    const totalStock = data.reduce((sum, row) => sum + Number(row.stock || 0), 0);
+function renderTableCell(value, isPercent = false) {
+  const content = isPercent ? formatPercent(value) : formatNumber(value);
+  const isEmpty = content === "—";
 
-    return data
-      .map((row) => ({
-        ...row,
-        share: totalStock > 0 ? (Number(row.stock || 0) / totalStock) * 100 : 0,
-      }))
-      .filter((row) => !highlightWheatOnly || wheatMatcher(row));
-  }, [data, highlightWheatOnly, wheatMatcher]);
-
-  const totalStock = useMemo(
-    () => normalizedRows.reduce((sum, row) => sum + Number(row.stock || 0), 0),
-    [normalizedRows]
+  return (
+    <span className={isEmpty ? "stocks-page__cell-empty" : "stocks-page__cell-value"}>
+      {content}
+    </span>
   );
+}
 
-  const utilization = useMemo(() => {
-    if (!storageFooterConfig?.capacity) return 0;
-    return (totalStock / storageFooterConfig.capacity) * 100;
-  }, [storageFooterConfig, totalStock]);
-
-  const gridTemplateColumns = useMemo(
-    () =>
-      columns
-        .map((column, index) => {
-          if (index === 0) return "minmax(0, 1.4fr)";
-          return "minmax(112px, auto)";
-        })
-        .join(" "),
-    [columns]
+function SummaryCard({ title, reportDate, data, location }) {
+  const totalStock = useMemo(
+    () => data.reduce((sum, row) => sum + Number(row.stock || 0), 0),
+    [data]
   );
 
   return (
@@ -195,116 +186,226 @@ function StocksCard({
             <StorageIcon />
             {title}
           </span>
-          <span className="mb-head-meta">{displayCell(reportDate)}</span>
+          <span className="mb-head-meta">Report date: {reportDate}</span>
         </div>
-        {storageFooterConfig?.location ? (
-          <div className="stocks-page__subhead">
-            <span className="stocks-page__location">{storageFooterConfig.location}</span>
-            <button
-              type="button"
-              className="stocks-page__export-button"
-              onClick={() => downloadCSV(exportFilename, normalizedRows, columns)}
-            >
-              Export CSV
-            </button>
-          </div>
-        ) : null}
+        <div className="stocks-page__subhead">
+          <span className="stocks-page__location">{location}</span>
+        </div>
       </div>
 
       <div className="mb-col-headers">
-        <div className="mb-col-row" style={{ gridTemplateColumns }}>
-          {columns.map((column) => (
-            <span
-              key={column.key}
-              className={`mb-col-cell stocks-page__align-${column.align || "left"}`}
-            >
-              {column.label}
-            </span>
-          ))}
+        <div className="mb-col-row" style={{ gridTemplateColumns: "minmax(0, 1fr) 120px" }}>
+          <span className="mb-col-cell">Commodity</span>
+          <span className="mb-col-cell stocks-page__align-right">Stock</span>
         </div>
       </div>
 
-      <div className="mb-card-body stocks-page__body">
-        {normalizedRows.map((row) => (
-          <div key={`${title}-${row.commodity}`} className="mb-row" style={{ gridTemplateColumns }}>
-            {columns.map((column) => (
-              <div
-                key={column.key}
-                className={`stocks-page__cell stocks-page__align-${column.align || "left"} ${column.cellClassName || ""}`.trim()}
-              >
-                {typeof column.render === "function"
-                  ? column.render(row, { wheatMatcher })
-                  : <span className="mb-row-value">{displayCell(row[column.key])}</span>}
-              </div>
-            ))}
+      <div className="mb-card-body stocks-page__summary-body">
+        {data.map((row) => (
+          <div key={`${title}-${row.commodity}`} className="mb-row" style={{ gridTemplateColumns: "minmax(0, 1fr) 120px" }}>
+            <span className="mb-row-label">{row.commodity}</span>
+            <span className="mb-row-value stocks-page__align-right">{formatNumber(row.stock)}</span>
           </div>
         ))}
       </div>
 
       <div className="mb-card-foot stocks-page__footer">
         <div className="stocks-page__footer-top">
-          <span className="mb-foot-label">{displayCell(storageFooterConfig?.label)}</span>
-          <span className="mb-foot-val">
-            {formatNumber(totalStock)} t
-            {storageFooterConfig?.capacity ? (
-              <span className="stocks-page__capacity"> / {formatNumber(storageFooterConfig.capacity)} t</span>
-            ) : null}
-          </span>
-        </div>
-        <FillBar percentage={utilization} />
-        <div className="stocks-page__footer-bottom">
-          <span className="mb-row-meta">
-            {highlightWheatOnly ? "Filtru activ: grau" : `${normalizedRows.length} pozitii`}
-          </span>
-          <span className="mb-row-meta">{formatPercent(utilization)} utilizare</span>
+          <span className="mb-foot-label">Total stock Inland Silos</span>
+          <span className="mb-foot-val">{formatNumber(totalStock)} t</span>
         </div>
       </div>
     </article>
   );
 }
 
-export default function StocksPage() {
-  const [showWheatOnly, setShowWheatOnly] = useState(false);
+function ChimpexDetailedCard() {
+  const [commodityFilter, setCommodityFilter] = useState("All");
+  const [originFilter, setOriginFilter] = useState("All");
+  const [clientFilter, setClientFilter] = useState("All");
 
-  const cards = useMemo(
-    () =>
-      STOCKS_DATA.map((card) => ({
-        ...card,
-        columns: STOCKS_COLUMNS,
-      })),
+  const commodityOptions = useMemo(
+    () => [...new Set(chimpexDetailedData.map((row) => row.commodity))].sort(),
+    []
+  );
+  const originOptions = useMemo(
+    () => [...new Set(chimpexDetailedData.map((row) => row.origin))].sort(),
+    []
+  );
+  const clientOptions = useMemo(
+    () => [...new Set(chimpexDetailedData.map((row) => row.client))].sort(),
     []
   );
 
+  const filteredRows = useMemo(
+    () =>
+      chimpexDetailedData.filter((row) => {
+        const matchesCommodity = commodityFilter === "All" || row.commodity === commodityFilter;
+        const matchesOrigin = originFilter === "All" || row.origin === originFilter;
+        const matchesClient = clientFilter === "All" || row.client === clientFilter;
+        return matchesCommodity && matchesOrigin && matchesClient;
+      }),
+    [clientFilter, commodityFilter, originFilter]
+  );
+
+  const handleReset = () => {
+    setCommodityFilter("All");
+    setOriginFilter("All");
+    setClientFilter("All");
+  };
+
+  const exportRows = useMemo(
+    () =>
+      filteredRows.map((row) => ({
+        ...row,
+        silozChimpex: formatNumber(row.silozChimpex),
+        warehouseChimpex: formatNumber(row.warehouseChimpex),
+        bargesThirdParty: displayCell(row.bargesThirdParty),
+        niva: formatNumber(row.niva),
+      })),
+    [filteredRows]
+  );
+
+  return (
+    <article className="mb-card stocks-page__card stocks-page__detailed-card">
+      <div className="mb-card-head stocks-page__detailed-head">
+        <div className="mb-card-title">
+          <span className="stocks-page__title">
+            <StorageIcon />
+            Chimpex Siloz — Detailed Stocks Report
+          </span>
+          <div className="stocks-page__header-actions">
+            <span className="mb-head-meta">Report date: {CHIMPEX_REPORT_DATE}</span>
+            <button
+              type="button"
+              className="stocks-page__export-button"
+              onClick={() => downloadCSV(CHIMPEX_EXPORT_FILENAME, exportRows, chimpexColumns)}
+            >
+              Export CSV
+            </button>
+          </div>
+        </div>
+        <div className="stocks-page__subhead stocks-page__subhead--tight">
+          <span className="stocks-page__location">Operational visibility by commodity, origin, client and storage space.</span>
+        </div>
+      </div>
+
+      <div className="stocks-page__filters">
+        <FilterSelect
+          label="Commodity"
+          value={commodityFilter}
+          options={commodityOptions}
+          onChange={(event) => setCommodityFilter(event.target.value)}
+        />
+        <FilterSelect
+          label="Origin"
+          value={originFilter}
+          options={originOptions}
+          onChange={(event) => setOriginFilter(event.target.value)}
+        />
+        <FilterSelect
+          label="Client"
+          value={clientFilter}
+          options={clientOptions}
+          onChange={(event) => setClientFilter(event.target.value)}
+        />
+        <div className="stocks-page__filter-group stocks-page__filter-group--action">
+          <span className="stocks-page__filter-label">Reset</span>
+          <button type="button" className="stocks-page__reset-button" onClick={handleReset}>
+            Clear filters
+          </button>
+        </div>
+      </div>
+
+      <div className="stocks-table-wrap">
+        <table className="stocks-table chimpex-detailed-table">
+          <colgroup>
+            {chimpexColumns.map((column) => (
+              <col key={column.key} style={{ width: column.width, minWidth: column.width }} />
+            ))}
+          </colgroup>
+          <thead>
+            <tr>
+              {chimpexColumns.map((column) => (
+                <th
+                  key={column.key}
+                  className={column.align === "right" ? "stocks-table__th stocks-table__th--numeric" : "stocks-table__th"}
+                  scope="col"
+                >
+                  {column.label}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {filteredRows.length > 0 ? (
+              filteredRows.map((row, index) => (
+                <tr key={`${row.commodity}-${row.origin}-${row.client}-${index}`} className="stocks-table__row">
+                  <td className="stocks-table__td stocks-table__td--commodity">{displayCell(row.commodity)}</td>
+                  <td className="stocks-table__td">{displayCell(row.origin)}</td>
+                  <td className="stocks-table__td">{displayCell(row.client)}</td>
+                  <td className="stocks-table__td stocks-table__td--numeric">{renderTableCell(row.silozChimpex)}</td>
+                  <td className="stocks-table__td stocks-table__td--numeric">{renderTableCell(row.warehouseChimpex)}</td>
+                  <td className="stocks-table__td stocks-table__td--numeric">{renderTableCell(row.bargesThirdParty)}</td>
+                  <td className="stocks-table__td stocks-table__td--numeric">{renderTableCell(row.niva)}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td className="stocks-table__empty" colSpan={chimpexColumns.length}>
+                  No operational rows match the current filters.
+                </td>
+              </tr>
+            )}
+          </tbody>
+          <tfoot>
+            {chimpexFooterRows.map((row) =>
+              row.mergedValue ? (
+                <tr key={row.label} className={`stocks-table__footer stocks-table__footer--${row.tone}`}>
+                  <th className="stocks-table__footer-label" colSpan={3} scope="row">
+                    {row.label}
+                  </th>
+                  <td className="stocks-table__footer-merged" colSpan={4}>
+                    {row.mergedValue}
+                  </td>
+                </tr>
+              ) : (
+                <tr key={row.label} className={`stocks-table__footer stocks-table__footer--${row.tone}`}>
+                  <th className="stocks-table__footer-label" colSpan={3} scope="row">
+                    {row.label}
+                  </th>
+                  <td className="stocks-table__footer-value">{renderTableCell(row.values.silozChimpex, row.isPercent)}</td>
+                  <td className="stocks-table__footer-value">{renderTableCell(row.values.warehouseChimpex, row.isPercent)}</td>
+                  <td className="stocks-table__footer-value">{renderTableCell(row.values.bargesThirdParty, row.isPercent)}</td>
+                  <td className="stocks-table__footer-value">{renderTableCell(row.values.niva, row.isPercent)}</td>
+                </tr>
+              )
+            )}
+          </tfoot>
+        </table>
+      </div>
+    </article>
+  );
+}
+
+export default function StocksPage() {
   return (
     <section className="stocks-page">
       <div className="stocks-page__toolbar">
         <div>
           <h2 className="stocks-page__heading">Stocks</h2>
-          <p className="stocks-page__caption">Situatie detaliata a stocurilor disponibile in Motherboard.</p>
+          <p className="stocks-page__caption">Expanded operational reporting view for Motherboard stock positions.</p>
         </div>
-        <button
-          type="button"
-          className={`stocks-page__filter-button ${showWheatOnly ? "is-active" : ""}`}
-          onClick={() => setShowWheatOnly((current) => !current)}
-        >
-          {showWheatOnly ? "Afiseaza toate produsele" : "Afiseaza doar grau"}
-        </button>
       </div>
 
       <div className="stocks-page__stack">
-        {cards.map((card) => (
-          <StocksCard
-            key={card.id}
-            title={card.title}
-            reportDate={card.reportDate}
-            data={card.data}
-            columns={card.columns}
-            exportFilename={card.exportFilename}
-            storageFooterConfig={card.storageFooterConfig}
-            wheatMatcher={card.wheatMatcher}
-            highlightWheatOnly={showWheatOnly}
-          />
-        ))}
+        <ChimpexDetailedCard />
+        <SummaryCard
+          title="Inland Silos — Summary by Commodity"
+          reportDate={CHIMPEX_REPORT_DATE}
+          location="Multiple locations"
+          data={inlandSummaryData}
+        />
       </div>
     </section>
   );

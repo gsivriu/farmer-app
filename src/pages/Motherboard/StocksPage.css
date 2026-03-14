@@ -4,7 +4,7 @@
 
 .stocks-page__toolbar {
   display: flex;
-  align-items: flex-start;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 16px;
@@ -23,7 +23,6 @@
   font-size: 13px;
 }
 
-.stocks-page__filter-button,
 .stocks-page__export-button {
   border: 1px solid rgba(185, 16, 30, 0.12);
   background: rgba(185, 16, 30, 0.06);
@@ -36,9 +35,7 @@
   transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
-.stocks-page__filter-button:hover,
-.stocks-page__export-button:hover,
-.stocks-page__filter-button.is-active {
+.stocks-page__export-button:hover {
   background: rgba(185, 16, 30, 0.12);
   border-color: rgba(185, 16, 30, 0.2);
 }
@@ -51,6 +48,10 @@
 
 .stocks-page__card {
   min-height: 0;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .stocks-page__title {
@@ -61,6 +62,12 @@
   min-width: 0;
 }
 
+.stocks-page__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .stocks-page__subhead {
   display: flex;
   align-items: center;
@@ -69,50 +76,75 @@
   margin-top: 10px;
 }
 
+.stocks-page__subhead--tight {
+  margin-top: 8px;
+}
+
 .stocks-page__location {
   color: #6b7280;
   font-size: 12px;
   font-weight: 500;
 }
 
-.stocks-page__body {
-  max-height: 260px;
+.stocks-page__summary-body {
+  max-height: 240px;
 }
 
-.stocks-page__cell {
-  min-width: 0;
+.stocks-page__filters {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid var(--gray-light);
 }
 
-.stocks-page__align-left {
-  text-align: left;
+.stocks-page__filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stocks-page__filter-group--action {
+  justify-content: flex-end;
+}
+
+.stocks-page__filter-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.stocks-page__filter-select,
+.stocks-page__reset-button {
+  min-height: 38px;
+  border-radius: 10px;
+  border: 1px solid var(--gray-light);
+  background: #fff;
+  color: #111827;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.stocks-page__reset-button {
+  justify-content: center;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  background: #f9fafb;
+}
+
+.stocks-page__filter-select:focus,
+.stocks-page__reset-button:focus {
+  outline: none;
+  border-color: rgba(185, 16, 30, 0.35);
+  box-shadow: 0 0 0 3px rgba(185, 16, 30, 0.08);
 }
 
 .stocks-page__align-right {
   text-align: right;
-}
-
-.stocks-page__commodity-cell {
-  padding-right: 12px;
-}
-
-.stocks-page__commodity-wrap {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-
-.stocks-page__tag {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: #fef3c7;
-  color: #92400e;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
 }
 
 .stocks-page__footer {
@@ -135,8 +167,129 @@
   font-weight: 600;
 }
 
-.stocks-page__fill-bar {
-  height: 4px;
+.stocks-page__detailed-card .mb-card-head {
+  border-bottom: none;
+}
+
+.stocks-table-wrap {
+  overflow: auto;
+  border-top: 1px solid var(--gray-light);
+  border-bottom-left-radius: var(--radius-lg);
+  border-bottom-right-radius: var(--radius-lg);
+}
+
+.stocks-table {
+  width: 100%;
+  min-width: 1080px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.stocks-table__th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #f8fafc;
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: left;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--gray-light);
+  white-space: normal;
+}
+
+.stocks-table__th--numeric,
+.stocks-table__td--numeric,
+.stocks-table__footer-value,
+.stocks-table__footer-merged {
+  text-align: right;
+}
+
+.stocks-table__td {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  color: #374151;
+  font-size: 13px;
+  vertical-align: middle;
+  background: transparent;
+}
+
+.stocks-table__td--commodity {
+  font-weight: 600;
+  color: #111827;
+}
+
+.stocks-table__row:hover .stocks-table__td {
+  background: #f9fafb;
+}
+
+.stocks-page__cell-value,
+.stocks-page__cell-empty {
+  display: inline-block;
+  width: 100%;
+  font-variant-numeric: tabular-nums;
+}
+
+.stocks-page__cell-value {
+  color: #111827;
+  font-weight: 600;
+}
+
+.stocks-page__cell-empty {
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.stocks-table__footer-label,
+.stocks-table__footer-value,
+.stocks-table__footer-merged {
+  padding: 12px 14px;
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+  font-size: 12px;
+}
+
+.stocks-table__footer-label {
+  text-align: left;
+  color: #111827;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.stocks-table__footer-value,
+.stocks-table__footer-merged {
+  font-variant-numeric: tabular-nums;
+  color: #111827;
+  font-weight: 700;
+}
+
+.stocks-table__footer--neutral .stocks-table__footer-label,
+.stocks-table__footer--neutral .stocks-table__footer-value {
+  background: #f8fafc;
+}
+
+.stocks-table__footer--wheat .stocks-table__footer-label,
+.stocks-table__footer--wheat .stocks-table__footer-value {
+  background: #fefce8;
+}
+
+.stocks-table__footer--success-soft .stocks-table__footer-label,
+.stocks-table__footer--success-soft .stocks-table__footer-value {
+  background: #f0fdf4;
+}
+
+.stocks-table__footer--success-strong .stocks-table__footer-label,
+.stocks-table__footer--success-strong .stocks-table__footer-merged {
+  background: #dcfce7;
+}
+
+.stocks-table__empty {
+  padding: 24px 16px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 13px;
 }
 
 .theme-dark .stocks-page__heading {
@@ -145,27 +298,85 @@
 
 .theme-dark .stocks-page__caption,
 .theme-dark .stocks-page__location,
-.theme-dark .stocks-page__capacity {
+.theme-dark .stocks-page__capacity,
+.theme-dark .stocks-page__filter-label {
   color: #9ca3af;
 }
 
-.theme-dark .stocks-page__filter-button,
 .theme-dark .stocks-page__export-button {
   background: rgba(248, 113, 113, 0.12);
   border-color: rgba(248, 113, 113, 0.18);
   color: #fca5a5;
 }
 
-.theme-dark .stocks-page__filter-button:hover,
-.theme-dark .stocks-page__export-button:hover,
-.theme-dark .stocks-page__filter-button.is-active {
+.theme-dark .stocks-page__export-button:hover {
   background: rgba(248, 113, 113, 0.18);
   border-color: rgba(248, 113, 113, 0.24);
 }
 
-.theme-dark .stocks-page__tag {
+.theme-dark .stocks-page__filter-select,
+.theme-dark .stocks-page__reset-button {
+  background: #0f172a;
+  border-color: #1f2937;
+  color: #e5e7eb;
+}
+
+.theme-dark .stocks-page__card {
+  background: #111827;
+  border-color: #1f2937;
+}
+
+.theme-dark .stocks-page__filters,
+.theme-dark .stocks-table-wrap,
+.theme-dark .stocks-table__th {
+  border-color: #1f2937;
+}
+
+.theme-dark .stocks-table__th {
+  background: #0f172a;
+  color: #9ca3af;
+}
+
+.theme-dark .stocks-table__td {
+  border-bottom-color: rgba(255, 255, 255, 0.05);
+  color: #cbd5e1;
+}
+
+.theme-dark .stocks-table__td--commodity,
+.theme-dark .stocks-page__cell-value,
+.theme-dark .stocks-table__footer-label,
+.theme-dark .stocks-table__footer-value,
+.theme-dark .stocks-table__footer-merged {
+  color: #e5e7eb;
+}
+
+.theme-dark .stocks-page__cell-empty,
+.theme-dark .stocks-table__empty {
+  color: #64748b;
+}
+
+.theme-dark .stocks-table__row:hover .stocks-table__td {
+  background: #0f172a;
+}
+
+.theme-dark .stocks-table__footer--neutral .stocks-table__footer-label,
+.theme-dark .stocks-table__footer--neutral .stocks-table__footer-value {
+  background: #111827;
+}
+
+.theme-dark .stocks-table__footer--wheat .stocks-table__footer-label,
+.theme-dark .stocks-table__footer--wheat .stocks-table__footer-value {
   background: #3f2d10;
-  color: #fcd34d;
+}
+
+.theme-dark .stocks-table__footer--success-soft .stocks-table__footer-label,
+.theme-dark .stocks-table__footer--success-soft .stocks-table__footer-value {
+  background: #13281d;
+}
+
+.theme-dark .stocks-table__footer--success-strong .stocks-table__footer-label,
+.theme-dark .stocks-table__footer--success-strong .stocks-table__footer-merged {
+  background: #14532d;
 }
 
 @media (max-width: 768px) {
@@ -176,13 +387,17 @@
   .stocks-page__toolbar,
   .stocks-page__subhead,
   .stocks-page__footer-top,
-  .stocks-page__footer-bottom {
+  .stocks-page__footer-bottom,
+  .stocks-page__header-actions {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .stocks-page__filter-button,
   .stocks-page__export-button {
     width: 100%;
+  }
+
+  .stocks-page__filters {
+    grid-template-columns: 1fr;
   }
 }
