@@ -6,7 +6,7 @@ import "./StocksPage.css";
 const CHIMPEX_COMMODITY_FILTERS = ["Wheat", "Barley", "Rapeseed", "SFS", "Corn"];
 
 // Chimpex overview totals (for header fill bar)
-const CHIMPEX_TOTAL    = 112400;
+const CHIMPEX_TOTAL    = 112300;
 const CHIMPEX_CAPACITY = 235000;
 
 // Inland overview totals (for header fill bar)

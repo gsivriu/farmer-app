@@ -78,7 +78,7 @@ const CHIMPEX_DATA = [
   { commodity: "Rapeseed",  stock: 12300 },
   { commodity: "Barley",    stock:  9800 },
 ];
-const CHIMPEX_TOTAL    = 112400;
+const CHIMPEX_TOTAL    = 112300;
 const CHIMPEX_CAPACITY = 235000;
 
 const INLAND_DATA = [
