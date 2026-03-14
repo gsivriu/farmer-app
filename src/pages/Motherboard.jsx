@@ -542,13 +542,13 @@ export default function MotherboardPage() {
 
       {mbTab === "overview" && (
         <>
+          <CardVessels />
           <div className="mb-overview-grid">
             <CardChimpex />
             <CardInland />
             <CardLogistics />
             <CardAcquisitions />
           </div>
-          <CardVessels />
         </>
       )}
 
