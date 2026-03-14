@@ -116,6 +116,62 @@ const ACQ_DATA = [
   { product: "Rapeseed",  contracts: 2, qty: "680 t",   price: "487 €/t" },
 ];
 
+const VESSELS_MOCK = [
+  {
+    id: "v1",
+    name: "MV Kerkyra",
+    status: "loading",
+    product: "wheat",
+    productLabel: "Wheat",
+    loadedTons: 42800,
+    totalTons: 55000,
+    startedLoading: "2026-03-10",
+    laydayExpires: "2026-03-16",
+  },
+  {
+    id: "v2",
+    name: "MV Dacia Star",
+    status: "loading",
+    product: "corn",
+    productLabel: "Corn",
+    loadedTons: 12000,
+    totalTons: 38000,
+    startedLoading: "2026-03-13",
+    laydayExpires: "2026-03-21",
+  },
+  {
+    id: "v3",
+    name: "MV Black Sea Express",
+    status: "on_roads",
+    product: "sunflower",
+    productLabel: "Sunflower",
+    loadedTons: 0,
+    totalTons: 47000,
+    arrivedRoads: "2026-03-14",
+    estBerth: "2026-03-15",
+  },
+];
+
+const PRODUCT_COLORS = {
+  wheat:     { accent: "#ca8a04", iconBg: "#fef9c3", stroke: "#ca8a04", dot: "#ca8a04", text: "#854d0e" },
+  corn:      { accent: "#16a34a", iconBg: "#dcfce7", stroke: "#16a34a", dot: "#16a34a", text: "#166534" },
+  sunflower: { accent: "#ea580c", iconBg: "#fff7ed", stroke: "#ea580c", dot: "#ea580c", text: "#9a3412" },
+  rapeseed:  { accent: "#059669", iconBg: "#ecfdf5", stroke: "#059669", dot: "#059669", text: "#065f46" },
+  barley:    { accent: "#2563eb", iconBg: "#eff6ff", stroke: "#2563eb", dot: "#2563eb", text: "#1e40af" },
+};
+
+const daysUntil = (dateStr) => {
+  const diff = new Date(dateStr) - new Date();
+  return Math.ceil(diff / (1000 * 60 * 60 * 24));
+};
+
+const fmtDate = (dateStr) => {
+  if (!dateStr) return "—";
+  return new Date(dateStr).toLocaleDateString("en-GB", {
+    day: "numeric", month: "short", year: "numeric",
+  });
+};
+
 // ── Card: Chimpex ─────────────────────────────────────────────────────────────
 
 function CardChimpex() {
@@ -306,6 +362,147 @@ function CardAcquisitions() {
   );
 }
 
+// ── Card: Vessels Underloading ────────────────────────────────────────────────
+
+function CardVessels() {
+  return (
+    <div className="vessels-section">
+      <div className="vessels-section-head">
+        <div className="mb-card-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="#b9101e" strokeWidth="1.8"
+               strokeLinecap="round" strokeLinejoin="round">
+            <path d="M2 20a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0"/>
+            <path d="M4 14 2 20M20 14l2 6"/>
+            <path d="M4 14h16"/>
+            <path d="M6 14V8l6-4 6 4v6"/>
+            <line x1="12" y1="4" x2="12" y2="14"/>
+            <line x1="8" y1="10" x2="16" y2="10"/>
+          </svg>
+          Vessels Underloading
+        </div>
+        <span style={{ fontSize: 11, color: "#6b7280" }}>
+          {VESSELS_MOCK.filter(v => v.status === "loading").length} loading
+          {" · "}
+          {VESSELS_MOCK.filter(v => v.status === "on_roads").length} on roads
+        </span>
+      </div>
+
+      <div className="vessels-grid">
+        {VESSELS_MOCK.map(vessel => {
+          const colors = PRODUCT_COLORS[vessel.product] ?? PRODUCT_COLORS.wheat;
+          const pct = vessel.totalTons > 0
+            ? Math.round((vessel.loadedTons / vessel.totalTons) * 1000) / 10
+            : 0;
+          const daysLeft = vessel.laydayExpires ? daysUntil(vessel.laydayExpires) : null;
+          const isDemurrageWarning = daysLeft !== null && daysLeft <= 3;
+          const remaining = vessel.totalTons - vessel.loadedTons;
+          const isOnRoads = vessel.status === "on_roads";
+          return (
+            <div
+              key={vessel.id}
+              className={"vessel-card" + (isOnRoads ? " vessel-card--muted" : "")}
+            >
+              <div
+                className="vessel-accent"
+                style={{ background: isOnRoads ? "#d1d5db" : colors.accent }}
+              />
+              <div className="vessel-body">
+                <div className="vessel-top">
+                  <div className="vessel-name-wrap">
+                    <div
+                      className="vessel-icon"
+                      style={{ background: isOnRoads ? "#f3f4f6" : colors.iconBg }}
+                    >
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+                           stroke={isOnRoads ? "#9ca3af" : colors.stroke}
+                           strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M2 20a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0"/>
+                        <path d="M4 14 2 20M20 14l2 6"/>
+                        <path d="M4 14h16"/>
+                        <path d="M6 14V8l6-4 6 4v6"/>
+                        <line x1="12" y1="4" x2="12" y2="14"/>
+                        <line x1="8" y1="10" x2="16" y2="10"/>
+                      </svg>
+                    </div>
+                    <div className="vessel-name">{vessel.name}</div>
+                  </div>
+                  <span className={"vessel-chip " + (isOnRoads ? "vessel-chip--road" : "vessel-chip--loading")}>
+                    {isOnRoads ? "On roads" : "Loading"}
+                  </span>
+                </div>
+
+                <div className="vessel-product">
+                  <span className="vessel-dot" style={{ background: isOnRoads ? "#d1d5db" : colors.dot }} />
+                  <span style={{ color: isOnRoads ? "#9ca3af" : colors.text }}>{vessel.productLabel}</span>
+                </div>
+
+                <div className="vessel-progress">
+                  <div className="vessel-progress-nums">
+                    <span>
+                      <span className="vessel-loaded" style={{ color: isOnRoads ? "#9ca3af" : "#111827" }}>
+                        {vessel.loadedTons.toLocaleString("ro-RO")}
+                      </span>
+                      <span className="vessel-total"> / {vessel.totalTons.toLocaleString("ro-RO")} t</span>
+                    </span>
+                    <span className="vessel-pct">{isOnRoads ? "—" : `${pct}%`}</span>
+                  </div>
+                  <div className="vessel-bar-bg">
+                    <div
+                      className="vessel-bar-fill"
+                      style={{ width: `${pct}%`, background: isOnRoads ? "#d1d5db" : colors.accent }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="vessel-dates">
+                <div className="vessel-date-cell">
+                  <div className="vessel-date-label">
+                    {isOnRoads ? "Arrived roads" : "Started loading"}
+                  </div>
+                  <div className="vessel-date-val">
+                    {fmtDate(isOnRoads ? vessel.arrivedRoads : vessel.startedLoading)}
+                  </div>
+                </div>
+                <div className="vessel-date-cell">
+                  <div className="vessel-date-label">
+                    {isOnRoads ? "Est. berth" : "Layday expires"}
+                  </div>
+                  <div className="vessel-date-val" style={{ color: isDemurrageWarning ? "#ea580c" : undefined }}>
+                    {fmtDate(isOnRoads ? vessel.estBerth : vessel.laydayExpires)}
+                  </div>
+                </div>
+              </div>
+
+              {isOnRoads && (
+                <div className="vessel-footer vessel-footer--neutral">Layday starts on berthing</div>
+              )}
+              {!isOnRoads && isDemurrageWarning && (
+                <div className="vessel-footer vessel-footer--warning">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                       stroke="#ea580c" strokeWidth="2" strokeLinecap="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                  </svg>
+                  {daysLeft} {daysLeft === 1 ? "day" : "days"} to demurrage
+                  · {remaining.toLocaleString("ro-RO")} t remaining
+                </div>
+              )}
+              {!isOnRoads && !isDemurrageWarning && daysLeft !== null && (
+                <div className="vessel-footer vessel-footer--ok">
+                  {daysLeft} days remaining
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ── Placeholder card ──────────────────────────────────────────────────────────
 
 function PlaceholderCard({ text }) {
@@ -344,12 +541,15 @@ export default function MotherboardPage() {
       </nav>
 
       {mbTab === "overview" && (
-        <div className="mb-overview-grid">
-          <CardChimpex />
-          <CardInland />
-          <CardLogistics />
-          <CardAcquisitions />
-        </div>
+        <>
+          <div className="mb-overview-grid">
+            <CardChimpex />
+            <CardInland />
+            <CardLogistics />
+            <CardAcquisitions />
+          </div>
+          <CardVessels />
+        </>
       )}
 
       {mbTab === "stocks" && (
