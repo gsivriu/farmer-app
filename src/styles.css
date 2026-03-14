@@ -6267,6 +6267,7 @@ select.input:focus {
 /* Sub-nav secundar */
 .mb-subnav {
   display: flex;
+  justify-content: center;
   background: var(--white);
   border-bottom: 1px solid var(--gray-light);
   padding: 0 20px;

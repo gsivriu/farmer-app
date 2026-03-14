@@ -68,26 +68,12 @@ function IconCart() {
   );
 }
 
-// ── Commodity badge ─────────────────────────────────────────────────────────
-
-const BADGE_MAP = {
-  "Wheat":     "mb-badge mb-badge-wheat",
-  "Corn":      "mb-badge mb-badge-corn",
-  "Sunflower": "mb-badge mb-badge-sun",
-  "Rapeseed":  "mb-badge mb-badge-rape",
-  "Barley":    "mb-badge mb-badge-barley",
-};
-
-function CommodityBadge({ name }) {
-  return <span className={BADGE_MAP[name] || "mb-badge"}>{name}</span>;
-}
-
 // ── Fill bar ────────────────────────────────────────────────────────────────
 
-function FillBar({ pct }) {
+function FillBar({ pct, height = 5 }) {
   const color = pct > 90 ? "#b9101e" : pct >= 60 ? "#eab308" : "#10b981";
   return (
-    <div className="mb-fill-bar" style={{ minWidth: 48 }}>
+    <div className="mb-fill-bar" style={{ minWidth: 48, height }}>
       <div className="mb-fill-inner" style={{ width: `${pct}%`, background: color }} />
     </div>
   );
@@ -131,25 +117,51 @@ function Delta({ val }) {
   return <span style={{ color: "#6b7280" }}>— 0€</span>;
 }
 
+// ── Footer with total fill bar ────────────────────────────────────────────────
+
+function TotalFillFooter({ label, total, capacity }) {
+  const pct = Math.min(Math.round((total / capacity) * 100), 100);
+  const fmt = (n) => n.toLocaleString("en-US");
+  return (
+    <div className="mb-card-foot" style={{ flexDirection: "column", alignItems: "stretch", gap: 6 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+        <span className="mb-foot-label">{label}</span>
+        <span className="mb-foot-val">
+          {fmt(total)} t{" "}
+          <span style={{ fontSize: 11, fontWeight: 400, color: "#9ca3af" }}>/ {fmt(capacity)} t</span>
+        </span>
+      </div>
+      <FillBar pct={pct} height={6} />
+      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        <span style={{ fontSize: 10, color: "#9ca3af" }}>{pct}% utilized</span>
+      </div>
+    </div>
+  );
+}
+
 // ── Data ─────────────────────────────────────────────────────────────────────
 
+// Chimpex — aggregated by commodity (combining cells with same product)
 const CHIMPEX_DATA = [
-  { id: "C-01 East",    commodity: "Wheat",     stock: 28400, cap: 30000 },
-  { id: "C-02 West",    commodity: "Corn",      stock: 32100, cap: 40000 },
-  { id: "C-03 North",   commodity: "Sunflower", stock: 19600, cap: 20000 },
-  { id: "C-04 South",   commodity: "Rapeseed",  stock: 12300, cap: 22000 },
-  { id: "C-05 Central", commodity: "Barley",    stock:  9800, cap: 15000 },
-  { id: "C-06 East 2",  commodity: "Wheat",     stock: 10100, cap: 20000 },
+  { commodity: "Wheat",     stock: 38500 },  // C-01 East + C-06 East 2
+  { commodity: "Corn",      stock: 32100 },  // C-02 West
+  { commodity: "Sunflower", stock: 19600 },  // C-03 North
+  { commodity: "Rapeseed",  stock: 12300 },  // C-04 South
+  { commodity: "Barley",    stock:  9800 },  // C-05 Central
 ];
+const CHIMPEX_TOTAL    = 112400;
+const CHIMPEX_CAPACITY = 235000;
 
+// Inland Silos — aggregated by commodity across all locations
 const INLAND_DATA = [
-  { silo: "Slobozia",   county: "Ialomița",   commodity: "Wheat",     stock: 18200, cap: 25000 },
-  { silo: "Călărași",   county: "Călărași",   commodity: "Corn",      stock: 22500, cap: 30000 },
-  { silo: "Brăila",     county: "Brăila",     commodity: "Sunflower", stock: 11800, cap: 20000 },
-  { silo: "Alexandria", county: "Teleorman",  commodity: "Rapeseed",  stock: 21500, cap: 40000 },
-  { silo: "Galați",     county: "Galați",     commodity: "Barley",    stock:  6400, cap: 15000 },
-  { silo: "Buzău",      county: "Buzău",      commodity: "Wheat",     stock: 13400, cap: 20000 },
+  { commodity: "Wheat",     stock: 31600 },  // Slobozia + Buzău
+  { commodity: "Corn",      stock: 22500 },  // Călărași
+  { commodity: "Sunflower", stock: 11800 },  // Brăila
+  { commodity: "Rapeseed",  stock: 21500 },  // Alexandria
+  { commodity: "Barley",    stock:  6400 },  // Galați
 ];
+const INLAND_TOTAL    = 93800;
+const INLAND_CAPACITY = 302000;
 
 const TRANSPORT_DATA = [
   { id: "TRN-2241",  type: "train", pct: 72,  from: "Slobozia",   to: "Chimpex",  status: "In Transit", qty: "1,840 t" },
@@ -172,6 +184,7 @@ const ACQ_DATA = [
 // ── Card: Chimpex ─────────────────────────────────────────────────────────────
 
 function CardChimpex() {
+  const fmt = (n) => n.toLocaleString("en-US");
   return (
     <div className="mb-card">
       <div className="mb-card-head">
@@ -181,34 +194,26 @@ function CardChimpex() {
         </div>
       </div>
       <div className="mb-col-headers">
-        <div className="mb-col-row" style={{ gridTemplateColumns: "72px 1fr 72px 56px" }}>
-          <span className="mb-col-cell">Cell</span>
+        <div className="mb-col-row" style={{ gridTemplateColumns: "1fr 80px" }}>
           <span className="mb-col-cell">Commodity</span>
-          <span className="mb-col-cell">Stock</span>
-          <span className="mb-col-cell">Cap.</span>
+          <span className="mb-col-cell" style={{ textAlign: "right" }}>Stock</span>
         </div>
       </div>
-      <div className="mb-card-body" style={{ maxHeight: 220 }}>
-        {CHIMPEX_DATA.map((r) => {
-          const pct = Math.round((r.stock / r.cap) * 100);
-          return (
-            <div key={r.id} className="mb-row" style={{ gridTemplateColumns: "72px 1fr 72px 56px" }}>
-              <span style={{ fontSize: 11, fontWeight: 600, color: "#374151" }}>{r.id}</span>
-              <CommodityBadge name={r.commodity} />
-              <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <span style={{ fontSize: 11, fontWeight: 600 }}>{(r.stock / 1000).toFixed(1)}k t</span>
-                <FillBar pct={pct} />
-                <span style={{ fontSize: 9.5, color: "#9ca3af" }}>{pct}%</span>
-              </div>
-              <span style={{ fontSize: 11, color: "#6b7280" }}>{(r.cap / 1000).toFixed(0)}k t</span>
-            </div>
-          );
-        })}
+      <div className="mb-card-body" style={{ maxHeight: 200 }}>
+        {CHIMPEX_DATA.map((r) => (
+          <div key={r.commodity} className="mb-row" style={{ gridTemplateColumns: "1fr 80px" }}>
+            <span style={{ fontSize: 12.5, color: "#374151" }}>{r.commodity}</span>
+            <span style={{ fontSize: 12, fontWeight: 600, color: "#111827", textAlign: "right" }}>
+              {fmt(r.stock)} t
+            </span>
+          </div>
+        ))}
       </div>
-      <div className="mb-card-foot">
-        <span className="mb-foot-label">Total stock Chimpex</span>
-        <span className="mb-foot-val">112,400 t</span>
-      </div>
+      <TotalFillFooter
+        label="Total stock Chimpex"
+        total={CHIMPEX_TOTAL}
+        capacity={CHIMPEX_CAPACITY}
+      />
     </div>
   );
 }
@@ -216,6 +221,7 @@ function CardChimpex() {
 // ── Card: Inland Silos ────────────────────────────────────────────────────────
 
 function CardInland() {
+  const fmt = (n) => n.toLocaleString("en-US");
   return (
     <div className="mb-card">
       <div className="mb-card-head">
@@ -225,36 +231,26 @@ function CardInland() {
         </div>
       </div>
       <div className="mb-col-headers">
-        <div className="mb-col-row" style={{ gridTemplateColumns: "72px 68px 1fr 72px 56px" }}>
-          <span className="mb-col-cell">Silo</span>
-          <span className="mb-col-cell">County</span>
+        <div className="mb-col-row" style={{ gridTemplateColumns: "1fr 80px" }}>
           <span className="mb-col-cell">Commodity</span>
-          <span className="mb-col-cell">Stock</span>
-          <span className="mb-col-cell">Cap.</span>
+          <span className="mb-col-cell" style={{ textAlign: "right" }}>Stock</span>
         </div>
       </div>
-      <div className="mb-card-body" style={{ maxHeight: 220 }}>
-        {INLAND_DATA.map((r) => {
-          const pct = Math.round((r.stock / r.cap) * 100);
-          return (
-            <div key={r.silo} className="mb-row" style={{ gridTemplateColumns: "72px 68px 1fr 72px 56px" }}>
-              <span style={{ fontSize: 11, fontWeight: 600, color: "#374151" }}>{r.silo}</span>
-              <span style={{ fontSize: 10.5, color: "#6b7280" }}>{r.county}</span>
-              <CommodityBadge name={r.commodity} />
-              <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <span style={{ fontSize: 11, fontWeight: 600 }}>{(r.stock / 1000).toFixed(1)}k t</span>
-                <FillBar pct={pct} />
-                <span style={{ fontSize: 9.5, color: "#9ca3af" }}>{pct}%</span>
-              </div>
-              <span style={{ fontSize: 11, color: "#6b7280" }}>{(r.cap / 1000).toFixed(0)}k t</span>
-            </div>
-          );
-        })}
+      <div className="mb-card-body" style={{ maxHeight: 200 }}>
+        {INLAND_DATA.map((r) => (
+          <div key={r.commodity} className="mb-row" style={{ gridTemplateColumns: "1fr 80px" }}>
+            <span style={{ fontSize: 12.5, color: "#374151" }}>{r.commodity}</span>
+            <span style={{ fontSize: 12, fontWeight: 600, color: "#111827", textAlign: "right" }}>
+              {fmt(r.stock)} t
+            </span>
+          </div>
+        ))}
       </div>
-      <div className="mb-card-foot">
-        <span className="mb-foot-label">Total stock Inland</span>
-        <span className="mb-foot-val">74,000 t</span>
-      </div>
+      <TotalFillFooter
+        label="Total stock Inland"
+        total={INLAND_TOTAL}
+        capacity={INLAND_CAPACITY}
+      />
     </div>
   );
 }
@@ -346,7 +342,7 @@ function CardAcquisitions() {
       <div className="mb-card-body" style={{ maxHeight: 220 }}>
         {ACQ_DATA.map((r) => (
           <div key={r.product} className="mb-row" style={{ gridTemplateColumns: "1fr 64px 60px 64px 56px" }}>
-            <CommodityBadge name={r.product} />
+            <span style={{ fontSize: 12.5, color: "#374151" }}>{r.product}</span>
             <span style={{ fontSize: 11, textAlign: "center" }}>{r.contracts}</span>
             <span style={{ fontSize: 11, color: "#374151" }}>{r.qty}</span>
             <span style={{ fontSize: 11, fontWeight: 600 }}>{r.price}</span>
@@ -400,7 +396,7 @@ export default function MotherboardPage() {
 
   return (
     <div className="motherboard-layout">
-      {/* Secondary sub-nav */}
+      {/* Secondary sub-nav — centered on desktop */}
       <nav className="mb-subnav">
         {tabs.map((t) => (
           <button
