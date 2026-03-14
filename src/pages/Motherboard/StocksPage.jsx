@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import "./StocksPage.css";
 
 const CHIMPEX_REPORT_DATE = "13 Mar 2026";
-const CHIMPEX_EXPORT_FILENAME = "chimpex-detailed-stocks-13-mar-2026";
 const CHIMPEX_COMMODITY_FILTERS = ["Wheat", "Barley", "Rapeseed", "SFS", "Corn"];
 
 const chimpexDetailedData = [
@@ -43,15 +42,6 @@ const chimpexFooterRows = [
     tone: "neutral",
     values: {
       silozChimpex: 47690.19,
-      warehouseChimpex: 0,
-      niva: 0,
-    },
-  },
-  {
-    label: "WHEAT BASE",
-    tone: "wheat",
-    values: {
-      silozChimpex: 49011.894,
       warehouseChimpex: 0,
       niva: 0,
     },
@@ -100,35 +90,6 @@ export function formatPercent(value) {
 export function displayCell(value) {
   if (value === null || value === undefined || value === "" || value === 0) return "—";
   return value;
-}
-
-export function downloadCSV(filename, rows, columns) {
-  const header = columns.map((column) => column.label).join(",");
-  const content = rows.map((row) =>
-    columns
-      .map((column) => {
-        const rawValue =
-          typeof column.exportValue === "function"
-            ? column.exportValue(row)
-            : row[column.key];
-        const value = displayCell(rawValue);
-        const escaped = String(value).replace(/"/g, '""');
-        return `"${escaped}"`;
-      })
-      .join(",")
-  );
-
-  const csv = [header, ...content].join("\n");
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-
-  link.href = url;
-  link.setAttribute("download", `${filename}.csv`);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
 }
 
 function matchesCommodityFilter(commodity, filterValue) {
@@ -264,17 +225,6 @@ function ChimpexDetailedCard() {
     setClientFilter("All");
   };
 
-  const exportRows = useMemo(
-    () =>
-      filteredRows.map((row) => ({
-        ...row,
-        silozChimpex: formatNumber(row.silozChimpex),
-        warehouseChimpex: formatNumber(row.warehouseChimpex),
-        niva: formatNumber(row.niva),
-      })),
-    [filteredRows]
-  );
-
   return (
     <article className="mb-card stocks-page__card stocks-page__detailed-card">
       <div className="mb-card-head stocks-page__detailed-head">
@@ -283,16 +233,7 @@ function ChimpexDetailedCard() {
             <StorageIcon />
             Chimpex Siloz — Detailed Stocks Report
           </span>
-          <div className="stocks-page__header-actions">
-            <span className="mb-head-meta">Report date: {CHIMPEX_REPORT_DATE}</span>
-            <button
-              type="button"
-              className="stocks-page__export-button"
-              onClick={() => downloadCSV(CHIMPEX_EXPORT_FILENAME, exportRows, chimpexColumns)}
-            >
-              Export CSV
-            </button>
-          </div>
+          <span className="mb-head-meta">Report date: {CHIMPEX_REPORT_DATE}</span>
         </div>
         <div className="stocks-page__subhead stocks-page__subhead--tight">
           <span className="stocks-page__location">Operational visibility by commodity, origin, client and storage space.</span>
