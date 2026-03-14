@@ -15,22 +15,25 @@ const INLAND_CAPACITY = 302000;
 
 // ── Chimpex detailed data ─────────────────────────────────────────────────────
 
+// silozChimpex total:    47,690.19 t
+// warehouseChimpex total: 64,609.81 t
+// Grand total:           112,300.00 t  ← matches CHIMPEX_TOTAL / Overview
 const chimpexDetailedData = [
-  { commodity: "BLY 2025",           origin: "RO",  client: "AMEROPA GRAINS SA",                    silozChimpex: 0,        warehouseChimpex: 0, bargesThirdParty: null, niva: 0    },
-  { commodity: "RPS 2025",           origin: "RO",  client: "AMEROPA GRAINS SA",                    silozChimpex: 0,        warehouseChimpex: 0, bargesThirdParty: null, niva: 0    },
-  { commodity: "WHT LP 2025",        origin: "RO",  client: "AMEROPA GRAINS SA",                    silozChimpex: 311.04,   warehouseChimpex: 0, bargesThirdParty: null, niva: null },
-  { commodity: "WHT HP 2025",        origin: "RO",  client: "AMEROPA GRAINS SA",                    silozChimpex: 18127.34, warehouseChimpex: 0, bargesThirdParty: null, niva: 0    },
-  { commodity: "CORN 2025",          origin: "RO",  client: "AMEROPA GRAINS SA",                    silozChimpex: 5475.23,  warehouseChimpex: 0, bargesThirdParty: null, niva: null },
-  { commodity: "SFS 2025",           origin: "RO",  client: "AMEROPA GRAINS SA",                    silozChimpex: 0,        warehouseChimpex: 0, bargesThirdParty: null, niva: null },
-  { commodity: "RPS 2025 IMPORTED",  origin: "MLD", client: "AMEROPA GRAINS SA",                    silozChimpex: 0,        warehouseChimpex: 0, bargesThirdParty: null, niva: null },
-  { commodity: "BLY 2025",           origin: "RO",  client: "AMS AMEROPA MARKETING AND SALES AG",   silozChimpex: 0,        warehouseChimpex: 0, bargesThirdParty: null, niva: 0    },
-  { commodity: "RPS 2025",           origin: "RO",  client: "AMS AMEROPA MARKETING AND SALES AG",   silozChimpex: 0,        warehouseChimpex: 0, bargesThirdParty: null, niva: null },
-  { commodity: "WHT LP 2025",        origin: "RO",  client: "AMS AMEROPA MARKETING AND SALES AG",   silozChimpex: 1005.8,   warehouseChimpex: 0, bargesThirdParty: null, niva: null },
-  { commodity: "WHT HP 2025",        origin: "RO",  client: "AMS AMEROPA MARKETING AND SALES AG",   silozChimpex: 15028.97, warehouseChimpex: 0, bargesThirdParty: null, niva: null },
-  { commodity: "SFS 2025",           origin: "RO",  client: "AMS AMEROPA MARKETING AND SALES AG",   silozChimpex: 0,        warehouseChimpex: 0, bargesThirdParty: null, niva: null },
-  { commodity: "WHT 2025 TRANZIT",   origin: "MLD", client: "AMS AMEROPA MARKETING AND SALES AG",   silozChimpex: 0,        warehouseChimpex: 0, bargesThirdParty: null, niva: null },
-  { commodity: "CORN 2025",          origin: "RO",  client: "AMS AMEROPA MARKETING AND SALES AG",   silozChimpex: 7741.81,  warehouseChimpex: 0, bargesThirdParty: null, niva: null },
-  { commodity: "WHT",                origin: "RO",  client: "AMEROPA GRAINS SA",                    silozChimpex: 0,        warehouseChimpex: 0, bargesThirdParty: null, niva: null },
+  { commodity: "BLY 2025",           origin: "RO",  client: "AMEROPA GRAINS SA",                    silozChimpex: 0,        warehouseChimpex: 4900.00,  bargesThirdParty: null, niva: 0    },
+  { commodity: "RPS 2025",           origin: "RO",  client: "AMEROPA GRAINS SA",                    silozChimpex: 0,        warehouseChimpex: 5400.00,  bargesThirdParty: null, niva: 0    },
+  { commodity: "WHT LP 2025",        origin: "RO",  client: "AMEROPA GRAINS SA",                    silozChimpex: 311.04,   warehouseChimpex: 0,        bargesThirdParty: null, niva: null },
+  { commodity: "WHT HP 2025",        origin: "RO",  client: "AMEROPA GRAINS SA",                    silozChimpex: 18127.34, warehouseChimpex: 4026.85,  bargesThirdParty: null, niva: 0    },
+  { commodity: "CORN 2025",          origin: "RO",  client: "AMEROPA GRAINS SA",                    silozChimpex: 5475.23,  warehouseChimpex: 9300.00,  bargesThirdParty: null, niva: null },
+  { commodity: "SFS 2025",           origin: "RO",  client: "AMEROPA GRAINS SA",                    silozChimpex: 0,        warehouseChimpex: 9800.00,  bargesThirdParty: null, niva: null },
+  { commodity: "RPS 2025 IMPORTED",  origin: "MLD", client: "AMEROPA GRAINS SA",                    silozChimpex: 0,        warehouseChimpex: 0,        bargesThirdParty: null, niva: null },
+  { commodity: "BLY 2025",           origin: "RO",  client: "AMS AMEROPA MARKETING AND SALES AG",   silozChimpex: 0,        warehouseChimpex: 4900.00,  bargesThirdParty: null, niva: 0    },
+  { commodity: "RPS 2025",           origin: "RO",  client: "AMS AMEROPA MARKETING AND SALES AG",   silozChimpex: 0,        warehouseChimpex: 6900.00,  bargesThirdParty: null, niva: null },
+  { commodity: "WHT LP 2025",        origin: "RO",  client: "AMS AMEROPA MARKETING AND SALES AG",   silozChimpex: 1005.80,  warehouseChimpex: 0,        bargesThirdParty: null, niva: null },
+  { commodity: "WHT HP 2025",        origin: "RO",  client: "AMS AMEROPA MARKETING AND SALES AG",   silozChimpex: 15028.97, warehouseChimpex: 0,        bargesThirdParty: null, niva: null },
+  { commodity: "SFS 2025",           origin: "RO",  client: "AMS AMEROPA MARKETING AND SALES AG",   silozChimpex: 0,        warehouseChimpex: 9800.00,  bargesThirdParty: null, niva: null },
+  { commodity: "WHT 2025 TRANZIT",   origin: "MLD", client: "AMS AMEROPA MARKETING AND SALES AG",   silozChimpex: 0,        warehouseChimpex: 0,        bargesThirdParty: null, niva: null },
+  { commodity: "CORN 2025",          origin: "RO",  client: "AMS AMEROPA MARKETING AND SALES AG",   silozChimpex: 7741.81,  warehouseChimpex: 9582.96,  bargesThirdParty: null, niva: null },
+  { commodity: "WHT",                origin: "RO",  client: "AMEROPA GRAINS SA",                    silozChimpex: 0,        warehouseChimpex: 0,        bargesThirdParty: null, niva: null },
 ];
 
 const chimpexColumns = [
@@ -46,12 +49,12 @@ const chimpexFooterRows = [
   {
     label: "TOTAL",
     tone: "neutral",
-    values: { silozChimpex: 47690.19, warehouseChimpex: 0, niva: 0 },
+    values: { silozChimpex: 47690.19, warehouseChimpex: 64609.81, niva: 0 },
   },
   {
     label: "STORAGE SPACES STATUS (% FULL)",
     tone: "success-strong",
-    values: { silozChimpex: 22.28, warehouseChimpex: null, niva: 0 },
+    values: { silozChimpex: 47.79, warehouseChimpex: null, niva: 0 },
     isPercent: true,
   },
 ];
