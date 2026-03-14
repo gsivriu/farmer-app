@@ -1,5 +1,6 @@
 import { useState } from "react";
 import StocksPage from "./Motherboard/StocksPage";
+import { TrainIcon, BargeIcon, TruckIcon } from "../components/TransportIcons";
 
 // ── SVG icons ──────────────────────────────────────────────────────────────
 // Section title icons: 14×14, strokeWidth 1.8, stroke="currentColor" → #b9101e via CSS
@@ -34,44 +35,6 @@ function IconCart() {
   );
 }
 
-// Transport icons: outline, monochrome, spec-exact paths (16×16 inside 32×32 container)
-
-function IconTruck() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="1" y="3" width="15" height="13" />
-      <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
-      <circle cx="5.5" cy="18.5" r="2.5" />
-      <circle cx="18.5" cy="18.5" r="2.5" />
-    </svg>
-  );
-}
-
-function IconTrain() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="6" width="17" height="11" rx="2" />
-      <path d="M19 10h2l1 4h-3" />
-      <circle cx="6" cy="18" r="1.5" />
-      <circle cx="14" cy="18" r="1.5" />
-      <line x1="2" y1="10" x2="19" y2="10" />
-      <line x1="8" y1="6" x2="8" y2="10" />
-      <line x1="14" y1="6" x2="14" y2="10" />
-    </svg>
-  );
-}
-
-function IconBarge() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M2 20a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0" />
-      <path d="M4 14v-3l4-2 4 2v3" />
-      <path d="M12 14V9" />
-      <path d="M8 9h8" />
-      <line x1="12" y1="5" x2="12" y2="9" />
-    </svg>
-  );
-}
 
 // ── Fill bar ────────────────────────────────────────────────────────────────
 
@@ -140,9 +103,9 @@ const TRANSPORT_DATA = [
 
 // Transport type definitions — order determines display order
 const TRANSPORT_TYPES = [
-  { type: "train", label: "Train", Icon: IconTrain },
-  { type: "barge", label: "Barge", Icon: IconBarge },
-  { type: "truck", label: "Truck", Icon: IconTruck },
+  { type: "train", label: "Train", Icon: TrainIcon, color: "#b9101e", bgColor: "#fef2f2", borderColor: "#b9101e" },
+  { type: "barge", label: "Barge", Icon: BargeIcon, color: "#1d4ed8", bgColor: "#eff6ff", borderColor: "#1d4ed8" },
+  { type: "truck", label: "Truck", Icon: TruckIcon, color: "#15803d", bgColor: "#f0fdf4", borderColor: "#15803d" },
 ];
 
 const ACQ_DATA = [
@@ -250,15 +213,15 @@ function CardLogistics() {
       </div>
 
       <div className="mb-card-body" style={{ maxHeight: 260 }}>
-        {TRANSPORT_TYPES.map(({ type, label, Icon }) => {
+        {TRANSPORT_TYPES.map(({ type, label, Icon, color, bgColor, borderColor }) => {
           const items = TRANSPORT_DATA.filter((t) => t.type === type);
           if (items.length === 0) return null;
           return (
             <div key={type} className="mb-logistics-group">
-              {/* Group header: neutral icon box + uppercase label + count */}
+              {/* Group header: colored icon box + uppercase label + count */}
               <div className={`tr-group-header tr-group--${type}`}>
                 <div className="tr-type-icon">
-                  <Icon />
+                  <Icon size={16} color={color} bgColor={bgColor} borderColor={borderColor} />
                 </div>
                 <span className="tr-type-label">{label}</span>
                 <span className="tr-type-count">{items.length}</span>
