@@ -28,13 +28,12 @@ const chimpexDetailedData = [
 ];
 
 const chimpexColumns = [
-  { key: "commodity", label: "COMMODITY", align: "left", width: "150px" },
-  { key: "origin", label: "ORIGIN", align: "left", width: "80px" },
-  { key: "client", label: "CLIENT", align: "left", width: "260px" },
-  { key: "silozChimpex", label: "SILOZ CHIMPEX", align: "right", width: "130px" },
-  { key: "warehouseChimpex", label: "WAREHOUSE CHIMPEX", align: "right", width: "150px" },
-  { key: "bargesThirdParty", label: "BARGES LOADED FROM 3RD PARTY SUPPLIERS", align: "right", width: "210px" },
-  { key: "niva", label: "NIVA", align: "right", width: "100px" },
+  { key: "commodity", label: "COMMODITY", align: "left", width: "18%" },
+  { key: "origin", label: "ORIGIN", align: "left", width: "9%" },
+  { key: "client", label: "CLIENT", align: "left", width: "31%" },
+  { key: "silozChimpex", label: "SILOZ CHIMPEX", align: "right", width: "14%" },
+  { key: "warehouseChimpex", label: "WAREHOUSE CHIMPEX", align: "right", width: "16%" },
+  { key: "niva", label: "NIVA", align: "right", width: "12%" },
 ];
 
 const chimpexFooterRows = [
@@ -44,7 +43,6 @@ const chimpexFooterRows = [
     values: {
       silozChimpex: 47690.19,
       warehouseChimpex: 0,
-      bargesThirdParty: null,
       niva: 0,
     },
   },
@@ -54,7 +52,6 @@ const chimpexFooterRows = [
     values: {
       silozChimpex: 49011.894,
       warehouseChimpex: 0,
-      bargesThirdParty: null,
       niva: 0,
     },
   },
@@ -64,7 +61,6 @@ const chimpexFooterRows = [
     values: {
       silozChimpex: 22.28,
       warehouseChimpex: null,
-      bargesThirdParty: null,
       niva: 0,
     },
     isPercent: true,
@@ -260,7 +256,6 @@ function ChimpexDetailedCard() {
         ...row,
         silozChimpex: formatNumber(row.silozChimpex),
         warehouseChimpex: formatNumber(row.warehouseChimpex),
-        bargesThirdParty: displayCell(row.bargesThirdParty),
         niva: formatNumber(row.niva),
       })),
     [filteredRows]
@@ -346,7 +341,6 @@ function ChimpexDetailedCard() {
                   <td className="stocks-table__td">{displayCell(row.client)}</td>
                   <td className="stocks-table__td stocks-table__td--numeric">{renderTableCell(row.silozChimpex)}</td>
                   <td className="stocks-table__td stocks-table__td--numeric">{renderTableCell(row.warehouseChimpex)}</td>
-                  <td className="stocks-table__td stocks-table__td--numeric">{renderTableCell(row.bargesThirdParty)}</td>
                   <td className="stocks-table__td stocks-table__td--numeric">{renderTableCell(row.niva)}</td>
                 </tr>
               ))
@@ -365,7 +359,7 @@ function ChimpexDetailedCard() {
                   <th className="stocks-table__footer-label" colSpan={3} scope="row">
                     {row.label}
                   </th>
-                  <td className="stocks-table__footer-merged" colSpan={4}>
+                  <td className="stocks-table__footer-merged" colSpan={3}>
                     {row.mergedValue}
                   </td>
                 </tr>
@@ -376,7 +370,6 @@ function ChimpexDetailedCard() {
                   </th>
                   <td className="stocks-table__footer-value">{renderTableCell(row.values.silozChimpex, row.isPercent)}</td>
                   <td className="stocks-table__footer-value">{renderTableCell(row.values.warehouseChimpex, row.isPercent)}</td>
-                  <td className="stocks-table__footer-value">{renderTableCell(row.values.bargesThirdParty, row.isPercent)}</td>
                   <td className="stocks-table__footer-value">{renderTableCell(row.values.niva, row.isPercent)}</td>
                 </tr>
               )
