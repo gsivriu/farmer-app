@@ -3,6 +3,7 @@ import "./StocksPage.css";
 
 const CHIMPEX_REPORT_DATE = "13 Mar 2026";
 const CHIMPEX_EXPORT_FILENAME = "chimpex-detailed-stocks-13-mar-2026";
+const CHIMPEX_COMMODITY_FILTERS = ["Wheat", "Barley", "Rapeseed", "SFS", "Corn"];
 
 const chimpexDetailedData = [
   { commodity: "BLY 2025", origin: "RO", client: "AMEROPA GRAINS SA", silozChimpex: 0, warehouseChimpex: 0, bargesThirdParty: null, niva: 0 },
@@ -130,6 +131,22 @@ export function downloadCSV(filename, rows, columns) {
   URL.revokeObjectURL(url);
 }
 
+function matchesCommodityFilter(commodity, filterValue) {
+  if (filterValue === "All") return true;
+
+  const normalizedCommodity = String(commodity || "").trim().toLowerCase();
+
+  const filterMatchers = {
+    Wheat: ["wht", "wheat"],
+    Barley: ["bly", "barley"],
+    Rapeseed: ["rps", "rapeseed", "rape"],
+    SFS: ["sfs", "sunflower"],
+    Corn: ["corn", "maize"],
+  };
+
+  return (filterMatchers[filterValue] || []).some((token) => normalizedCommodity.includes(token));
+}
+
 function StorageIcon() {
   return (
     <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -220,10 +237,7 @@ function ChimpexDetailedCard() {
   const [originFilter, setOriginFilter] = useState("All");
   const [clientFilter, setClientFilter] = useState("All");
 
-  const commodityOptions = useMemo(
-    () => [...new Set(chimpexDetailedData.map((row) => row.commodity))].sort(),
-    []
-  );
+  const commodityOptions = useMemo(() => CHIMPEX_COMMODITY_FILTERS, []);
   const originOptions = useMemo(
     () => [...new Set(chimpexDetailedData.map((row) => row.origin))].sort(),
     []
@@ -236,7 +250,7 @@ function ChimpexDetailedCard() {
   const filteredRows = useMemo(
     () =>
       chimpexDetailedData.filter((row) => {
-        const matchesCommodity = commodityFilter === "All" || row.commodity === commodityFilter;
+        const matchesCommodity = matchesCommodityFilter(row.commodity, commodityFilter);
         const matchesOrigin = originFilter === "All" || row.origin === originFilter;
         const matchesClient = clientFilter === "All" || row.client === clientFilter;
         return matchesCommodity && matchesOrigin && matchesClient;
