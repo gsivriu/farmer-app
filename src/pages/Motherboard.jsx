@@ -1,4 +1,5 @@
 import { useState } from "react";
+import StocksPage from "./Motherboard/StocksPage";
 
 // ── SVG icons ──────────────────────────────────────────────────────────────
 // Section title icons: 14×14, strokeWidth 1.8, stroke="currentColor" → #b9101e via CSS
@@ -389,7 +390,7 @@ export default function MotherboardPage() {
       )}
 
       {mbTab === "stocks" && (
-        <PlaceholderCard text="Stocks — full stock details for Chimpex & Inland silos (coming soon)" />
+        <StocksPage />
       )}
 
       {mbTab === "logistics" && (
