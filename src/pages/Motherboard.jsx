@@ -1328,6 +1328,14 @@ function ExecutionTab() {
               <span className="exec-pill" style={{ background: pmt.bg, color: pmt.color }}>{pmt.label}</span>
             </div>
 
+            {/* Row 1.5 — contract number */}
+            {bid.contract_no && (
+              <div className="exec-contract-row">
+                <span className="exec-contract-lbl">Contract</span>
+                <span className="exec-contract-val">{bid.contract_no}</span>
+              </div>
+            )}
+
             {/* Row 2 — product (left) + quantity (right) */}
             <div className="exec-card-r2">
               <span className="exec-product-primary">{getProductLabelSafe(bid.product)}</span>
