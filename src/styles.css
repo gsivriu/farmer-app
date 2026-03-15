@@ -7145,8 +7145,8 @@ select.input:focus {
   gap: 8px;
   margin-bottom: 4px;
 }
-.exec-card-product { font-size: 18px; font-weight: 700; color: #111827; line-height: 1.2; }
-.theme-dark .exec-card-product { color: #e5e7eb; }
+.exec-card-email { font-size: 18px; font-weight: 700; color: #1A1A1A; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.theme-dark .exec-card-email { color: #e5e7eb; }
 .exec-card-pills { display: flex; align-items: center; gap: 4px; flex-shrink: 0; padding-top: 2px; }
 
 /* Pills */
@@ -7164,16 +7164,16 @@ select.input:focus {
 .exec-pill--expired { background: #FFEBEE; color: #C62828; border-color: #EF9A9A; }
 .exec-pill--soon    { background: #FFF8E1; color: #F57F17; border-color: #FFCC80; }
 
-/* Row 2 — qty · price (secondary) */
+/* Row 2 — product · qty · price (secondary) */
 .exec-card-r2 {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
+  gap: 8px;
   margin-bottom: 4px;
 }
-.exec-qty-val { font-size: 13px; font-weight: 400; color: #6b7280; font-variant-numeric: tabular-nums; }
-.exec-price-val { font-size: 13px; font-weight: 400; color: #6b7280; font-variant-numeric: tabular-nums; }
-.exec-card-r2 .exec-qty-val::after { content: "  ·"; color: #d1d5db; margin-right: 2px; }
+.exec-product-sec  { font-size: 13px; font-weight: 400; color: #757575; }
+.exec-qty-price-sec { font-size: 13px; font-weight: 400; color: #757575; font-variant-numeric: tabular-nums; white-space: nowrap; flex-shrink: 0; }
 
 /* Row 3 — incoterm · delivery */
 .exec-card-r3 {
@@ -7208,21 +7208,13 @@ select.input:focus {
 .theme-dark .exec-bar-bg { background: #374151; }
 .exec-pct { font-size: 11px; font-weight: 700; text-align: right; margin-top: 3px; }
 
-/* Row 6 — email + calc button */
+/* Row 6 — calc button */
 .exec-card-r6 {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 8px;
   margin-top: 4px;
-}
-.exec-email {
-  font-size: 11px;
-  color: #9E9E9E;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 55%;
 }
 
 /* Compact calculation button */

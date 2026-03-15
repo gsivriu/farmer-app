@@ -1310,17 +1310,18 @@ function ExecutionTab() {
           <div key={bid.id} className="exec-card">
 
             {/* Row 1 — product + payment pill */}
+            {/* Row 1 — email (primary) + payment pill */}
             <div className="exec-card-r1">
-              <span className="exec-card-product">{getProductLabelSafe(bid.product)}</span>
+              <span className="exec-card-email">{bid.farmer_email ?? "—"}</span>
               <div className="exec-card-pills">
                 <span className="exec-pill" style={{ background: pmt.bg, color: pmt.color, borderColor: pmt.border }}>{pmt.label}</span>
               </div>
             </div>
 
-            {/* Row 2 — qty · price (secondary, gray) */}
+            {/* Row 2 — product · qty · price (secondary, gray) */}
             <div className="exec-card-r2">
-              <span className="exec-qty-val">{formatCompactNumber(bid.quantity)} t</span>
-              <span className="exec-price-val">{fmtPrice(bid)}</span>
+              <span className="exec-product-sec">{getProductLabelSafe(bid.product)}</span>
+              <span className="exec-qty-price-sec">{formatCompactNumber(bid.quantity)} t  ·  {fmtPrice(bid)}</span>
             </div>
 
             {/* Row 3 — incoterm · delivery period */}
@@ -1340,11 +1341,8 @@ function ExecutionTab() {
               <div className="exec-pct" style={{ color: pct === 0 ? "#9ca3af" : barColor }}>{pct}%</div>
             </div>
 
-            {/* Row 6 — email + calc button */}
+            {/* Row 6 — calc button */}
             <div className="exec-card-r6">
-              {bid.farmer_email && (
-                <span className="exec-email">✉ {bid.farmer_email}</span>
-              )}
               {state.calculation_sent ? (
                 <span className="exec-calc-sent">✅ Sent</span>
               ) : (
