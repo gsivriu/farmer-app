@@ -7285,23 +7285,26 @@ select.input:focus {
 .exec-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.45);
-  z-index: 1000;
+  background: rgba(0,0,0,.4);
+  z-index: 50;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
+  justify-content: center;
 }
 .exec-modal {
+  position: relative;
   display: flex;
   flex-direction: column;
-  width: 100%;
+  width: 90%;
+  max-width: 600px;
   background: var(--white);
-  border-radius: 16px 16px 0 0;
-  max-height: 90vh;
+  border-radius: 16px;
+  max-height: 85vh;
   overflow: hidden;
   animation: exec-modal-up .25s ease;
 }
 .theme-dark .exec-modal { background: #1f2937; }
-@keyframes exec-modal-up { from { transform: translateY(60px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes exec-modal-up { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
 /* Top bar: handle + close */
 .exec-modal-topbar {
