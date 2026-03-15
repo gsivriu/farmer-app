@@ -533,7 +533,7 @@ const mockTrains = [
     id: 1,
     furnizor: "LA CIMP NOU pt AMS",
     locatie_incarcare: "Darmanesti 24",
-    produs: "Grau",
+    produs: "Wheat",
     cantitate_descarcata: 1038,
     cantitate_nedescarcata: 550,
     tip_vag: "11 FALS UTZ",
@@ -545,7 +545,7 @@ const mockTrains = [
     id: 2,
     furnizor: "Ameropa Grains",
     locatie_incarcare: "Vladeni 17",
-    produs: "Porumb",
+    produs: "Corn",
     cantitate: 1603,
     eta: "In Faurei",
     tip_vag: "32 TADS DBCR",
@@ -557,7 +557,7 @@ const mockTrains = [
     id: 3,
     furnizor: "Marsat",
     locatie_incarcare: "Roman 6",
-    produs: "Porumb",
+    produs: "Corn",
     cantitate: 1600,
     vagoane_incarcate: 11,
     etc: "16.03.2026",
@@ -570,13 +570,13 @@ const mockTrains = [
     id: 4,
     furnizor: "Marsat",
     locatie_incarcare: "Roman 7",
-    produs: "Porumb",
+    produs: "Corn",
     cantitate: 1600,
-    accept_portuar: "De solicitat",
+    accept_portuar: "To be requested",
     tip_vag: "33 TALS DBCR",
     locatie_descarcare: "Chimpex",
     status: "programat_incarcare",
-    data_programarii: "se programeaza",
+    data_programarii: "to be scheduled",
     transport_asigurat: "FCA PCA",
   },
   { id: 5, furnizor: null, locatie_incarcare: null, produs: null, status: "asteptare_zona_b" },
@@ -585,13 +585,13 @@ const mockTrains = [
 ];
 
 const TRAIN_STATUS_GROUPS = [
-  { key: "sub_descarcare",      label: "Sub Descărcare",          color: "#E53935" },
-  { key: "asteptare_zona_b",    label: "În Așteptare Zona B",     color: "#FB8C00" },
-  { key: "asteptare_mol_v",     label: "În Așteptare Mol V",      color: "#FB8C00" },
-  { key: "asteptare_palas",     label: "În Așteptare Palas",      color: "#FB8C00" },
+  { key: "sub_descarcare",      label: "Underdischarge",          color: "#E53935" },
+  { key: "asteptare_zona_b",    label: "Waiting Zone B",          color: "#FB8C00" },
+  { key: "asteptare_mol_v",     label: "Waiting Mol V",           color: "#FB8C00" },
+  { key: "asteptare_palas",     label: "Waiting Palas",           color: "#FB8C00" },
   { key: "on_the_way",          label: "On the Way",              color: "#1E88E5" },
-  { key: "sub_incarcare",       label: "Sub Încărcare",           color: "#43A047" },
-  { key: "programat_incarcare", label: "Programate la Încărcare", color: "#757575" },
+  { key: "sub_incarcare",       label: "Underloading",            color: "#43A047" },
+  { key: "programat_incarcare", label: "Scheduled for Loading",   color: "#757575" },
 ];
 
 const WAITING_STATUSES = ["asteptare_zona_b", "asteptare_mol_v", "asteptare_palas"];
@@ -602,7 +602,7 @@ function TrainCard({ train }) {
   if (isWaiting) {
     return (
       <div className="train-card train-card--empty">
-        Nicio garnitură în așteptare
+        No trains waiting
       </div>
     );
   }
@@ -642,8 +642,8 @@ function TrainCard({ train }) {
       {train.status === "sub_descarcare" && (
         <div className="train-card-progress">
           <div className="train-card-progress-nums">
-            <span>Descărcat: <strong>{train.cantitate_descarcata?.toLocaleString("en-US")} t</strong></span>
-            <span>Rămas: <strong>{train.cantitate_nedescarcata?.toLocaleString("en-US")} t</strong></span>
+            <span>Unloaded: <strong>{train.cantitate_descarcata?.toLocaleString("en-US")} t</strong></span>
+            <span>Remaining: <strong>{train.cantitate_nedescarcata?.toLocaleString("en-US")} t</strong></span>
           </div>
           <div className="train-card-bar-bg">
             <div className="train-card-bar-fill" style={{ width: `${pct}%` }} />
@@ -663,7 +663,7 @@ function TrainCard({ train }) {
         <div className="train-card-detail">
           {train.etc && <><span className="train-card-lbl">ETC:</span> {train.etc}</>}
           {train.etc && train.vagoane_incarcate != null && <span className="train-card-sep"> · </span>}
-          {train.vagoane_incarcate != null && <>Vagoane încărcate: <strong>{train.vagoane_incarcate}</strong></>}
+          {train.vagoane_incarcate != null && <>Wagons loaded: <strong>{train.vagoane_incarcate}</strong></>}
         </div>
       )}
 
@@ -672,12 +672,12 @@ function TrainCard({ train }) {
         <>
           {train.accept_portuar && (
             <div className="train-card-detail">
-              <span className="train-card-lbl">Accept portuar:</span> {train.accept_portuar}
+              <span className="train-card-lbl">Port acceptance:</span> {train.accept_portuar}
             </div>
           )}
           {train.data_programarii && (
             <div className="train-card-detail">
-              <span className="train-card-lbl">Data programării:</span> {train.data_programarii}
+              <span className="train-card-lbl">Scheduled date:</span> {train.data_programarii}
             </div>
           )}
         </>
@@ -706,7 +706,7 @@ function TrainSection({ trains }) {
       <div className="logi-section-head">
         <div className="logi-section-title">
           <TrainIcon size={16} color="#b9101e" bgColor="#fef2f2" borderColor="#b9101e" />
-          <span>Tren</span>
+          <span>Train</span>
         </div>
         <span className="logi-type-badge" style={{ color: "#b9101e", background: "#fef2f2" }}>{withData}</span>
       </div>
@@ -719,7 +719,7 @@ function TrainSection({ trains }) {
             <div className="train-status-header">
               <span className="train-status-label" style={{ color: group.color }}>{group.label}</span>
               <span className="train-status-count" style={{ color: group.color }}>
-                {rows.length} {rows.length > 1 ? "trenuri" : "tren"}
+                {rows.length} {rows.length > 1 ? "trains" : "train"}
               </span>
             </div>
             {rows.map(t => <TrainCard key={t.id} train={t} />)}
@@ -728,7 +728,7 @@ function TrainSection({ trains }) {
       })}
 
       <div className="logi-section-foot">
-        {active} trenuri active · {scheduled} programate · {waiting} în așteptare
+        {active} trains active · {scheduled} scheduled · {waiting} waiting
       </div>
     </div>
   );
