@@ -7140,14 +7140,14 @@ select.input:focus {
 /* Row 1 — product + pills */
 .exec-card-r1 {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
-.exec-card-product { font-size: 15px; font-weight: 700; color: #111827; }
+.exec-card-product { font-size: 18px; font-weight: 700; color: #111827; line-height: 1.2; }
 .theme-dark .exec-card-product { color: #e5e7eb; }
-.exec-card-pills { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.exec-card-pills { display: flex; align-items: center; gap: 4px; flex-shrink: 0; padding-top: 2px; }
 
 /* Pills */
 .exec-pill {
@@ -7164,25 +7164,21 @@ select.input:focus {
 .exec-pill--expired { background: #FFEBEE; color: #C62828; border-color: #EF9A9A; }
 .exec-pill--soon    { background: #FFF8E1; color: #F57F17; border-color: #FFCC80; }
 
-/* Row 2 — qty + price */
+/* Row 2 — qty · price (secondary) */
 .exec-card-r2 {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 6px;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
 }
-.exec-qty-val { font-size: 20px; font-weight: 800; color: #111827; font-variant-numeric: tabular-nums; }
-.theme-dark .exec-qty-val { color: #e5e7eb; }
-.exec-price-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
-.exec-field-lbl { font-size: 11px; color: #9ca3af; }
-.exec-price-val { font-size: 15px; font-weight: 700; color: #111827; font-variant-numeric: tabular-nums; }
-.theme-dark .exec-price-val { color: #e5e7eb; }
+.exec-qty-val { font-size: 13px; font-weight: 400; color: #6b7280; font-variant-numeric: tabular-nums; }
+.exec-price-val { font-size: 13px; font-weight: 400; color: #6b7280; font-variant-numeric: tabular-nums; }
+.exec-card-r2 .exec-qty-val::after { content: "  ·"; color: #d1d5db; margin-right: 2px; }
 
 /* Row 3 — incoterm · delivery */
 .exec-card-r3 {
   font-size: 12px;
-  color: #6b7280;
+  color: #9ca3af;
   margin-bottom: 10px;
 }
 
@@ -7212,13 +7208,21 @@ select.input:focus {
 .theme-dark .exec-bar-bg { background: #374151; }
 .exec-pct { font-size: 11px; font-weight: 700; text-align: right; margin-top: 3px; }
 
-/* Row 6 — payment pill + calc button */
+/* Row 6 — email + calc button */
 .exec-card-r6 {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-top: 2px;
+  margin-top: 4px;
+}
+.exec-email {
+  font-size: 11px;
+  color: #9E9E9E;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 55%;
 }
 
 /* Compact calculation button */
@@ -7227,13 +7231,14 @@ select.input:focus {
   border: 1.5px solid #C62828;
   color: #C62828;
   border-radius: 6px;
-  padding: 0 14px;
-  height: 28px;
-  font-size: 12px;
+  padding: 0 12px;
+  height: 26px;
+  font-size: 11px;
   font-weight: 600;
   cursor: pointer;
   transition: background .15s;
   flex-shrink: 0;
+  white-space: nowrap;
 }
 .exec-calc-btn-sm:hover { background: #fff5f5; }
 .theme-dark .exec-calc-btn-sm:hover { background: #2d1b1b; }
@@ -7242,6 +7247,7 @@ select.input:focus {
   font-size: 12px;
   font-style: italic;
   color: #2E7D32;
+  flex-shrink: 0;
 }
 
 /* Empty state */

@@ -1314,7 +1314,7 @@ function ExecutionTab() {
         return (
           <div key={bid.id} className="exec-card">
 
-            {/* Row 1 — product + status pills */}
+            {/* Row 1 — product + payment pill */}
             <div className="exec-card-r1">
               <span className="exec-card-product">{getProductLabelSafe(bid.product)}</span>
               <div className="exec-card-pills">
@@ -1322,18 +1322,15 @@ function ExecutionTab() {
               </div>
             </div>
 
-            {/* Row 2 — qty + price */}
+            {/* Row 2 — qty · price (secondary, gray) */}
             <div className="exec-card-r2">
               <span className="exec-qty-val">{formatCompactNumber(bid.quantity)} t</span>
-              <div className="exec-price-wrap">
-                <span className="exec-field-lbl">Price</span>
-                <span className="exec-price-val">{fmtPrice(bid)}</span>
-              </div>
+              <span className="exec-price-val">{fmtPrice(bid)}</span>
             </div>
 
             {/* Row 3 — incoterm · delivery period */}
             <div className="exec-card-r3">
-              {[bid.parity, fmtDelivery(bid.delivery_start, bid.delivery_end)].filter(Boolean).join(" · ")}
+              {[bid.parity, fmtDelivery(bid.delivery_start, bid.delivery_end)].filter(Boolean).join("  ·  ")}
             </div>
 
             {/* Row 4 — delivery progress */}
@@ -1348,11 +1345,13 @@ function ExecutionTab() {
               <div className="exec-pct" style={{ color: pct === 0 ? "#9ca3af" : barColor }}>{pct}%</div>
             </div>
 
-            {/* Row 6 — footer: payment badge + calc button */}
+            {/* Row 6 — email + calc button */}
             <div className="exec-card-r6">
-              <span className="exec-pill" style={{ background: pmt.bg, color: pmt.color, borderColor: pmt.border }}>{pmt.label}</span>
+              {bid.farmer_email && (
+                <span className="exec-email">✉ {bid.farmer_email}</span>
+              )}
               {state.calculation_sent ? (
-                <span className="exec-calc-sent">✅ Calculation sent</span>
+                <span className="exec-calc-sent">✅ Sent</span>
               ) : (
                 <button className="exec-calc-btn-sm" onClick={() => setModalBid(bid)}>
                   Calculation
