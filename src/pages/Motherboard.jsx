@@ -527,22 +527,211 @@ function CardVessels() {
 
 // ── Logistics Tab ────────────────────────────────────────────────────────────
 
-const TRAIN_STATUS_GROUPS = [
-  { key: "underdischarge", label: "Underdischarge",        color: "#b9101e" },
-  { key: "waiting_zone",   label: "Waiting Zone",          color: "#d97706" },
-  { key: "in_transit",     label: "On the Way",            color: "#1d4ed8" },
-  { key: "underloading",   label: "Underloading",          color: "#ea580c" },
-  { key: "scheduled",      label: "Scheduled for Loading", color: "#6b7280" },
+// TODO: replace with Supabase fetch
+const mockTrains = [
+  {
+    id: 1,
+    furnizor: "LA CIMP NOU pt AMS",
+    locatie_incarcare: "Darmanesti 24",
+    produs: "Grau",
+    cantitate_descarcata: 1038,
+    cantitate_nedescarcata: 550,
+    tip_vag: "11 FALS UTZ",
+    locatie_descarcare: "Chimpex",
+    status: "sub_descarcare",
+    transport_asigurat: null,
+  },
+  {
+    id: 2,
+    furnizor: "Ameropa Grains",
+    locatie_incarcare: "Vladeni 17",
+    produs: "Porumb",
+    cantitate: 1603,
+    eta: "In Faurei",
+    tip_vag: "32 TADS DBCR",
+    locatie_descarcare: "Chimpex",
+    status: "on_the_way",
+    transport_asigurat: "FCA",
+  },
+  {
+    id: 3,
+    furnizor: "Marsat",
+    locatie_incarcare: "Roman 6",
+    produs: "Porumb",
+    cantitate: 1600,
+    vagoane_incarcate: 11,
+    etc: "16.03.2026",
+    tip_vag: "33 TALS DBCF",
+    locatie_descarcare: "Chimpex",
+    status: "sub_incarcare",
+    transport_asigurat: "FCA PCA",
+  },
+  {
+    id: 4,
+    furnizor: "Marsat",
+    locatie_incarcare: "Roman 7",
+    produs: "Porumb",
+    cantitate: 1600,
+    accept_portuar: "De solicitat",
+    tip_vag: "33 TALS DBCR",
+    locatie_descarcare: "Chimpex",
+    status: "programat_incarcare",
+    data_programarii: "se programeaza",
+    transport_asigurat: "FCA PCA",
+  },
+  { id: 5, furnizor: null, locatie_incarcare: null, produs: null, status: "asteptare_zona_b" },
+  { id: 6, furnizor: null, locatie_incarcare: null, produs: null, status: "asteptare_mol_v" },
+  { id: 7, furnizor: null, locatie_incarcare: null, produs: null, status: "asteptare_palas" },
 ];
 
-function normalizeTrainStatus(s) {
-  switch ((s ?? "").toLowerCase()) {
-    case "underdischarge": case "unloading":    return "underdischarge";
-    case "waiting":        case "waiting_zone": return "waiting_zone";
-    case "in_transit":     case "on_the_way":   return "in_transit";
-    case "loading":        case "underloading": return "underloading";
-    default:                                    return "scheduled";
+const TRAIN_STATUS_GROUPS = [
+  { key: "sub_descarcare",      label: "Sub Descărcare",          color: "#E53935" },
+  { key: "asteptare_zona_b",    label: "În Așteptare Zona B",     color: "#FB8C00" },
+  { key: "asteptare_mol_v",     label: "În Așteptare Mol V",      color: "#FB8C00" },
+  { key: "asteptare_palas",     label: "În Așteptare Palas",      color: "#FB8C00" },
+  { key: "on_the_way",          label: "On the Way",              color: "#1E88E5" },
+  { key: "sub_incarcare",       label: "Sub Încărcare",           color: "#43A047" },
+  { key: "programat_incarcare", label: "Programate la Încărcare", color: "#757575" },
+];
+
+const WAITING_STATUSES = ["asteptare_zona_b", "asteptare_mol_v", "asteptare_palas"];
+
+function TrainCard({ train }) {
+  const isWaiting = WAITING_STATUSES.includes(train.status);
+
+  if (isWaiting) {
+    return (
+      <div className="train-card train-card--empty">
+        Nicio garnitură în așteptare
+      </div>
+    );
   }
+
+  const total = train.status === "sub_descarcare"
+    ? (train.cantitate_descarcata ?? 0) + (train.cantitate_nedescarcata ?? 0)
+    : (train.cantitate ?? null);
+  const pct = train.status === "sub_descarcare" && total > 0
+    ? Math.round((train.cantitate_descarcata / total) * 100)
+    : null;
+
+  return (
+    <div className="train-card">
+      {/* Row 1 — furnizor + produs · cantitate */}
+      <div className="train-card-row1">
+        <span className="train-card-furnizor">{train.furnizor}</span>
+        <span className="train-card-produs-qty">
+          {train.produs}{total != null ? ` · ${total.toLocaleString("en-US")} t` : ""}
+        </span>
+      </div>
+
+      {/* Row 2 — route */}
+      {(train.locatie_incarcare || train.locatie_descarcare) && (
+        <div className="train-card-route">
+          {train.locatie_incarcare} → {train.locatie_descarcare}
+        </div>
+      )}
+
+      {/* Row 3 — tip vagon */}
+      {train.tip_vag && (
+        <div className="train-card-detail">
+          <span className="train-card-lbl">Vag:</span> {train.tip_vag}
+        </div>
+      )}
+
+      {/* Row 4 — sub_descarcare progress */}
+      {train.status === "sub_descarcare" && (
+        <div className="train-card-progress">
+          <div className="train-card-progress-nums">
+            <span>Descărcat: <strong>{train.cantitate_descarcata?.toLocaleString("en-US")} t</strong></span>
+            <span>Rămas: <strong>{train.cantitate_nedescarcata?.toLocaleString("en-US")} t</strong></span>
+          </div>
+          <div className="train-card-bar-bg">
+            <div className="train-card-bar-fill" style={{ width: `${pct}%` }} />
+          </div>
+        </div>
+      )}
+
+      {/* Row 5 — on_the_way ETA */}
+      {train.status === "on_the_way" && train.eta && (
+        <div className="train-card-detail">
+          <span className="train-card-lbl">ETA:</span> {train.eta}
+        </div>
+      )}
+
+      {/* Row 6 — sub_incarcare */}
+      {train.status === "sub_incarcare" && (train.etc || train.vagoane_incarcate != null) && (
+        <div className="train-card-detail">
+          {train.etc && <><span className="train-card-lbl">ETC:</span> {train.etc}</>}
+          {train.etc && train.vagoane_incarcate != null && <span className="train-card-sep"> · </span>}
+          {train.vagoane_incarcate != null && <>Vagoane încărcate: <strong>{train.vagoane_incarcate}</strong></>}
+        </div>
+      )}
+
+      {/* Row 7 — programat_incarcare */}
+      {train.status === "programat_incarcare" && (
+        <>
+          {train.accept_portuar && (
+            <div className="train-card-detail">
+              <span className="train-card-lbl">Accept portuar:</span> {train.accept_portuar}
+            </div>
+          )}
+          {train.data_programarii && (
+            <div className="train-card-detail">
+              <span className="train-card-lbl">Data programării:</span> {train.data_programarii}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Row 8 — transport asigurat badges */}
+      {train.transport_asigurat && (
+        <div className="train-card-badges">
+          {train.transport_asigurat.split(" ").map(b => (
+            <span key={b} className="train-card-badge">{b}</span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TrainSection({ trains }) {
+  const active    = trains.filter(t => ["sub_descarcare", "on_the_way", "sub_incarcare"].includes(t.status)).length;
+  const scheduled = trains.filter(t => t.status === "programat_incarcare").length;
+  const waiting   = trains.filter(t => WAITING_STATUSES.includes(t.status)).length;
+  const withData  = trains.filter(t => t.furnizor).length;
+
+  return (
+    <div className="logi-section">
+      <div className="logi-section-head">
+        <div className="logi-section-title">
+          <TrainIcon size={16} color="#b9101e" bgColor="#fef2f2" borderColor="#b9101e" />
+          <span>Tren</span>
+        </div>
+        <span className="logi-type-badge" style={{ color: "#b9101e", background: "#fef2f2" }}>{withData}</span>
+      </div>
+
+      {TRAIN_STATUS_GROUPS.map(group => {
+        const rows = trains.filter(t => t.status === group.key);
+        if (rows.length === 0) return null;
+        return (
+          <div key={group.key} className="train-status-group">
+            <div className="train-status-header">
+              <span className="train-status-label" style={{ color: group.color }}>{group.label}</span>
+              <span className="train-status-count" style={{ color: group.color }}>
+                {rows.length} {rows.length > 1 ? "trenuri" : "tren"}
+              </span>
+            </div>
+            {rows.map(t => <TrainCard key={t.id} train={t} />)}
+          </div>
+        );
+      })}
+
+      <div className="logi-section-foot">
+        {active} trenuri active · {scheduled} programate · {waiting} în așteptare
+      </div>
+    </div>
+  );
 }
 
 function LogisticsTypeSection({ items, Icon, color, bgColor, borderColor, label }) {
@@ -575,56 +764,12 @@ function LogisticsTypeSection({ items, Icon, color, bgColor, borderColor, label 
 }
 
 function LogisticsTab() {
-  const trains = TRANSPORT_DATA.filter(t => t.type === "train");
   const barges = TRANSPORT_DATA.filter(t => t.type === "barge");
   const trucks = TRANSPORT_DATA.filter(t => t.type === "truck");
-  const activeTrains = trains.filter(t => normalizeTrainStatus(t.status) !== "scheduled").length;
 
   return (
     <div className="logi-tab">
-
-      {/* ── Train section with status groups ── */}
-      <div className="logi-section">
-        <div className="logi-section-head">
-          <div className="logi-section-title">
-            <TrainIcon size={16} color="#b9101e" bgColor="#fef2f2" borderColor="#b9101e" />
-            <span>Train</span>
-          </div>
-          <span className="logi-type-badge" style={{ color: "#b9101e", background: "#fef2f2" }}>{trains.length}</span>
-        </div>
-
-        {TRAIN_STATUS_GROUPS.map(group => {
-          const rows = trains.filter(t => normalizeTrainStatus(t.status) === group.key);
-          if (rows.length === 0) return null;
-          return (
-            <div key={group.key} className="train-status-group">
-              <div className="train-status-header">
-                <span className="train-status-label" style={{ color: group.color }}>{group.label}</span>
-                <span className="train-status-count" style={{ color: group.color }}>
-                  {rows.length} train{rows.length > 1 ? "s" : ""}
-                </span>
-              </div>
-              {rows.map(t => (
-                <div key={t.id} className="logi-row-card">
-                  <div className="logi-row-info">
-                    <span className="logi-row-id">{t.id}</span>
-                    <span className="logi-row-route">{t.from} → {t.to}</span>
-                  </div>
-                  <div className="logi-row-right">
-                    <span className="logi-row-qty">{t.qty}</span>
-                    <span className="logi-row-commodity">{t.commodity}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          );
-        })}
-
-        <div className="logi-section-foot">
-          {trains.length} trains · {activeTrains} active
-        </div>
-      </div>
-
+      <TrainSection trains={mockTrains} />
       {barges.length > 0 && (
         <LogisticsTypeSection
           items={barges} label="Barge"

@@ -6582,6 +6582,113 @@ select.input:focus {
   font-weight: 500;
 }
 
+/* ── Train cards ─────────────────────────────────────────────────────────── */
+.train-card {
+  background: var(--white);
+  border: 1px solid #f0f0f0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.05);
+}
+.theme-dark .train-card { background: #1f2937; border-color: #374151; box-shadow: none; }
+
+.train-card--empty {
+  font-size: 12px;
+  font-style: italic;
+  color: #9ca3af;
+  text-align: center;
+  padding: 14px;
+}
+
+/* Row 1 */
+.train-card-row1 {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.train-card-furnizor {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
+  flex: 1;
+}
+.theme-dark .train-card-furnizor { color: #e5e7eb; }
+
+.train-card-produs-qty {
+  font-size: 13px;
+  font-weight: 700;
+  color: #111827;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.theme-dark .train-card-produs-qty { color: #e5e7eb; }
+
+/* Row 2 — route */
+.train-card-route {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+/* Rows 3, 5, 6, 7 — detail lines */
+.train-card-detail {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+.train-card-detail strong { color: #374151; }
+.theme-dark .train-card-detail strong { color: #d1d5db; }
+
+.train-card-lbl {
+  color: #9ca3af;
+  font-weight: 500;
+}
+.train-card-sep { color: #d1d5db; }
+
+/* Row 4 — progress bar */
+.train-card-progress { margin-top: 8px; }
+.train-card-progress-nums {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 5px;
+}
+.train-card-progress-nums strong { color: #111827; }
+.theme-dark .train-card-progress-nums strong { color: #e5e7eb; }
+.train-card-bar-bg {
+  height: 5px;
+  background: #f3f4f6;
+  border-radius: 99px;
+  overflow: hidden;
+}
+.theme-dark .train-card-bar-bg { background: #374151; }
+.train-card-bar-fill {
+  height: 100%;
+  background: #E53935;
+  border-radius: 99px;
+  transition: width 0.3s ease;
+}
+
+/* Row 8 — transport badges */
+.train-card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+.train-card-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: #374151;
+  background: #f3f4f6;
+  border-radius: 4px;
+  padding: 2px 7px;
+}
+.theme-dark .train-card-badge { background: #374151; color: #d1d5db; }
+
 /* Row card */
 .logi-row-card {
   display: flex;
