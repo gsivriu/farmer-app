@@ -7133,48 +7133,65 @@ select.input:focus {
   border-radius: 12px;
   padding: 14px 16px;
   margin-bottom: 12px;
-  box-shadow: 0 1px 4px rgba(0,0,0,.05);
+  box-shadow: 0 2px 6px rgba(0,0,0,.06);
 }
 .theme-dark .exec-card { background: #1f2937; border-color: #374151; box-shadow: none; }
 
-.exec-card-head {
+/* Row 1 — product + pills */
+.exec-card-r1 {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 .exec-card-product { font-size: 15px; font-weight: 700; color: #111827; }
-.exec-card-contract { font-size: 12px; color: #6b7280; margin-top: 2px; }
-.exec-card-farmer { font-size: 12px; color: #6b7280; text-align: right; max-width: 55%; word-break: break-all; }
 .theme-dark .exec-card-product { color: #e5e7eb; }
+.exec-card-pills { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
 
-.exec-card-fields {
+/* Pills */
+.exec-pill {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.exec-pill--expired { background: #FFEBEE; color: #C62828; border-color: #EF9A9A; }
+.exec-pill--soon    { background: #FFF8E1; color: #F57F17; border-color: #FFCC80; }
+
+/* Row 2 — qty + price */
+.exec-card-r2 {
   display: flex;
+  align-items: baseline;
   justify-content: space-between;
+  gap: 8px;
   margin-bottom: 6px;
 }
-.exec-field { display: flex; flex-direction: column; gap: 2px; }
-.exec-field--right { align-items: flex-end; }
+.exec-qty-val { font-size: 20px; font-weight: 800; color: #111827; font-variant-numeric: tabular-nums; }
+.theme-dark .exec-qty-val { color: #e5e7eb; }
+.exec-price-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
 .exec-field-lbl { font-size: 11px; color: #9ca3af; }
-.exec-field-val { font-size: 14px; font-weight: 700; color: #111827; font-variant-numeric: tabular-nums; }
-.theme-dark .exec-field-val { color: #e5e7eb; }
+.exec-price-val { font-size: 15px; font-weight: 700; color: #111827; font-variant-numeric: tabular-nums; }
+.theme-dark .exec-price-val { color: #e5e7eb; }
 
-.exec-card-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+/* Row 3 — incoterm · delivery */
+.exec-card-r3 {
   font-size: 12px;
   color: #6b7280;
   margin-bottom: 10px;
 }
 
-/* Expiry banners */
+/* Expiry banners (compact) */
 .exec-banner {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
-  padding: 8px 12px;
-  margin-bottom: 10px;
+  padding: 5px 10px;
+  margin-bottom: 8px;
   border-radius: 4px;
 }
 .exec-banner--expired { background: #FFEBEE; border-left: 3px solid #C62828; color: #C62828; }
@@ -7195,40 +7212,36 @@ select.input:focus {
 .theme-dark .exec-bar-bg { background: #374151; }
 .exec-pct { font-size: 11px; font-weight: 700; text-align: right; margin-top: 3px; }
 
-/* Payment badge */
-.exec-payment-badge {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-  text-align: center;
-  padding: 5px 0;
-  border-radius: 999px;
-  margin-bottom: 10px;
+/* Row 6 — payment pill + calc button */
+.exec-card-r6 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 2px;
 }
 
-/* Calculation button / sent */
-.exec-calc-btn {
-  width: 100%;
+/* Compact calculation button */
+.exec-calc-btn-sm {
   background: transparent;
   border: 1.5px solid #C62828;
   color: #C62828;
-  border-radius: 8px;
-  padding: 10px;
-  font-size: 14px;
+  border-radius: 6px;
+  padding: 0 14px;
+  height: 28px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: background .15s;
+  flex-shrink: 0;
 }
-.exec-calc-btn:hover { background: #fff5f5; }
-.theme-dark .exec-calc-btn:hover { background: #2d1b1b; }
+.exec-calc-btn-sm:hover { background: #fff5f5; }
+.theme-dark .exec-calc-btn-sm:hover { background: #2d1b1b; }
 
 .exec-calc-sent {
-  font-size: 13px;
+  font-size: 12px;
   font-style: italic;
   color: #2E7D32;
-  text-align: center;
-  padding: 8px 0;
 }
 
 /* Empty state */

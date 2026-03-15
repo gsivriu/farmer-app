@@ -1206,10 +1206,21 @@ function CalculationSheet({ calc }) {
 }
 
 const PAYMENT_STYLES = {
-  partially_paid:  { bg: "#FFF3E0", color: "#E65100", label: "PARTIALLY PAID"  },
-  fully_paid:      { bg: "#E8F5E9", color: "#2E7D32", label: "FULLY PAID"      },
-  payment_pending: { bg: "#F5F5F5", color: "#616161", label: "PAYMENT PENDING" },
+  fully_paid:      { bg: "#E8F5E9", color: "#2E7D32", border: "#A5D6A7", label: "FULLY PAID"      },
+  partially_paid:  { bg: "#FFF3E0", color: "#E65100", border: "#FFCC80", label: "PARTIALLY PAID"  },
+  payment_pending: { bg: "#F5F5F5", color: "#757575", border: "#E0E0E0", label: "PAYMENT PENDING" },
+  overdue:         { bg: "#FFEBEE", color: "#C62828", border: "#EF9A9A", label: "OVERDUE"          },
 };
+
+// TODO: replace demo delivered_quantity and payment_status with real Supabase values per contract
+const DEMO_STATES = [
+  { demoPct: 100, payment_status: "fully_paid"      },
+  { demoPct: 0,   payment_status: "payment_pending" },
+  { demoPct: 60,  payment_status: "partially_paid"  },
+  { demoPct: 30,  payment_status: "payment_pending" },
+  { demoPct: 100, payment_status: "partially_paid"  },
+  { demoPct: 0,   payment_status: "overdue"         },
+];
 
 function ExecutionTab() {
   // TODO: replace with Supabase fetch when ready
@@ -1225,9 +1236,10 @@ function ExecutionTab() {
   useEffect(() => {
     setCalcState(prev => {
       const next = { ...prev };
-      acceptedBids.forEach(b => {
+      acceptedBids.forEach((b, idx) => {
         if (!next[b.id]) {
-          next[b.id] = { calculation_sent: false, payment_status: "payment_pending" };
+          const demo = DEMO_STATES[idx % DEMO_STATES.length];
+          next[b.id] = { calculation_sent: false, payment_status: demo.payment_status, demoPct: demo.demoPct };
         }
       });
       return next;
@@ -1251,26 +1263,6 @@ function ExecutionTab() {
     showToast(`Calculation sent to ${mockCalculation.partener}`);
   };
 
-  // Sort: expired → expiring ≤5 → active (by expiry asc) → fully paid
-  const sortedBids = useMemo(() => [...acceptedBids].sort((a, b) => {
-    const urgency = (bid) => {
-      if (calcState[bid.id]?.payment_status === "fully_paid") return 3;
-      const d = bid.delivery_end ? daysUntil(bid.delivery_end) : null;
-      if (d === null) return 2;
-      if (d < 0)  return 0;
-      if (d <= 5) return 1;
-      return 2;
-    };
-    const ua = urgency(a), ub = urgency(b);
-    if (ua !== ub) return ua - ub;
-    const da = a.delivery_end ? new Date(a.delivery_end).getTime() : Infinity;
-    const db = b.delivery_end ? new Date(b.delivery_end).getTime() : Infinity;
-    return da - db;
-  }), [acceptedBids, calcState]);
-
-  const expiredCount     = useMemo(() => acceptedBids.filter(b => b.delivery_end && daysUntil(b.delivery_end) < 0).length, [acceptedBids]);
-  const expiringSoonCount = useMemo(() => acceptedBids.filter(b => { if (!b.delivery_end) return false; const d = daysUntil(b.delivery_end); return d >= 0 && d <= 5; }).length, [acceptedBids]);
-
   const fmtDMY = (v) => {
     if (!v) return "";
     const [y, m, d] = String(v).slice(0, 10).split("-");
@@ -1287,6 +1279,27 @@ function ExecutionTab() {
     return `${formatCompactNumber(p)} ${unit}`;
   };
 
+  // Sort: overdue/expired → expiring ≤5 → partially delivered → not delivered → fully paid
+  const sortedBids = useMemo(() => [...acceptedBids].sort((a, b) => {
+    const urgency = (bid) => {
+      const ps = calcState[bid.id]?.payment_status;
+      if (ps === "fully_paid") return 4;
+      const d = bid.delivery_end ? daysUntil(bid.delivery_end) : null;
+      if (ps === "overdue" || (d !== null && d < 0)) return 0;
+      if (d !== null && d <= 5) return 1;
+      const pct = calcState[bid.id]?.demoPct ?? 0;
+      return pct > 0 ? 2 : 3;
+    };
+    const ua = urgency(a), ub = urgency(b);
+    if (ua !== ub) return ua - ub;
+    const da = a.delivery_end ? new Date(a.delivery_end).getTime() : Infinity;
+    const db = b.delivery_end ? new Date(b.delivery_end).getTime() : Infinity;
+    return da - db;
+  }), [acceptedBids, calcState]);
+
+  const expiredCount      = useMemo(() => acceptedBids.filter(b => b.delivery_end && daysUntil(b.delivery_end) < 0).length, [acceptedBids]);
+  const expiringSoonCount = useMemo(() => acceptedBids.filter(b => { if (!b.delivery_end) return false; const d = daysUntil(b.delivery_end); return d >= 0 && d <= 5; }).length, [acceptedBids]);
+
   return (
     <div className="exec-tab">
 
@@ -1297,63 +1310,59 @@ function ExecutionTab() {
       <div className="exec-summary">
         {acceptedBids.length} contracts
         {expiringSoonCount > 0 && <> · <span className="exec-summary--warn">{expiringSoonCount} expiring soon</span></>}
-        {expiredCount     > 0 && <> · <span className="exec-summary--expired">{expiredCount} expired</span></>}
+        {expiredCount      > 0 && <> · <span className="exec-summary--expired">{expiredCount} expired</span></>}
       </div>
 
       {/* ── Contract cards ── */}
       {sortedBids.map(bid => {
-        const state     = calcState[bid.id] ?? { calculation_sent: false, payment_status: "payment_pending" };
-        const days      = bid.delivery_end ? daysUntil(bid.delivery_end) : null;
-        const delivered = bid.delivered_quantity ?? 0; // TODO: from Supabase
-        const pct       = bid.quantity > 0 ? Math.min(100, Math.round((delivered / bid.quantity) * 100)) : 0;
-        const barColor  = pct === 100 ? "#43A047" : pct >= 50 ? "#FB8C00" : "#E53935";
-        const pmt       = PAYMENT_STYLES[state.payment_status] ?? PAYMENT_STYLES.payment_pending;
+        const state    = calcState[bid.id] ?? { calculation_sent: false, payment_status: "payment_pending", demoPct: 0 };
+        const days     = bid.delivery_end ? daysUntil(bid.delivery_end) : null;
+        // TODO: fetch real delivered_quantity from Supabase
+        const delivered = bid.quantity > 0 ? (bid.quantity * (state.demoPct ?? 0)) / 100 : 0;
+        const pct      = state.demoPct ?? 0;
+        const barColor = pct === 0 ? "#E0E0E0" : pct === 100 ? "#43A047" : pct >= 50 ? "#FB8C00" : "#E53935";
+        const pmt      = PAYMENT_STYLES[state.payment_status] ?? PAYMENT_STYLES.payment_pending;
 
         return (
           <div key={bid.id} className="exec-card">
 
-            {/* Header: product + contract / farmer email */}
-            <div className="exec-card-head">
-              <div>
-                <div className="exec-card-product">{getProductLabelSafe(bid.product)}</div>
-                {bid.contract_no && (
-                  <div className="exec-card-contract">Contract: {bid.contract_no}</div>
+            {/* Row 1 — product + status pills */}
+            <div className="exec-card-r1">
+              <span className="exec-card-product">{getProductLabelSafe(bid.product)}</span>
+              <div className="exec-card-pills">
+                <span className="exec-pill" style={{ background: pmt.bg, color: pmt.color, borderColor: pmt.border }}>{pmt.label}</span>
+                {days !== null && days < 0 && (
+                  <span className="exec-pill exec-pill--expired">EXPIRED</span>
+                )}
+                {days !== null && days >= 0 && days <= 5 && (
+                  <span className="exec-pill exec-pill--soon">{days}d</span>
                 )}
               </div>
-              <div className="exec-card-farmer">{bid.farmer_email ?? "—"}</div>
             </div>
 
-            {/* Qty + Price */}
-            <div className="exec-card-fields">
-              <div className="exec-field">
-                <span className="exec-field-lbl">Quantity</span>
-                <span className="exec-field-val">{formatCompactNumber(bid.quantity)} t</span>
-              </div>
-              <div className="exec-field exec-field--right">
+            {/* Row 2 — qty + price */}
+            <div className="exec-card-r2">
+              <span className="exec-qty-val">{formatCompactNumber(bid.quantity)} t</span>
+              <div className="exec-price-wrap">
                 <span className="exec-field-lbl">Price</span>
-                <span className="exec-field-val">{fmtPrice(bid)}</span>
+                <span className="exec-price-val">{fmtPrice(bid)}</span>
               </div>
             </div>
 
-            {/* Parity + Delivery */}
-            <div className="exec-card-meta">
-              <span>{bid.parity} {bid.delivery_location || bid.loading_location || ""}</span>
-              <span>Delivery: {fmtDelivery(bid.delivery_start, bid.delivery_end)}</span>
+            {/* Row 3 — incoterm · delivery period */}
+            <div className="exec-card-r3">
+              {[bid.parity, fmtDelivery(bid.delivery_start, bid.delivery_end)].filter(Boolean).join(" · ")}
             </div>
 
-            {/* Expiry warning banner */}
+            {/* Row 4 — compact expiry banner */}
             {days !== null && days < 0 && (
-              <div className="exec-banner exec-banner--expired">
-                ⚠️ This contract has expired
-              </div>
+              <div className="exec-banner exec-banner--expired">⚠️ This contract has expired</div>
             )}
             {days !== null && days >= 0 && days <= 5 && (
-              <div className="exec-banner exec-banner--soon">
-                ⚠️ {days} {days === 1 ? "day" : "days"} until contract expiry
-              </div>
+              <div className="exec-banner exec-banner--soon">⚠️ {days} {days === 1 ? "day" : "days"} until expiry</div>
             )}
 
-            {/* Delivery progress bar */}
+            {/* Row 5 — delivery progress */}
             <div className="exec-progress">
               <div className="exec-progress-labels">
                 <span>Delivered</span>
@@ -1362,22 +1371,21 @@ function ExecutionTab() {
               <div className="exec-bar-bg">
                 <div className="exec-bar-fill" style={{ width: `${pct}%`, background: barColor }} />
               </div>
-              <div className="exec-pct" style={{ color: barColor }}>{pct}%</div>
+              <div className="exec-pct" style={{ color: pct === 0 ? "#9ca3af" : barColor }}>{pct}%</div>
             </div>
 
-            {/* Payment badge */}
-            <div className="exec-payment-badge" style={{ background: pmt.bg, color: pmt.color }}>
-              {pmt.label}
+            {/* Row 6 — footer: payment badge + calc button */}
+            <div className="exec-card-r6">
+              <span className="exec-pill" style={{ background: pmt.bg, color: pmt.color, borderColor: pmt.border }}>{pmt.label}</span>
+              {state.calculation_sent ? (
+                <span className="exec-calc-sent">✅ Calculation sent</span>
+              ) : (
+                <button className="exec-calc-btn-sm" onClick={() => setModalBid(bid)}>
+                  Calculation
+                </button>
+              )}
             </div>
 
-            {/* Calculation button or sent */}
-            {state.calculation_sent ? (
-              <div className="exec-calc-sent">✅ Calculation sent</div>
-            ) : (
-              <button className="exec-calc-btn" onClick={() => setModalBid(bid)}>
-                Calculation
-              </button>
-            )}
           </div>
         );
       })}
