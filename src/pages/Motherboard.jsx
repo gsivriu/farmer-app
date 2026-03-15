@@ -1,6 +1,9 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useMemo, useEffect } from "react";
 import StocksPage from "./Motherboard/StocksPage";
 import { TrainIcon, BargeIcon, TruckIcon } from "../components/TransportIcons";
+import { useAppContext } from "../context/AppContext.jsx";
+import { getProductLabelSafe } from "../utils/productLabels";
+import { formatCompactNumber } from "../utils/numberFormat";
 
 // ── SVG icons ──────────────────────────────────────────────────────────────
 // Section title icons: 14×14, strokeWidth 1.8, stroke="currentColor" → #b9101e via CSS
@@ -1009,12 +1012,221 @@ function LogisticsTab() {
   );
 }
 
-// ── Placeholder card ──────────────────────────────────────────────────────────
+// ── Execution Tab ────────────────────────────────────────────────────────────
 
-function PlaceholderCard({ text }) {
+const PAYMENT_STYLES = {
+  partially_paid:  { bg: "#FFF3E0", color: "#E65100", label: "PARTIALLY PAID"  },
+  fully_paid:      { bg: "#E8F5E9", color: "#2E7D32", label: "FULLY PAID"      },
+  payment_pending: { bg: "#F5F5F5", color: "#616161", label: "PAYMENT PENDING" },
+};
+
+function ExecutionTab() {
+  // TODO: replace with Supabase fetch when ready
+  const { bids } = useAppContext();
+
+  const acceptedBids = useMemo(
+    () => (Array.isArray(bids) ? bids.filter(b => b.status === "accepted") : []),
+    [bids]
+  );
+
+  // Local UI state per bid — TODO: persist calculation_sent + payment_status to Supabase
+  const [calcState, setCalcState] = useState({});
+  useEffect(() => {
+    setCalcState(prev => {
+      const next = { ...prev };
+      acceptedBids.forEach(b => {
+        if (!next[b.id]) {
+          next[b.id] = { calculation_sent: false, payment_status: "payment_pending" };
+        }
+      });
+      return next;
+    });
+  }, [acceptedBids]);
+
+  const [modalBid, setModalBid] = useState(null);
+  const [toast, setToast]       = useState(null);
+
+  const showToast = (msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 2500);
+  };
+
+  const sendCalculation = (bid) => {
+    setModalBid(null);
+    setCalcState(prev => ({
+      ...prev,
+      [bid.id]: { ...prev[bid.id], calculation_sent: true },
+    }));
+    showToast(`Calculation sent to ${bid.farmer_email ?? "farmer"}`);
+  };
+
+  // Sort: expired → expiring ≤5 → active (by expiry asc) → fully paid
+  const sortedBids = useMemo(() => [...acceptedBids].sort((a, b) => {
+    const urgency = (bid) => {
+      if (calcState[bid.id]?.payment_status === "fully_paid") return 3;
+      const d = bid.delivery_end ? daysUntil(bid.delivery_end) : null;
+      if (d === null) return 2;
+      if (d < 0)  return 0;
+      if (d <= 5) return 1;
+      return 2;
+    };
+    const ua = urgency(a), ub = urgency(b);
+    if (ua !== ub) return ua - ub;
+    const da = a.delivery_end ? new Date(a.delivery_end).getTime() : Infinity;
+    const db = b.delivery_end ? new Date(b.delivery_end).getTime() : Infinity;
+    return da - db;
+  }), [acceptedBids, calcState]);
+
+  const expiredCount     = useMemo(() => acceptedBids.filter(b => b.delivery_end && daysUntil(b.delivery_end) < 0).length, [acceptedBids]);
+  const expiringSoonCount = useMemo(() => acceptedBids.filter(b => { if (!b.delivery_end) return false; const d = daysUntil(b.delivery_end); return d >= 0 && d <= 5; }).length, [acceptedBids]);
+
+  const fmtDMY = (v) => {
+    if (!v) return "";
+    const [y, m, d] = String(v).slice(0, 10).split("-");
+    return `${d}/${m}/${y}`;
+  };
+  const fmtDelivery = (s, e) => {
+    if (!s && !e) return "—";
+    return e ? `${fmtDMY(s)} — ${fmtDMY(e)}` : fmtDMY(s);
+  };
+  const fmtPrice = (bid) => {
+    const p = bid.final_price ?? bid.counter_price ?? bid.price;
+    if (!p) return "—";
+    const unit = ["FCA", "FOR", "FOB"].includes(String(bid.parity || "").toUpperCase()) ? "RON/t" : "€/t";
+    return `${formatCompactNumber(p)} ${unit}`;
+  };
+
   return (
-    <div className="mb-card" style={{ margin: 16 }}>
-      <div className="mb-placeholder">{text}</div>
+    <div className="exec-tab">
+
+      {/* ── Toast ── */}
+      {toast && <div className="exec-toast">✅ {toast}</div>}
+
+      {/* ── Summary bar ── */}
+      <div className="exec-summary">
+        {acceptedBids.length} contracts
+        {expiringSoonCount > 0 && <> · <span className="exec-summary--warn">{expiringSoonCount} expiring soon</span></>}
+        {expiredCount     > 0 && <> · <span className="exec-summary--expired">{expiredCount} expired</span></>}
+      </div>
+
+      {/* ── Contract cards ── */}
+      {sortedBids.map(bid => {
+        const state     = calcState[bid.id] ?? { calculation_sent: false, payment_status: "payment_pending" };
+        const days      = bid.delivery_end ? daysUntil(bid.delivery_end) : null;
+        const delivered = bid.delivered_quantity ?? 0; // TODO: from Supabase
+        const pct       = bid.quantity > 0 ? Math.min(100, Math.round((delivered / bid.quantity) * 100)) : 0;
+        const barColor  = pct === 100 ? "#43A047" : pct >= 50 ? "#FB8C00" : "#E53935";
+        const pmt       = PAYMENT_STYLES[state.payment_status] ?? PAYMENT_STYLES.payment_pending;
+
+        return (
+          <div key={bid.id} className="exec-card">
+
+            {/* Header: product + contract / farmer email */}
+            <div className="exec-card-head">
+              <div>
+                <div className="exec-card-product">{getProductLabelSafe(bid.product)}</div>
+                {bid.contract_no && (
+                  <div className="exec-card-contract">Contract: {bid.contract_no}</div>
+                )}
+              </div>
+              <div className="exec-card-farmer">{bid.farmer_email ?? "—"}</div>
+            </div>
+
+            {/* Qty + Price */}
+            <div className="exec-card-fields">
+              <div className="exec-field">
+                <span className="exec-field-lbl">Quantity</span>
+                <span className="exec-field-val">{formatCompactNumber(bid.quantity)} t</span>
+              </div>
+              <div className="exec-field exec-field--right">
+                <span className="exec-field-lbl">Price</span>
+                <span className="exec-field-val">{fmtPrice(bid)}</span>
+              </div>
+            </div>
+
+            {/* Parity + Delivery */}
+            <div className="exec-card-meta">
+              <span>{bid.parity} {bid.delivery_location || bid.loading_location || ""}</span>
+              <span>Delivery: {fmtDelivery(bid.delivery_start, bid.delivery_end)}</span>
+            </div>
+
+            {/* Expiry warning banner */}
+            {days !== null && days < 0 && (
+              <div className="exec-banner exec-banner--expired">
+                ⚠️ This contract has expired
+              </div>
+            )}
+            {days !== null && days >= 0 && days <= 5 && (
+              <div className="exec-banner exec-banner--soon">
+                ⚠️ {days} {days === 1 ? "day" : "days"} until contract expiry
+              </div>
+            )}
+
+            {/* Delivery progress bar */}
+            <div className="exec-progress">
+              <div className="exec-progress-labels">
+                <span>Delivered</span>
+                <span className="exec-progress-qty">{formatCompactNumber(delivered)} / {formatCompactNumber(bid.quantity)} t</span>
+              </div>
+              <div className="exec-bar-bg">
+                <div className="exec-bar-fill" style={{ width: `${pct}%`, background: barColor }} />
+              </div>
+              <div className="exec-pct" style={{ color: barColor }}>{pct}%</div>
+            </div>
+
+            {/* Payment badge */}
+            <div className="exec-payment-badge" style={{ background: pmt.bg, color: pmt.color }}>
+              {pmt.label}
+            </div>
+
+            {/* Calculation button or sent */}
+            {state.calculation_sent ? (
+              <div className="exec-calc-sent">✅ Calculation sent</div>
+            ) : (
+              <button className="exec-calc-btn" onClick={() => setModalBid(bid)}>
+                Calculation
+              </button>
+            )}
+          </div>
+        );
+      })}
+
+      {acceptedBids.length === 0 && (
+        <div className="exec-empty">No accepted contracts yet</div>
+      )}
+
+      {/* ── Calculation Modal ── */}
+      {modalBid && (
+        <div className="exec-modal-backdrop" onClick={() => setModalBid(null)}>
+          <div className="exec-modal" onClick={e => e.stopPropagation()}>
+            <div className="exec-modal-handle" />
+            <button className="exec-modal-close" onClick={() => setModalBid(null)}>✕</button>
+
+            <div className="exec-modal-header">
+              <div className="exec-modal-title">
+                {modalBid.farmer_email ?? "Farmer"} — {getProductLabelSafe(modalBid.product)}
+              </div>
+              {modalBid.contract_no && (
+                <div className="exec-modal-sub">{modalBid.contract_no}</div>
+              )}
+            </div>
+
+            <div className="exec-modal-body">
+              {/* TODO: replace with real calculation breakdown */}
+              <div className="exec-modal-placeholder">
+                <div className="exec-modal-placeholder-icon">📊</div>
+                <div>Calculation details will appear here</div>
+              </div>
+            </div>
+
+            <div className="exec-modal-footer">
+              <button className="exec-modal-send" onClick={() => sendCalculation(modalBid)}>
+                Send Calculation
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1067,7 +1279,7 @@ export default function MotherboardPage() {
       )}
 
       {mbTab === "execution" && (
-        <PlaceholderCard text="Execution — intake, calculations, contracts per owner" />
+        <ExecutionTab />
       )}
     </div>
   );
