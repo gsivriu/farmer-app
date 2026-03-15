@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import StocksPage from "./Motherboard/StocksPage";
 import { TrainIcon, BargeIcon, TruckIcon } from "../components/TransportIcons";
 
@@ -365,6 +365,17 @@ function CardAcquisitions() {
 // ── Card: Vessels Underloading ────────────────────────────────────────────────
 
 function CardVessels() {
+  const [activeIdx, setActiveIdx] = useState(0);
+  const carouselRef = useRef(null);
+
+  const handleScroll = useCallback(() => {
+    const el = carouselRef.current;
+    if (!el) return;
+    const cardWidth = el.firstChild?.offsetWidth ?? el.offsetWidth;
+    const idx = Math.round(el.scrollLeft / cardWidth);
+    setActiveIdx(Math.min(idx, VESSELS_MOCK.length - 1));
+  }, []);
+
   return (
     <div className="mb-card vessels-section">
       <div className="vessels-section-head">
@@ -388,7 +399,11 @@ function CardVessels() {
         </span>
       </div>
 
-      <div className="vessels-grid">
+      <div
+        className="vessels-grid"
+        ref={carouselRef}
+        onScroll={handleScroll}
+      >
         {VESSELS_MOCK.map(vessel => {
           const colors = PRODUCT_COLORS[vessel.product] ?? PRODUCT_COLORS.wheat;
           const pct = vessel.totalTons > 0
@@ -496,6 +511,12 @@ function CardVessels() {
             </div>
           );
         })}
+      </div>
+
+      <div className="vessels-carousel-dots">
+        {VESSELS_MOCK.map((_, i) => (
+          <span key={i} className={"vessels-dot" + (i === activeIdx ? " vessels-dot--active" : "")} />
+        ))}
       </div>
     </div>
   );

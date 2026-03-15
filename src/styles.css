@@ -6701,14 +6701,64 @@ select.input:focus {
 .theme-dark .vessel-footer--ok      { color: #4ade80; }
 .theme-dark .vessel-footer--neutral { color: #6b7280; }
 
+/* ── Vessels dot indicator (hidden on desktop) ───────────────────────────── */
+.vessels-carousel-dots { display: none; }
+
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .mb-tab-body { padding-top: 20px; }
   .mb-overview-grid { grid-template-columns: 1fr; }
   .mb-subnav { padding: 0 12px; overflow-x: auto; justify-content: flex-start; }
   .mb-subnav .nav-item { padding: 10px 14px; white-space: nowrap; }
-  .vessels-grid { grid-template-columns: 1fr; }
   .vessels-section { padding: 0; }
+
+  /* Carousel container */
+  .vessels-grid {
+    display: flex;
+    flex-direction: row;
+    overflow-x: scroll;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    touch-action: pan-x;
+    -webkit-overflow-scrolling: touch;
+    gap: 12px;
+    padding: 4px 16px 8px;
+    margin: 0 -16px;
+    /* hide scrollbar */
+    scrollbar-width: none;
+  }
+  .vessels-grid::-webkit-scrollbar { display: none; }
+
+  /* Each card snaps and shows ~85vw, hinting at next */
+  .vessels-grid .vessel-card {
+    flex: 0 0 85vw;
+    max-width: 85vw;
+    scroll-snap-align: start;
+    /* last card fade hint */
+  }
+  .vessels-grid .vessel-card:last-child {
+    margin-right: 16px;
+  }
+
+  /* Dot indicator */
+  .vessels-carousel-dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 0 4px;
+  }
+  .vessels-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #d1d5db;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .vessels-dot--active {
+    background: #b9101e;
+    transform: scale(1.25);
+  }
 }
 @media (min-width: 601px) and (max-width: 900px) {
   .vessels-grid { grid-template-columns: 1fr 1fr; }
