@@ -318,7 +318,7 @@ function CardAcquisitions() {
   const totalContracts = ACQ_DATA.reduce((s, r) => s + r.contracts, 0);
 
   return (
-    <div className="mb-card">
+    <div className="mb-card acq-table">
       <div className="mb-card-head">
         <div className="mb-card-title">
           <span style={{ display: "flex", alignItems: "center", gap: 6, flex: 1 }}>

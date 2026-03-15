@@ -6712,6 +6712,18 @@ select.input:focus {
   .mb-subnav .nav-item { padding: 10px 14px; white-space: nowrap; }
   .vessels-section { padding: 0; }
 
+  /* Contracts Today — fix column alignment on mobile */
+  .acq-table .mb-col-row,
+  .acq-table .mb-row,
+  .acq-table .mb-totals-row > div {
+    grid-template-columns: 1.8fr 0.6fr 1fr 1fr !important;
+  }
+  .acq-table .mb-row span:nth-child(n+2),
+  .acq-table .mb-col-row span:nth-child(n+2),
+  .acq-table .mb-totals-row span:nth-child(n+2) {
+    font-variant-numeric: tabular-nums;
+  }
+
   /* Carousel container */
   .vessels-grid {
     display: flex;
