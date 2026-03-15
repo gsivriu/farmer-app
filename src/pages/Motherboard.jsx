@@ -714,9 +714,11 @@ function TrainSection({ trains }) {
           <div key={group.key} className="train-status-group">
             <div className="train-status-header">
               <span className="train-status-label" style={{ color: group.color }}>{group.label}</span>
-              <span className="train-status-count" style={{ color: group.color }}>
-                {rows.length} {rows.length > 1 ? "trains" : "train"}
-              </span>
+              {rows.some(t => t.furnizor) && (
+                <span className="train-status-count" style={{ color: group.color }}>
+                  {rows.filter(t => t.furnizor).length} {rows.filter(t => t.furnizor).length > 1 ? "trains" : "train"}
+                </span>
+              )}
             </div>
             {rows.map(t => <TrainCard key={t.id} train={t} />)}
           </div>
