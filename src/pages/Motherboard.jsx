@@ -1209,18 +1209,10 @@ const PAYMENT_STYLES = {
   fully_paid:      { bg: "#E8F5E9", color: "#2E7D32", border: "#A5D6A7", label: "FULLY PAID"      },
   partially_paid:  { bg: "#FFF3E0", color: "#E65100", border: "#FFCC80", label: "PARTIALLY PAID"  },
   payment_pending: { bg: "#F5F5F5", color: "#757575", border: "#E0E0E0", label: "PAYMENT PENDING" },
-  overdue:         { bg: "#FFEBEE", color: "#C62828", border: "#EF9A9A", label: "OVERDUE"          },
 };
 
-// TODO: replace demo delivered_quantity and payment_status with real Supabase values per contract
-const DEMO_STATES = [
-  { demoPct: 100, payment_status: "fully_paid"      },
-  { demoPct: 0,   payment_status: "payment_pending" },
-  { demoPct: 60,  payment_status: "partially_paid"  },
-  { demoPct: 30,  payment_status: "payment_pending" },
-  { demoPct: 100, payment_status: "partially_paid"  },
-  { demoPct: 0,   payment_status: "overdue"         },
-];
+const DEMO_PAYMENT = ["fully_paid", "partially_paid", "payment_pending"];
+const DEMO_PCT     = [100, 60, 30, 0];
 
 function ExecutionTab() {
   // TODO: replace with Supabase fetch when ready
@@ -1238,8 +1230,12 @@ function ExecutionTab() {
       const next = { ...prev };
       acceptedBids.forEach((b, idx) => {
         if (!next[b.id]) {
-          const demo = DEMO_STATES[idx % DEMO_STATES.length];
-          next[b.id] = { calculation_sent: false, payment_status: demo.payment_status, demoPct: demo.demoPct };
+          // TODO: replace demo payment_status with real Supabase values
+          next[b.id] = {
+            calculation_sent: false,
+            payment_status: DEMO_PAYMENT[idx % 3],
+            demoPct: DEMO_PCT[idx % 4],
+          };
         }
       });
       return next;
@@ -1279,14 +1275,13 @@ function ExecutionTab() {
     return `${formatCompactNumber(p)} ${unit}`;
   };
 
-  // Sort: overdue → partially delivered → not delivered → fully paid
+  // Sort: partially delivered → not delivered → fully paid
   const sortedBids = useMemo(() => [...acceptedBids].sort((a, b) => {
     const urgency = (bid) => {
       const ps = calcState[bid.id]?.payment_status;
-      if (ps === "fully_paid") return 3;
-      if (ps === "overdue") return 0;
+      if (ps === "fully_paid") return 2;
       const pct = calcState[bid.id]?.demoPct ?? 0;
-      return pct > 0 ? 1 : 2;
+      return pct > 0 ? 0 : 1;
     };
     return urgency(a) - urgency(b);
   }), [acceptedBids, calcState]);
