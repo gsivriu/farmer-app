@@ -869,7 +869,7 @@ function BargeCard({ barge }) {
       {/* Row 6 — under_coming */}
       {barge.status === "under_coming" && (
         <div className="barge-status-block">
-          <span className="barge-chip barge-chip--blue">Under Coming</span>
+          <span className="barge-chip barge-chip--blue">Underway</span>
           {barge.eta_pod && <div className="barge-card-eta">{barge.eta_pod}</div>}
           {barge.etb && <div className="barge-card-detail"><span className="barge-card-lbl">ETB:</span> {barge.etb}</div>}
           {barge.discharging_permit_qty != null && (
@@ -927,7 +927,7 @@ function BargeSection({ barges }) {
   const loading = barges.filter(b => ["under_loading", "wait_departure", "waiting_to_start_loading"].includes(b.status));
   const groups  = [
     { label: "Arrived / Under Operation", color: "#E53935", items: arrived },
-    { label: "Under Coming",              color: "#1E88E5", items: coming  },
+    { label: "Underway",              color: "#1E88E5", items: coming  },
     { label: "Under Loading",             color: "#43A047", items: loading },
   ];
 
@@ -960,7 +960,7 @@ function BargeSection({ barges }) {
       })}
 
       <div className="logi-section-foot">
-        {arrived.length} arrived · {coming.length} under coming · {loading.length} under loading · {fmtTon(sumQty(barges))} total
+        {arrived.length} arrived · {coming.length} underway · {loading.length} under loading · {fmtTon(sumQty(barges))} total
       </div>
     </div>
   );
