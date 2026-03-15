@@ -1018,9 +1018,9 @@ function LogisticsTab() {
 const mockCalculation = {
   calculation_number: "206602",
   calculation_date: "13/03/2026",
-  magazie: "MAGAZIE/PLATFORMA 1",
+  magazie: "WAREHOUSE/PLATFORM 1",
   partener: "Partener Demo SRL",
-  produs: "GRAU PANIFICATIE",
+  produs: "MILLING WHEAT",
   silo: "FARCASELE",
   contract: "C/BKS/MWHT/25/90080",
   ext: "5919",
@@ -1035,17 +1035,17 @@ const mockCalculation = {
   cantitate_receptionata: 25.400,
   cantitate_util: 25.400,
   specificatii: [
-    { name: "Corpuri Straine",      moneda: "RON", price_base: 2.00,  indice_receptie: 1.80,  depasire: 0.00 },
-    { name: "Umiditate",            moneda: "RON", price_base: 14.00, indice_receptie: 10.30, depasire: 0.00 },
-    { name: "Masa Hectolitrica",    moneda: "RON", price_base: 77.00, indice_receptie: 77.60, depasire: 0.00 },
-    { name: "Continut de Proteina", moneda: "RON", price_base: 12.00, indice_receptie: 14.34, depasire: 0.00 },
-    { name: "Umiditate",            moneda: "RON", price_base: 14.00, indice_receptie: 10.30, depasire: 0.00 },
-    { name: "Corpuri Straine",      moneda: "RON", price_base: 2.00,  indice_receptie: 1.80,  depasire: 0.00 },
-    { name: "Infestie",             moneda: "RON", price_base: 0.00,  indice_receptie: 0.00,  depasire: 0.00 },
-    { name: "Invazie",              moneda: "RON", price_base: 0.00,  indice_receptie: 0.00,  depasire: 0.00 },
+    { name: "Foreign Matter",    moneda: "RON", price_base: 2.00,  indice_receptie: 1.80,  depasire: 0.00 },
+    { name: "Moisture",          moneda: "RON", price_base: 14.00, indice_receptie: 10.30, depasire: 0.00 },
+    { name: "Hectoliter Weight", moneda: "RON", price_base: 77.00, indice_receptie: 77.60, depasire: 0.00 },
+    { name: "Protein Content",   moneda: "RON", price_base: 12.00, indice_receptie: 14.34, depasire: 0.00 },
+    { name: "Moisture",          moneda: "RON", price_base: 14.00, indice_receptie: 10.30, depasire: 0.00 },
+    { name: "Foreign Matter",    moneda: "RON", price_base: 2.00,  indice_receptie: 1.80,  depasire: 0.00 },
+    { name: "Infestation",       moneda: "RON", price_base: 0.00,  indice_receptie: 0.00,  depasire: 0.00 },
+    { name: "Invasion",          moneda: "RON", price_base: 0.00,  indice_receptie: 0.00,  depasire: 0.00 },
   ],
   cantitate_finala: 25.4000,
-  unitate: "mto",
+  unitate: "MT",
   pret_standard: 950.00000,
   pret_de_facturat: 950.00,
   moneda_finala: "RON",
@@ -1076,12 +1076,12 @@ function CalculationSheet({ calc }) {
       <div className="calc-section">
         <div className="calc-info-grid">
           {[
-            ["Partener",          calc.partener],
-            ["Produs",            calc.produs],
-            ["Silo",              calc.silo],
-            ["Contract",          `${calc.contract} · Ext. ${calc.ext}`],
-            ["Data Contract",     calc.data_contract],
-            ["Perioada Livrare",  `${calc.perioada_livrare_start} → ${calc.perioada_livrare_end}`],
+            ["Partner",          calc.partener],
+            ["Product",          calc.produs],
+            ["Silo",             calc.silo],
+            ["Contract",         `${calc.contract} · Ext. ${calc.ext}`],
+            ["Contract Date",    calc.data_contract],
+            ["Delivery Period",  `${calc.perioada_livrare_start} → ${calc.perioada_livrare_end}`],
           ].map(([lbl, val]) => (
             <div key={lbl} className="calc-info-row">
               <span className="calc-lbl">{lbl}</span>
@@ -1096,13 +1096,13 @@ function CalculationSheet({ calc }) {
       <div className="calc-section">
         <div className="calc-transport-table">
           <div className="calc-transport-header">
-            <span>Mijloc Transport</span>
-            <span>Aviz</span>
-            <span>Data Recep.</span>
-            <span>Pret Contr.</span>
-            <span>Pret</span>
-            <span>Cant. Recep.</span>
-            <span>Cant. Util</span>
+            <span>Transport</span>
+            <span>Notice</span>
+            <span>Reception Date</span>
+            <span>Contract Price</span>
+            <span>Price</span>
+            <span>Received Qty</span>
+            <span>Net Qty</span>
           </div>
           <div className="calc-transport-row">
             <span>{calc.mijloc_transport}</span>
@@ -1119,14 +1119,14 @@ function CalculationSheet({ calc }) {
 
       {/* ── Section 4: Specificatii calitative ── */}
       <div className="calc-section">
-        <div className="calc-section-title">Specificații Calitative</div>
+        <div className="calc-section-title">Quality Specifications</div>
         <div className="calc-spec-table">
           <div className="calc-spec-header">
-            <span>Specificatie</span>
-            <span>Moneda</span>
-            <span>Price Base</span>
-            <span>Indice Recep.</span>
-            <span>Depasire</span>
+            <span>Specification</span>
+            <span>Currency</span>
+            <span>Base Value</span>
+            <span>Reception Index</span>
+            <span>Excess</span>
           </div>
           {calc.specificatii.map((s, i) => (
             <div key={i} className="calc-spec-row">
@@ -1150,40 +1150,40 @@ function CalculationSheet({ calc }) {
         <div className="calc-totals-rows">
           <div className="calc-totals-row">
             <div className="calc-totals-item">
-              <span className="calc-lbl">Cantitate</span>
+              <span className="calc-lbl">Quantity</span>
               <div className="calc-val">{fmt(calc.cantitate_finala, 4)} {calc.unitate}</div>
             </div>
             <div className="calc-totals-item">
-              <span className="calc-lbl">Pret Standard</span>
+              <span className="calc-lbl">Standard Price</span>
               <div className="calc-val">{fmt(calc.pret_standard, 5)}</div>
             </div>
             <div className="calc-totals-item">
-              <span className="calc-lbl">Pret de Facturat</span>
+              <span className="calc-lbl">Invoice Price</span>
               <div className="calc-val">{fmt(calc.pret_de_facturat)} {calc.moneda_finala}</div>
             </div>
           </div>
           <div className="calc-totals-row">
             <div className="calc-totals-item">
-              <span className="calc-lbl">De facturat la</span>
+              <span className="calc-lbl">Invoice Date</span>
               <div className="calc-val">{calc.data_facturare}</div>
             </div>
             <div className="calc-totals-item">
-              <span className="calc-lbl">Curs Schimb</span>
+              <span className="calc-lbl">Exchange Rate</span>
               <div className="calc-val">{fmt(calc.curs_schimb, 4)}</div>
             </div>
           </div>
           <div className="calc-totals-box">
             <div className="calc-totals-box-grid">
               <div>
-                <span className="calc-lbl">Pret (RON)</span>
+                <span className="calc-lbl">Price (RON)</span>
                 <div className="calc-val">{fmt(calc.pret_ron)}</div>
               </div>
               <div>
-                <span className="calc-lbl">Valoare</span>
+                <span className="calc-lbl">Value</span>
                 <div className="calc-val">{fmt(calc.valoare)}</div>
               </div>
               <div>
-                <span className="calc-lbl">Valoare TVA</span>
+                <span className="calc-lbl">VAT Value</span>
                 <div className="calc-val">{fmt(calc.valoare_tva)}</div>
               </div>
             </div>
@@ -1197,8 +1197,8 @@ function CalculationSheet({ calc }) {
 
       {/* ── Section 6: Document footer ── */}
       <div className="calc-doc-footer">
-        <span>Întocmit de: <em>{calc.intocmit_de}</em></span>
-        <span>Semnatura: ___________</span>
+        <span>Prepared by: <em>{calc.intocmit_de}</em></span>
+        <span>Signature: ___________</span>
       </div>
 
     </div>
@@ -1378,7 +1378,7 @@ function ExecutionTab() {
             {/* Header */}
             <div className="exec-modal-header">
               <div className="exec-modal-title">
-                Calculatie {mockCalculation.calculation_number} / {mockCalculation.calculation_date}
+                Calculation {mockCalculation.calculation_number} / {mockCalculation.calculation_date}
               </div>
               <div className="exec-modal-sub">
                 {mockCalculation.partener} — {mockCalculation.produs}
