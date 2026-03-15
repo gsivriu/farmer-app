@@ -92,13 +92,16 @@ const INLAND_TOTAL    = 93800;
 const INLAND_CAPACITY = 302000;
 
 const TRANSPORT_DATA = [
-  { id: "TRN-2241",  type: "train", commodity: "Wheat",    from: "Darmanesti",   to: "Chimpex",  qty: "1,840 t" },
-  { id: "TRN-2198",  type: "train", commodity: "Corn",     from: "Sarulesti", to: "Chimpex",   qty: "2,100 t" },
-  { id: "Danube-7",  type: "barge", commodity: "Wheat",    from: "Galați",     to: "Chimpex",  qty: "2,500 t" },
-  { id: "Neptune-3", type: "barge", commodity: "Rapeseed", from: "Macin",     to: "Chimpex",   qty: "3,000 t" },
-  { id: "B-44 XYZ",  type: "truck", commodity: "Corn",     from: "Vladeni",   to: "Silotrans",  qty: "28 t" },
-  { id: "CT-22 ABC", type: "truck", commodity: "Wheat",    from: "Ciresu",     to: "Babeni", qty: "28 t" },
-  { id: "IF-33 MNO", type: "truck", commodity: "Rapeseed", from: "Ciocarlia",      to: "Chimpex",  qty: "28 t" },
+  { id: "TRN-2241",  type: "train", status: "underdischarge", commodity: "Wheat",     from: "Darmanesti",  to: "Chimpex",   qty: "1,840 t" },
+  { id: "TRN-2198",  type: "train", status: "in_transit",     commodity: "Corn",      from: "Sarulesti",   to: "Chimpex",   qty: "2,100 t" },
+  { id: "TRN-2305",  type: "train", status: "waiting_zone",   commodity: "Sunflower", from: "Ciocarlia",   to: "Chimpex",   qty: "1,540 t" },
+  { id: "TRN-2177",  type: "train", status: "underloading",   commodity: "Rapeseed",  from: "Babeni",      to: "Silotrans", qty: "980 t"   },
+  { id: "TRN-2089",  type: "train", status: "scheduled",      commodity: "Wheat",     from: "Vladeni",     to: "Chimpex",   qty: "2,020 t" },
+  { id: "Danube-7",  type: "barge", commodity: "Wheat",       from: "Galați",         to: "Chimpex",       qty: "2,500 t" },
+  { id: "Neptune-3", type: "barge", commodity: "Rapeseed",    from: "Macin",          to: "Chimpex",       qty: "3,000 t" },
+  { id: "B-44 XYZ",  type: "truck", commodity: "Corn",        from: "Vladeni",        to: "Silotrans",     qty: "28 t"    },
+  { id: "CT-22 ABC", type: "truck", commodity: "Wheat",       from: "Ciresu",         to: "Babeni",        qty: "28 t"    },
+  { id: "IF-33 MNO", type: "truck", commodity: "Rapeseed",    from: "Ciocarlia",      to: "Chimpex",       qty: "28 t"    },
 ];
 
 // Transport type definitions — order determines display order
@@ -522,6 +525,122 @@ function CardVessels() {
   );
 }
 
+// ── Logistics Tab ────────────────────────────────────────────────────────────
+
+const TRAIN_STATUS_GROUPS = [
+  { key: "underdischarge", label: "Underdischarge",        color: "#b9101e" },
+  { key: "waiting_zone",   label: "Waiting Zone",          color: "#d97706" },
+  { key: "in_transit",     label: "On the Way",            color: "#1d4ed8" },
+  { key: "underloading",   label: "Underloading",          color: "#ea580c" },
+  { key: "scheduled",      label: "Scheduled for Loading", color: "#6b7280" },
+];
+
+function normalizeTrainStatus(s) {
+  switch ((s ?? "").toLowerCase()) {
+    case "underdischarge": case "unloading":    return "underdischarge";
+    case "waiting":        case "waiting_zone": return "waiting_zone";
+    case "in_transit":     case "on_the_way":   return "in_transit";
+    case "loading":        case "underloading": return "underloading";
+    default:                                    return "scheduled";
+  }
+}
+
+function LogisticsTypeSection({ items, Icon, color, bgColor, borderColor, label }) {
+  return (
+    <div className="logi-section">
+      <div className="logi-section-head">
+        <div className="logi-section-title">
+          <Icon size={16} color={color} bgColor={bgColor} borderColor={borderColor} />
+          <span>{label}</span>
+        </div>
+        <span className="logi-type-badge" style={{ color, background: bgColor }}>{items.length}</span>
+      </div>
+      {items.map(t => (
+        <div key={t.id} className="logi-row-card">
+          <div className="logi-row-info">
+            <span className="logi-row-id">{t.id}</span>
+            <span className="logi-row-route">{t.from} → {t.to}</span>
+          </div>
+          <div className="logi-row-right">
+            <span className="logi-row-qty">{t.qty}</span>
+            <span className="logi-row-commodity">{t.commodity}</span>
+          </div>
+        </div>
+      ))}
+      <div className="logi-section-foot">
+        {items.length} {label.toLowerCase()}{items.length !== 1 ? "s" : ""} · {items.length} active
+      </div>
+    </div>
+  );
+}
+
+function LogisticsTab() {
+  const trains = TRANSPORT_DATA.filter(t => t.type === "train");
+  const barges = TRANSPORT_DATA.filter(t => t.type === "barge");
+  const trucks = TRANSPORT_DATA.filter(t => t.type === "truck");
+  const activeTrains = trains.filter(t => normalizeTrainStatus(t.status) !== "scheduled").length;
+
+  return (
+    <div className="logi-tab">
+
+      {/* ── Train section with status groups ── */}
+      <div className="logi-section">
+        <div className="logi-section-head">
+          <div className="logi-section-title">
+            <TrainIcon size={16} color="#b9101e" bgColor="#fef2f2" borderColor="#b9101e" />
+            <span>Train</span>
+          </div>
+          <span className="logi-type-badge" style={{ color: "#b9101e", background: "#fef2f2" }}>{trains.length}</span>
+        </div>
+
+        {TRAIN_STATUS_GROUPS.map(group => {
+          const rows = trains.filter(t => normalizeTrainStatus(t.status) === group.key);
+          if (rows.length === 0) return null;
+          return (
+            <div key={group.key} className="train-status-group">
+              <div className="train-status-header">
+                <span className="train-status-label" style={{ color: group.color }}>{group.label}</span>
+                <span className="train-status-count" style={{ color: group.color }}>
+                  {rows.length} train{rows.length > 1 ? "s" : ""}
+                </span>
+              </div>
+              {rows.map(t => (
+                <div key={t.id} className="logi-row-card">
+                  <div className="logi-row-info">
+                    <span className="logi-row-id">{t.id}</span>
+                    <span className="logi-row-route">{t.from} → {t.to}</span>
+                  </div>
+                  <div className="logi-row-right">
+                    <span className="logi-row-qty">{t.qty}</span>
+                    <span className="logi-row-commodity">{t.commodity}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          );
+        })}
+
+        <div className="logi-section-foot">
+          {trains.length} trains · {activeTrains} active
+        </div>
+      </div>
+
+      {barges.length > 0 && (
+        <LogisticsTypeSection
+          items={barges} label="Barge"
+          Icon={BargeIcon} color="#1d4ed8" bgColor="#eff6ff" borderColor="#1d4ed8"
+        />
+      )}
+      {trucks.length > 0 && (
+        <LogisticsTypeSection
+          items={trucks} label="Auto"
+          Icon={TruckIcon} color="#15803d" bgColor="#f0fdf4" borderColor="#15803d"
+        />
+      )}
+    </div>
+  );
+}
+
 // ── Placeholder card ──────────────────────────────────────────────────────────
 
 function PlaceholderCard({ text }) {
@@ -576,7 +695,7 @@ export default function MotherboardPage() {
       )}
 
       {mbTab === "logistics" && (
-        <PlaceholderCard text="Logistics — detailed transport plan, all active means of transport" />
+        <LogisticsTab />
       )}
 
       {mbTab === "execution" && (
