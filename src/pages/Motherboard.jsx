@@ -1279,26 +1279,17 @@ function ExecutionTab() {
     return `${formatCompactNumber(p)} ${unit}`;
   };
 
-  // Sort: overdue/expired → expiring ≤5 → partially delivered → not delivered → fully paid
+  // Sort: overdue → partially delivered → not delivered → fully paid
   const sortedBids = useMemo(() => [...acceptedBids].sort((a, b) => {
     const urgency = (bid) => {
       const ps = calcState[bid.id]?.payment_status;
-      if (ps === "fully_paid") return 4;
-      const d = bid.delivery_end ? daysUntil(bid.delivery_end) : null;
-      if (ps === "overdue" || (d !== null && d < 0)) return 0;
-      if (d !== null && d <= 5) return 1;
+      if (ps === "fully_paid") return 3;
+      if (ps === "overdue") return 0;
       const pct = calcState[bid.id]?.demoPct ?? 0;
-      return pct > 0 ? 2 : 3;
+      return pct > 0 ? 1 : 2;
     };
-    const ua = urgency(a), ub = urgency(b);
-    if (ua !== ub) return ua - ub;
-    const da = a.delivery_end ? new Date(a.delivery_end).getTime() : Infinity;
-    const db = b.delivery_end ? new Date(b.delivery_end).getTime() : Infinity;
-    return da - db;
+    return urgency(a) - urgency(b);
   }), [acceptedBids, calcState]);
-
-  const expiredCount      = useMemo(() => acceptedBids.filter(b => b.delivery_end && daysUntil(b.delivery_end) < 0).length, [acceptedBids]);
-  const expiringSoonCount = useMemo(() => acceptedBids.filter(b => { if (!b.delivery_end) return false; const d = daysUntil(b.delivery_end); return d >= 0 && d <= 5; }).length, [acceptedBids]);
 
   return (
     <div className="exec-tab">
@@ -1309,14 +1300,11 @@ function ExecutionTab() {
       {/* ── Summary bar ── */}
       <div className="exec-summary">
         {acceptedBids.length} contracts
-        {expiringSoonCount > 0 && <> · <span className="exec-summary--warn">{expiringSoonCount} expiring soon</span></>}
-        {expiredCount      > 0 && <> · <span className="exec-summary--expired">{expiredCount} expired</span></>}
       </div>
 
       {/* ── Contract cards ── */}
       {sortedBids.map(bid => {
         const state    = calcState[bid.id] ?? { calculation_sent: false, payment_status: "payment_pending", demoPct: 0 };
-        const days     = bid.delivery_end ? daysUntil(bid.delivery_end) : null;
         // TODO: fetch real delivered_quantity from Supabase
         const delivered = bid.quantity > 0 ? (bid.quantity * (state.demoPct ?? 0)) / 100 : 0;
         const pct      = state.demoPct ?? 0;
@@ -1331,12 +1319,6 @@ function ExecutionTab() {
               <span className="exec-card-product">{getProductLabelSafe(bid.product)}</span>
               <div className="exec-card-pills">
                 <span className="exec-pill" style={{ background: pmt.bg, color: pmt.color, borderColor: pmt.border }}>{pmt.label}</span>
-                {days !== null && days < 0 && (
-                  <span className="exec-pill exec-pill--expired">EXPIRED</span>
-                )}
-                {days !== null && days >= 0 && days <= 5 && (
-                  <span className="exec-pill exec-pill--soon">{days}d</span>
-                )}
               </div>
             </div>
 
@@ -1354,15 +1336,7 @@ function ExecutionTab() {
               {[bid.parity, fmtDelivery(bid.delivery_start, bid.delivery_end)].filter(Boolean).join(" · ")}
             </div>
 
-            {/* Row 4 — compact expiry banner */}
-            {days !== null && days < 0 && (
-              <div className="exec-banner exec-banner--expired">⚠️ This contract has expired</div>
-            )}
-            {days !== null && days >= 0 && days <= 5 && (
-              <div className="exec-banner exec-banner--soon">⚠️ {days} {days === 1 ? "day" : "days"} until expiry</div>
-            )}
-
-            {/* Row 5 — delivery progress */}
+            {/* Row 4 — delivery progress */}
             <div className="exec-progress">
               <div className="exec-progress-labels">
                 <span>Delivered</span>
