@@ -6524,12 +6524,13 @@ select.input:focus {
 .theme-dark .tr-item-qty   { color: #e5e7eb; }
 
 /* ── Logistics Tab ─────────────────────────────────────────────────────────── */
-.logi-tab { display: flex; flex-direction: column; gap: 12px; padding: 16px; }
+.logi-tab { display: flex; flex-direction: column; gap: 0; padding: 0; }
 
 .logi-section {
   background: var(--white);
-  border-radius: var(--radius-lg, 12px);
-  border: 1px solid var(--glass-border, #e5e7eb);
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid #f3f4f6;
   overflow: hidden;
 }
 
@@ -6585,13 +6586,15 @@ select.input:focus {
 /* ── Train cards ─────────────────────────────────────────────────────────── */
 .train-card {
   background: var(--white);
-  border: 1px solid #f0f0f0;
-  border-radius: 10px;
-  padding: 12px 14px;
-  margin-bottom: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,.05);
+  border: none;
+  border-bottom: 1px solid #f3f4f6;
+  border-radius: 0;
+  padding: 16px 20px;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
-.theme-dark .train-card { background: #1f2937; border-color: #374151; box-shadow: none; }
+.theme-dark .train-card { background: #1f2937; border-color: #374151; }
 
 .train-card--empty {
   font-size: 12px;
@@ -6692,13 +6695,15 @@ select.input:focus {
 /* ── Barge cards ─────────────────────────────────────────────────────────── */
 .barge-card {
   background: var(--white);
-  border: 1px solid #f0f0f0;
-  border-radius: 10px;
-  padding: 12px 14px;
-  margin-bottom: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,.05);
+  border: none;
+  border-bottom: 1px solid #f3f4f6;
+  border-radius: 0;
+  padding: 16px 20px;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
-.theme-dark .barge-card { background: #1f2937; border-color: #374151; box-shadow: none; }
+.theme-dark .barge-card { background: #1f2937; border-color: #374151; }
 
 /* Row 1 */
 .barge-card-row1 {
@@ -7104,9 +7109,7 @@ select.input:focus {
 .exec-tab {
   display: flex;
   flex-direction: column;
-  background: #F2F2F7;
-  min-height: 100%;
-  padding: 12px 0 24px;
+  width: 100%;
 }
 
 /* Toast */
@@ -7132,7 +7135,7 @@ select.input:focus {
 .exec-summary {
   font-size: 12px;
   color: #8E8E93;
-  padding: 0 16px 10px;
+  padding: 12px 20px 8px;
 }
 .exec-summary--expired { color: #FF3B30; }
 
@@ -7140,12 +7143,14 @@ select.input:focus {
 .exec-card {
   background: #FFFFFF;
   border: none;
-  border-radius: 14px;
-  padding: 14px 16px;
-  margin: 0 16px 10px;
-  box-shadow: 0 1px 3px rgba(0,0,0,.07), 0 4px 12px rgba(0,0,0,.04);
+  border-radius: 0;
+  border-bottom: 1px solid #F2F2F7;
+  padding: 16px 20px;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
-.theme-dark .exec-card { background: #1f2937; box-shadow: none; }
+.theme-dark .exec-card { background: #1f2937; }
 
 /* Row 1 — email + payment pill */
 .exec-card-r1 {
