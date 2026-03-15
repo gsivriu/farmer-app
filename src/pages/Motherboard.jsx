@@ -104,12 +104,6 @@ const TRANSPORT_DATA = [
   { id: "IF-33 MNO", type: "truck", commodity: "Rapeseed",    from: "Ciocarlia",      to: "Chimpex",       qty: "28 t"    },
 ];
 
-// Transport type definitions — order determines display order
-const TRANSPORT_TYPES = [
-  { type: "train", label: "Train", Icon: TrainIcon, color: "#b9101e", bgColor: "#fef2f2", borderColor: "#b9101e" },
-  { type: "barge", label: "Barge", Icon: BargeIcon, color: "#1d4ed8", bgColor: "#eff6ff", borderColor: "#1d4ed8" },
-  { type: "truck", label: "Truck", Icon: TruckIcon, color: "#15803d", bgColor: "#f0fdf4", borderColor: "#15803d" },
-];
 
 const ACQ_DATA = [
   { product: "Wheat",     contracts: 4, qty: "1,840 t", price: "208 €/t" },
@@ -248,7 +242,43 @@ function CardInland() {
 // ── Card: Logistics Underway ──────────────────────────────────────────────────
 
 function CardLogistics() {
-  const totalActive = TRANSPORT_DATA.length;
+  // Derived from the same mock data as the Logistics tab so both are in sync
+  // mockTrains and mockBarges are defined later in this file but are module-scope
+  // consts, so they're available by the time this component renders.
+  const trainRows = mockTrains
+    .filter(t => t.furnizor)
+    .map(t => {
+      const total = t.status === "sub_descarcare"
+        ? (t.cantitate_descarcata ?? 0) + (t.cantitate_nedescarcata ?? 0)
+        : (t.cantitate ?? null);
+      return {
+        id: `tr-${t.id}`,
+        name: t.furnizor,
+        route: [t.locatie_incarcare, t.locatie_descarcare].filter(Boolean).join(" → "),
+        qty: total != null ? `${total.toLocaleString("en-US")} t` : "—",
+      };
+    });
+
+  const bargeRows = mockBarges.map(b => ({
+    id: `br-${b.id}`,
+    name: b.barge,
+    route: [b.pol, b.locatie_descarcare ?? "Chimpex"].filter(Boolean).join(" → "),
+    qty: fmtTon(b.bl_quantity),
+  }));
+
+  const truckRows = TRANSPORT_DATA.filter(t => t.type === "truck").map(t => ({
+    id: t.id,
+    name: t.commodity,
+    route: `${t.from} → ${t.to}`,
+    qty: t.qty,
+  }));
+
+  const sections = [
+    { type: "train", label: "Train", Icon: TrainIcon, color: "#b9101e", bgColor: "#fef2f2", borderColor: "#b9101e", items: trainRows },
+    { type: "barge", label: "Barge", Icon: BargeIcon, color: "#1d4ed8", bgColor: "#eff6ff", borderColor: "#1d4ed8", items: bargeRows },
+    { type: "truck", label: "Auto",  Icon: TruckIcon, color: "#15803d", bgColor: "#f0fdf4", borderColor: "#15803d", items: truckRows },
+  ];
+  const totalActive = trainRows.length + bargeRows.length + truckRows.length;
 
   return (
     <div className="mb-card">
@@ -272,12 +302,10 @@ function CardLogistics() {
       </div>
 
       <div className="mb-card-body" style={{ maxHeight: 260 }}>
-        {TRANSPORT_TYPES.map(({ type, label, Icon, color, bgColor, borderColor }) => {
-          const items = TRANSPORT_DATA.filter((t) => t.type === type);
+        {sections.map(({ type, label, Icon, color, bgColor, borderColor, items }) => {
           if (items.length === 0) return null;
           return (
             <div key={type} className="mb-logistics-group">
-              {/* Group header: colored icon box + uppercase label + count */}
               <div className={`tr-group-header tr-group--${type}`}>
                 <div className="tr-type-icon">
                   <Icon size={16} color={color} bgColor={bgColor} borderColor={borderColor} />
@@ -285,12 +313,11 @@ function CardLogistics() {
                 <span className="tr-type-label">{label}</span>
                 <span className="tr-type-count">{items.length}</span>
               </div>
-              {/* Individual transport rows */}
-              {items.map((t) => (
+              {items.map(t => (
                 <div key={t.id} className="tr-item-row">
                   <div className="tr-item-info">
-                    <span className="tr-item-name">{t.commodity}</span>
-                    <span className="tr-item-route">{t.from} → {t.to}</span>
+                    <span className="tr-item-name">{t.name}</span>
+                    <span className="tr-item-route">{t.route}</span>
                   </div>
                   <span className="tr-item-qty">{t.qty}</span>
                 </div>
@@ -302,10 +329,10 @@ function CardLogistics() {
 
       <div className="mb-card-foot">
         <span className="mb-foot-label">
-          {TRANSPORT_TYPES.map(({ type, label }) => {
-            const n = TRANSPORT_DATA.filter((t) => t.type === type).length;
-            return n > 0 ? `${n} ${label.toLowerCase()}${n > 1 ? "s" : ""}` : null;
-          }).filter(Boolean).join(" · ")}
+          {sections
+            .filter(s => s.items.length > 0)
+            .map(s => `${s.items.length} ${s.label.toLowerCase()}${s.items.length > 1 ? "s" : ""}`)
+            .join(" · ")}
         </span>
         <span className="mb-foot-val">{totalActive} active</span>
       </div>
@@ -531,7 +558,7 @@ function CardVessels() {
 const mockTrains = [
   {
     id: 1,
-    furnizor: "LA CIMP NOU pt AMS",
+    furnizor: "LA CIMP NOU for AMS",
     locatie_incarcare: "Darmanesti 24",
     produs: "Wheat",
     cantitate_descarcata: 1038,
