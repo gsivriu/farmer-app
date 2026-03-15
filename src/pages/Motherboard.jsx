@@ -1303,7 +1303,7 @@ function ExecutionTab() {
         // TODO: fetch real delivered_quantity from Supabase
         const delivered = bid.quantity > 0 ? (bid.quantity * (state.demoPct ?? 0)) / 100 : 0;
         const pct      = state.demoPct ?? 0;
-        const barColor = pct === 0 ? "#E0E0E0" : pct === 100 ? "#43A047" : pct >= 50 ? "#FB8C00" : "#E53935";
+        const barColor = pct === 0 ? "#E0E0E0" : "#43A047";
         const pmt      = PAYMENT_STYLES[state.payment_status] ?? PAYMENT_STYLES.payment_pending;
 
         return (
