@@ -6689,6 +6689,129 @@ select.input:focus {
 }
 .theme-dark .train-card-badge { background: #374151; color: #d1d5db; }
 
+/* ── Barge cards ─────────────────────────────────────────────────────────── */
+.barge-card {
+  background: var(--white);
+  border: 1px solid #f0f0f0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.05);
+}
+.theme-dark .barge-card { background: #1f2937; border-color: #374151; box-shadow: none; }
+
+/* Row 1 */
+.barge-card-row1 {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.barge-name-wrap { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
+.barge-card-name { font-size: 14px; font-weight: 700; color: #111827; }
+.theme-dark .barge-card-name { color: #e5e7eb; }
+
+.barge-buyer-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 999px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.barge-card-goods-qty {
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  color: #111827;
+  font-variant-numeric: tabular-nums;
+}
+.theme-dark .barge-card-goods-qty { color: #e5e7eb; }
+
+/* Detail rows */
+.barge-card-detail {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+.barge-card-detail strong { color: #374151; font-weight: 600; }
+.theme-dark .barge-card-detail strong { color: #d1d5db; }
+.barge-card-lbl { color: #9ca3af; font-weight: 500; }
+
+/* Row 4 — agents + transport */
+.barge-card-row4 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 4px;
+}
+.barge-transport-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: #374151;
+  background: #f3f4f6;
+  border-radius: 4px;
+  padding: 2px 7px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.theme-dark .barge-transport-badge { background: #374151; color: #d1d5db; }
+
+/* Status block */
+.barge-status-block { margin-top: 8px; }
+
+/* Status chips */
+.barge-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 999px;
+  margin-bottom: 5px;
+}
+.barge-chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.barge-chip--red    { color: #b91c1c; background: #fef2f2; } .barge-chip--red::before    { background: #E53935; }
+.barge-chip--amber  { color: #b45309; background: #fffbeb; } .barge-chip--amber::before  { background: #f59e0b; }
+.barge-chip--blue   { color: #1d4ed8; background: #eff6ff; } .barge-chip--blue::before   { background: #1E88E5; }
+.barge-chip--orange { color: #c2410c; background: #fff7ed; } .barge-chip--orange::before { background: #ea580c; }
+.barge-chip--green  { color: #166534; background: #f0fdf4; } .barge-chip--green::before  { background: #43A047; }
+.barge-chip--gray   { color: #374151; background: #f3f4f6; } .barge-chip--gray::before   { background: #9ca3af; }
+
+/* ETA italic line */
+.barge-card-eta {
+  font-size: 11px;
+  font-style: italic;
+  color: #6b7280;
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+/* Progress bar */
+.barge-card-progress { margin-top: 6px; }
+.barge-card-progress-nums {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 5px;
+  font-variant-numeric: tabular-nums;
+}
+.barge-card-bar-bg  { height: 5px; background: #f3f4f6; border-radius: 99px; overflow: hidden; }
+.barge-card-bar-fill { height: 100%; background: #43A047; border-radius: 99px; transition: width .3s ease; }
+.theme-dark .barge-card-bar-bg { background: #374151; }
+
+/* Group total row */
+.barge-group-total {
+  font-size: 11px;
+  color: #9ca3af;
+  text-align: right;
+  padding: 2px 0 10px;
+  font-variant-numeric: tabular-nums;
+}
+
 /* Row card */
 .logi-row-card {
   display: flex;

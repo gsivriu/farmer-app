@@ -732,6 +732,210 @@ function TrainSection({ trains }) {
   );
 }
 
+// TODO: replace with Supabase fetch
+const mockBarges = [
+  { id: 1,  buyer: "AMG", supplier: "Agro Oil",           pol: "Harsova",      convoy: null,                   barge: "Elena1",            goods: "RO CORN", bl_quantity: 235500,   ttl_quantity: 1002720,  nor: "12/03/2026 18:30", status: "under_discharging",          ds_quantity: 250000,  survey_company: "CU",              transport: null, tw_l: null,  pro_l: null  },
+  { id: 2,  buyer: "AMG", supplier: "Eurosilo Z",          pol: "Gostinu",      convoy: null,                   barge: "Maestro 03",        goods: "RO WHT",  bl_quantity: 2918220,  ttl_quantity: 2918220,  nor: "13/03/2026 14:30", status: "waiting_etb",                etb: "14.03",         survey_company: "CU",              transport: null, tw_l: 79.53, pro_l: 12.55 },
+  { id: 3,  buyer: "AMG", supplier: "Octopod",             pol: "Oryahovo",     convoy: null,                   barge: "NBL-035",           goods: "BG WHT",  bl_quantity: 1965940,  ttl_quantity: 1965940,  eta_pod: "ETA Constanta 14.03.2026 06:00 hrs agw wp wog",  status: "under_coming", owners_agents: "TIA",              transport: "CIF", discharging_permit_qty: 1965940, tw_l: 73.1,  pro_l: 12.88 },
+  { id: 4,  buyer: "AMG", supplier: "Dobromih Ceres",      pol: "Ceatalchioi",  convoy: null,                   barge: "Early Bird",        goods: "RO WHT",  bl_quantity: 1001910,  ttl_quantity: 2045770,  eta_pod: "ETA Constanta 17.03.2026 agw wp wog",            status: "under_coming", owners_agents: "Diamat Shipping",  transport: "FOB", tw_l: 75.5,  pro_l: 15.50 },
+  { id: 5,  buyer: "AMG", supplier: "Dobromih Ceres",      pol: "Ceatalchioi",  convoy: null,                   barge: "Tesco",             goods: "RO WHT",  bl_quantity: 1043860,  ttl_quantity: 2045770,  eta_pod: "ETA Constanta 17.03.2026 agw wp wog",            status: "under_coming", owners_agents: "Diamat Shipping",  transport: "FOB", tw_l: 73.85, pro_l: 15.50 },
+  { id: 6,  buyer: "AMS", supplier: "Octopod",             pol: "Somovit",      convoy: "1389/11586",           barge: "1389/11586",        goods: "BG WHT",  bl_quantity: 990260,   ttl_quantity: 1400000,                                                             status: "wait_departure",             owners_agents: "TTS/Navrom",       transport: "CIF", tw_l: null,  pro_l: null  },
+  { id: 7,  buyer: "AMS", supplier: "Octopod",             pol: "Somovit",      convoy: "1272/30075",           barge: "1272/30075",        goods: "BG WHT",  bl_quantity: 1371500,  ttl_quantity: 1400000,                                                             status: "wait_departure",             owners_agents: "TTS/Navrom",       transport: "CIF", tw_l: null,  pro_l: null  },
+  { id: 8,  buyer: "AMS", supplier: "Octopod",             pol: "Somovit",      convoy: "1147/30058",           barge: "1147/30058",        goods: "BG WHT",  bl_quantity: 1400000,  ttl_quantity: 1400000,                                                             status: "under_loading",              owners_agents: "TTS/Navrom",       transport: "CIF", tw_l: null,  pro_l: null  },
+  { id: 9,  buyer: "AMG", supplier: "Agro Oil",            pol: "Harsova",      convoy: null,                   barge: "Tessa",             goods: "RO CORN", bl_quantity: 1200000,  ttl_quantity: 1250000,                                                             status: "under_loading",              owners_agents: "First Nav",        transport: "FOB", tw_l: null,  pro_l: null  },
+  { id: 10, buyer: "AMG", supplier: "Agro Oil",            pol: "Harsova",      convoy: null,                   barge: "Leo",               goods: "RO CORN", bl_quantity: 1050000,  ttl_quantity: 1250000,                                                             status: "waiting_to_start_loading",   owners_agents: "First Nav",        transport: "FOB", tw_l: null,  pro_l: null  },
+  { id: 11, buyer: "AMS", supplier: "Rusagro-Prim SRL",    pol: "Giurgiulesti", convoy: "TEMPTATION or subst.", barge: "TEMPTATION",        goods: "MD WHT",  bl_quantity: 5000000,  ttl_quantity: 5000000,  etb: "15.03.2026 agw wp wog",                              status: "under_coming", owners_agents: "Inland Shipping",  transport: "DAP", tw_l: null,  pro_l: null  },
+];
+
+function fmtTon(qty) {
+  if (qty == null) return "—";
+  return (qty / 1000).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " t";
+}
+
+
+function BargeCard({ barge }) {
+  const pct = barge.ttl_quantity > 0
+    ? Math.round((barge.bl_quantity / barge.ttl_quantity) * 100)
+    : 0;
+  const buyerStyle = barge.buyer === "AMS"
+    ? { color: "#1d4ed8", background: "#eff6ff" }
+    : barge.buyer === "AMG"
+    ? { color: "#b9101e", background: "#fef2f2" }
+    : { color: "#374151", background: "#f3f4f6" };
+
+  return (
+    <div className="barge-card">
+      {/* Row 1 — barge name + buyer / goods + qty */}
+      <div className="barge-card-row1">
+        <div className="barge-name-wrap">
+          <span className="barge-card-name">{barge.barge}</span>
+          <span className="barge-buyer-badge" style={buyerStyle}>{barge.buyer}</span>
+        </div>
+        <span className="barge-card-goods-qty">
+          {barge.goods} · {fmtTon(barge.bl_quantity)}
+        </span>
+      </div>
+
+      {/* Row 2 — supplier + pol */}
+      <div className="barge-card-detail">
+        Supplier: <strong>{barge.supplier}</strong>
+        {barge.pol && <> · POL: <strong>{barge.pol}</strong></>}
+      </div>
+
+      {/* Row 3 — convoy */}
+      {barge.convoy && (
+        <div className="barge-card-detail">
+          <span className="barge-card-lbl">Convoy:</span> {barge.convoy}
+        </div>
+      )}
+
+      {/* Row 4 — agents + transport badge */}
+      {(barge.owners_agents || barge.transport) && (
+        <div className="barge-card-row4">
+          {barge.owners_agents && (
+            <span className="barge-card-detail">
+              <span className="barge-card-lbl">Agents:</span> {barge.owners_agents}
+            </span>
+          )}
+          {barge.transport && (
+            <span className="barge-transport-badge">{barge.transport}</span>
+          )}
+        </div>
+      )}
+
+      {/* Row 5 — under_discharging */}
+      {barge.status === "under_discharging" && (
+        <div className="barge-status-block">
+          <span className="barge-chip barge-chip--red">Under Discharging</span>
+          {barge.nor && (
+            <div className="barge-card-detail">
+              NOR: {barge.nor}
+              {barge.ds_quantity != null && <> · D/S Qty: {fmtTon(barge.ds_quantity)}</>}
+            </div>
+          )}
+          {barge.survey_company && (
+            <div className="barge-card-detail">
+              <span className="barge-card-lbl">Survey:</span> {barge.survey_company}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Row 5 — waiting_etb */}
+      {barge.status === "waiting_etb" && (
+        <div className="barge-status-block">
+          <span className="barge-chip barge-chip--amber">Waiting ETB{barge.etb ? ` ${barge.etb}` : ""}</span>
+          {barge.nor && <div className="barge-card-detail">NOR: {barge.nor}</div>}
+          {(barge.tw_l != null || barge.pro_l != null) && (
+            <div className="barge-card-detail">
+              {barge.tw_l != null && <>TW-L: {barge.tw_l}</>}
+              {barge.tw_l != null && barge.pro_l != null && " · "}
+              {barge.pro_l != null && <>Pro-L: {barge.pro_l}</>}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Row 6 — under_coming */}
+      {barge.status === "under_coming" && (
+        <div className="barge-status-block">
+          <span className="barge-chip barge-chip--blue">Under Coming</span>
+          {barge.eta_pod && <div className="barge-card-eta">{barge.eta_pod}</div>}
+          {barge.etb && <div className="barge-card-detail"><span className="barge-card-lbl">ETB:</span> {barge.etb}</div>}
+          {barge.discharging_permit_qty != null && (
+            <div className="barge-card-detail">
+              <span className="barge-card-lbl">Permit Qty:</span> {fmtTon(barge.discharging_permit_qty)}
+            </div>
+          )}
+          {(barge.tw_l != null || barge.pro_l != null) && (
+            <div className="barge-card-detail">
+              {barge.tw_l != null && <>TW-L: {barge.tw_l}</>}
+              {barge.tw_l != null && barge.pro_l != null && " · "}
+              {barge.pro_l != null && <>Pro-L: {barge.pro_l}</>}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Row 7 — wait_departure */}
+      {barge.status === "wait_departure" && (
+        <div className="barge-status-block">
+          <span className="barge-chip barge-chip--orange">Waiting Departure</span>
+        </div>
+      )}
+
+      {/* Row 7 — under_loading */}
+      {barge.status === "under_loading" && (
+        <div className="barge-status-block">
+          <span className="barge-chip barge-chip--green">Under Loading</span>
+          <div className="barge-card-progress">
+            <div className="barge-card-progress-nums">
+              <span>{fmtTon(barge.bl_quantity)} / {fmtTon(barge.ttl_quantity)}</span>
+              <span>{pct}%</span>
+            </div>
+            <div className="barge-card-bar-bg">
+              <div className="barge-card-bar-fill" style={{ width: `${pct}%` }} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Row 7 — waiting_to_start_loading */}
+      {barge.status === "waiting_to_start_loading" && (
+        <div className="barge-status-block">
+          <span className="barge-chip barge-chip--gray">Waiting to Start Loading</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BargeSection({ barges }) {
+  const sumQty = arr => arr.reduce((s, b) => s + (b.bl_quantity ?? 0), 0);
+  const arrived = barges.filter(b => ["under_discharging", "waiting_etb"].includes(b.status));
+  const coming  = barges.filter(b => b.status === "under_coming");
+  const loading = barges.filter(b => ["under_loading", "wait_departure", "waiting_to_start_loading"].includes(b.status));
+  const groups  = [
+    { label: "Arrived / Under Operation", color: "#E53935", items: arrived },
+    { label: "Under Coming",              color: "#1E88E5", items: coming  },
+    { label: "Under Loading",             color: "#43A047", items: loading },
+  ];
+
+  return (
+    <div className="logi-section">
+      <div className="logi-section-head">
+        <div className="logi-section-title">
+          <BargeIcon size={16} color="#1d4ed8" bgColor="#eff6ff" borderColor="#1d4ed8" />
+          <span>Barge</span>
+        </div>
+        <span className="logi-type-badge" style={{ color: "#1d4ed8", background: "#eff6ff" }}>{barges.length}</span>
+      </div>
+
+      {groups.map(group => {
+        if (group.items.length === 0) return null;
+        return (
+          <div key={group.label} className="train-status-group">
+            <div className="train-status-header">
+              <span className="train-status-label" style={{ color: group.color }}>{group.label}</span>
+              <span className="train-status-count" style={{ color: group.color }}>
+                {group.items.length} {group.items.length > 1 ? "barges" : "barge"}
+              </span>
+            </div>
+            {group.items.map(b => <BargeCard key={b.id} barge={b} />)}
+            <div className="barge-group-total">
+              Total: {group.items.length} {group.items.length > 1 ? "barges" : "barge"} · {fmtTon(sumQty(group.items))}
+            </div>
+          </div>
+        );
+      })}
+
+      <div className="logi-section-foot">
+        {arrived.length} arrived · {coming.length} under coming · {loading.length} under loading · {fmtTon(sumQty(barges))} total
+      </div>
+    </div>
+  );
+}
+
 function LogisticsTypeSection({ items, Icon, color, bgColor, borderColor, label }) {
   return (
     <div className="logi-section">
@@ -762,18 +966,12 @@ function LogisticsTypeSection({ items, Icon, color, bgColor, borderColor, label 
 }
 
 function LogisticsTab() {
-  const barges = TRANSPORT_DATA.filter(t => t.type === "barge");
   const trucks = TRANSPORT_DATA.filter(t => t.type === "truck");
 
   return (
     <div className="logi-tab">
       <TrainSection trains={mockTrains} />
-      {barges.length > 0 && (
-        <LogisticsTypeSection
-          items={barges} label="Barge"
-          Icon={BargeIcon} color="#1d4ed8" bgColor="#eff6ff" borderColor="#1d4ed8"
-        />
-      )}
+      <BargeSection barges={mockBarges} />
       {trucks.length > 0 && (
         <LogisticsTypeSection
           items={trucks} label="Auto"
