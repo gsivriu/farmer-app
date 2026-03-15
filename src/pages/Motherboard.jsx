@@ -579,22 +579,18 @@ const mockTrains = [
     data_programarii: "to be scheduled",
     transport_asigurat: "FCA PCA",
   },
-  { id: 5, furnizor: null, locatie_incarcare: null, produs: null, status: "asteptare_zona_b" },
-  { id: 6, furnizor: null, locatie_incarcare: null, produs: null, status: "asteptare_mol_v" },
-  { id: 7, furnizor: null, locatie_incarcare: null, produs: null, status: "asteptare_palas" },
+  { id: 5, furnizor: null, locatie_incarcare: null, produs: null, status: "asteptare_zona" },
 ];
 
 const TRAIN_STATUS_GROUPS = [
   { key: "sub_descarcare",      label: "Underdischarge",          color: "#E53935" },
-  { key: "asteptare_zona_b",    label: "Waiting Zone B",          color: "#FB8C00" },
-  { key: "asteptare_mol_v",     label: "Waiting Mol V",           color: "#FB8C00" },
-  { key: "asteptare_palas",     label: "Waiting Palas",           color: "#FB8C00" },
+  { key: "asteptare_zona",      label: "Waiting Zone",            color: "#FB8C00" },
   { key: "on_the_way",          label: "On the Way",              color: "#1E88E5" },
   { key: "sub_incarcare",       label: "Underloading",            color: "#43A047" },
   { key: "programat_incarcare", label: "Scheduled for Loading",   color: "#757575" },
 ];
 
-const WAITING_STATUSES = ["asteptare_zona_b", "asteptare_mol_v", "asteptare_palas"];
+const WAITING_STATUSES = ["asteptare_zona"];
 
 function TrainCard({ train }) {
   const isWaiting = WAITING_STATUSES.includes(train.status);
