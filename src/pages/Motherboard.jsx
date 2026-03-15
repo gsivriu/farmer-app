@@ -1014,6 +1014,197 @@ function LogisticsTab() {
 
 // ── Execution Tab ────────────────────────────────────────────────────────────
 
+// TODO: replace mockCalculation with real data fetched from Supabase per contract
+const mockCalculation = {
+  calculation_number: "206602",
+  calculation_date: "13/03/2026",
+  magazie: "MAGAZIE/PLATFORMA 1",
+  partener: "Partener Demo SRL",
+  produs: "GRAU PANIFICATIE",
+  silo: "FARCASELE",
+  contract: "C/BKS/MWHT/25/90080",
+  ext: "5919",
+  data_contract: "13/03/2026",
+  perioada_livrare_start: "13/03/2026",
+  perioada_livrare_end: "30/03/2026",
+  mijloc_transport: "OT27RTY",
+  aviz: "335",
+  data_receptie: "13/03/2026",
+  pret_contract: 950.00,
+  pret: 950.00,
+  cantitate_receptionata: 25.400,
+  cantitate_util: 25.400,
+  specificatii: [
+    { name: "Corpuri Straine",      moneda: "RON", price_base: 2.00,  indice_receptie: 1.80,  depasire: 0.00 },
+    { name: "Umiditate",            moneda: "RON", price_base: 14.00, indice_receptie: 10.30, depasire: 0.00 },
+    { name: "Masa Hectolitrica",    moneda: "RON", price_base: 77.00, indice_receptie: 77.60, depasire: 0.00 },
+    { name: "Continut de Proteina", moneda: "RON", price_base: 12.00, indice_receptie: 14.34, depasire: 0.00 },
+    { name: "Umiditate",            moneda: "RON", price_base: 14.00, indice_receptie: 10.30, depasire: 0.00 },
+    { name: "Corpuri Straine",      moneda: "RON", price_base: 2.00,  indice_receptie: 1.80,  depasire: 0.00 },
+    { name: "Infestie",             moneda: "RON", price_base: 0.00,  indice_receptie: 0.00,  depasire: 0.00 },
+    { name: "Invazie",              moneda: "RON", price_base: 0.00,  indice_receptie: 0.00,  depasire: 0.00 },
+  ],
+  cantitate_finala: 25.4000,
+  unitate: "mto",
+  pret_standard: 950.00000,
+  pret_de_facturat: 950.00,
+  moneda_finala: "RON",
+  data_facturare: "13/03/2026",
+  curs_schimb: 1.0000,
+  pret_ron: 950.00,
+  valoare: 24130.00,
+  valoare_tva: 0.00,
+  total: 24130.00,
+  intocmit_de: "Andreea Ghita",
+};
+
+function CalculationSheet({ calc }) {
+  const fmt = (n, dec = 2) =>
+    Number(n).toLocaleString("en-US", { minimumFractionDigits: dec, maximumFractionDigits: dec });
+
+  return (
+    <div className="calc-sheet">
+
+      {/* ── Section 1: Company header ── */}
+      <div className="calc-company-header">
+        <span className="calc-company-name">AMEROPA GRAINS SA</span>
+        <span className="calc-magazie">{calc.magazie}</span>
+      </div>
+      <div className="calc-divider" />
+
+      {/* ── Section 2: Contract info ── */}
+      <div className="calc-section">
+        <div className="calc-info-grid">
+          {[
+            ["Partener",          calc.partener],
+            ["Produs",            calc.produs],
+            ["Silo",              calc.silo],
+            ["Contract",          `${calc.contract} · Ext. ${calc.ext}`],
+            ["Data Contract",     calc.data_contract],
+            ["Perioada Livrare",  `${calc.perioada_livrare_start} → ${calc.perioada_livrare_end}`],
+          ].map(([lbl, val]) => (
+            <div key={lbl} className="calc-info-row">
+              <span className="calc-lbl">{lbl}</span>
+              <span className="calc-val">{val}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="calc-divider" />
+
+      {/* ── Section 3: Transport ── */}
+      <div className="calc-section">
+        <div className="calc-transport-table">
+          <div className="calc-transport-header">
+            <span>Mijloc Transport</span>
+            <span>Aviz</span>
+            <span>Data Recep.</span>
+            <span>Pret Contr.</span>
+            <span>Pret</span>
+            <span>Cant. Recep.</span>
+            <span>Cant. Util</span>
+          </div>
+          <div className="calc-transport-row">
+            <span>{calc.mijloc_transport}</span>
+            <span>{calc.aviz}</span>
+            <span>{calc.data_receptie}</span>
+            <span>{fmt(calc.pret_contract)}</span>
+            <span>{fmt(calc.pret)}</span>
+            <span>{fmt(calc.cantitate_receptionata, 3)}</span>
+            <span>{fmt(calc.cantitate_util, 3)}</span>
+          </div>
+        </div>
+      </div>
+      <div className="calc-divider" />
+
+      {/* ── Section 4: Specificatii calitative ── */}
+      <div className="calc-section">
+        <div className="calc-section-title">Specificații Calitative</div>
+        <div className="calc-spec-table">
+          <div className="calc-spec-header">
+            <span>Specificatie</span>
+            <span>Moneda</span>
+            <span>Price Base</span>
+            <span>Indice Recep.</span>
+            <span>Depasire</span>
+          </div>
+          {calc.specificatii.map((s, i) => (
+            <div key={i} className="calc-spec-row">
+              <span>{s.name}</span>
+              <span>{s.moneda}</span>
+              <span>{fmt(s.price_base)}</span>
+              <span style={{ color: s.indice_receptie > s.price_base ? "#43A047" : s.indice_receptie < s.price_base ? "#E53935" : undefined }}>
+                {fmt(s.indice_receptie)}
+              </span>
+              <span style={{ color: s.depasire > 0 ? "#E53935" : "#9ca3af", fontWeight: s.depasire > 0 ? 700 : undefined }}>
+                {fmt(s.depasire)}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="calc-divider" />
+
+      {/* ── Section 5: Totals ── */}
+      <div className="calc-section">
+        <div className="calc-totals-rows">
+          <div className="calc-totals-row">
+            <div className="calc-totals-item">
+              <span className="calc-lbl">Cantitate</span>
+              <div className="calc-val">{fmt(calc.cantitate_finala, 4)} {calc.unitate}</div>
+            </div>
+            <div className="calc-totals-item">
+              <span className="calc-lbl">Pret Standard</span>
+              <div className="calc-val">{fmt(calc.pret_standard, 5)}</div>
+            </div>
+            <div className="calc-totals-item">
+              <span className="calc-lbl">Pret de Facturat</span>
+              <div className="calc-val">{fmt(calc.pret_de_facturat)} {calc.moneda_finala}</div>
+            </div>
+          </div>
+          <div className="calc-totals-row">
+            <div className="calc-totals-item">
+              <span className="calc-lbl">De facturat la</span>
+              <div className="calc-val">{calc.data_facturare}</div>
+            </div>
+            <div className="calc-totals-item">
+              <span className="calc-lbl">Curs Schimb</span>
+              <div className="calc-val">{fmt(calc.curs_schimb, 4)}</div>
+            </div>
+          </div>
+          <div className="calc-totals-box">
+            <div className="calc-totals-box-grid">
+              <div>
+                <span className="calc-lbl">Pret (RON)</span>
+                <div className="calc-val">{fmt(calc.pret_ron)}</div>
+              </div>
+              <div>
+                <span className="calc-lbl">Valoare</span>
+                <div className="calc-val">{fmt(calc.valoare)}</div>
+              </div>
+              <div>
+                <span className="calc-lbl">Valoare TVA</span>
+                <div className="calc-val">{fmt(calc.valoare_tva)}</div>
+              </div>
+            </div>
+            <div className="calc-total-final">
+              TOTAL: {fmt(calc.total)} RON
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="calc-divider" />
+
+      {/* ── Section 6: Document footer ── */}
+      <div className="calc-doc-footer">
+        <span>Întocmit de: <em>{calc.intocmit_de}</em></span>
+        <span>Semnatura: ___________</span>
+      </div>
+
+    </div>
+  );
+}
+
 const PAYMENT_STYLES = {
   partially_paid:  { bg: "#FFF3E0", color: "#E65100", label: "PARTIALLY PAID"  },
   fully_paid:      { bg: "#E8F5E9", color: "#2E7D32", label: "FULLY PAID"      },
@@ -1057,7 +1248,7 @@ function ExecutionTab() {
       ...prev,
       [bid.id]: { ...prev[bid.id], calculation_sent: true },
     }));
-    showToast(`Calculation sent to ${bid.farmer_email ?? "farmer"}`);
+    showToast(`Calculation sent to ${mockCalculation.partener}`);
   };
 
   // Sort: expired → expiring ≤5 → active (by expiry asc) → fully paid
@@ -1199,31 +1390,35 @@ function ExecutionTab() {
       {modalBid && (
         <div className="exec-modal-backdrop" onClick={() => setModalBid(null)}>
           <div className="exec-modal" onClick={e => e.stopPropagation()}>
-            <div className="exec-modal-handle" />
-            <button className="exec-modal-close" onClick={() => setModalBid(null)}>✕</button>
 
+            {/* Top bar — handle + close */}
+            <div className="exec-modal-topbar">
+              <div className="exec-modal-handle" />
+              <button className="exec-modal-close" onClick={() => setModalBid(null)}>✕</button>
+            </div>
+
+            {/* Header */}
             <div className="exec-modal-header">
               <div className="exec-modal-title">
-                {modalBid.farmer_email ?? "Farmer"} — {getProductLabelSafe(modalBid.product)}
+                Calculatie {mockCalculation.calculation_number} / {mockCalculation.calculation_date}
               </div>
-              {modalBid.contract_no && (
-                <div className="exec-modal-sub">{modalBid.contract_no}</div>
-              )}
+              <div className="exec-modal-sub">
+                {mockCalculation.partener} — {mockCalculation.produs}
+              </div>
             </div>
 
+            {/* Scrollable body */}
             <div className="exec-modal-body">
-              {/* TODO: replace with real calculation breakdown */}
-              <div className="exec-modal-placeholder">
-                <div className="exec-modal-placeholder-icon">📊</div>
-                <div>Calculation details will appear here</div>
-              </div>
+              <CalculationSheet calc={mockCalculation} />
             </div>
 
+            {/* Sticky footer */}
             <div className="exec-modal-footer">
               <button className="exec-modal-send" onClick={() => sendCalculation(modalBid)}>
                 Send Calculation
               </button>
             </div>
+
           </div>
         </div>
       )}
