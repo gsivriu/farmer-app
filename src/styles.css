@@ -6703,6 +6703,7 @@ select.input:focus {
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
+  .mb-tab-body { padding-top: 20px; }
   .mb-overview-grid { grid-template-columns: 1fr; }
   .mb-subnav { padding: 0 12px; overflow-x: auto; justify-content: flex-start; }
   .mb-subnav .nav-item { padding: 10px 14px; white-space: nowrap; }

@@ -539,7 +539,7 @@ export default function MotherboardPage() {
       </nav>
 
       {mbTab === "overview" && (
-        <>
+        <div className="mb-tab-body">
           <CardVessels />
           <div className="mb-overview-grid">
             <CardChimpex />
@@ -547,7 +547,7 @@ export default function MotherboardPage() {
             <CardLogistics />
             <CardAcquisitions />
           </div>
-        </>
+        </div>
       )}
 
       {mbTab === "stocks" && (
