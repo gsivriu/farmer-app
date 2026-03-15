@@ -7305,17 +7305,19 @@ select.input:focus {
   -webkit-overflow-scrolling: touch;
 }
 
-.exec-modal-footer { padding: 12px 16px 28px; flex-shrink: 0; border-top: 1px solid #f3f4f6; }
+.exec-modal-footer { display: flex; justify-content: center; padding: 12px 16px 20px; flex-shrink: 0; border-top: 1px solid #f3f4f6; }
 .theme-dark .exec-modal-footer { border-top-color: #374151; }
 .exec-modal-send {
-  width: 100%;
+  width: auto;
+  align-self: center;
+  height: 36px;
+  padding: 0 24px;
   background: #C62828;
   color: #fff;
   border: none;
   border-radius: 8px;
-  padding: 14px;
-  font-size: 15px;
-  font-weight: 700;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
   transition: background .15s;
 }
