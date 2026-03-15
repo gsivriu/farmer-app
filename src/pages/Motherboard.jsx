@@ -1303,14 +1303,13 @@ function ExecutionTab() {
         // TODO: fetch real delivered_quantity from Supabase
         const delivered = bid.quantity > 0 ? (bid.quantity * (state.demoPct ?? 0)) / 100 : 0;
         const pct      = state.demoPct ?? 0;
-        const barColor = pct === 0 ? "#E0E0E0" : "#43A047";
+        const barColor = pct === 0 ? "#F0F0F0" : pct === 100 ? "#43A047" : pct >= 50 ? "#FB8C00" : "#E53935";
         const pmt      = PAYMENT_STYLES[state.payment_status] ?? PAYMENT_STYLES.payment_pending;
 
         return (
           <div key={bid.id} className="exec-card">
 
-            {/* Row 1 — product + payment pill */}
-            {/* Row 1 — email (primary) + payment pill */}
+            {/* Row 1 — email + payment pill */}
             <div className="exec-card-r1">
               <span className="exec-card-email">{bid.farmer_email ?? "—"}</span>
               <div className="exec-card-pills">
@@ -1318,10 +1317,15 @@ function ExecutionTab() {
               </div>
             </div>
 
-            {/* Row 2 — product · qty · price (secondary, gray) */}
+            <div className="exec-card-divider" />
+
+            {/* Row 2 — product (left) + qty/price stacked (right) */}
             <div className="exec-card-r2">
-              <span className="exec-product-sec">{getProductLabelSafe(bid.product)}</span>
-              <span className="exec-qty-price-sec">{formatCompactNumber(bid.quantity)} t  ·  {fmtPrice(bid)}</span>
+              <span className="exec-product-primary">{getProductLabelSafe(bid.product)}</span>
+              <div className="exec-qty-stack">
+                <span className="exec-qty-primary">{formatCompactNumber(bid.quantity)} t</span>
+                <span className="exec-price-secondary">{fmtPrice(bid)}</span>
+              </div>
             </div>
 
             {/* Row 3 — incoterm · delivery period */}
@@ -1332,19 +1336,19 @@ function ExecutionTab() {
             {/* Row 4 — delivery progress */}
             <div className="exec-progress">
               <div className="exec-progress-labels">
-                <span>Delivered</span>
+                <span className="exec-progress-lbl">Delivered</span>
                 <span className="exec-progress-qty">{formatCompactNumber(delivered)} / {formatCompactNumber(bid.quantity)} t</span>
               </div>
               <div className="exec-bar-bg">
-                <div className="exec-bar-fill" style={{ width: `${pct}%`, background: barColor }} />
+                <div className="exec-bar-fill" style={{ width: `${pct}%`, background: pct === 0 ? "transparent" : barColor }} />
               </div>
               <div className="exec-pct" style={{ color: pct === 0 ? "#9ca3af" : barColor }}>{pct}%</div>
             </div>
 
-            {/* Row 6 — calc button */}
+            {/* Row 5 — calc button */}
             <div className="exec-card-r6">
               {state.calculation_sent ? (
-                <span className="exec-calc-sent">✅ Sent</span>
+                <span className="exec-calc-sent">✓ Sent</span>
               ) : (
                 <button className="exec-calc-btn-sm" onClick={() => setModalBid(bid)}>
                   Calculation

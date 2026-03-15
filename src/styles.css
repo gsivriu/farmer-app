@@ -7126,95 +7126,132 @@ select.input:focus {
 .exec-summary--warn    { color: #F57F17; font-weight: 600; }
 .exec-summary--expired { color: #C62828; font-weight: 600; }
 
-/* Contract card */
+/* ── Contract card ── */
 .exec-card {
   background: var(--white);
-  border: 1px solid var(--glass-border, #e5e7eb);
+  border: 1px solid #F0F0F0;
   border-radius: 12px;
-  padding: 14px 16px;
+  padding: 16px;
   margin-bottom: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,.06);
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
 }
 .theme-dark .exec-card { background: #1f2937; border-color: #374151; box-shadow: none; }
 
-/* Row 1 — product + pills */
+/* Row 1 — email + payment pill */
 .exec-card-r1 {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 4px;
-}
-.exec-card-email { font-size: 18px; font-weight: 700; color: #1A1A1A; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-.theme-dark .exec-card-email { color: #e5e7eb; }
-.exec-card-pills { display: flex; align-items: center; gap: 4px; flex-shrink: 0; padding-top: 2px; }
-
-/* Pills */
-.exec-pill {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-  padding: 2px 7px;
-  border-radius: 999px;
-  border: 1px solid transparent;
-  white-space: nowrap;
-}
-.exec-pill--expired { background: #FFEBEE; color: #C62828; border-color: #EF9A9A; }
-.exec-pill--soon    { background: #FFF8E1; color: #F57F17; border-color: #FFCC80; }
-
-/* Row 2 — product · qty · price (secondary) */
-.exec-card-r2 {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 4px;
+  margin-bottom: 10px;
 }
-.exec-product-sec  { font-size: 13px; font-weight: 400; color: #757575; }
-.exec-qty-price-sec { font-size: 13px; font-weight: 400; color: #757575; font-variant-numeric: tabular-nums; white-space: nowrap; flex-shrink: 0; }
+.exec-card-email {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1A1A1A;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 60%;
+  min-width: 0;
+}
+.theme-dark .exec-card-email { color: #e5e7eb; }
+.exec-card-pills { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+
+/* Payment pill */
+.exec-pill {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+/* Divider */
+.exec-card-divider {
+  height: 1px;
+  background: #F5F5F5;
+  margin: 0 0 10px;
+}
+
+/* Row 2 — product (left) + qty/price stacked (right) */
+.exec-card-r2 {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.exec-product-primary {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1A1A1A;
+  line-height: 1.3;
+}
+.theme-dark .exec-product-primary { color: #e5e7eb; }
+.exec-qty-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.exec-qty-primary {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1A1A1A;
+  font-variant-numeric: tabular-nums;
+}
+.theme-dark .exec-qty-primary { color: #e5e7eb; }
+.exec-price-secondary {
+  font-size: 12px;
+  font-weight: 400;
+  color: #9E9E9E;
+  font-variant-numeric: tabular-nums;
+}
 
 /* Row 3 — incoterm · delivery */
 .exec-card-r3 {
   font-size: 12px;
-  color: #9ca3af;
-  margin-bottom: 10px;
-}
-
-/* Expiry banners (compact) */
-.exec-banner {
-  font-size: 12px;
-  font-weight: 500;
-  padding: 5px 10px;
+  color: #BDBDBD;
+  margin-top: 4px;
   margin-bottom: 8px;
-  border-radius: 4px;
 }
-.exec-banner--expired { background: #FFEBEE; border-left: 3px solid #C62828; color: #C62828; }
-.exec-banner--soon    { background: #FFF8E1; border-left: 3px solid #FB8C00; color: #F57F17; }
 
 /* Progress bar */
-.exec-progress { margin-bottom: 10px; }
+.exec-progress { margin-bottom: 0; }
 .exec-progress-labels {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
-  color: #6b7280;
-  margin-bottom: 5px;
+  align-items: center;
+  margin-bottom: 6px;
 }
-.exec-progress-qty { font-variant-numeric: tabular-nums; }
-.exec-bar-bg { height: 6px; background: #f3f4f6; border-radius: 3px; overflow: hidden; }
-.exec-bar-fill { height: 100%; border-radius: 3px; transition: width .3s ease; }
+.exec-progress-lbl {
+  font-size: 11px;
+  color: #9E9E9E;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.exec-progress-qty {
+  font-size: 11px;
+  color: #9E9E9E;
+  font-variant-numeric: tabular-nums;
+}
+.exec-bar-bg { height: 4px; background: #F0F0F0; border-radius: 2px; overflow: hidden; }
+.exec-bar-fill { height: 100%; border-radius: 2px; transition: width .3s ease; }
 .theme-dark .exec-bar-bg { background: #374151; }
-.exec-pct { font-size: 11px; font-weight: 700; text-align: right; margin-top: 3px; }
+.exec-pct { font-size: 11px; font-weight: 700; text-align: right; margin-top: 6px; }
 
 /* Row 6 — calc button */
 .exec-card-r6 {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 8px;
-  margin-top: 4px;
+  margin-top: 8px;
 }
 
 /* Compact calculation button */
@@ -7223,23 +7260,22 @@ select.input:focus {
   border: 1.5px solid #C62828;
   color: #C62828;
   border-radius: 6px;
-  padding: 0 12px;
-  height: 26px;
+  padding: 0 14px;
+  height: 28px;
   font-size: 11px;
   font-weight: 600;
+  letter-spacing: 0.02em;
   cursor: pointer;
   transition: background .15s;
-  flex-shrink: 0;
   white-space: nowrap;
 }
 .exec-calc-btn-sm:hover { background: #fff5f5; }
 .theme-dark .exec-calc-btn-sm:hover { background: #2d1b1b; }
 
 .exec-calc-sent {
-  font-size: 12px;
-  font-style: italic;
-  color: #2E7D32;
-  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #43A047;
 }
 
 /* Empty state */
