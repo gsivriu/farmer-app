@@ -613,11 +613,11 @@ const mockTrains = [
 ];
 
 const TRAIN_STATUS_GROUPS = [
-  { key: "sub_descarcare",      label: "Underdischarge",          color: "#E53935" },
-  { key: "asteptare_zona",      label: "Waiting Zone",            color: "#FB8C00" },
-  { key: "on_the_way",          label: "On the Way",              color: "#1E88E5" },
-  { key: "sub_incarcare",       label: "Underloading",            color: "#43A047" },
-  { key: "programat_incarcare", label: "Scheduled for Loading",   color: "#757575" },
+  { key: "sub_descarcare",      label: "Underdischarge",        color: "#C62828", pillBg: "#FFF0F0", dotColor: "#C62828" },
+  { key: "asteptare_zona",      label: "Waiting Zone",          color: "#C2410C", pillBg: "#FFF7ED", dotColor: "#F97316" },
+  { key: "on_the_way",          label: "On the Way",            color: "#1D4ED8", pillBg: "#EFF6FF", dotColor: "#3B82F6" },
+  { key: "sub_incarcare",       label: "Underloading",          color: "#15803D", pillBg: "#F0FDF4", dotColor: "#22C55E" },
+  { key: "programat_incarcare", label: "Scheduled for Loading", color: "#6D28D9", pillBg: "#F5F3FF", dotColor: "#8B5CF6" },
 ];
 
 const WAITING_STATUSES = ["asteptare_zona"];
@@ -731,22 +731,28 @@ function TrainSection({ trains }) {
     <div className="logi-section">
       <div className="logi-section-head">
         <div className="logi-section-title">
-          <TrainIcon size={16} color="#b9101e" bgColor="#fef2f2" borderColor="#b9101e" />
+          <div className="logi-icon-box" style={{ background: "#FFF0F0" }}>
+            <TrainIcon size={18} color="#C62828" showCircle={false} />
+          </div>
           <span>Train</span>
         </div>
-        <span className="logi-type-badge" style={{ color: "#b9101e", background: "#fef2f2" }}>{withData}</span>
+        <span className="logi-type-badge" style={{ color: "#C62828", background: "#FFF0F0" }}>{withData}</span>
       </div>
 
       {TRAIN_STATUS_GROUPS.map(group => {
         const rows = trains.filter(t => t.status === group.key);
         if (rows.length === 0) return null;
+        const visibleCount = rows.filter(t => t.furnizor).length;
         return (
           <div key={group.key} className="train-status-group">
             <div className="train-status-header">
-              <span className="train-status-label" style={{ color: group.color }}>{group.label}</span>
-              {rows.some(t => t.furnizor) && (
-                <span className="train-status-count" style={{ color: group.color }}>
-                  {rows.filter(t => t.furnizor).length} {rows.filter(t => t.furnizor).length > 1 ? "trains" : "train"}
+              <span className="logi-status-pill" style={{ background: group.pillBg, color: group.color }}>
+                <span className="logi-status-dot" style={{ background: group.dotColor }} />
+                {group.label}
+              </span>
+              {visibleCount > 0 && (
+                <span className="logi-status-count">
+                  {visibleCount} {visibleCount > 1 ? "trains" : "train"}
                 </span>
               )}
             </div>
@@ -926,19 +932,21 @@ function BargeSection({ barges }) {
   const coming  = barges.filter(b => b.status === "under_coming");
   const loading = barges.filter(b => ["under_loading", "wait_departure", "waiting_to_start_loading"].includes(b.status));
   const groups  = [
-    { label: "Arrived / Under Operation", color: "#E53935", items: arrived },
-    { label: "Underway",              color: "#1E88E5", items: coming  },
-    { label: "Under Loading",             color: "#43A047", items: loading },
+    { label: "Arrived / Under Operation", color: "#C62828", pillBg: "#FFF0F0", dotColor: "#C62828", items: arrived },
+    { label: "Underway",                  color: "#1D4ED8", pillBg: "#EFF6FF", dotColor: "#3B82F6", items: coming  },
+    { label: "Under Loading",             color: "#15803D", pillBg: "#F0FDF4", dotColor: "#22C55E", items: loading },
   ];
 
   return (
     <div className="logi-section">
       <div className="logi-section-head">
         <div className="logi-section-title">
-          <BargeIcon size={16} color="#1d4ed8" bgColor="#eff6ff" borderColor="#1d4ed8" />
+          <div className="logi-icon-box" style={{ background: "#EFF6FF" }}>
+            <BargeIcon size={18} color="#1D4ED8" showCircle={false} />
+          </div>
           <span>Barge</span>
         </div>
-        <span className="logi-type-badge" style={{ color: "#1d4ed8", background: "#eff6ff" }}>{barges.length}</span>
+        <span className="logi-type-badge" style={{ color: "#1D4ED8", background: "#EFF6FF" }}>{barges.length}</span>
       </div>
 
       {groups.map(group => {
@@ -946,8 +954,11 @@ function BargeSection({ barges }) {
         return (
           <div key={group.label} className="train-status-group">
             <div className="train-status-header">
-              <span className="train-status-label" style={{ color: group.color }}>{group.label}</span>
-              <span className="train-status-count" style={{ color: group.color }}>
+              <span className="logi-status-pill" style={{ background: group.pillBg, color: group.color }}>
+                <span className="logi-status-dot" style={{ background: group.dotColor }} />
+                {group.label}
+              </span>
+              <span className="logi-status-count">
                 {group.items.length} {group.items.length > 1 ? "barges" : "barge"}
               </span>
             </div>
@@ -966,12 +977,14 @@ function BargeSection({ barges }) {
   );
 }
 
-function LogisticsTypeSection({ items, Icon, color, bgColor, borderColor, label }) {
+function LogisticsTypeSection({ items, Icon, color, bgColor, label }) {
   return (
     <div className="logi-section">
       <div className="logi-section-head">
         <div className="logi-section-title">
-          <Icon size={16} color={color} bgColor={bgColor} borderColor={borderColor} />
+          <div className="logi-icon-box" style={{ background: bgColor }}>
+            <Icon size={18} color={color} showCircle={false} />
+          </div>
           <span>{label}</span>
         </div>
         <span className="logi-type-badge" style={{ color, background: bgColor }}>{items.length}</span>
