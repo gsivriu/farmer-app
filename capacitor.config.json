@@ -2,9 +2,5 @@
   "appId": "com.gsivriu.farmerapp",
   "appName": "Ameropa Multiverse",
   "webDir": "dist",
-  "bundledWebRuntime": false,
-  "server": {
-    "url": "http://192.168.100.247:5173",
-    "cleartext": true
-  }
+  "bundledWebRuntime": false
 }
