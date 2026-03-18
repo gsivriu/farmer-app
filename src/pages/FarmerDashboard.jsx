@@ -97,15 +97,6 @@ export default function FarmerDashboard() {
     }
   }, [activeTab, fetchBids]);
 
-  useEffect(() => {
-    const handleVisibility = () => {
-      if (document.visibilityState === "visible") {
-        fetchBids();
-      }
-    };
-    document.addEventListener("visibilitychange", handleVisibility);
-    return () => document.removeEventListener("visibilitychange", handleVisibility);
-  }, [fetchBids]);
 
   useEffect(() => {
     if (!Array.isArray(bids)) return;

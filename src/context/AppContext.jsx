@@ -126,31 +126,61 @@ export function AppProvider({ children }) {
   }, [fetchCommodities]);
 
   useEffect(() => {
-    let channel;
+    let channel = null;
+    let retryTimeout = null;
+    let destroyed = false;
+
+    const removeChannel = () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+        channel = null;
+      }
+    };
+
     const subscribe = () => {
+      if (destroyed) return;
+      removeChannel();
       channel = supabase
-        .channel("public:commodities")
+        .channel(`public:commodities:${Date.now()}`)
         .on(
           "postgres_changes",
           { event: "*", schema: "public", table: "commodities" },
           () => { fetchCommodities(); }
         )
         .subscribe((status) => {
+          if (destroyed) return;
           if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
-            setTimeout(subscribe, 3000);
+            removeChannel();
+            retryTimeout = setTimeout(subscribe, 3000);
           }
         });
     };
+
     subscribe();
+
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        clearTimeout(retryTimeout);
+        subscribe();
+        fetchCommodities();
+      }
+    };
+
     const handleResume = () => {
-      if (channel) supabase.removeChannel(channel);
+      clearTimeout(retryTimeout);
       subscribe();
       fetchCommodities();
     };
+
+    document.addEventListener("visibilitychange", handleVisibility);
     document.addEventListener("resume", handleResume);
+
     return () => {
+      destroyed = true;
+      clearTimeout(retryTimeout);
+      removeChannel();
+      document.removeEventListener("visibilitychange", handleVisibility);
       document.removeEventListener("resume", handleResume);
-      if (channel) supabase.removeChannel(channel);
     };
   }, [fetchCommodities]);
 
@@ -170,31 +200,61 @@ export function AppProvider({ children }) {
   }, [fetchBids]);
 
   useEffect(() => {
-    let channel;
+    let channel = null;
+    let retryTimeout = null;
+    let destroyed = false;
+
+    const removeChannel = () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+        channel = null;
+      }
+    };
+
     const subscribe = () => {
+      if (destroyed) return;
+      removeChannel();
       channel = supabase
-        .channel("public:bids")
+        .channel(`public:bids:${Date.now()}`)
         .on(
           "postgres_changes",
           { event: "*", schema: "public", table: "bids" },
           () => { fetchBids(); }
         )
         .subscribe((status) => {
+          if (destroyed) return;
           if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
-            setTimeout(subscribe, 3000);
+            removeChannel();
+            retryTimeout = setTimeout(subscribe, 3000);
           }
         });
     };
+
     subscribe();
+
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        clearTimeout(retryTimeout);
+        subscribe();
+        fetchBids();
+      }
+    };
+
     const handleResume = () => {
-      if (channel) supabase.removeChannel(channel);
+      clearTimeout(retryTimeout);
       subscribe();
       fetchBids();
     };
+
+    document.addEventListener("visibilitychange", handleVisibility);
     document.addEventListener("resume", handleResume);
+
     return () => {
+      destroyed = true;
+      clearTimeout(retryTimeout);
+      removeChannel();
+      document.removeEventListener("visibilitychange", handleVisibility);
       document.removeEventListener("resume", handleResume);
-      if (channel) supabase.removeChannel(channel);
     };
   }, [fetchBids]);
 
