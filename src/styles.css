@@ -91,7 +91,7 @@ body.weather-modal-open {
 html.disable-refresh,
 body.disable-refresh {
   overscroll-behavior: none;
-  touch-action: none;
+  touch-action: pan-y;
 }
 
 body.weather-modal-open {
