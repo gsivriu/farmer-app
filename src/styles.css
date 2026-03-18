@@ -90,7 +90,7 @@ body.weather-modal-open {
 
 html.disable-refresh,
 body.disable-refresh {
-  overscroll-behavior: none;
+  overscroll-behavior-y: contain;
 }
 
 body.weather-modal-open {

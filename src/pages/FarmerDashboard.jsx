@@ -150,14 +150,11 @@ export default function FarmerDashboard() {
   }, [activeTab]);
 
   useEffect(() => {
-    const html = document.documentElement;
-    const body = document.body;
-    const shouldDisableRefresh = activeTab === "home";
-    html.classList.toggle("disable-refresh", shouldDisableRefresh);
-    body.classList.toggle("disable-refresh", shouldDisableRefresh);
+    const scrollEl = document.querySelector(".farmer-dashboard-layout");
+    if (!scrollEl) return;
+    scrollEl.style.overscrollBehaviorY = activeTab === "home" ? "contain" : "";
     return () => {
-      html.classList.remove("disable-refresh");
-      body.classList.remove("disable-refresh");
+      scrollEl.style.overscrollBehaviorY = "";
     };
   }, [activeTab]);
 
