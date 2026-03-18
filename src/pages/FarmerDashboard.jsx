@@ -311,6 +311,8 @@ export default function FarmerDashboard() {
       ...prev,
       [bid.id]: { locked: true, lastCounter: null },
     }));
+    setSelectedBid(null);
+    setFarmerActionError(null);
   };
 
   const handleRejectCounter = async (bid) => {
@@ -332,6 +334,8 @@ export default function FarmerDashboard() {
       ...prev,
       [bid.id]: { locked: true, lastCounter: null },
     }));
+    setSelectedBid(null);
+    setFarmerActionError(null);
   };
 
   const handleCounterBack = async (bid) => {
@@ -357,11 +361,13 @@ export default function FarmerDashboard() {
       )
     );
     setFarmerConfirmAction(null);
-    setFarmerCounterSent(true);
+    setFarmerCounterSent(false);
     setFarmerActionLocks((prev) => ({
       ...prev,
       [bid.id]: { locked: true, lastCounter: value },
     }));
+    setSelectedBid(null);
+    setFarmerActionError(null);
   };
 
   const formatDateTime = (value) => {
