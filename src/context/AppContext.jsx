@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { supabase } from "../supabaseClient";
 
 const AppContext = createContext(null);
@@ -126,19 +126,31 @@ export function AppProvider({ children }) {
   }, [fetchCommodities]);
 
   useEffect(() => {
-    const commoditiesSubscription = supabase
-      .channel("public:commodities")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "commodities" },
-        () => {
-          fetchCommodities();
-        }
-      )
-      .subscribe();
-
+    let channel;
+    const subscribe = () => {
+      channel = supabase
+        .channel("public:commodities")
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "commodities" },
+          () => { fetchCommodities(); }
+        )
+        .subscribe((status) => {
+          if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+            setTimeout(subscribe, 3000);
+          }
+        });
+    };
+    subscribe();
+    const handleResume = () => {
+      if (channel) supabase.removeChannel(channel);
+      subscribe();
+      fetchCommodities();
+    };
+    document.addEventListener("resume", handleResume);
     return () => {
-      supabase.removeChannel(commoditiesSubscription);
+      document.removeEventListener("resume", handleResume);
+      if (channel) supabase.removeChannel(channel);
     };
   }, [fetchCommodities]);
 
@@ -158,19 +170,31 @@ export function AppProvider({ children }) {
   }, [fetchBids]);
 
   useEffect(() => {
-    const bidsSubscription = supabase
-      .channel("public:bids")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "bids" },
-        () => {
-          fetchBids();
-        }
-      )
-      .subscribe();
-
+    let channel;
+    const subscribe = () => {
+      channel = supabase
+        .channel("public:bids")
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "bids" },
+          () => { fetchBids(); }
+        )
+        .subscribe((status) => {
+          if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+            setTimeout(subscribe, 3000);
+          }
+        });
+    };
+    subscribe();
+    const handleResume = () => {
+      if (channel) supabase.removeChannel(channel);
+      subscribe();
+      fetchBids();
+    };
+    document.addEventListener("resume", handleResume);
     return () => {
-      supabase.removeChannel(bidsSubscription);
+      document.removeEventListener("resume", handleResume);
+      if (channel) supabase.removeChannel(channel);
     };
   }, [fetchBids]);
 
