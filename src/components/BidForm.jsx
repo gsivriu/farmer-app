@@ -1,6 +1,7 @@
 // src/components/BidForm.jsx
 import { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
+import { isFreightParity } from "../utils/formatting";
 
 const PRODUCT_OPTIONS = [
   { value: "wheat", label: "Wheat" },
@@ -11,10 +12,6 @@ const PRODUCT_OPTIONS = [
 ];
 
 const PARITY_OPTIONS = ["CPT", "DAP", "FCA", "FOR", "FOB", "CIF"];
-const isFreightParity = (parity) => {
-  const p = String(parity || "").toUpperCase();
-  return p === "FCA" || p === "FOR" || p === "FOB";
-};
 
 export default function BidForm({ onBidCreated, embedded = false }) {
   const [product, setProduct] = useState("wheat");

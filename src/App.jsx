@@ -24,24 +24,15 @@ function App() {
   const determineRole = (user) => {
     if (!user) return "farmer";
 
-    // 1. Admin email allowlist (lowercase).
-    const superAdmins = [
-      "gsivriu@gmail.com",
-      "admin1@test.com",
-    ];
+    // Admin email allowlist from .env (VITE_ADMIN_EMAILS=email1,email2)
+    const superAdmins = (import.meta.env.VITE_ADMIN_EMAILS || "")
+      .split(",")
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
 
-    // 2. Normalize the user email.
     const email = String(user.email || "").trim().toLowerCase();
 
-    console.log("Role check for:", email);
-
-    if (superAdmins.includes(email)) {
-      console.log("Role detected: admin");
-      return "admin";
-    }
-
-    console.log("Role detected: farmer");
-    return "farmer";
+    return superAdmins.includes(email) ? "admin" : "farmer";
   };
 
   // LOAD SESSION + USER ROLE
