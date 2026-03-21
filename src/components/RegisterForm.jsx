@@ -1,72 +1,32 @@
-import { useState } from "react";
-import { supabase } from "../supabaseClient";
+import { useNavigate } from "react-router-dom";
 
-export default function RegisterForm({ onRegister }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [message, setMessage] = useState(null);
-
-  const handleRegister = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    setMessage(null);
-
-    const { error } = await supabase.auth.signUp({ email, password });
-
-    setLoading(false);
-
-    if (error) {
-      setError(error.message);
-      return;
-    }
-
-    setMessage("Account created. Check your email to confirm.");
-    onRegister?.();
-  };
+export default function RegisterForm() {
+  const navigate = useNavigate();
 
   return (
-    <form className="login-form" onSubmit={handleRegister}>
-      <div className="small-text">
-        New <strong>account</strong>
+    <div className="login-form">
+      <div className="small-text" style={{ textAlign: "center", marginBottom: "16px" }}>
+        <strong>Acces prin invitație</strong>
       </div>
-
-      <label className="label">
-        Email
-        <input
-          className="input"
-          type="email"
-          placeholder="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-      </label>
-
-      <label className="label">
-        Password
-        <input
-          className="input"
-          type="password"
-          placeholder="Minimum 6 characters"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-      </label>
-
-      {error && <p className="badge rejected">{error}</p>}
-      {message && <p className="badge accepted">{message}</p>}
-
+      <p
+        style={{
+          textAlign: "center",
+          color: "var(--gray)",
+          fontSize: "14px",
+          lineHeight: "1.6",
+          margin: "0 0 28px 0",
+        }}
+      >
+        Accesul în aplicație se face prin invitație din partea unui trader Ameropa.
+        Dacă ești fermier Ameropa și nu ai primit invitația, contactează trader-ul tău.
+      </p>
       <button
         className="btn outline full-width"
-        type="submit"
-        disabled={loading}
+        type="button"
+        onClick={() => navigate("/login")}
       >
-        {loading ? "Creating account..." : "Create account"}
+        Înapoi la login
       </button>
-    </form>
+    </div>
   );
 }

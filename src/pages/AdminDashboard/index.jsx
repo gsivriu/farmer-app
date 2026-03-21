@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import HomeTab from "./HomeTab";
 import BidsTab from "./BidsTab";
+import FarmiersTab from "./FarmiersTab";
 import MotherboardPage from "../Motherboard";
 
 export default function AdminDashboard() {
@@ -31,6 +32,13 @@ export default function AdminDashboard() {
         </button>
         <button
           type="button"
+          className={"nav-item " + (activeTab === "farmers" ? "active" : "")}
+          onClick={() => setActiveTab("farmers")}
+        >
+          Fermieri
+        </button>
+        <button
+          type="button"
           className={"nav-item " + (activeTab === "motherboard" ? "active" : "")}
           onClick={() => setActiveTab("motherboard")}
         >
@@ -45,6 +53,10 @@ export default function AdminDashboard() {
 
         <div className={activeTab === "bids" ? "tab-pane active" : "tab-pane"}>
           <BidsTab active={activeTab === "bids"} />
+        </div>
+
+        <div className={activeTab === "farmers" ? "tab-pane active" : "tab-pane"}>
+          {activeTab === "farmers" && <FarmiersTab />}
         </div>
 
         <div className={"tab-pane admin-motherboard-pane" + (activeTab === "motherboard" ? " active" : "")}>
@@ -73,6 +85,28 @@ export default function AdminDashboard() {
             <path d="M14 4v6h6" />
           </svg>
           <span className="nav-label">Bids</span>
+        </button>
+        <button
+          type="button"
+          className={"nav-item " + (activeTab === "farmers" ? "active" : "")}
+          onClick={() => setActiveTab("farmers")}
+        >
+          <svg
+            className="nav-icon"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+          <span className="nav-label">Fermieri</span>
         </button>
         <button
           type="button"
