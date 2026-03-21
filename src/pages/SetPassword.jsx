@@ -58,7 +58,10 @@ export default function SetPassword() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    supabase.auth.signOut();
+    const clearSession = async () => {
+      await supabase.auth.signOut();
+    };
+    clearSession();
   }, []);
 
   useEffect(() => {
