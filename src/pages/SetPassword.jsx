@@ -58,6 +58,10 @@ export default function SetPassword() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    supabase.auth.signOut();
+  }, []);
+
+  useEffect(() => {
     const token_hash = searchParams.get("token_hash");
     const type = searchParams.get("type");
 
