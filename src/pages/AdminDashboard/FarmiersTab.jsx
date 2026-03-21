@@ -105,9 +105,6 @@ export default function FarmiersTab() {
     e.preventDefault();
     setInviteLoading(true);
 
-    const { data: sessionData } = await supabase.auth.getSession();
-    const token = sessionData?.session?.access_token;
-
     const { data, error } = await supabase.functions.invoke("invite-farmer", {
       body: {
         email: inviteEmail.trim(),
@@ -115,13 +112,23 @@ export default function FarmiersTab() {
         judet: inviteJudet || null,
         telefon: inviteTelefon.trim() || null,
       },
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
 
     setInviteLoading(false);
 
-    if (error || data?.error) {
-      showToast(data?.error || error?.message || "Eroare la trimiterea invitației.", "error");
+    // Extragem mesajul real de eroare din response body (non-2xx)
+    if (error) {
+      let msg = "Eroare la trimiterea invitației.";
+      try {
+        const body = await error.context?.json?.();
+        if (body?.error) msg = body.error;
+      } catch { /* ignore */ }
+      showToast(msg, "error");
+      return;
+    }
+
+    if (data?.error) {
+      showToast(data.error, "error");
       return;
     }
 
