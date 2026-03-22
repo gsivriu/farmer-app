@@ -58,35 +58,50 @@ export default function SetPassword() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const clearSession = async () => {
+    const init = async () => {
+      // 1. Delogăm orice sesiune existentă (ex: admin logat)
       await supabase.auth.signOut();
-    };
-    clearSession();
-  }, []);
 
-  useEffect(() => {
-    const token_hash = searchParams.get("token_hash");
-    const type = searchParams.get("type");
+      // 2. PKCE flow: token_hash în query string
+      const token_hash = searchParams.get("token_hash");
+      const type = searchParams.get("type");
 
-    if (token_hash && type) {
-      supabase.auth.verifyOtp({ token_hash, type }).then(({ data, error: otpError }) => {
+      if (token_hash && type) {
+        const { data, error: otpError } = await supabase.auth.verifyOtp({ token_hash, type });
         if (otpError) {
           setTokenError("Link invalid sau expirat. Cere o nouă invitație.");
           return;
         }
         setEmail(data?.user?.email || "");
         setSessionReady(true);
-      });
-    } else {
-      supabase.auth.getSession().then(({ data }) => {
-        if (data.session?.user) {
-          setEmail(data.session.user.email || "");
-          setSessionReady(true);
-        } else {
-          setTokenError("Link invalid. Cere o nouă invitație.");
+        return;
+      }
+
+      // 3. Implicit flow: access_token în hash fragment (#access_token=...&refresh_token=...)
+      const hash = window.location.hash;
+      const hashParams = new URLSearchParams(hash.startsWith("#") ? hash.slice(1) : hash);
+      const access_token = hashParams.get("access_token");
+      const refresh_token = hashParams.get("refresh_token");
+
+      if (access_token) {
+        const { data, error: sessionError } = await supabase.auth.setSession({
+          access_token,
+          refresh_token: refresh_token || "",
+        });
+        if (sessionError) {
+          setTokenError("Link invalid sau expirat. Cere o nouă invitație.");
+          return;
         }
-      });
-    }
+        setEmail(data.session?.user?.email || "");
+        setSessionReady(true);
+        return;
+      }
+
+      // 4. Niciun token găsit
+      setTokenError("Link invalid. Cere o nouă invitație.");
+    };
+
+    init();
   }, [searchParams]);
 
   const rulesStatus = PASSWORD_RULES.map((r) => ({ ...r, met: r.test(password) }));
