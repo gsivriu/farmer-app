@@ -18,6 +18,7 @@ Deno.serve(async (req) => {
       username: Deno.env.get("AMEROPA_DB_USER")!,
       password: Deno.env.get("AMEROPA_DB_PASS")!,
       db:       Deno.env.get("AMEROPA_DB_NAME")!,
+      port: 3306,
     });
 
     await client.execute("SELECT 1");
