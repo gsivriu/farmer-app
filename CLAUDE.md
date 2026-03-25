@@ -60,7 +60,9 @@ Dev/prod environment split complete as of 2026-03-25.
 
 ## Known Issues / Tech Debt
 - [ ] Prod DB has 11 migrations tracked remotely but no matching local files. Baseline (`20260325120000_baseline.sql`) captures the full schema but is not reconciled with remote history. Do NOT run `supabase db push` against prod without first running `supabase migration repair`.
-- [ ] 4 DB functions missing `SET search_path = ''` (security advisory): `is_admin`, `generate_contract_no`, `assign_contract_no_on_accept`, `handle_new_user`. Fix on dev first, then migrate to prod.
+- [x] ~~4 DB functions missing `SET search_path = ''`~~ — fixed in `20260325130000_fix_function_search_paths.sql`, applied DEV + PROD.
+- [x] ~~`rate_limits` RLS no-policy advisory~~ — fixed in `20260325130001_fix_rate_limits_rls.sql`, applied DEV + PROD.
+- [ ] Leaked password protection (HaveIBeenPwned) not enabled — see `SECURITY_MANUAL_STEPS.md`.
 - [ ] `vercel.json` missing security headers (X-Frame-Options, X-Content-Type-Options, Referrer-Policy)
 - [ ] `.env` file contains MySQL credentials for Ameropa DB — these should be managed as Edge Function secrets via `supabase secrets set`, not a local file
 
