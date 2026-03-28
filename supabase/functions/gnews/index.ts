@@ -1,30 +1,63 @@
 // supabase/functions/gnews/index.ts
 
-// Define CORS headers manually.
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Use native Deno.serve (no external imports required).
 Deno.serve(async (req) => {
-  // 1. Log request start for quick diagnostics.
   console.log("REQUEST RECEIVED - function started.");
 
-  // 2. Handle browser preflight requests.
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  // ✅ HEALTH CHECK — public, fără auth
+  const requestUrl = new URL(req.url);
+  if (req.method === "HEAD" || requestUrl.pathname.endsWith("/health")) {
+    return new Response(JSON.stringify({ status: "ok" }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  // ✅ AUTH CHECK — verifică că request-ul vine de la un user autentificat
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader) {
+    console.warn("Unauthorized request — missing Authorization header.");
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_ANON_KEY")!,
+  );
+
+  const { data: { user }, error: authError } = await supabase.auth.getUser(
+    authHeader.replace("Bearer ", ""),
+  );
+
+  if (authError || !user) {
+    console.warn("Unauthorized request — invalid token.");
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  // ✅ END AUTH CHECK
+
   try {
-    // 3. Validate API key.
     const apiKey = Deno.env.get("GNEWS_API_KEY");
     if (!apiKey) {
       console.error("Missing GNEWS_API_KEY.");
       throw new Error("Server configuration error: missing API key.");
     }
 
-    // 4. Parse request body safely.
     let requestBody = {};
     try {
       const text = await req.text();
@@ -35,7 +68,6 @@ Deno.serve(async (req) => {
 
     const { q, lang, max } = requestBody;
 
-    // 5. Build URL and call GNews.
     const searchTerm = encodeURIComponent(q || "agricultura");
     const url = `https://gnews.io/api/v4/search?q=${searchTerm}&lang=${
       lang || "ro"
@@ -46,7 +78,6 @@ Deno.serve(async (req) => {
     const gnewsRes = await fetch(url);
     const data = await gnewsRes.json();
 
-    // 6. Return response.
     if (!gnewsRes.ok) {
       console.error("GNews error:", data);
       return new Response(JSON.stringify(data), {
@@ -60,7 +91,6 @@ Deno.serve(async (req) => {
       status: 200,
     });
   } catch (error) {
-    // Catch any internal error and return a clear message.
     console.error("CRITICAL ERROR:", error.message);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -1,10 +1,14 @@
 import { useNewsData } from "../../hooks/useNewsData";
+import * as Sentry from "@sentry/react";
 
 export default function NewsTab({ active }) {
   const { newsItems, newsLoading, newsError } = useNewsData(active);
 
   return (
     <div className="dashboard-row full">
+      <button onClick={() => Sentry.captureException(new Error("Sentry test error — farmer-app"))}>
+        Test Sentry
+      </button>
       <div className="card">
         <div className="card-header news-header-balanced">
           <h2 className="market-title">News</h2>
