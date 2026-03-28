@@ -6,6 +6,7 @@ import { AuthProvider } from "./hooks/useAuth";
 import { AppProvider } from "./context/AppContext.jsx";
 import "./styles.css";
 import * as Sentry from "@sentry/react";
+import { inject } from "@vercel/analytics";
 
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN,
@@ -13,6 +14,8 @@ Sentry.init({
   tracesSampleRate: 0.2,
   enabled: import.meta.env.PROD,
 });
+
+inject();
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
