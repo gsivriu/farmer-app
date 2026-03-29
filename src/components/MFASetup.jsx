@@ -6,7 +6,6 @@ export default function MFASetup({ onSuccess }) {
   const { enrollMFA, verifyEnrollment } = useMFA();
   const [step, setStep] = useState("idle");
   const [qrCode, setQrCode] = useState(null);
-  const [secret, setSecret] = useState(null);
   const [uri, setUri] = useState(null);
   const [code, setCode] = useState("");
   const [error, setError] = useState(null);
@@ -18,7 +17,6 @@ export default function MFASetup({ onSuccess }) {
     try {
       const result = await enrollMFA();
       setQrCode(result.qrCode);
-      setSecret(result.secret);
       setUri(result.uri);
       setStep("scanning");
     } catch (err) {

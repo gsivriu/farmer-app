@@ -5,6 +5,11 @@ export function useMFA() {
   const [pendingFactorId, setPendingFactorId] = useState(null);
 
   const enrollMFA = async () => {
+    // Clean up any previous unverified TOTP factors to avoid accumulation
+    const { data: existing } = await supabase.auth.mfa.listFactors();
+    const unverified = existing?.totp?.filter((f) => f.status !== "verified") ?? [];
+    await Promise.all(unverified.map((f) => supabase.auth.mfa.unenroll({ factorId: f.id })));
+
     const { data, error } = await supabase.auth.mfa.enroll({ factorType: "totp" });
     if (error) throw error;
     setPendingFactorId(data.id);

@@ -12,8 +12,11 @@ export function AuthProvider({ children }) {
   const [mfaEnrolled, setMfaEnrolled] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+
     const loadProfile = async (currentUser) => {
       if (!currentUser) {
+        if (cancelled) return;
         setUser(null);
         setRole(null);
         setProfile(null);
@@ -23,7 +26,7 @@ export function AuthProvider({ children }) {
         return;
       }
 
-      const [{ data: profileData }, { data: aalData }] = await Promise.all([
+      const [profileResult, aalResult] = await Promise.all([
         supabase
           .from("profiles")
           .select("role, status, full_name, sharp_id, telefon, judet")
@@ -32,16 +35,29 @@ export function AuthProvider({ children }) {
         supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
       ]);
 
-      if (profileData?.status === "disabled") {
+      if (cancelled) return;
+
+      // Can't determine role — sign out rather than fall back to "farmer"
+      if (profileResult.error || !profileResult.data) {
+        await supabase.auth.signOut();
+        window.location.replace("/login");
+        return;
+      }
+
+      if (profileResult.data.status === "disabled") {
         await supabase.auth.signOut();
         return;
       }
 
+      // If AAL check fails, default to aal1 — forces MFAVerify for admins (secure)
+      const currentAal = aalResult.data?.currentLevel ?? "aal1";
+      const mfaIsEnrolled = aalResult.data?.nextLevel === "aal2";
+
       setUser(currentUser);
-      setProfile(profileData);
-      setRole(profileData?.role || "farmer");
-      setAalLevel(aalData?.currentLevel || "aal1");
-      setMfaEnrolled(aalData?.nextLevel === "aal2");
+      setProfile(profileResult.data);
+      setRole(profileResult.data.role);
+      setAalLevel(currentAal);
+      setMfaEnrolled(mfaIsEnrolled);
       setLoading(false);
     };
 
@@ -49,7 +65,10 @@ export function AuthProvider({ children }) {
       loadProfile(session?.user ?? null);
     });
 
-    return () => listener.subscription.unsubscribe();
+    return () => {
+      cancelled = true;
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
   return (
