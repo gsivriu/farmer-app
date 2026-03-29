@@ -31,10 +31,23 @@ export default function MFASetup({ onSuccess }) {
     setLoading(true);
     setError(null);
     try {
-      await verifyEnrollment(code);
+      const timeout = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("timeout")), 10000)
+      );
+      await Promise.race([verifyEnrollment(code), timeout]);
       onSuccess();
-    } catch {
-      setError("Cod incorect. Încearcă din nou.");
+    } catch (err) {
+      const msg = err?.message ?? "";
+      const isNetworkError =
+        err?.message === "timeout" ||
+        !navigator.onLine ||
+        msg.toLowerCase().includes("fetch") ||
+        msg.toLowerCase().includes("network");
+      setError(
+        isNetworkError
+          ? "Eroare de rețea. Verifică conexiunea și încearcă din nou."
+          : "Cod incorect. Încearcă din nou."
+      );
     } finally {
       setLoading(false);
     }
