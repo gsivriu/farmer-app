@@ -5,19 +5,24 @@ export function useMFA() {
   const [pendingFactorId, setPendingFactorId] = useState(null);
 
   const enrollMFA = async () => {
-    // Clean up any previous unverified TOTP factors to avoid accumulation
-    const { data: existing } = await supabase.auth.mfa.listFactors();
-    const unverified = existing?.totp?.filter((f) => f.status !== "verified") ?? [];
-    await Promise.all(unverified.map((f) => supabase.auth.mfa.unenroll({ factorId: f.id })));
+    // Try to enroll directly first
+    let result = await supabase.auth.mfa.enroll({ factorType: "totp" });
 
-    const { data, error } = await supabase.auth.mfa.enroll({ factorType: "totp" });
-    if (error) throw error;
-    setPendingFactorId(data.id);
+    // If a factor already exists (e.g. after refresh mid-setup), clean up and retry
+    if (result.error) {
+      const { data: existing } = await supabase.auth.mfa.listFactors();
+      const unverified = existing?.totp?.filter((f) => f.status !== "verified") ?? [];
+      await Promise.all(unverified.map((f) => supabase.auth.mfa.unenroll({ factorId: f.id })));
+      result = await supabase.auth.mfa.enroll({ factorType: "totp" });
+    }
+
+    if (result.error) throw result.error;
+    setPendingFactorId(result.data.id);
     return {
-      qrCode: data.totp.qr_code,
-      secret: data.totp.secret,
-      uri: data.totp.uri,
-      factorId: data.id,
+      qrCode: result.data.totp.qr_code,
+      secret: result.data.totp.secret,
+      uri: result.data.totp.uri,
+      factorId: result.data.id,
     };
   };
 
