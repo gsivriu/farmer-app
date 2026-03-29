@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMFA } from "../hooks/useMFA";
+import { supabase } from "../supabaseClient";
 
 export default function MFASetup({ onSuccess }) {
   const { enrollMFA, verifyEnrollment } = useMFA();
@@ -53,6 +54,16 @@ export default function MFASetup({ onSuccess }) {
         <button className="btn primary-btn full-width" onClick={handleStart} disabled={loading}>
           {loading ? "Se inițializează..." : "Continuă"}
         </button>
+        <div style={{ textAlign: "center", marginTop: "1rem" }}>
+          <button
+            type="button"
+            className="login-link"
+            style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+            onClick={() => supabase.auth.signOut()}
+          >
+            Logout
+          </button>
+        </div>
       </div>
     );
   }
