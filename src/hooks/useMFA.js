@@ -5,24 +5,21 @@ export function useMFA() {
   const [pendingFactorId, setPendingFactorId] = useState(null);
 
   const enrollMFA = async () => {
-    // Try to enroll directly first
-    let result = await supabase.auth.mfa.enroll({ factorType: "totp" });
+    // Use a unique friendlyName so enrollment never fails due to name conflicts
+    // from interrupted previous sessions (e.g. refresh mid-setup).
+    // unenroll() at AAL1 for unverified factors is unreliable, so we bypass
+    // the conflict entirely with a unique name and clean up orphans after verify.
+    const { data, error } = await supabase.auth.mfa.enroll({
+      factorType: "totp",
+      friendlyName: `ameropa_${Date.now()}`,
+    });
+    if (error) throw error;
 
-    // If a factor already exists (e.g. after refresh mid-setup), clean up and retry
-    if (result.error) {
-      const { data: existing } = await supabase.auth.mfa.listFactors();
-      const unverified = existing?.totp?.filter((f) => f.status !== "verified") ?? [];
-      await Promise.all(unverified.map((f) => supabase.auth.mfa.unenroll({ factorId: f.id })));
-      result = await supabase.auth.mfa.enroll({ factorType: "totp" });
-    }
-
-    if (result.error) throw result.error;
-    setPendingFactorId(result.data.id);
+    setPendingFactorId(data.id);
     return {
-      qrCode: result.data.totp.qr_code,
-      secret: result.data.totp.secret,
-      uri: result.data.totp.uri,
-      factorId: result.data.id,
+      qrCode: data.totp.qr_code,
+      uri: data.totp.uri,
+      factorId: data.id,
     };
   };
 
@@ -40,6 +37,12 @@ export function useMFA() {
     });
     if (error) throw error;
     setPendingFactorId(null);
+
+    // Clean up any leftover unverified factors from interrupted sessions
+    const { data: remaining } = await supabase.auth.mfa.listFactors();
+    const orphans = remaining?.totp?.filter((f) => f.status !== "verified") ?? [];
+    await Promise.all(orphans.map((f) => supabase.auth.mfa.unenroll({ factorId: f.id })));
+
     return data;
   };
 
