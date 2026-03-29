@@ -70,7 +70,7 @@ export default function MFASetup({ onSuccess }) {
             type="button"
             className="login-link"
             style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
-            onClick={async () => { await supabase.auth.signOut(); window.location.replace("/login"); }}
+            onClick={async () => { try { await supabase.auth.signOut(); } finally { window.location.replace("/login"); } }}
           >
             Logout
           </button>
