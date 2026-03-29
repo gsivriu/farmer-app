@@ -25,8 +25,7 @@ export default function LoginForm({
 
     if (authError) {
       setLoading(false);
-      console.log("AUTH ERROR:", JSON.stringify({ message: authError.message, code: authError.code, status: authError.status }));
-      const msg = authError.message?.toLowerCase() ?? "";
+const msg = authError.message?.toLowerCase() ?? "";
       const code = authError.code ?? "";
       if (code === "user_banned" || msg.includes("ban") || msg.includes("disabled")) {
         setError("Contul tău a fost dezactivat. Contactează administratorul.");
