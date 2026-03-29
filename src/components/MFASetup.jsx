@@ -6,6 +6,7 @@ export default function MFASetup({ onSuccess }) {
   const [step, setStep] = useState("idle");
   const [qrCode, setQrCode] = useState(null);
   const [secret, setSecret] = useState(null);
+  const [uri, setUri] = useState(null);
   const [code, setCode] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -17,6 +18,7 @@ export default function MFASetup({ onSuccess }) {
       const result = await enrollMFA();
       setQrCode(result.qrCode);
       setSecret(result.secret);
+      setUri(result.uri);
       setStep("scanning");
     } catch (err) {
       setError(err.message);
@@ -62,16 +64,27 @@ export default function MFASetup({ onSuccess }) {
         Deschide aplicația de autentificare și scanează codul de mai jos.
       </p>
 
-      {qrCode && (
+      {uri && (
         <div style={{ textAlign: "center", margin: "1rem 0" }}>
-          <img src={qrCode} alt="QR code 2FA" style={{ width: 180, height: 180 }} />
+          <a
+            href={uri}
+            className="btn primary-btn full-width"
+            style={{ display: "block", marginBottom: "1rem" }}
+          >
+            Deschide în aplicația de autentificare
+          </a>
         </div>
       )}
 
-      {secret && (
-        <p className="small-text" style={{ textAlign: "center", wordBreak: "break-all", marginBottom: "1rem" }}>
-          Cod manual: <strong>{secret}</strong>
-        </p>
+      {qrCode && (
+        <details style={{ marginBottom: "1rem" }}>
+          <summary className="small-text" style={{ cursor: "pointer", textAlign: "center" }}>
+            Sau scanează QR code (desktop)
+          </summary>
+          <div style={{ textAlign: "center", marginTop: "0.75rem" }}>
+            <img src={qrCode} alt="QR code 2FA" style={{ width: 180, height: 180 }} />
+          </div>
+        </details>
       )}
 
       <form onSubmit={handleVerify} className="form">

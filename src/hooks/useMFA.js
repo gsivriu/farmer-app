@@ -11,6 +11,7 @@ export function useMFA() {
     return {
       qrCode: data.totp.qr_code,
       secret: data.totp.secret,
+      uri: data.totp.uri,
       factorId: data.id,
     };
   };
