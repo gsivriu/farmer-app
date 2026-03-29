@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { Analytics } from "@vercel/analytics/react";
 import "./App.css";
 import { supabase } from "./supabaseClient";
 import { useAuth } from "./hooks/useAuth";
@@ -10,6 +11,8 @@ import SetPassword from "./pages/SetPassword";
 import ProtectedRoute from "./components/ProtectedRoute";
 import FarmerDashboard from "./pages/FarmerDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import MFASetup from "./components/MFASetup";
+import MFAVerify from "./components/MFAVerify";
 
 // ─── Auth pages shell ────────────────────────────────────────────────────────
 function AuthShell({ children }) {
@@ -51,7 +54,17 @@ function RegisterPage() {
 
 // ─── Dashboard shell (după login) ────────────────────────────────────────────
 function DashboardShell({ darkMode, setDarkMode }) {
-  const { role } = useAuth();
+  const { role, aalLevel, mfaEnrolled } = useAuth();
+
+  // Trader fără 2FA enrollat → forțat la setup
+  if (role === "admin" && !mfaEnrolled) {
+    return <MFASetup onSuccess={() => window.location.reload()} />;
+  }
+
+  // Trader cu 2FA enrollat dar sesiune AAL1 → cerut cod TOTP
+  if (role === "admin" && mfaEnrolled && aalLevel !== "aal2") {
+    return <MFAVerify onSuccess={() => window.location.reload()} />;
+  }
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -135,6 +148,7 @@ export default function App() {
   }, []);
 
   return (
+    <>
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
@@ -166,5 +180,7 @@ export default function App() {
       />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
+    <Analytics />
+    </>
   );
 }

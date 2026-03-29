@@ -108,7 +108,11 @@ export default function BidForm({ onBidCreated, embedded = false }) {
 
     if (insertError) {
       setLoading(false);
-      setError("Error submitting bid: " + insertError.message);
+      if (insertError.message?.includes("Rate limit exceeded")) {
+        setError("Too many bids submitted. Please wait a minute before trying again.");
+      } else {
+        setError("Error submitting bid: " + insertError.message);
+      }
       return;
     }
 

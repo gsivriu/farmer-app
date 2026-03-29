@@ -8,6 +8,8 @@ export function AuthProvider({ children }) {
   const [role, setRole] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [aalLevel, setAalLevel] = useState(null);
+  const [mfaEnrolled, setMfaEnrolled] = useState(false);
 
   useEffect(() => {
     const loadProfile = async (currentUser) => {
@@ -15,15 +17,20 @@ export function AuthProvider({ children }) {
         setUser(null);
         setRole(null);
         setProfile(null);
+        setAalLevel(null);
+        setMfaEnrolled(false);
         setLoading(false);
         return;
       }
 
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("role, status, full_name, sharp_id, telefon, judet")
-        .eq("id", currentUser.id)
-        .single();
+      const [{ data: profileData }, { data: aalData }] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("role, status, full_name, sharp_id, telefon, judet")
+          .eq("id", currentUser.id)
+          .single(),
+        supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
+      ]);
 
       if (profileData?.status === "disabled") {
         await supabase.auth.signOut();
@@ -33,6 +40,8 @@ export function AuthProvider({ children }) {
       setUser(currentUser);
       setProfile(profileData);
       setRole(profileData?.role || "farmer");
+      setAalLevel(aalData?.currentLevel || "aal1");
+      setMfaEnrolled(aalData?.nextLevel === "aal2");
       setLoading(false);
     };
 
@@ -44,7 +53,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, role, profile, loading }}>
+    <AuthContext.Provider value={{ user, role, profile, loading, aalLevel, mfaEnrolled }}>
       {children}
     </AuthContext.Provider>
   );
