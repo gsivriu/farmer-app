@@ -33,7 +33,7 @@ export default function MFASetup({ onSuccess }) {
     try {
       await verifyEnrollment(code);
       onSuccess();
-    } catch (err) {
+    } catch {
       setError("Cod incorect. Încearcă din nou.");
     } finally {
       setLoading(false);
