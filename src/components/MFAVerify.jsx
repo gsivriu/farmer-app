@@ -13,10 +13,23 @@ export default function MFAVerify({ onSuccess }) {
     setLoading(true);
     setError(null);
     try {
-      await challengeAndVerify(code);
+      const timeout = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("timeout")), 10000)
+      );
+      await Promise.race([challengeAndVerify(code), timeout]);
       onSuccess();
-    } catch {
-      setError("Cod incorect. Încearcă din nou.");
+    } catch (err) {
+      const msg = err?.message ?? "";
+      const isNetworkError =
+        err?.message === "timeout" ||
+        !navigator.onLine ||
+        msg.toLowerCase().includes("fetch") ||
+        msg.toLowerCase().includes("network");
+      setError(
+        isNetworkError
+          ? "Eroare de rețea. Verifică conexiunea și încearcă din nou."
+          : "Cod incorect. Încearcă din nou."
+      );
       setCode("");
     } finally {
       setLoading(false);
