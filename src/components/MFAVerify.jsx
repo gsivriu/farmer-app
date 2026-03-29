@@ -25,6 +25,7 @@ export default function MFAVerify({ onSuccess }) {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    window.location.replace("/login");
   };
 
   return (
