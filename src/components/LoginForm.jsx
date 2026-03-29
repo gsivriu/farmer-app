@@ -25,8 +25,10 @@ export default function LoginForm({
 
     if (authError) {
       setLoading(false);
+      console.log("AUTH ERROR:", JSON.stringify({ message: authError.message, code: authError.code, status: authError.status }));
       const msg = authError.message?.toLowerCase() ?? "";
-      if (msg.includes("ban") || msg.includes("disabled") || authError.status === 403) {
+      const code = authError.code ?? "";
+      if (code === "user_banned" || msg.includes("ban") || msg.includes("disabled")) {
         setError("Contul tău a fost dezactivat. Contactează administratorul.");
       } else {
         setError("Email sau parolă incorectă.");
