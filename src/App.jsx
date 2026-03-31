@@ -88,11 +88,12 @@ function DashboardShell({ darkMode, setDarkMode }) {
             <button className="btn small outline" type="button" onClick={handleLogout}>
               Logout
             </button>
-            <label className="theme-switch">
+            <label className="theme-switch" aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}>
               <input
                 type="checkbox"
                 checked={darkMode}
                 onChange={() => setDarkMode((p) => !p)}
+                aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
               />
               <span className="theme-slider">
                 <span className="theme-star theme-star-1"></span>
