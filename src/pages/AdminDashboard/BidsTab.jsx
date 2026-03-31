@@ -89,6 +89,7 @@ export default function BidsTab({ active }) {
   const [adminModalDelivery, setAdminModalDelivery] = useState("");
   const [adminModalOriginal, setAdminModalOriginal] = useState({ counter: "", freight: "", delivery: "" });
   const [adminConfirmAction, setAdminConfirmAction] = useState(null);
+  const [modalError, setModalError] = useState(null);
   const [deliveryLocations, setDeliveryLocations] = useState([]);
 
   useEffect(() => { fetchBids(); }, [fetchBids]);
@@ -167,24 +168,25 @@ export default function BidsTab({ active }) {
 
     if (isFreightParity(bid.parity)) {
       const missingMessage = getMissingFreightMessage(bid, freightValue, deliveryValue);
-      if (missingMessage) { alert(missingMessage); return; }
+      if (missingMessage) { setModalError(missingMessage); return; }
     }
 
     const payload = { status: action };
     if (action === "countered") {
       const counterNum = parseOptionalNumber(counterValue);
-      if (!Number.isFinite(counterNum) || counterNum <= 0) { alert("Enter a valid counter price."); return; }
+      if (!Number.isFinite(counterNum) || counterNum <= 0) { setModalError("Enter a valid counter price."); return; }
       payload.counter_price = counterNum;
       if (isFreightParity(bid.parity)) {
         const freightNum = parseOptionalNumber(freightValue);
-        if (!Number.isFinite(freightNum) || freightNum <= 0) { alert("Enter a valid transport fee."); return; }
+        if (!Number.isFinite(freightNum) || freightNum <= 0) { setModalError("Enter a valid transport fee."); return; }
         payload.freight_cost = freightNum;
         payload.delivery_location = normalizeOptionalText(deliveryValue);
       }
     }
 
+    setModalError(null);
     const { error } = await supabase.from("bids").update(payload).eq("id", bid.id);
-    if (error) { alert("Error while sending update: " + error.message); return; }
+    if (error) { setModalError("Error while sending update: " + error.message); return; }
 
     if (action === "accepted" && bid.farmer_id) {
       await addFarmerRewardsPoints(bid.farmer_id, Number(bid.quantity || 0));
@@ -210,6 +212,7 @@ export default function BidsTab({ active }) {
     setAdminModalDelivery(deliveryValue);
     setAdminModalOriginal({ counter: counterValue, freight: freightValue, delivery: deliveryValue });
     setAdminConfirmAction(confirmAction);
+    setModalError(null);
   };
 
   // ── Derived data ─────────────────────────────────────────────────────────────
@@ -396,7 +399,29 @@ export default function BidsTab({ active }) {
             })}
 
             {filteredBids.length === 0 && (
-              <p className="small-text" style={{ padding: 12 }}>No bids found for selected filters.</p>
+              <div className="empty-state">
+                <svg className="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2M12 12h.01M12 16h.01" />
+                </svg>
+                <p className="empty-state-title">No bids found</p>
+                <p className="empty-state-subtitle">No results for the current filters. Try adjusting or resetting them.</p>
+                <button
+                  type="button"
+                  className="btn small outline"
+                  onClick={() => {
+                    setListFarmerFilter("all");
+                    setFilterProduct("all");
+                    setFilterStatus("all");
+                    setFilterParity("all");
+                    setFilterDeliveryFrom("");
+                    setFilterDeliveryTo("");
+                    setFilterDeliveryLocation("all");
+                    setFilterLoadingLocation("all");
+                  }}
+                >
+                  Reset filters
+                </button>
+              </div>
             )}
           </div>
         )}
@@ -531,6 +556,11 @@ export default function BidsTab({ active }) {
                 </div>
               )}
             </div>
+            {modalError && (
+              <div className="modal-inline-error" role="alert">
+                {modalError}
+              </div>
+            )}
             <div className="modal-actions">
               {(() => {
                 const currentCounter = parseOptionalNumber(adminModalCounter);
@@ -566,7 +596,7 @@ export default function BidsTab({ active }) {
                   <>
                     <button
                       type="button"
-                      className="btn small ghost admin-reject-btn"
+                      className={`btn small ghost admin-reject-btn${adminConfirmAction === "rejected" ? " is-confirming" : ""}`}
                       disabled={isDecisionLocked}
                       onClick={(event) => {
                         event.stopPropagation();
@@ -578,7 +608,7 @@ export default function BidsTab({ active }) {
                     </button>
                     <button
                       type="button"
-                      className="btn small ghost admin-counter-btn"
+                      className={`btn small ghost admin-counter-btn${adminConfirmAction === "countered" ? " is-confirming" : ""}`}
                       disabled={isDecisionLocked || !hasChanges || counterInvalid || freightInvalid}
                       onClick={(event) => {
                         event.stopPropagation();
@@ -590,7 +620,7 @@ export default function BidsTab({ active }) {
                     </button>
                     <button
                       type="button"
-                      className="btn small ghost admin-accept-btn"
+                      className={`btn small ghost admin-accept-btn${adminConfirmAction === "accepted" ? " is-confirming" : ""}`}
                       disabled={isDecisionLocked || hasChanges}
                       onClick={(event) => {
                         event.stopPropagation();
