@@ -1283,15 +1283,6 @@ select.input {
   border-color: #1f2937;
 }
 
-.theme-dark .btn.outline {
-  background: var(--btn-bg);
-  color: var(--btn-text);
-  border-color: var(--btn-border);
-}
-
-.theme-dark .btn.outline:hover {
-  background: var(--btn-bg-hover);
-}
 
 .theme-dark .input::placeholder {
   color: #64748b;
@@ -1371,24 +1362,52 @@ select.input:focus {
   font-size: 13px;
 }
 
+/* Secondary — transparent cu border subțire, text navy */
 .btn.outline {
-  border: 1px solid var(--btn-border);
-  background: var(--btn-bg);
-  color: var(--btn-text);
+  background: transparent;
+  color: var(--navy-table);
+  border: 1px solid rgba(26, 54, 93, 0.35);
 }
 
+.btn.outline:hover {
+  background: rgba(26, 54, 93, 0.06);
+  box-shadow: none;
+  transform: translateY(-1px);
+}
+
+.theme-dark .btn.outline {
+  background: transparent;
+  color: #94a3b8;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.theme-dark .btn.outline:hover {
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: none;
+}
+
+/* Ghost — cel mai puțin vizual, fără border, dismiss actions */
 .btn.small.ghost {
   padding: 8px 12px;
   font-size: 13px;
   border-radius: var(--radius-md);
-  background: var(--btn-bg);
-  border: 1px solid var(--btn-border);
-  color: var(--btn-text);
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--gray);
   white-space: nowrap;
 }
 
 .btn.small.ghost:hover {
-  background: var(--btn-bg-hover);
+  background: rgba(0, 0, 0, 0.05);
+  box-shadow: none;
+}
+
+.theme-dark .btn.small.ghost {
+  color: #64748b;
+}
+
+.theme-dark .btn.small.ghost:hover {
+  background: rgba(255, 255, 255, 0.07);
 }
 
 .full-width {
@@ -2229,27 +2248,6 @@ select.input:focus {
   margin-top: 16px;
 }
 
-.filter-btn {
-  background: transparent !important;
-  color: var(--gray) !important;
-  border-color: var(--gray-light) !important;
-  border-radius: var(--radius-md);
-}
-
-.filter-btn:hover {
-  color: var(--gray) !important;
-  background: rgba(0, 0, 0, 0.04) !important;
-}
-
-.theme-dark .filter-btn {
-  background: transparent !important;
-  color: #94a3b8 !important;
-  border-color: #1f2937 !important;
-}
-
-.theme-dark .filter-btn:hover {
-  background: rgba(255, 255, 255, 0.2) !important;
-}
 
 .bid-submit-btn {
   background: var(--brand) !important;
@@ -5805,12 +5803,11 @@ select.input:focus {
     gap: 12px;
   }
 
-  .filter-btn {
+  .btn.small.outline {
     min-height: 44px;
-    padding: 12px 20px;
+    padding: 10px 20px;
     font-size: 14px;
     font-weight: 600;
-    border-radius: 12px;
   }
 
   /* Bid List */

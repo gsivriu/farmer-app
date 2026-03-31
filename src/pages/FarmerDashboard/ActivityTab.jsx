@@ -213,10 +213,10 @@ export default function ActivityTab() {
           <div className="card-header activity-header-compact">
             <h2 className="market-title">My Activity</h2>
             <div className="activity-header-actions">
-              <button type="button" className="btn small outline filter-btn" onClick={() => setFiltersOpen(true)}>
+              <button type="button" className="btn small outline" onClick={() => setFiltersOpen(true)}>
                 Filters
               </button>
-              <button type="button" className="btn small outline filter-btn" onClick={() => setShowStats((prev) => !prev)}>
+              <button type="button" className="btn small outline" onClick={() => setShowStats((prev) => !prev)}>
                 Stats
               </button>
             </div>
@@ -507,7 +507,7 @@ export default function ActivityTab() {
           <div className="bid-modal" onClick={(event) => event.stopPropagation()}>
             <div className="bid-modal-header">
               <h3>Filters</h3>
-              <button type="button" className="btn small outline filter-btn" onClick={() => setFiltersOpen(false)}>
+              <button type="button" className="btn small outline" onClick={() => setFiltersOpen(false)}>
                 Close
               </button>
             </div>
@@ -543,12 +543,12 @@ export default function ActivityTab() {
               </div>
 
               <div className="filter-actions">
-                <button type="button" className="btn small outline filter-btn" onClick={() => setFiltersOpen(false)}>
+                <button type="button" className="btn small outline" onClick={() => setFiltersOpen(false)}>
                   Apply
                 </button>
                 <button
                   type="button"
-                  className="btn small outline filter-btn"
+                  className="btn small outline"
                   onClick={() => { setProductFilter("all"); setStatusFilter("all"); setDateFrom(""); setDateTo(""); }}
                 >
                   Reset

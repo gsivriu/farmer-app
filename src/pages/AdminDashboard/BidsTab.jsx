@@ -277,9 +277,8 @@ export default function BidsTab({ active }) {
         <div className="card-header admin-bids-header">
           <h2 className="market-title">All bids</h2>
           <div className="admin-bids-actions">
-            <button type="button" className="btn small outline" onClick={() => fetchBids()}>Refresh</button>
-            <button type="button" className="btn small outline filter-btn" onClick={() => setFiltersOpen(true)}>Filters</button>
-            <button type="button" className="btn small outline filter-btn" onClick={() => setShowStats((prev) => !prev)}>Stats</button>
+            <button type="button" className="btn small outline" onClick={() => setFiltersOpen(true)}>Filters</button>
+            <button type="button" className="btn small outline" onClick={() => setShowStats((prev) => !prev)}>Stats</button>
           </div>
         </div>
 
@@ -649,7 +648,7 @@ export default function BidsTab({ active }) {
           <div className="bid-modal" onClick={(event) => event.stopPropagation()}>
             <div className="bid-modal-header">
               <h3>Filters</h3>
-              <button type="button" className="btn small outline filter-btn" onClick={() => setFiltersOpen(false)}>
+              <button type="button" className="btn small outline" onClick={() => setFiltersOpen(false)}>
                 Close
               </button>
             </div>
@@ -717,10 +716,10 @@ export default function BidsTab({ active }) {
                 <input className="input" type="date" value={filterDeliveryTo} onChange={(e) => setFilterDeliveryTo(e.target.value)} />
               </div>
               <div className="filter-actions">
-                <button type="button" className="btn small outline filter-btn" onClick={() => setFiltersOpen(false)}>Apply</button>
+                <button type="button" className="btn small outline" onClick={() => setFiltersOpen(false)}>Apply</button>
                 <button
                   type="button"
-                  className="btn small outline filter-btn"
+                  className="btn small outline"
                   onClick={() => {
                     setListFarmerFilter("all");
                     setFilterProduct("all");
