@@ -7641,15 +7641,15 @@ select.input:focus {
 :root {
   --brand-red: #b9101e;
 
-  /* Surfaces */
-  --surface-page:   hsl(0, 0%, 96.5%);
-  --surface-base:   hsl(0, 0%, 99%);
-  --surface-subtle: hsl(0, 0%, 97.5%);
+  /* Surfaces — white base */
+  --surface-page:   #ffffff;
+  --surface-base:   #ffffff;
+  --surface-subtle: hsl(0, 0%, 97%);
 
-  /* Typography */
+  /* Typography — 3-step hierarchy */
   --text-primary:   hsl(0, 0%, 8%);
-  --text-secondary: hsl(0, 0%, 42%);
-  --text-tertiary:  hsl(0, 0%, 62%);
+  --text-secondary: hsl(0, 0%, 38%);
+  --text-tertiary:  hsl(0, 0%, 58%);
 
   /* 8pt spacing scale */
   --space-2: 4px;
@@ -7668,14 +7668,19 @@ select.input:focus {
   --radius-sm: 4px;
 }
 
+/* Neutralize old glass/gray background on admin pane */
+.admin-home-pane {
+  background: #ffffff !important;
+}
+
 /* -------- HOME PAGE WRAPPER -------- */
 .home-page {
   max-width: 1200px;
   margin: 0 auto;
-  padding: var(--space-8) var(--space-7);
+  padding: var(--space-7) var(--space-7);
   display: flex;
   flex-direction: column;
-  gap: var(--space-8);
+  gap: var(--space-7);
   background: var(--surface-page);
   min-height: 100%;
 }
@@ -7700,31 +7705,34 @@ select.input:focus {
 .market-ticker-item:first-child { padding-left: 0; }
 .market-ticker-item:last-child  { padding-right: 0; border-right: none; }
 
+/* Eyebrow label — whispers */
 .ticker-label {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.08em;
   color: var(--text-tertiary);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
+/* Primary number — shouts */
 .ticker-value {
-  font-size: 22px;
-  font-weight: 500;
+  font-size: 24px;
+  font-weight: 600;
   letter-spacing: -0.02em;
   color: var(--text-primary);
   line-height: 1;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
   font-variant-numeric: tabular-nums;
 }
 
 .ticker-delta {
   font-size: 12px;
   font-weight: 500;
+  letter-spacing: 0.01em;
 }
 
-.ticker-delta.positive { color: #2d6a2d; }
+.ticker-delta.positive { color: #2a6130; }
 .ticker-delta.negative { color: var(--brand-red); }
 
 .ticker-note {
@@ -7747,11 +7755,12 @@ select.input:focus {
   margin-bottom: var(--space-4);
 }
 
+/* Section eyebrow — whispers */
 .exchange-title {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.08em;
   color: var(--text-tertiary);
 }
 
@@ -7774,18 +7783,21 @@ select.input:focus {
   border-bottom: none;
 }
 
+/* Instrument name — speaks */
 .exchange-pair {
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 500;
   color: var(--text-secondary);
   display: flex;
   align-items: center;
   gap: var(--space-3);
 }
 
+/* Rate value — shouts */
 .exchange-section .exchange-value {
-  font-size: 15px;
-  font-weight: 500;
-  letter-spacing: -0.01em;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
 }
@@ -7833,10 +7845,10 @@ select.input:focus {
 }
 
 .list-price-title {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.08em;
   color: var(--text-tertiary);
 }
 
@@ -7862,9 +7874,10 @@ select.input:focus {
   box-shadow: none;
 }
 
+/* Commodity field label — speaks */
 .home-page .admin-label {
-  font-size: 11px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-secondary);
@@ -7884,7 +7897,8 @@ select.input:focus {
   min-width: 0;
   width: auto;
   padding: 0 var(--space-4);
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 500;
   font-variant-numeric: tabular-nums;
   border: var(--hairline);
   border-radius: var(--radius-sm);
@@ -7944,10 +7958,10 @@ select.input:focus {
 }
 
 .home-page .silo-table-header h3 {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.08em;
   color: var(--text-tertiary);
   margin: 0 0 var(--space-4);
 }
@@ -7961,26 +7975,63 @@ select.input:focus {
 
 @media (max-width: 768px) {
   .home-page {
-    padding: var(--space-6) var(--space-5);
-    gap: var(--space-7);
+    padding: var(--space-5) var(--space-4);  /* 16px 12px */
+    gap: var(--space-6);                      /* 24px between sections */
   }
 
   .market-ticker {
     grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-5);
+    gap: var(--space-5) 0;
+    padding: var(--space-5) var(--space-4);
   }
 
   .market-ticker-item {
     border-right: none;
-    padding: 0;
+    padding: var(--space-3) 0;
+    border-bottom: var(--hairline);
   }
 
   .market-ticker-item:nth-child(odd) {
     border-right: var(--hairline);
-    padding-right: var(--space-6);
+    padding-right: var(--space-5);
+  }
+
+  .market-ticker-item:nth-child(even) {
+    padding-left: var(--space-5);
+  }
+
+  /* Remove bottom border from last row */
+  .market-ticker-item:nth-last-child(-n+2) {
+    border-bottom: none;
   }
 
   .home-page .admin-grid {
     grid-template-columns: 1fr;
+    gap: var(--space-5) 0;
+  }
+
+  /* Tighter button on mobile */
+  .home-page .admin-btn {
+    padding: 0 var(--space-5);  /* 0 16px instead of 0 24px */
+    font-size: 13px;
+  }
+
+  .home-page .admin-row {
+    gap: var(--space-3);  /* 8px */
+  }
+
+  /* Slightly smaller input number on mobile */
+  .home-page .admin-input {
+    font-size: 14px;
+  }
+
+  .home-page .admin-price-item {
+    padding-bottom: var(--space-4);
+    border-bottom: var(--hairline);
+  }
+
+  .home-page .admin-price-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
   }
 }
