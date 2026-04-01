@@ -322,7 +322,7 @@ export default function BidsTab({ active }) {
         {!loading && !error && (
           <div className="admin-bid-list" style={{ marginTop: 14 }}>
             {filteredBids.map((b) => {
-              const unit = b.product === "sunflower" ? "USD/t" : "EUR/t";
+              const unit = `${b.currency || (b.product === "sunflower" ? "USD" : "EUR")}/t`;
               const statusClass =
                 b.status === "accepted" ? "is-accepted"
                 : b.status === "rejected" ? "is-rejected"
@@ -465,11 +465,11 @@ export default function BidsTab({ active }) {
                 <span className="bid-modal-label">Price</span>
                 <span className="bid-modal-value">
                   {adminSelectedBid.status === "accepted" && getAcceptedPrice(adminSelectedBid) != null ? (
-                    <>{formatCompactNumber(getAcceptedPrice(adminSelectedBid))}{" "}{adminSelectedBid.product === "sunflower" ? "USD/t" : "EUR/t"}</>
+                    <>{formatCompactNumber(getAcceptedPrice(adminSelectedBid))}{" "}{`${adminSelectedBid.currency || (adminSelectedBid.product === "sunflower" ? "USD" : "EUR")}/t`}</>
                   ) : hasPositiveNumber(adminSelectedBid.counter_price) ? (
-                    <>{formatCompactNumber(adminSelectedBid.counter_price)}{" "}{adminSelectedBid.product === "sunflower" ? "USD/t" : "EUR/t"}</>
+                    <>{formatCompactNumber(adminSelectedBid.counter_price)}{" "}{`${adminSelectedBid.currency || (adminSelectedBid.product === "sunflower" ? "USD" : "EUR")}/t`}</>
                   ) : (
-                    <>{formatCompactNumber(adminSelectedBid.price)}{" "}{adminSelectedBid.product === "sunflower" ? "USD/t" : "EUR/t"}</>
+                    <>{formatCompactNumber(adminSelectedBid.price)}{" "}{`${adminSelectedBid.currency || (adminSelectedBid.product === "sunflower" ? "USD" : "EUR")}/t`}</>
                   )}
                 </span>
               </div>
@@ -486,7 +486,7 @@ export default function BidsTab({ active }) {
                     onChange={(e) => setAdminModalCounter(e.target.value)}
                   />
                   <span className="bid-modal-unit">
-                    {adminSelectedBid.product === "sunflower" ? "USD/t" : "EUR/t"}
+                    {`${adminSelectedBid.currency || (adminSelectedBid.product === "sunflower" ? "USD" : "EUR")}/t`}
                   </span>
                 </span>
               </div>
@@ -504,7 +504,7 @@ export default function BidsTab({ active }) {
                       onChange={(e) => setAdminModalFreight(e.target.value)}
                     />
                     <span className="bid-modal-unit">
-                      {adminSelectedBid.product === "sunflower" ? "USD/t" : "EUR/t"}
+                      {`${adminSelectedBid.currency || (adminSelectedBid.product === "sunflower" ? "USD" : "EUR")}/t`}
                     </span>
                   </span>
                 </div>
@@ -544,6 +544,24 @@ export default function BidsTab({ active }) {
                   {formatDeliveryRange(adminSelectedBid.delivery_start, adminSelectedBid.delivery_end)}
                 </span>
               </div>
+              {adminSelectedBid.crop_year && (
+                <div className="bid-modal-row">
+                  <span className="bid-modal-label">Crop year</span>
+                  <span className="bid-modal-value">{adminSelectedBid.crop_year}</span>
+                </div>
+              )}
+              {adminSelectedBid.quantity_tolerance != null && (
+                <div className="bid-modal-row">
+                  <span className="bid-modal-label">Tolerance</span>
+                  <span className="bid-modal-value">±{adminSelectedBid.quantity_tolerance}%</span>
+                </div>
+              )}
+              {adminSelectedBid.remarks && (
+                <div className="bid-modal-row">
+                  <span className="bid-modal-label">Remarks</span>
+                  <span className="bid-modal-value">{adminSelectedBid.remarks}</span>
+                </div>
+              )}
               <div className="bid-modal-row">
                 <span className="bid-modal-label">Status</span>
                 <span className="bid-modal-value">{getStatusLabel(adminSelectedBid.status)}</span>

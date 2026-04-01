@@ -273,7 +273,7 @@ export default function ActivityTab() {
                       : "is-pending";
                     const hasCounterPrice = hasPositiveNumber(b.counter_price);
                     const activePrice = hasCounterPrice ? Number(b.counter_price) : Number(b.price);
-                    const unit = b.product === "sunflower" ? "USD/t" : "EUR/t";
+                    const unit = `${b.currency || (b.product === "sunflower" ? "USD" : "EUR")}/t`;
                     const statusLabel = getStatusLabel(b.status);
 
                     return (
@@ -394,7 +394,7 @@ export default function ActivityTab() {
                     onChange={(e) => setFarmerModalCounter(e.target.value)}
                   />
                   <span className="bid-modal-unit">
-                    {selectedBid.product === "sunflower" ? "USD/t" : "EUR/t"}
+                    {`${selectedBid.currency || (selectedBid.product === "sunflower" ? "USD" : "EUR")}/t`}
                   </span>
                 </span>
               </div>
@@ -422,6 +422,24 @@ export default function ActivityTab() {
                   {formatDeliveryRange(selectedBid.delivery_start, selectedBid.delivery_end)}
                 </span>
               </div>
+              {selectedBid.crop_year && (
+                <div className="bid-modal-row">
+                  <span className="bid-modal-label">Crop year</span>
+                  <span className="bid-modal-value">{selectedBid.crop_year}</span>
+                </div>
+              )}
+              {selectedBid.quantity_tolerance != null && (
+                <div className="bid-modal-row">
+                  <span className="bid-modal-label">Tolerance</span>
+                  <span className="bid-modal-value">±{selectedBid.quantity_tolerance}%</span>
+                </div>
+              )}
+              {selectedBid.remarks && (
+                <div className="bid-modal-row">
+                  <span className="bid-modal-label">Remarks</span>
+                  <span className="bid-modal-value">{selectedBid.remarks}</span>
+                </div>
+              )}
             </div>
 
             {farmerActionError && (
