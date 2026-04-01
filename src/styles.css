@@ -8329,3 +8329,298 @@ select.input:focus {
     width: 100%;
   }
 }
+
+/* =============================================================
+   BID DETAILS MODAL — redesign v2
+   ============================================================= */
+
+/* ── Surface & layout ── */
+.bid-modal.bid-modal-details {
+  max-width: 480px;
+  border-radius: 12px;
+  padding: 28px 28px 24px;
+  border: none;
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.10);
+  background: #ffffff;
+}
+
+/* ── Drag handle (visible only on mobile) ── */
+.bid-detail-drag {
+  display: none;
+  width: 36px;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 2px;
+  margin: 0 auto 20px;
+}
+
+/* ── Header ── */
+.bid-modal-details .bid-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+}
+
+.bid-detail-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bid-detail-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.bid-detail-title {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.bid-detail-date {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.bid-detail-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: -10px -10px 0 0;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--text-tertiary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.bid-detail-close:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--text-primary);
+}
+
+/* ── Status badges ── */
+.bid-status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.bid-status-accepted  { background: #EAF3DE; color: #27500A; }
+.bid-status-rejected  { background: #F5E8E8; color: #7A2020; }
+.bid-status-countered { background: #FEF3C7; color: #7A4A00; }
+.bid-status-pending   { background: #F1EFE8; color: #5F5E5A; }
+
+/* ── Body rows — no dividers, spacing separates ── */
+.bid-modal-details .bid-modal-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 10px 0;
+  border-top: none;
+}
+
+.bid-modal-details .bid-modal-row + .bid-modal-row {
+  border-top: none;
+}
+
+.bid-modal-details .bid-modal-label {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-tertiary);
+  letter-spacing: 0;
+}
+
+.bid-modal-details .bid-modal-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  text-align: right;
+  justify-self: end;
+}
+
+/* ── Counter input ── */
+.bid-detail-counter-input {
+  height: 36px;
+  width: 100px;
+  padding: 0 10px;
+  font-size: 14px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--text-primary);
+  background: #ffffff;
+  border: 0.5px solid rgba(0, 0, 0, 0.20);
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.15s;
+  -moz-appearance: textfield;
+}
+
+.bid-detail-counter-input::-webkit-outer-spin-button,
+.bid-detail-counter-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+.bid-detail-counter-input:focus {
+  border-color: rgba(0, 0, 0, 0.40);
+}
+
+.bid-modal-details .bid-modal-unit {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+
+/* ── Footer actions ── */
+.bid-detail-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 0.5px solid rgba(0, 0, 0, 0.08);
+}
+
+/* Reject — ghost, text-only */
+.bid-action-reject {
+  height: auto;
+  padding: 6px 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color 0.15s;
+  white-space: nowrap;
+}
+
+.bid-action-reject:hover:not(:disabled) { color: var(--brand-red); }
+
+.bid-action-reject.is-confirming {
+  color: var(--brand-red);
+  animation: none;
+}
+
+.bid-action-reject:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* Counter offer — outline secondary */
+.bid-action-counter {
+  height: 36px;
+  padding: 0 18px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  background: transparent;
+  border: 0.5px solid rgba(0, 0, 0, 0.20);
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.bid-action-counter:hover:not(:disabled) { background: rgba(0, 0, 0, 0.04); }
+
+.bid-action-counter.is-confirming {
+  background: #FEF3C7;
+  border-color: rgba(245, 158, 11, 0.50);
+  color: #78350F;
+}
+
+.bid-action-counter:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* Accept — primary red */
+.bid-action-accept {
+  height: 36px;
+  padding: 0 22px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #ffffff;
+  background: var(--brand-red);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+
+.bid-action-accept:hover:not(:disabled) { opacity: 0.88; }
+
+.bid-action-accept.is-confirming {
+  opacity: 0.88;
+  animation: pulse-confirm-red 0.9s ease-in-out infinite alternate;
+}
+
+.bid-action-accept:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* ── Mobile — bottom sheet ── */
+@media (max-width: 768px) {
+  .bid-modal-backdrop-details {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .bid-modal-backdrop-details .bid-modal.bid-modal-details {
+    width: 100%;
+    max-width: 100%;
+    max-height: 92vh;
+    border-radius: 16px 16px 0 0;
+    padding: 16px 20px 32px;
+    overflow-y: auto;
+  }
+
+  .bid-detail-drag {
+    display: block;
+  }
+
+  .bid-modal-details .bid-modal-label,
+  .bid-modal-details .bid-modal-value {
+    font-size: 15px;
+  }
+
+  /* Stivuit vertical, ordine inversată: Accept sus, Reject jos */
+  .bid-detail-footer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .bid-action-accept {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .bid-action-counter {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .bid-action-reject {
+    text-align: center;
+    padding: 8px 0;
+  }
+}

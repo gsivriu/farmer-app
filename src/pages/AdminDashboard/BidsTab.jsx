@@ -65,6 +65,15 @@ const normalizeOptionalText = (value) => {
   return trimmed === "" ? null : trimmed;
 };
 
+function BidStatusBadge({ status }) {
+  const s = String(status || "").toLowerCase();
+  if (s === "accepted")        return <span className="bid-status-badge bid-status-accepted">Accepted</span>;
+  if (s === "rejected")        return <span className="bid-status-badge bid-status-rejected">Rejected</span>;
+  if (s === "countered")       return <span className="bid-status-badge bid-status-countered">Counter offer</span>;
+  if (s === "farmer_countered") return <span className="bid-status-badge bid-status-countered">Farmer counter</span>;
+  return <span className="bid-status-badge bid-status-pending">Pending</span>;
+}
+
 export default function BidsTab({ active }) {
   const { bids, fetchBids, addFarmerRewardsPoints } = useAppContext();
 
@@ -429,7 +438,7 @@ export default function BidsTab({ active }) {
       {/* Admin bid action modal */}
       {adminSelectedBid && (
         <div
-          className="bid-modal-backdrop"
+          className="bid-modal-backdrop bid-modal-backdrop-details"
           role="dialog"
           aria-modal="true"
           onClick={() => setAdminSelectedBid(null)}
@@ -438,17 +447,20 @@ export default function BidsTab({ active }) {
             className="bid-modal bid-modal-details"
             onClick={(event) => { event.stopPropagation(); setAdminConfirmAction(null); }}
           >
+            <div className="bid-detail-drag" aria-hidden="true" />
             <div className="bid-modal-header">
-              <h3>Bid details</h3>
-              <button type="button" className="btn small ghost" onClick={() => setAdminSelectedBid(null)}>
-                Close
+              <div className="bid-detail-header-left">
+                <div className="bid-detail-title-row">
+                  <h3 className="bid-detail-title">{getProductLabelSafe(adminSelectedBid.product)}</h3>
+                  <BidStatusBadge status={adminSelectedBid.status} />
+                </div>
+                <span className="bid-detail-date">{formatDateTime(adminSelectedBid.created_at)}</span>
+              </div>
+              <button type="button" className="bid-detail-close" onClick={() => setAdminSelectedBid(null)}>
+                ×
               </button>
             </div>
             <div className="bid-modal-body">
-              <div className="bid-modal-row">
-                <span className="bid-modal-label">Date</span>
-                <span className="bid-modal-value">{formatDateTime(adminSelectedBid.created_at)}</span>
-              </div>
               <div className="bid-modal-row">
                 <span className="bid-modal-label">Farmer</span>
                 <span className="bid-modal-value">{adminSelectedBid.farmer_email || adminSelectedBid.farmer_id}</span>
@@ -477,7 +489,7 @@ export default function BidsTab({ active }) {
                 <span className="bid-modal-label">Counter</span>
                 <span className="bid-modal-value bid-modal-counter">
                   <input
-                    className="input inline-input"
+                    className="bid-detail-counter-input"
                     type="number"
                     step="0.01"
                     inputMode="decimal"
@@ -495,7 +507,7 @@ export default function BidsTab({ active }) {
                   <span className="bid-modal-label">Freight</span>
                   <span className="bid-modal-value bid-modal-counter">
                     <input
-                      className="input inline-input"
+                      className="bid-detail-counter-input"
                       type="number"
                       step="0.01"
                       inputMode="decimal"
@@ -578,7 +590,7 @@ export default function BidsTab({ active }) {
                 {modalError}
               </div>
             )}
-            <div className="modal-actions">
+            <div className="bid-detail-footer">
               {(() => {
                 const currentCounter = parseOptionalNumber(adminModalCounter);
                 const originalCounter = parseOptionalNumber(adminModalOriginal.counter);
@@ -613,7 +625,7 @@ export default function BidsTab({ active }) {
                   <>
                     <button
                       type="button"
-                      className={`btn small ghost admin-reject-btn${adminConfirmAction === "rejected" ? " is-confirming" : ""}`}
+                      className={`bid-action-reject${adminConfirmAction === "rejected" ? " is-confirming" : ""}`}
                       disabled={isDecisionLocked}
                       onClick={(event) => {
                         event.stopPropagation();
@@ -625,7 +637,7 @@ export default function BidsTab({ active }) {
                     </button>
                     <button
                       type="button"
-                      className={`btn small ghost admin-counter-btn${adminConfirmAction === "countered" ? " is-confirming" : ""}`}
+                      className={`bid-action-counter${adminConfirmAction === "countered" ? " is-confirming" : ""}`}
                       disabled={isDecisionLocked || !hasChanges || counterInvalid || freightInvalid}
                       onClick={(event) => {
                         event.stopPropagation();
@@ -637,7 +649,7 @@ export default function BidsTab({ active }) {
                     </button>
                     <button
                       type="button"
-                      className={`btn small ghost admin-accept-btn${adminConfirmAction === "accepted" ? " is-confirming" : ""}`}
+                      className={`bid-action-accept${adminConfirmAction === "accepted" ? " is-confirming" : ""}`}
                       disabled={isDecisionLocked || hasChanges}
                       onClick={(event) => {
                         event.stopPropagation();
@@ -650,7 +662,7 @@ export default function BidsTab({ active }) {
                   </>
                 );
               })()}
-            </div>
+            </div>{/* bid-detail-footer */}
           </div>
         </div>
       )}
