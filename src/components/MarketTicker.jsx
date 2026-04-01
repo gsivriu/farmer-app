@@ -69,57 +69,30 @@ const FUTURES = [
   
   export default function MarketTicker() {
     return (
-      <div className="market-card market-ticker">
-        <div className="market-card-header">
-          <h3 className="market-title">Market overview</h3>
-          <p className="market-subtitle"></p>
-        </div>
-
-        <p style={{ fontSize: "11px", color: "var(--text-muted, #888)", margin: "0 0 10px 0", display: "flex", alignItems: "center", gap: "4px" }}>
-          ℹ️ Indicative values only
-        </p>
-
-        <div className="market-grid">
+      <div>
+        <div className="market-ticker">
           {FUTURES.map((f) => {
             const delta = getDeltaInfo(f.change);
-  
-            const itemClass =
-              "market-item " +
-              (delta.sign === "up"
-                ? "market-item-up"
-                : delta.sign === "down"
-                ? "market-item-down"
-                : "market-item-flat");
-  
             const deltaClass =
-              "market-delta " +
+              "ticker-delta " +
               (delta.sign === "up"
-                ? "delta-up"
+                ? "positive"
                 : delta.sign === "down"
-                ? "delta-down"
-                : "delta-flat");
-  
+                ? "negative"
+                : "");
+
             return (
-              <div key={f.id} className={itemClass}>
-                <div className="market-line-1">
-                  <span className="market-product">
-                    {f.market} – {f.product}
-                  </span>
-                  <span className="market-tag">{f.contract}</span>
+              <div key={f.id} className="market-ticker-item">
+                <div className="ticker-label">
+                  {f.market} · {f.product} · {f.contract}
                 </div>
-  
-                <div className="market-line-2">
-                  <span className="market-price">{f.price.toFixed(2)}</span>
-                </div>
-  
-                <span className={deltaClass}>
-                  <span className="delta-arrow">{delta.arrow}</span>
-                  {delta.label}
-                </span>
+                <div className="ticker-value">{f.price.toFixed(2)}</div>
+                <span className={deltaClass}>{delta.label}</span>
               </div>
             );
           })}
         </div>
+        <p className="ticker-note">Indicative values only</p>
       </div>
     );
   }

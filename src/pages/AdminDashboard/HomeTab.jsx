@@ -45,46 +45,45 @@ export default function HomeTab() {
   };
 
   return (
-    <div className="card admin-card dashboard-card">
+    <div className="home-page">
       <MarketTicker />
-      <div className="section-divider" />
       <ExchangeRatesCard />
-      <div className="section-divider exchange-divider" />
 
-      <div className="card-header admin-price-header">
-        <h2 className="market-title">List price</h2>
-        {priceNotice && <p className="admin-price-notice">{priceNotice}</p>}
-      </div>
+      <div className="list-price-section">
+        <div className="list-price-header">
+          <h2 className="list-price-title">List price</h2>
+          {priceNotice && <p className="admin-price-notice">{priceNotice}</p>}
+        </div>
 
-      <div className="admin-grid">
-        {(commodities || []).map((c) => (
-          <div className="admin-price-item" key={c.id}>
-            <div className="admin-label">{getProductLabelSafe(c.id, c.name)}</div>
-            <div className="admin-row">
-              <input
-                className="input admin-input"
-                type="number"
-                step="0.01"
-                value={draftPrices?.[c.id] ?? ""}
-                onChange={(e) => handleDraftChange(c.id, e.target.value)}
-                placeholder="ex: 200"
-              />
-              <span className="admin-unit">
-                {c.id === "sunflower" ? "USD/t" : "EUR/t"}
-              </span>
-              <button
-                type="button"
-                className="btn primary-btn admin-btn"
-                onClick={() => handleSavePrice(c.id)}
-              >
-                Confirm
-              </button>
+        <div className="admin-grid">
+          {(commodities || []).map((c) => (
+            <div className="admin-price-item" key={c.id}>
+              <div className="admin-label">{getProductLabelSafe(c.id, c.name)}</div>
+              <div className="admin-row">
+                <input
+                  className="admin-input"
+                  type="number"
+                  step="0.01"
+                  value={draftPrices?.[c.id] ?? ""}
+                  onChange={(e) => handleDraftChange(c.id, e.target.value)}
+                  placeholder="ex: 200"
+                />
+                <span className="admin-unit">
+                  {c.id === "sunflower" ? "USD/t" : "EUR/t"}
+                </span>
+                <button
+                  type="button"
+                  className="admin-btn"
+                  onClick={() => handleSavePrice(c.id)}
+                >
+                  Confirm
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
-      <div className="section-divider" />
       <SiloPriceTable commodities={commodities} />
     </div>
   );

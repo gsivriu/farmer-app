@@ -7633,3 +7633,354 @@ select.input:focus {
   color: #9ca3af;
   padding: 6px 0 4px;
 }
+
+/* =============================================================
+   ADMIN HOMEPAGE REDESIGN v2 — design tokens + components
+   ============================================================= */
+
+:root {
+  --brand-red: #b9101e;
+
+  /* Surfaces */
+  --surface-page:   hsl(0, 0%, 96.5%);
+  --surface-base:   hsl(0, 0%, 99%);
+  --surface-subtle: hsl(0, 0%, 97.5%);
+
+  /* Typography */
+  --text-primary:   hsl(0, 0%, 8%);
+  --text-secondary: hsl(0, 0%, 42%);
+  --text-tertiary:  hsl(0, 0%, 62%);
+
+  /* 8pt spacing scale */
+  --space-2: 4px;
+  --space-3: 8px;
+  --space-4: 12px;
+  --space-5: 16px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 48px;
+  --space-9: 64px;
+
+  /* Border */
+  --hairline: 0.5px solid hsl(0, 0%, 88%);
+
+  /* Radius */
+  --radius-sm: 4px;
+}
+
+/* -------- HOME PAGE WRAPPER -------- */
+.home-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-7);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  background: var(--surface-page);
+  min-height: 100%;
+}
+
+/* -------- MARKET TICKER — horizontal strip -------- */
+.market-ticker {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  background: var(--surface-subtle);
+  border-radius: var(--radius-sm);
+  padding: var(--space-6) var(--space-7);
+  border: var(--hairline);
+  margin-top: 0;
+}
+
+.market-ticker-item {
+  padding: 0 var(--space-7);
+  border-right: var(--hairline);
+}
+
+.market-ticker-item:first-child { padding-left: 0; }
+.market-ticker-item:last-child  { padding-right: 0; border-right: none; }
+
+.ticker-label {
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-tertiary);
+  margin-bottom: 6px;
+}
+
+.ticker-value {
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ticker-delta {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.ticker-delta.positive { color: #2d6a2d; }
+.ticker-delta.negative { color: var(--brand-red); }
+
+.ticker-note {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: var(--space-3);
+}
+
+/* -------- EXCHANGE SECTION — micro-list, no card -------- */
+.exchange-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.exchange-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: var(--space-4);
+}
+
+.exchange-title {
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-tertiary);
+}
+
+.exchange-section .exchange-updated {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  text-align: right;
+}
+
+.exchange-section .exchange-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-4) 0;
+  border-bottom: var(--hairline);
+  font-size: 13px;
+}
+
+.exchange-section .exchange-row:last-child {
+  border-bottom: none;
+}
+
+.exchange-pair {
+  font-size: 13px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.exchange-section .exchange-value {
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.exchange-section .exchange-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.exchange-section .exchange-calc-btn {
+  background: transparent;
+  border: var(--hairline);
+  border-radius: var(--radius-sm);
+  padding: 4px 6px;
+  color: var(--text-secondary);
+  width: auto;
+  height: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.exchange-section .exchange-calc-btn:hover {
+  background: hsl(0, 0%, 94%);
+}
+
+.exchange-section .exchange-calc-btn svg {
+  color: var(--text-secondary);
+}
+
+/* -------- LIST PRICE SECTION -------- */
+.list-price-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.list-price-header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+
+.list-price-title {
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-tertiary);
+}
+
+.home-page .admin-price-notice {
+  font-size: 12px;
+  color: #2d6a2d;
+  margin: 0;
+  font-weight: 400;
+}
+
+/* Admin grid — operator workspace */
+.home-page .admin-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5) var(--space-7);
+}
+
+.home-page .admin-price-item {
+  background: none;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+}
+
+.home-page .admin-label {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-3);
+}
+
+.home-page .admin-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: 36px;
+}
+
+.home-page .admin-input {
+  height: 36px;
+  flex: 1;
+  min-width: 0;
+  width: auto;
+  padding: 0 var(--space-4);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  border: var(--hairline);
+  border-radius: var(--radius-sm);
+  background: var(--surface-base);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.15s;
+  box-shadow: none;
+}
+
+.home-page .admin-input:focus {
+  border-color: hsl(0, 0%, 60%);
+  box-shadow: none;
+}
+
+.home-page .admin-unit {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.home-page .admin-btn {
+  height: 36px;
+  padding: 0 var(--space-6);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  background: var(--brand-red);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  flex-shrink: 0;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+  transform: none;
+  box-shadow: none;
+}
+
+.home-page .admin-btn:hover {
+  opacity: 0.88;
+  transform: none;
+  box-shadow: none;
+  background: var(--brand-red);
+}
+
+.home-page .admin-btn:active {
+  opacity: 0.76;
+}
+
+/* -------- SILO TABLE — strip the card look -------- */
+.home-page .silo-table-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.home-page .silo-table-header h3 {
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-tertiary);
+  margin: 0 0 var(--space-4);
+}
+
+.home-page .silo-table-scroll {
+  border-radius: var(--radius-sm);
+  border: var(--hairline);
+  box-shadow: none;
+  background: var(--surface-base);
+}
+
+@media (max-width: 768px) {
+  .home-page {
+    padding: var(--space-6) var(--space-5);
+    gap: var(--space-7);
+  }
+
+  .market-ticker {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-5);
+  }
+
+  .market-ticker-item {
+    border-right: none;
+    padding: 0;
+  }
+
+  .market-ticker-item:nth-child(odd) {
+    border-right: var(--hairline);
+    padding-right: var(--space-6);
+  }
+
+  .home-page .admin-grid {
+    grid-template-columns: 1fr;
+  }
+}
