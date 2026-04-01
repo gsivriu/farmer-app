@@ -13,11 +13,6 @@ const PRODUCT_OPTIONS = [
 
 const PARITY_OPTIONS = ["CPT", "DAP", "FCA", "FOR", "FOB", "CIF"];
 const CURRENCY_OPTIONS = ["EUR", "USD", "RON"];
-const TOLERANCE_OPTIONS = [
-  { value: "", label: "— no tolerance —" },
-  { value: "5", label: "±5%" },
-  { value: "10", label: "±10%" },
-];
 
 const currentYear = new Date().getFullYear();
 const CROP_YEAR_OPTIONS = [currentYear - 1, currentYear, currentYear + 1];
@@ -188,16 +183,17 @@ export default function BidForm({ onBidCreated, embedded = false }) {
           </div>
 
           <div className="bid-input-container">
-            <label className="bid-input-label">Tolerance</label>
-            <select
+            <label className="bid-input-label">Tolerance (%)</label>
+            <input
               className="bid-input-field"
+              type="number"
+              min="0"
+              max="100"
+              step="1"
               value={quantityTolerance}
               onChange={(e) => setQuantityTolerance(e.target.value)}
-            >
-              {TOLERANCE_OPTIONS.map((t) => (
-                <option key={t.value} value={t.value}>{t.label}</option>
-              ))}
-            </select>
+              placeholder="ex: 5"
+            />
           </div>
         </div>
 
