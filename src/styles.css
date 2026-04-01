@@ -8505,45 +8505,51 @@ select.input:focus {
   border-top: 0.5px solid rgba(0, 0, 0, 0.08);
 }
 
-/* Reject — ghost, text-only */
+/* Reject — pure text, de-emphasized, pushed left */
 .bid-action-reject {
   height: auto;
-  padding: 6px 4px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-tertiary);
+  padding: 6px 2px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #A8A7A2;
   background: transparent;
   border: none;
   cursor: pointer;
   transition: color 0.15s;
   white-space: nowrap;
+  margin-right: auto;
+  letter-spacing: 0.01em;
 }
 
-.bid-action-reject:hover:not(:disabled) { color: var(--brand-red); }
+.bid-action-reject:hover:not(:disabled) { color: #7a0a13; }
 
 .bid-action-reject.is-confirming {
   color: var(--brand-red);
+  font-weight: 500;
   animation: none;
 }
 
 .bid-action-reject:disabled { opacity: 0.35; cursor: not-allowed; }
 
-/* Counter offer — outline secondary */
+/* Counter offer — tonal fill, clearly secondary */
 .bid-action-counter {
   height: 36px;
   padding: 0 18px;
   font-size: 13px;
   font-weight: 500;
   color: var(--text-primary);
-  background: transparent;
-  border: 0.5px solid rgba(0, 0, 0, 0.20);
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.14);
   border-radius: 6px;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s;
+  transition: background 0.15s, border-color 0.15s;
 }
 
-.bid-action-counter:hover:not(:disabled) { background: rgba(0, 0, 0, 0.04); }
+.bid-action-counter:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.09);
+  border-color: rgba(0, 0, 0, 0.22);
+}
 
 .bid-action-counter.is-confirming {
   background: #FEF3C7;
@@ -8553,29 +8559,34 @@ select.input:focus {
 
 .bid-action-counter:disabled { opacity: 0.35; cursor: not-allowed; }
 
-/* Accept — primary red */
+/* Accept — authoritative primary, full weight */
 .bid-action-accept {
-  height: 36px;
-  padding: 0 22px;
-  font-size: 13px;
-  font-weight: 500;
+  height: 38px;
+  padding: 0 28px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.015em;
   color: #ffffff;
-  background: var(--brand-red);
+  background: #B9101E;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   white-space: nowrap;
-  transition: opacity 0.15s;
+  box-shadow: 0 1px 3px rgba(185, 16, 30, 0.35), 0 3px 8px rgba(185, 16, 30, 0.20);
+  transition: background 0.15s, box-shadow 0.15s;
 }
 
-.bid-action-accept:hover:not(:disabled) { opacity: 0.88; }
+.bid-action-accept:hover:not(:disabled) {
+  background: #9e0d19;
+  box-shadow: 0 2px 6px rgba(185, 16, 30, 0.40), 0 4px 12px rgba(185, 16, 30, 0.25);
+}
 
 .bid-action-accept.is-confirming {
-  opacity: 0.88;
+  background: #9e0d19;
   animation: pulse-confirm-red 0.9s ease-in-out infinite alternate;
 }
 
-.bid-action-accept:disabled { opacity: 0.35; cursor: not-allowed; }
+.bid-action-accept:disabled { opacity: 0.35; cursor: not-allowed; box-shadow: none; }
 
 /* ── Mobile — bottom sheet ── */
 @media (max-width: 768px) {
