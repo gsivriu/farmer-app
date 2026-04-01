@@ -8010,23 +8010,34 @@ select.input:focus {
     gap: var(--space-5) 0;
   }
 
-  /* Tighter button on mobile */
+  /* Stack layout on mobile: input full-width, then unit + button */
+  .home-page .admin-row {
+    flex-wrap: wrap;
+    height: auto;
+    gap: var(--space-3) var(--space-3);
+  }
+
+  .home-page .admin-input {
+    flex: 1 1 100%;   /* full width row */
+    height: 40px;
+    font-size: 15px;
+  }
+
+  .home-page .admin-unit {
+    flex: 1;
+    font-size: 12px;
+    color: var(--text-tertiary);
+  }
+
   .home-page .admin-btn {
-    padding: 0 var(--space-5);  /* 0 16px instead of 0 24px */
+    flex-shrink: 0;
+    height: 36px;
+    padding: 0 var(--space-5);
     font-size: 13px;
   }
 
-  .home-page .admin-row {
-    gap: var(--space-3);  /* 8px */
-  }
-
-  /* Slightly smaller input number on mobile */
-  .home-page .admin-input {
-    font-size: 14px;
-  }
-
   .home-page .admin-price-item {
-    padding-bottom: var(--space-4);
+    padding-bottom: var(--space-5);
     border-bottom: var(--hairline);
   }
 
