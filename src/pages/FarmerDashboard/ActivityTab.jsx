@@ -209,9 +209,9 @@ export default function ActivityTab() {
   return (
     <>
       <div className="dashboard-row full">
-        <div className="activity-open">
-          <div className="activity-header-compact">
-            <h2 className="section-label">My Activity</h2>
+        <div className="card">
+          <div className="card-header activity-header-compact">
+            <h2 className="market-title">My Activity</h2>
             <div className="activity-header-actions">
               <button type="button" className="btn small outline" onClick={() => setFiltersOpen(true)}>
                 Filters

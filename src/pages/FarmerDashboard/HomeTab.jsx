@@ -7,10 +7,21 @@ export default function HomeTab() {
   return (
     <div className="dashboard-row full">
       <div className="dashboard-home-stack">
-        <FarmerProgress embedded />
-        <ExchangeRatesCard />
-        <WeatherWidget />
-        <MarketTicker />
+        <div className="card dashboard-card home-card-primary">
+          <FarmerProgress embedded />
+        </div>
+
+        <div className="home-card-secondary">
+          <ExchangeRatesCard />
+        </div>
+
+        <div className="card dashboard-card home-card-secondary">
+          <WeatherWidget />
+        </div>
+
+        <div className="card dashboard-card home-card-tertiary">
+          <MarketTicker />
+        </div>
       </div>
     </div>
   );

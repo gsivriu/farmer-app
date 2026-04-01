@@ -8,9 +8,11 @@ export default function SaleTab() {
 
   return (
     <div className="dashboard-row full">
-      <div className="open-sections">
+      <div className="card dashboard-card sale-card">
         <PricesGrid />
+        <div className="section-divider" />
         <BidForm onBidCreated={fetchBids} embedded />
+        <div className="section-divider" />
         <SiloPriceTable commodities={commodities} readOnly />
       </div>
     </div>

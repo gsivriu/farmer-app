@@ -15,10 +15,12 @@ export default function PricesGrid() {
   };
 
   return (
-    <div className="prices-open">
-      <div className="prices-header">
-        <p className="section-label">Ameropa CPT Constanta prices</p>
-        <p className="prices-subtitle">Updated today {todayLabel} after 12:00.</p>
+    <div className="market-card prices-card">
+      <div className="market-card-header">
+        <h3 className="market-title">Ameropa CPT Constanta prices</h3>
+        <p className="market-subtitle">
+          Updated today {todayLabel} after 12:00.
+        </p>
       </div>
 
       <div className="market-grid">
