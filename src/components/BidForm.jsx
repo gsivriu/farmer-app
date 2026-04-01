@@ -12,21 +12,30 @@ const PRODUCT_OPTIONS = [
 ];
 
 const PARITY_OPTIONS = ["CPT", "DAP", "FCA", "FOR", "FOB", "CIF"];
+const CURRENCY_OPTIONS = ["EUR", "USD", "RON"];
+const TOLERANCE_OPTIONS = [
+  { value: "", label: "— no tolerance —" },
+  { value: "5", label: "±5%" },
+  { value: "10", label: "±10%" },
+];
+
+const currentYear = new Date().getFullYear();
+const CROP_YEAR_OPTIONS = [currentYear - 1, currentYear, currentYear + 1];
 
 export default function BidForm({ onBidCreated, embedded = false }) {
   const [product, setProduct] = useState("wheat");
-  const isSunflower = product === "sunflower";
-  const priceLabel = isSunflower ? "Price (USD/t)" : "Price (EUR/t)";
-
   const [quantity, setQuantity] = useState("");
   const [price, setPrice] = useState("");
+  const [currency, setCurrency] = useState("EUR");
   const [parity, setParity] = useState("CPT");
   const [locations, setLocations] = useState([]);
   const [location, setLocation] = useState("Port Constanța");
   const [loadingLocation, setLoadingLocation] = useState("");
-
   const [deliveryStart, setDeliveryStart] = useState("");
   const [deliveryEnd, setDeliveryEnd] = useState("");
+  const [cropYear, setCropYear] = useState(String(currentYear));
+  const [quantityTolerance, setQuantityTolerance] = useState("");
+  const [remarks, setRemarks] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
@@ -97,12 +106,16 @@ export default function BidForm({ onBidCreated, embedded = false }) {
       product,
       quantity: qtyNum,
       price: priceNum,
+      currency,
       parity,
       delivery_location: isFreightParity(parity) ? null : location || "Port Constanța",
       loading_location: isFreightParity(parity) ? loadingLocation || null : null,
       freight_cost: null,
       delivery_start: deliveryStart || null,
       delivery_end: deliveryEnd || null,
+      crop_year: cropYear ? Number(cropYear) : null,
+      quantity_tolerance: quantityTolerance ? Number(quantityTolerance) : null,
+      remarks: remarks.trim() || null,
       status: "pending",
     });
 
@@ -122,11 +135,15 @@ export default function BidForm({ onBidCreated, embedded = false }) {
     // Reset
     setQuantity("");
     setPrice("");
+    setCurrency("EUR");
     setParity("CPT");
     setLocation("Port Constanța");
     setLoadingLocation("");
     setDeliveryStart("");
     setDeliveryEnd("");
+    setCropYear(String(currentYear));
+    setQuantityTolerance("");
+    setRemarks("");
 
     if (onBidCreated) onBidCreated();
   };
@@ -155,7 +172,7 @@ export default function BidForm({ onBidCreated, embedded = false }) {
           </select>
         </div>
 
-        {/* QUANTITY + PRICE */}
+        {/* QUANTITY + TOLERANCE */}
         <div className="bid-form-grid-2">
           <div className="bid-input-container">
             <label className="bid-input-label">Quantity (t)</label>
@@ -171,7 +188,23 @@ export default function BidForm({ onBidCreated, embedded = false }) {
           </div>
 
           <div className="bid-input-container">
-            <label className="bid-input-label">{priceLabel}</label>
+            <label className="bid-input-label">Tolerance</label>
+            <select
+              className="bid-input-field"
+              value={quantityTolerance}
+              onChange={(e) => setQuantityTolerance(e.target.value)}
+            >
+              {TOLERANCE_OPTIONS.map((t) => (
+                <option key={t.value} value={t.value}>{t.label}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* PRICE + CURRENCY */}
+        <div className="bid-form-grid-2">
+          <div className="bid-input-container">
+            <label className="bid-input-label">Price (/t)</label>
             <input
               className="bid-input-field"
               type="number"
@@ -179,8 +212,21 @@ export default function BidForm({ onBidCreated, embedded = false }) {
               step="0.5"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
-              placeholder={isSunflower ? "ex: 510" : "ex: 200"}
+              placeholder="ex: 200"
             />
+          </div>
+
+          <div className="bid-input-container">
+            <label className="bid-input-label">Currency</label>
+            <select
+              className="bid-input-field"
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value)}
+            >
+              {CURRENCY_OPTIONS.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
           </div>
         </div>
 
@@ -258,6 +304,32 @@ export default function BidForm({ onBidCreated, embedded = false }) {
               onChange={(e) => setDeliveryEnd(e.target.value)}
             />
           </div>
+        </div>
+
+        {/* CROP YEAR */}
+        <div className="bid-input-container">
+          <label className="bid-input-label">Crop year</label>
+          <select
+            className="bid-input-field"
+            value={cropYear}
+            onChange={(e) => setCropYear(e.target.value)}
+          >
+            {CROP_YEAR_OPTIONS.map((y) => (
+              <option key={y} value={String(y)}>{y}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* REMARKS */}
+        <div className="bid-input-container">
+          <label className="bid-input-label">Remarks (optional)</label>
+          <textarea
+            className="bid-input-field"
+            rows={2}
+            value={remarks}
+            onChange={(e) => setRemarks(e.target.value)}
+            placeholder="Any notes for the trader..."
+          />
         </div>
 
         <button
