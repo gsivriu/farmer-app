@@ -8051,3 +8051,281 @@ select.input:focus {
     padding-bottom: 0;
   }
 }
+
+/* =============================================================
+   FERMIERI TAB — redesign v2
+   ============================================================= */
+
+.farmers-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-7) var(--space-7);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-9);          /* 64px între secțiuni */
+  background: var(--surface-page);
+  min-height: 100%;
+}
+
+/* ── Eyebrow / section label ── */
+.farmers-section-eyebrow {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-tertiary);
+  margin: 0 0 var(--space-6);
+}
+
+/* ── Invite form ── */
+.farmers-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5) var(--space-6);
+}
+
+.farmers-form-full {
+  grid-column: 1 / -1;
+}
+
+.farmers-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.farmers-form-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.farmers-input {
+  height: 36px;
+  padding: 0 var(--space-4);
+  font-size: 14px;
+  color: var(--text-primary);
+  background: #ffffff;
+  border: 0.5px solid rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.farmers-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.farmers-input:focus {
+  border-color: rgba(0, 0, 0, 0.40);
+  box-shadow: none;
+}
+
+.farmers-select {
+  cursor: pointer;
+  padding-right: var(--space-6);
+}
+
+.farmers-invite-btn {
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  margin-top: var(--space-6);
+  padding: 0 var(--space-6);
+  font-size: 13px;
+  font-weight: 500;
+  background: var(--brand-red);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.farmers-invite-btn:hover  { opacity: 0.88; }
+.farmers-invite-btn:active { opacity: 0.76; }
+.farmers-invite-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ── Farmers list header ── */
+.farmers-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+  margin-bottom: var(--space-6);
+  flex-wrap: wrap;
+}
+
+.farmers-list-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.farmers-list-count {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-tertiary);
+  margin-left: 6px;
+}
+
+.farmers-search {
+  height: 36px;
+  width: 260px;
+  flex-shrink: 0;
+  padding: 0 var(--space-4);
+  font-size: 13px;
+  color: var(--text-primary);
+  background: #ffffff;
+  border: 0.5px solid rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.farmers-search::placeholder { color: var(--text-tertiary); }
+.farmers-search:focus {
+  border-color: rgba(0, 0, 0, 0.40);
+  box-shadow: none;
+}
+
+.farmers-empty {
+  text-align: center;
+  padding: var(--space-8) 0;
+  font-size: 14px;
+  color: var(--text-tertiary);
+}
+
+/* ── Table ── */
+.farmers-table-wrap {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.farmers-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 580px;
+}
+
+.farmers-table thead th {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  text-align: left;
+  padding: 0 12px 10px;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.10);
+  white-space: nowrap;
+}
+
+.farmers-table thead th:first-child { padding-left: 0; }
+.farmers-table thead th:last-child  { padding-right: 0; }
+
+.farmers-table tbody tr {
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.06);
+  transition: background 0.1s;
+}
+
+.farmers-table tbody tr:last-child { border-bottom: none; }
+.farmers-table tbody tr:hover      { background: rgba(0, 0, 0, 0.02); }
+
+.farmers-table tbody td {
+  padding: 14px 12px;
+  vertical-align: middle;
+}
+
+.farmers-table tbody td:first-child { padding-left: 0; }
+.farmers-table tbody td:last-child  { padding-right: 0; }
+
+/* Column density */
+.farmers-td-primary {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.farmers-td-secondary {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+.farmers-td-empty {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-tertiary);
+}
+
+.farmers-td-nowrap { white-space: nowrap; }
+
+/* Status badges */
+.farmers-badge-active {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  background: #EAF3DE;
+  color: #27500A;
+}
+
+.farmers-badge-inactive {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  background: #F1EFE8;
+  color: #5F5E5A;
+}
+
+/* Toggle action button */
+.farmers-toggle-btn {
+  height: 32px;
+  padding: 0 14px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+  background: transparent;
+  border: 0.5px solid rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.farmers-toggle-btn:hover { background: rgba(0, 0, 0, 0.04); }
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .farmers-page {
+    padding: var(--space-5) var(--space-4);
+    gap: var(--space-8);
+  }
+
+  .farmers-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .farmers-form-full {
+    grid-column: 1;
+  }
+
+  .farmers-list-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+
+  .farmers-search {
+    width: 100%;
+  }
+}
