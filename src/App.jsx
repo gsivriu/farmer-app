@@ -67,8 +67,11 @@ function DashboardShell({ darkMode, setDarkMode }) {
   }
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    window.location.replace("/login");
+    try {
+      await supabase.auth.signOut();
+    } finally {
+      window.location.replace("/login");
+    }
   };
 
   return (
