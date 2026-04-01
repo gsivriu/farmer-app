@@ -69,15 +69,11 @@ const FUTURES = [
   
   export default function MarketTicker() {
     return (
-      <div className="market-card market-ticker">
-        <div className="market-card-header">
-          <h3 className="market-title">Market overview</h3>
-          <p className="market-subtitle"></p>
+      <div className="market-ticker-open">
+        <div className="market-ticker-header">
+          <p className="section-label">Market overview</p>
+          <p className="market-indicative">Indicative values only</p>
         </div>
-
-        <p style={{ fontSize: "11px", color: "var(--text-muted, #888)", margin: "0 0 10px 0", display: "flex", alignItems: "center", gap: "4px" }}>
-          ℹ️ Indicative values only
-        </p>
 
         <div className="market-grid">
           {FUTURES.map((f) => {
@@ -122,5 +118,5 @@ const FUTURES = [
         </div>
       </div>
     );
-  }
+}
   

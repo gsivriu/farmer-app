@@ -5,10 +5,8 @@ export default function NewsTab({ active }) {
 
   return (
     <div className="dashboard-row full">
-      <div className="card">
-        <div className="card-header news-header-balanced">
-          <h2 className="market-title">News</h2>
-        </div>
+      <div className="news-open">
+        <h2 className="section-label">News</h2>
         <div className="card-body">
           {newsLoading && <p className="small-text">Loading news...</p>}
           {newsError && <p className="badge rejected">{newsError}</p>}

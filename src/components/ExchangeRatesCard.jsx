@@ -39,8 +39,8 @@ export default function ExchangeRatesCard() {
 
   return (
     <div className="exchange-card">
-      <div className="card-header exchange-card-header">
-        <h3 className="market-title">Exchange</h3>
+      <div className="exchange-card-header">
+        <p className="section-label">Exchange</p>
         <div className="exchange-header-actions">
           <div className="small-text exchange-updated">
             Updated: {formatDateDMY(rates.lastUpdated)}
@@ -64,7 +64,6 @@ export default function ExchangeRatesCard() {
           </button>
         </div>
       </div>
-      <div className="exchange-divider exchange-divider-top" />
       <div className="exchange-grid">
         <div className="exchange-row">
           <span>🇪🇺 1 EUR</span>
@@ -75,8 +74,7 @@ export default function ExchangeRatesCard() {
           <span className="exchange-value">{rates.ronToUsd} RON</span>
         </div>
       </div>
-      <div className="exchange-divider" />
-      <div className="exchange-row exchange-row-muted">
+      <div className="exchange-row exchange-row-muted exchange-parity-row">
         <span>EUR/USD parity</span>
         <span className="exchange-value">{rates.eurToUsd}</span>
       </div>

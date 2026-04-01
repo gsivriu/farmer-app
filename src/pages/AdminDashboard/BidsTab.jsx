@@ -273,9 +273,9 @@ export default function BidsTab({ active }) {
 
   return (
     <>
-      <div className="card admin-card dashboard-card">
-        <div className="card-header admin-bids-header">
-          <h2 className="market-title">All bids</h2>
+      <div className="bids-open">
+        <div className="admin-bids-header-row">
+          <h2 className="section-label">All bids</h2>
           <div className="admin-bids-actions">
             <button type="button" className="btn small outline" onClick={() => setFiltersOpen(true)}>Filters</button>
             <button type="button" className="btn small outline" onClick={() => setShowStats((prev) => !prev)}>Stats</button>

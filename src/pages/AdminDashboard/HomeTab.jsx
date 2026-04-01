@@ -45,14 +45,12 @@ export default function HomeTab() {
   };
 
   return (
-    <div className="card admin-card dashboard-card">
+    <div className="admin-home-open">
       <MarketTicker />
-      <div className="section-divider" />
       <ExchangeRatesCard />
-      <div className="section-divider exchange-divider" />
 
-      <div className="card-header admin-price-header">
-        <h2 className="market-title">List price</h2>
+      <div className="admin-price-section-header">
+        <h2 className="section-label">List price</h2>
         {priceNotice && <p className="admin-price-notice">{priceNotice}</p>}
       </div>
 
@@ -84,7 +82,6 @@ export default function HomeTab() {
         ))}
       </div>
 
-      <div className="section-divider" />
       <SiloPriceTable commodities={commodities} />
     </div>
   );
