@@ -6,13 +6,13 @@ import { formatDeliveryRange, formatLocationDisplay, isFreightParity } from "../
 export function getStatusStyle(status) {
   const s = String(status || "").toLowerCase();
   if (s === "accepted")
-    return { borderColor: "#22C55E", badgeBg: "#DCFCE7", badgeText: "#166534" };
+    return { borderColor: "#22C55E", badgeBg: "#DCFCE7", badgeText: "#166534", productColor: "#16a34a" };
   if (s === "rejected")
-    return { borderColor: "#EF4444", badgeBg: "#FEE2E2", badgeText: "#991B1B" };
+    return { borderColor: "#EF4444", badgeBg: "#FEE2E2", badgeText: "#991B1B", productColor: "#dc2626" };
   if (s === "countered" || s === "farmer_countered")
-    return { borderColor: "#3B82F6", badgeBg: "#DBEAFE", badgeText: "#1E40AF" };
+    return { borderColor: "#3B82F6", badgeBg: "#DBEAFE", badgeText: "#1E40AF", productColor: "#2563eb" };
   // pending / working
-  return { borderColor: "#D4A017", badgeBg: "#FEF3C7", badgeText: "#92400E" };
+  return { borderColor: "#D4A017", badgeBg: "#FEF3C7", badgeText: "#92400E", productColor: "#b45309" };
 }
 
 function getStatusLabel(status) {
@@ -51,11 +51,15 @@ function resolveDisplayPrice(bid) {
   return { price: bid.price, isCounter: false };
 }
 
+// Statuses where trader can take action
+const ACTIONABLE = new Set(["pending", "farmer_countered"]);
+
 // ── BidCard ──────────────────────────────────────────────────────────────────
-export default function BidCard({ bid, onClick }) {
+export default function BidCard({ bid, onClick, onAccept, onReject, onCounter }) {
   const style = getStatusStyle(bid.status);
   const unit = `${bid.currency || (bid.product === "sunflower" ? "USD" : "EUR")}/t`;
   const { price, isCounter } = resolveDisplayPrice(bid);
+  const isActionable = ACTIONABLE.has(String(bid.status || "").toLowerCase());
 
   const location = isFreightParity(bid.parity)
     ? formatLocationDisplay(bid.loading_location || "-")
@@ -72,85 +76,97 @@ export default function BidCard({ bid, onClick }) {
         if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick?.(); }
       }}
     >
-      {/* ── Header ──────────────────────────────────────────── */}
-      <div className="bid-card-header">
-        <div>
-          <div className="bid-card-title">{getProductLabelSafe(bid.product)}</div>
-          <div className="bid-card-subtitle">{bid.farmer_email || bid.farmer_id}</div>
-        </div>
-        <div className="bid-card-status-group">
-          <span
-            className="bid-card-badge"
-            style={{ background: style.badgeBg, color: style.badgeText }}
-          >
-            {getStatusLabel(bid.status)}
-          </span>
-          <span className="bid-card-timestamp">{formatDateTime(bid.created_at)}</span>
-        </div>
+
+      {/* ── 1. HEADER: fermier (stânga) + commodity (dreapta) ── */}
+      <div className="bc-header">
+        <span className="bc-farmer">{bid.farmer_email || bid.farmer_id}</span>
+        <span className="bc-commodity" style={{ color: style.productColor }}>
+          {getProductLabelSafe(bid.product)}
+        </span>
       </div>
 
-      {/* ── Section label ───────────────────────────────────── */}
-      <div className="bid-card-section-label">Details</div>
+      {/* ── 2. HIGHLIGHT ROW: preț mare + cantitate ─────────── */}
+      <div className="bc-price-row">
+        <span className={`bc-price${isCounter ? " bc-price-counter" : ""}`}>
+          {formatCompactNumber(price)}{" "}
+          <span className="bc-price-unit">{unit}</span>
+        </span>
+        <span className="bc-qty">{formatCompactNumber(bid.quantity)} t</span>
+      </div>
 
-      {/* ── Row 1: Offer Type | Delivery Period ─────────────── */}
-      <div className="bid-card-grid">
-        <div className="bid-card-cell">
-          <span className="bid-card-label">Offer Type</span>
-          <span className="bid-card-value">{bid.parity || "-"}</span>
+      {/* ── 3. GRID 2 COLOANE: detalii secundare ────────────── */}
+      <div className="bc-details">
+
+        {/* Locație | Tip ofertă */}
+        <div className="bc-field">
+          <span className="bc-field-label">Location</span>
+          <span className="bc-field-value">{location}</span>
         </div>
-        <div className="bid-card-cell bid-card-cell-right">
-          <span className="bid-card-label">Delivery Period</span>
-          <span className="bid-card-value">
+        <div className="bc-field bc-field-right">
+          <span className="bc-field-label">Offer Type</span>
+          <span className="bc-field-value">{bid.parity || "-"}</span>
+        </div>
+
+        {/* Perioadă livrare | Expirare */}
+        <div className="bc-field">
+          <span className="bc-field-label">Delivery Period</span>
+          <span className="bc-field-value">
             {formatDeliveryRange(bid.delivery_start, bid.delivery_end)}
           </span>
         </div>
-      </div>
-
-      {/* ── Row 2: Price | Location ─────────────────────────── */}
-      <div className="bid-card-grid">
-        <div className="bid-card-cell">
-          <span className="bid-card-label">Price</span>
-          <span className={`bid-card-value${isCounter ? " bid-card-counter-value" : ""}`}>
-            {formatCompactNumber(price)} {unit}
-          </span>
-        </div>
-        <div className="bid-card-cell bid-card-cell-right">
-          <span className="bid-card-label">Location</span>
-          <span className="bid-card-value">{location}</span>
-        </div>
-      </div>
-
-      {/* ── Row 3: Quantity | Commodity ─────────────────────── */}
-      <div className="bid-card-grid">
-        <div className="bid-card-cell">
-          <span className="bid-card-label">Quantity</span>
-          <span className="bid-card-value">{formatCompactNumber(bid.quantity)} t</span>
-        </div>
-        <div className="bid-card-cell bid-card-cell-right">
-          <span className="bid-card-label">Commodity</span>
-          <span className="bid-card-value">{getProductLabelSafe(bid.product)}</span>
-        </div>
-      </div>
-
-      {/* ── Row 4: Account | Contract or Date ───────────────── */}
-      <div className="bid-card-grid">
-        <div className="bid-card-cell">
-          <span className="bid-card-label">Account</span>
-          <span className="bid-card-value bid-card-value-truncate">
-            {bid.farmer_email || bid.farmer_id}
-          </span>
-        </div>
-        <div className="bid-card-cell bid-card-cell-right">
-          <span className="bid-card-label">
+        <div className="bc-field bc-field-right">
+          <span className="bc-field-label">
             {bid.status === "accepted" && bid.contract_no ? "Contract" : "Offer date"}
           </span>
-          <span className="bid-card-value">
+          <span className="bc-field-value">
             {bid.status === "accepted" && bid.contract_no
               ? bid.contract_no
               : formatDateOnly(bid.created_at)}
           </span>
         </div>
+
       </div>
+
+      {/* ── 4. FOOTER: status badge + butoane acțiuni ───────── */}
+      <div className="bc-footer">
+        <div className="bc-footer-left">
+          <span
+            className="bc-badge"
+            style={{ background: style.badgeBg, color: style.badgeText }}
+          >
+            {getStatusLabel(bid.status)}
+          </span>
+          <span className="bc-timestamp">{formatDateTime(bid.created_at)}</span>
+        </div>
+
+        {isActionable && (onAccept || onReject || onCounter) && (
+          <div
+            className="bc-actions"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+          >
+            {onReject && (
+              <button type="button" className="bc-btn bc-btn-reject"
+                onClick={(e) => { e.stopPropagation(); onReject(); }}>
+                Reject
+              </button>
+            )}
+            {onCounter && (
+              <button type="button" className="bc-btn bc-btn-counter"
+                onClick={(e) => { e.stopPropagation(); onCounter(); }}>
+                Counter
+              </button>
+            )}
+            {onAccept && (
+              <button type="button" className="bc-btn bc-btn-accept"
+                onClick={(e) => { e.stopPropagation(); onAccept(); }}>
+                Accept
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
     </div>
   );
 }

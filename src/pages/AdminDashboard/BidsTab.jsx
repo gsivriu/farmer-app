@@ -336,6 +336,9 @@ export default function BidsTab({ active }) {
                 key={b.id}
                 bid={b}
                 onClick={() => openAdminModal(b, null)}
+                onAccept={() => openAdminModal(b, "accepted")}
+                onReject={() => openAdminModal(b, "rejected")}
+                onCounter={() => openAdminModal(b, "countered")}
               />
             ))}
 

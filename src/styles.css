@@ -1610,6 +1610,199 @@ select.input:focus {
 .theme-dark .bid-card-cell-right { border-left-color: #1f2937; }
 .theme-dark .bid-card-timestamp { color: #4b5563; }
 
+/* ── BidCard inner layout (bc-* namespace) ───────────────────
+   Ierarhie: header → price-row → details grid → footer
+   ────────────────────────────────────────────────────────── */
+
+/* 1. Header */
+.bc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 16px 20px 12px 20px;
+  gap: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.bc-farmer {
+  font-size: 15px;
+  font-weight: 600;
+  color: #0B2545;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.bc-commodity {
+  font-size: 15px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+/* 2. Highlight row — preț + cantitate */
+.bc-price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 14px 20px;
+  gap: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.bc-price {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0B2545;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.bc-price-unit {
+  font-size: 13px;
+  font-weight: 500;
+  color: #6B7280;
+}
+
+.bc-price-counter {
+  color: #b91c1c;
+}
+
+.bc-qty {
+  font-size: 15px;
+  font-weight: 600;
+  color: #374151;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+/* 3. Details grid 2 coloane */
+.bc-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.bc-field {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 14px 9px 20px;
+  border-top: 1px solid #f3f4f6;
+  gap: 8px;
+}
+
+.bc-field-right {
+  padding-left: 14px;
+  border-left: 1px solid #f3f4f6;
+}
+
+.bc-field-label {
+  font-size: 12px;
+  color: #6B7280;
+  font-weight: 400;
+  flex-shrink: 0;
+}
+
+.bc-field-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  text-align: right;
+}
+
+/* 4. Footer */
+.bc-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 11px 16px 11px 20px;
+  border-top: 1px solid #e5e7eb;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.bc-footer-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.bc-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.bc-timestamp {
+  font-size: 11px;
+  color: #6B7280;
+  white-space: nowrap;
+}
+
+/* Action buttons */
+.bc-actions {
+  display: flex;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.bc-btn {
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  line-height: 1.4;
+  transition: opacity 0.12s ease;
+  white-space: nowrap;
+}
+
+.bc-btn:hover { opacity: 0.82; }
+.bc-btn:active { opacity: 0.65; }
+
+.bc-btn-accept {
+  background: #dcfce7;
+  color: #166534;
+  border-color: #86efac;
+}
+
+.bc-btn-reject {
+  background: #fee2e2;
+  color: #991b1b;
+  border-color: #fca5a5;
+}
+
+.bc-btn-counter {
+  background: #dbeafe;
+  color: #1e40af;
+  border-color: #93c5fd;
+}
+
+/* Dark mode */
+.theme-dark .bc-header { border-bottom-color: #1f2937; }
+.theme-dark .bc-farmer { color: #f1f5f9; }
+.theme-dark .bc-price-row { border-bottom-color: #1f2937; }
+.theme-dark .bc-price { color: #f1f5f9; }
+.theme-dark .bc-price-unit { color: #6b7280; }
+.theme-dark .bc-qty { color: #e2e8f0; }
+.theme-dark .bc-field { border-top-color: #1f2937; }
+.theme-dark .bc-field-right { border-left-color: #1f2937; }
+.theme-dark .bc-field-label { color: #9ca3af; }
+.theme-dark .bc-field-value { color: #e2e8f0; }
+.theme-dark .bc-footer { border-top-color: #1f2937; }
+.theme-dark .bc-timestamp { color: #6b7280; }
+.theme-dark .bc-btn-accept { background: rgba(22,163,74,.18); color: #4ade80; border-color: rgba(22,163,74,.4); }
+.theme-dark .bc-btn-reject { background: rgba(239,68,68,.18); color: #f87171; border-color: rgba(239,68,68,.4); }
+.theme-dark .bc-btn-counter { background: rgba(59,130,246,.18); color: #93c5fd; border-color: rgba(59,130,246,.4); }
+
 .theme-dark .bid-row {
   background: #111827;
   border-color: #1f2937;
