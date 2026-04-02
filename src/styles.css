@@ -8505,15 +8505,15 @@ select.input:focus {
   border-top: 0.5px solid rgba(0, 0, 0, 0.08);
 }
 
-/* Reject — ghost outline, clearly readable but neutral, pushed left */
+/* Reject — outlined, same visual weight as Counter offer, neutral/destructive */
 .bid-action-reject {
   height: 36px;
   padding: 0 16px;
   font-size: 13px;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: var(--brand-red);
   background: transparent;
-  border: 1px solid rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(185, 16, 30, 0.45);
   border-radius: 6px;
   cursor: pointer;
   transition: border-color 0.15s, color 0.15s, background 0.15s;
@@ -8522,15 +8522,13 @@ select.input:focus {
 }
 
 .bid-action-reject:hover:not(:disabled) {
-  border-color: rgba(185, 16, 30, 0.40);
-  color: var(--brand-red);
-  background: rgba(185, 16, 30, 0.04);
+  border-color: var(--brand-red);
+  background: rgba(185, 16, 30, 0.06);
 }
 
 .bid-action-reject.is-confirming {
   border-color: var(--brand-red);
-  color: var(--brand-red);
-  background: rgba(185, 16, 30, 0.06);
+  background: rgba(185, 16, 30, 0.08);
   animation: none;
 }
 
