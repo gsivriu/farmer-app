@@ -1524,6 +1524,92 @@ select.input:focus {
 .theme-dark .bid-card-hint { border-top-color: #1f2937; color: #4b5563; }
 .theme-dark .bid-card-counter-value { color: #f87171; }
 
+/* ── BidCard standalone component (features/BidCard.jsx) ──── */
+.bid-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 0.15s ease;
+}
+
+.bid-card:hover {
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.09);
+}
+
+.bid-card-status-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.bid-card-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.bid-card-timestamp {
+  font-size: 11px;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.bid-card-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid #f1f5f9;
+}
+
+.bid-card-cell {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 14px 9px 20px;
+  gap: 8px;
+}
+
+.bid-card-cell-right {
+  padding-left: 14px;
+  border-left: 1px solid #f1f5f9;
+}
+
+.bid-card-value-truncate {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* dark mode */
+.theme-dark .bid-card {
+  background: #111827;
+  border-color: #1f2937;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+}
+.theme-dark .bid-card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+}
+.theme-dark .bid-card-grid { border-top-color: #1f2937; }
+.theme-dark .bid-card-cell-right { border-left-color: #1f2937; }
+.theme-dark .bid-card-timestamp { color: #4b5563; }
+
 .theme-dark .bid-row {
   background: #111827;
   border-color: #1f2937;

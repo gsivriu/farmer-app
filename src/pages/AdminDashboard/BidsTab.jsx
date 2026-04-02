@@ -4,6 +4,7 @@ import { useAppContext } from "../../context/AppContext.jsx";
 import { getProductLabelSafe, PRODUCT_FILTER_KEYS } from "../../utils/productLabels";
 import { formatCompactNumber, hasPositiveNumber } from "../../utils/numberFormat";
 import { formatDeliveryRange, formatLocationDisplay, isFreightParity } from "../../utils/formatting";
+import BidCard from "../../components/features/BidCard.jsx";
 
 const formatDateOnly = (value) => {
   if (!value) return "-";
@@ -330,74 +331,13 @@ export default function BidsTab({ active }) {
 
         {!loading && !error && (
           <div className="admin-bid-list" style={{ marginTop: 14 }}>
-            {filteredBids.map((b) => {
-              const unit = `${b.currency || (b.product === "sunflower" ? "USD" : "EUR")}/t`;
-              const statusClass =
-                b.status === "accepted" ? "is-accepted"
-                : b.status === "rejected" ? "is-rejected"
-                : b.status === "countered" ? "is-countered"
-                : b.status === "farmer_countered" ? "is-farmer-countered"
-                : "is-pending";
-              const acceptedPrice = getAcceptedPrice(b);
-              const showAccepted = b.status === "accepted" && acceptedPrice != null;
-              const showRejected = b.status === "rejected" && acceptedPrice != null;
-              const hasCounterPrice = hasPositiveNumber(b.counter_price);
-              const showCounter = !showAccepted && !showRejected && hasCounterPrice;
-              const showPending = !showCounter && !showAccepted && !showRejected;
-
-              return (
-                <div
-                  role="button"
-                  tabIndex={0}
-                  className={"bid-row admin-bid-row " + statusClass}
-                  key={b.id}
-                  onClick={() => openAdminModal(b, null)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" || event.key === " ") {
-                      event.preventDefault();
-                      openAdminModal(b, null);
-                    }
-                  }}
-                >
-                  <div className="bid-card-header">
-                    <div>
-                      <div className="bid-card-title">{getProductLabelSafe(b.product)}</div>
-                      <div className="bid-card-subtitle">{b.farmer_email || b.farmer_id}</div>
-                    </div>
-                    <span className={`status-badge status-${statusClass.slice(3)}`}>
-                      {getStatusLabel(b.status)}
-                    </span>
-                  </div>
-
-                  <div className="bid-card-section-label">Details</div>
-
-                  <div className="bid-card-row">
-                    <span className="bid-card-label">Price</span>
-                    <span className={`bid-card-value${showCounter ? " bid-card-counter-value" : ""}`}>
-                      {showCounter
-                        ? `${formatCompactNumber(b.counter_price)} ${unit}`
-                        : (showAccepted || showRejected)
-                        ? `${formatCompactNumber(acceptedPrice)} ${unit}`
-                        : showPending
-                        ? `${formatCompactNumber(b.price)} ${unit}`
-                        : "-"}
-                    </span>
-                  </div>
-                  <div className="bid-card-row">
-                    <span className="bid-card-label">Quantity</span>
-                    <span className="bid-card-value">{formatCompactNumber(b.quantity)} t</span>
-                  </div>
-                  <div className="bid-card-row">
-                    <span className="bid-card-label">Parity</span>
-                    <span className="bid-card-value">{formatParityDisplay(b, { detailed: true })}</span>
-                  </div>
-                  <div className="bid-card-row">
-                    <span className="bid-card-label">Date</span>
-                    <span className="bid-card-value">{formatDateOnly(b.created_at)}</span>
-                  </div>
-                </div>
-              );
-            })}
+            {filteredBids.map((b) => (
+              <BidCard
+                key={b.id}
+                bid={b}
+                onClick={() => openAdminModal(b, null)}
+              />
+            ))}
 
             {filteredBids.length === 0 && (
               <div className="empty-state">
