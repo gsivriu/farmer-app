@@ -359,48 +359,41 @@ export default function BidsTab({ active }) {
                     }
                   }}
                 >
-                  <div className="bid-header">
+                  <div className="bid-card-header">
                     <div>
-                      <div className="bid-title">{getProductLabelSafe(b.product)}</div>
-                      <div className="bid-contract">Farmer: {b.farmer_email || b.farmer_id}</div>
+                      <div className="bid-card-title">{getProductLabelSafe(b.product)}</div>
+                      <div className="bid-card-subtitle">{b.farmer_email || b.farmer_id}</div>
                     </div>
                     <span className={`status-badge status-${statusClass.slice(3)}`}>
                       {getStatusLabel(b.status)}
                     </span>
                   </div>
-                  <div className="admin-bid-info">
-                    <div className="admin-bid-column">
-                      <div className="bid-field">
-                        <span className="bid-value admin-bid-price">
-                          {showCounter ? (
-                            <span className="admin-bid-counter-value">
-                              {formatCompactNumber(b.counter_price)} {unit}
-                            </span>
-                          ) : showAccepted ? (
-                            `${formatCompactNumber(acceptedPrice)} ${unit}`
-                          ) : showRejected ? (
-                            `${formatCompactNumber(acceptedPrice)} ${unit}`
-                          ) : showPending ? (
-                            `${formatCompactNumber(b.price)} ${unit}`
-                          ) : "-"}
-                        </span>
-                      </div>
-                      <div className="bid-field">
-                        <span className="bid-value bid-parity-value">
-                          {formatParityDisplay(b, { detailed: true })}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="admin-bid-column admin-bid-column-right">
-                      <div className="bid-field bid-field-right">
-                        <span className="bid-label">Quantity</span>
-                        <span className="bid-value">{formatCompactNumber(b.quantity)} t</span>
-                      </div>
-                      <div className="bid-field bid-field-right">
-                        <span className="bid-label">Date</span>
-                        <span className="bid-value bid-date-value">{formatDateOnly(b.created_at)}</span>
-                      </div>
-                    </div>
+
+                  <div className="bid-card-section-label">Details</div>
+
+                  <div className="bid-card-row">
+                    <span className="bid-card-label">Price</span>
+                    <span className={`bid-card-value${showCounter ? " bid-card-counter-value" : ""}`}>
+                      {showCounter
+                        ? `${formatCompactNumber(b.counter_price)} ${unit}`
+                        : (showAccepted || showRejected)
+                        ? `${formatCompactNumber(acceptedPrice)} ${unit}`
+                        : showPending
+                        ? `${formatCompactNumber(b.price)} ${unit}`
+                        : "-"}
+                    </span>
+                  </div>
+                  <div className="bid-card-row">
+                    <span className="bid-card-label">Quantity</span>
+                    <span className="bid-card-value">{formatCompactNumber(b.quantity)} t</span>
+                  </div>
+                  <div className="bid-card-row">
+                    <span className="bid-card-label">Parity</span>
+                    <span className="bid-card-value">{formatParityDisplay(b, { detailed: true })}</span>
+                  </div>
+                  <div className="bid-card-row">
+                    <span className="bid-card-label">Date</span>
+                    <span className="bid-card-value">{formatDateOnly(b.created_at)}</span>
                   </div>
                 </div>
               );

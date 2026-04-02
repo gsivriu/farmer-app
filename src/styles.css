@@ -1433,9 +1433,9 @@ select.input:focus {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 12px;
+  gap: 0;
   width: 100%;
-  padding: 16px;
+  padding: 0;
   border-radius: 16px;
   border: 1px solid #f1f5f9;
   background: #fff;
@@ -1446,6 +1446,83 @@ select.input:focus {
   position: relative;
   overflow: hidden;
 }
+
+/* ── Bushel-style bid card inner layout ─────────────────── */
+.bid-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 14px 16px 12px 20px;
+  gap: 10px;
+}
+
+.bid-card-title {
+  font-weight: 700;
+  font-size: 15px;
+  color: #1e293b;
+  line-height: 1.3;
+}
+
+.bid-card-subtitle {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.bid-card-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #94a3b8;
+  padding: 6px 16px 4px 20px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.bid-card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 16px 9px 20px;
+  border-top: 1px solid #f1f5f9;
+  gap: 12px;
+}
+
+.bid-card-label {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 400;
+  flex-shrink: 0;
+}
+
+.bid-card-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  text-align: right;
+}
+
+.bid-card-counter-value {
+  color: #b91c1c;
+}
+
+.bid-card-hint {
+  font-size: 11px;
+  color: #94a3b8;
+  padding: 6px 16px 11px 20px;
+  border-top: 1px solid #f1f5f9;
+  text-align: right;
+}
+
+/* dark mode */
+.theme-dark .bid-card-title { color: #f1f5f9; }
+.theme-dark .bid-card-subtitle { color: #4b5563; }
+.theme-dark .bid-card-section-label { color: #4b5563; border-top-color: #1f2937; }
+.theme-dark .bid-card-row { border-top-color: #1f2937; }
+.theme-dark .bid-card-label { color: #94a3b8; }
+.theme-dark .bid-card-value { color: #f1f5f9; }
+.theme-dark .bid-card-hint { border-top-color: #1f2937; color: #4b5563; }
+.theme-dark .bid-card-counter-value { color: #f87171; }
 
 .theme-dark .bid-row {
   background: #111827;

@@ -300,11 +300,11 @@ export default function ActivityTab() {
                           }
                         }}
                       >
-                        <div className="bid-header">
+                        <div className="bid-card-header">
                           <div>
-                            <div className="bid-title">{getProductLabelSafe(b.product)}</div>
+                            <div className="bid-card-title">{getProductLabelSafe(b.product)}</div>
                             {b.status === "accepted" && b.contract_no && (
-                              <div className="bid-contract">Contract: {b.contract_no}</div>
+                              <div className="bid-card-subtitle">Contract: {b.contract_no}</div>
                             )}
                           </div>
                           <span className={`status-badge status-${statusClass.slice(3)}`}>
@@ -312,30 +312,28 @@ export default function ActivityTab() {
                           </span>
                         </div>
 
-                        <div className="bid-details bid-details-compact">
-                          <div className="bid-field">
-                            <span className="bid-label">Quantity</span>
-                            <span className="bid-value bid-qty">{formatCompactNumber(b.quantity)} t</span>
-                          </div>
-                          <div className="bid-field bid-field-right">
-                            <span className="bid-label">Price</span>
-                            <span className={["bid-value", "bid-price", hasCounterPrice && b.status === "countered" ? "farmer-bid-counter-value" : ""].join(" ")}>
-                              {formatCompactNumber(activePrice)} {unit}
-                            </span>
-                          </div>
+                        <div className="bid-card-section-label">Details</div>
+
+                        <div className="bid-card-row">
+                          <span className="bid-card-label">Price</span>
+                          <span className={`bid-card-value${hasCounterPrice && b.status === "countered" ? " bid-card-counter-value" : ""}`}>
+                            {formatCompactNumber(activePrice)} {unit}
+                          </span>
+                        </div>
+                        <div className="bid-card-row">
+                          <span className="bid-card-label">Quantity</span>
+                          <span className="bid-card-value">{formatCompactNumber(b.quantity)} t</span>
+                        </div>
+                        <div className="bid-card-row">
+                          <span className="bid-card-label">Parity</span>
+                          <span className="bid-card-value">{formatParityDisplay(b)}</span>
+                        </div>
+                        <div className="bid-card-row">
+                          <span className="bid-card-label">Offer date</span>
+                          <span className="bid-card-value">{formatDateOnly(b.created_at)}</span>
                         </div>
 
-                        <div className="bid-details bid-details-compact">
-                          <div className="bid-field">
-                            <span className="bid-value bid-parity-value">{formatParityDisplay(b)}</span>
-                          </div>
-                        </div>
-
-                        <div className="bid-footer">
-                          Offer date:{" "}
-                          <span className="bid-date-value">{formatDateOnly(b.created_at)}</span>
-                        </div>
-                        <div className="bid-hint">View details &gt;</div>
+                        <div className="bid-card-hint">View details →</div>
                       </div>
                     );
                   })}
