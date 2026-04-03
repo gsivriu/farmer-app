@@ -1,0 +1,757 @@
+/* ================================================================
+   AGRI-FINTECH DESIGN SYSTEM — Farmer Dashboard
+   Scoped under .farmer-dashboard-layout to avoid admin conflicts.
+   ================================================================ */
+
+/* ─── Design tokens ─────────────────────────────────────────── */
+.farmer-dashboard-layout {
+  --af-navy:   #0B2545;
+  --af-bg:     #F8F9FB;
+  --af-card:   #FFFFFF;
+  --af-border: #E5E7EB;
+  --af-text:   #111827;
+  --af-muted:  #6B7280;
+  --af-blue:   #2563EB;
+  --af-success:#16A34A;
+  --af-warning:#D97706;
+  --af-danger: #DC2626;
+
+  background: var(--af-bg);
+}
+
+/* ─── Page / layout ──────────────────────────────────────────── */
+.farmer-dashboard-layout .dashboard-row.full {
+  background: var(--af-bg);
+  padding: 0;
+  min-height: 100%;
+}
+
+.farmer-dashboard-layout .dashboard-home-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Strip the generic .card wrapper used in HomeTab/SaleTab —
+   each child component provides its own card chrome */
+.farmer-dashboard-layout .home-card-secondary.card,
+.farmer-dashboard-layout .home-card-tertiary.card {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* home-card-primary wraps FarmerProgress (embedded) → IS the card */
+.farmer-dashboard-layout .home-card-primary.card {
+  background: var(--af-card) !important;
+  border: 1px solid var(--af-border) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07) !important;
+  padding: 16px !important;
+  margin: 0 !important;
+}
+
+/* FarmerProgress embedded — transparent inside its wrapper */
+.farmer-dashboard-layout .home-card-primary .progress-card {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* ─── Section labels ─────────────────────────────────────────── */
+.af-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--af-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 12px 0 4px;
+  padding: 0;
+  line-height: 1;
+}
+
+.af-section-label:first-child {
+  margin-top: 0;
+}
+
+/* Hide old section dividers — spacing is handled by gap */
+.farmer-dashboard-layout .section-divider {
+  display: none;
+}
+
+/* ─── Shared agri card ───────────────────────────────────────── */
+.farmer-dashboard-layout .exchange-card,
+.farmer-dashboard-layout .market-card,
+.farmer-dashboard-layout .weather-card.day,
+.farmer-dashboard-layout .weather-card.night,
+.farmer-dashboard-layout .weather-card.loading {
+  border-radius: 14px !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07) !important;
+  margin: 0 !important;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* ─── FarmerProgress ─────────────────────────────────────────── */
+.farmer-dashboard-layout .progress-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.farmer-dashboard-layout .progress-head-spacer {
+  display: none;
+}
+
+.farmer-dashboard-layout .progress-meta {
+  font-size: 13px;
+  color: var(--af-muted);
+}
+
+.farmer-dashboard-layout .progress-meta b {
+  color: var(--af-text);
+  font-weight: 700;
+}
+
+/* Progress bar */
+.farmer-dashboard-layout .uv-loader {
+  position: relative;
+  height: 8px;
+  border-radius: 99px;
+  background: #E5E7EB;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.farmer-dashboard-layout .uv-bar {
+  position: absolute;
+  inset: 0;
+  width: var(--pct, 0%);
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--af-blue) 0%, #60A5FA 100%);
+  transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* Reward grid */
+.farmer-dashboard-layout .reward-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 0 !important;
+}
+
+.farmer-dashboard-layout .reward-card {
+  border-radius: 10px !important;
+  border: 1px solid var(--af-border) !important;
+  padding: 10px 8px !important;
+  background: #F9FAFB !important;
+  box-shadow: none !important;
+  transition: box-shadow 0.15s;
+}
+
+.farmer-dashboard-layout .reward-card.reward-unlocked {
+  border-color: #BBF7D0 !important;
+  background: #F0FDF4 !important;
+}
+
+.farmer-dashboard-layout .reward-card.reward-locked {
+  opacity: 0.65;
+}
+
+.farmer-dashboard-layout .reward-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.farmer-dashboard-layout .reward-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--af-navy);
+  margin-bottom: 2px;
+}
+
+.farmer-dashboard-layout .reward-card .small-text {
+  font-size: 10px;
+  color: var(--af-muted);
+  line-height: 1.35;
+}
+
+.farmer-dashboard-layout .reward-lock.is-unlocked { color: var(--af-success); }
+.farmer-dashboard-layout .reward-lock.is-locked   { color: #D1D5DB; }
+.farmer-dashboard-layout .lock-icon { width: 15px; height: 15px; }
+
+/* ─── ExchangeRatesCard ──────────────────────────────────────── */
+.farmer-dashboard-layout .exchange-card {
+  background: var(--af-card) !important;
+  border: 1px solid var(--af-border) !important;
+  padding: 16px !important;
+}
+
+.farmer-dashboard-layout .exchange-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.farmer-dashboard-layout .exchange-card .market-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--af-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0;
+}
+
+.farmer-dashboard-layout .exchange-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.farmer-dashboard-layout .exchange-updated {
+  font-size: 11px;
+  color: var(--af-muted);
+}
+
+.farmer-dashboard-layout .exchange-calc-btn {
+  background: #F3F4F6;
+  border: none;
+  border-radius: 8px;
+  color: var(--af-muted);
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+.farmer-dashboard-layout .exchange-calc-btn:hover { background: #E5E7EB; }
+
+/* Hide decorative divider between header and rates */
+.farmer-dashboard-layout .exchange-divider-top { display: none; }
+
+.farmer-dashboard-layout .exchange-grid {
+  display: flex;
+  flex-direction: column;
+}
+
+.farmer-dashboard-layout .exchange-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 13px;
+  color: var(--af-text);
+}
+
+.farmer-dashboard-layout .exchange-row:not(:last-child),
+.farmer-dashboard-layout .exchange-divider {
+  border-bottom: 1px solid #F3F4F6;
+}
+
+.farmer-dashboard-layout .exchange-divider {
+  height: 0;
+  margin: 0;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+}
+
+.farmer-dashboard-layout .exchange-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--af-navy);
+}
+
+.farmer-dashboard-layout .exchange-row-muted {
+  color: var(--af-muted);
+  font-size: 12px;
+}
+.farmer-dashboard-layout .exchange-row-muted .exchange-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--af-muted);
+}
+
+/* ─── WeatherWidget (compact card) ──────────────────────────── */
+.farmer-dashboard-layout .weather-card {
+  border: 1px solid transparent !important;
+  padding: 16px !important;
+  overflow: hidden;
+  cursor: pointer;
+  min-height: auto !important;
+}
+
+.farmer-dashboard-layout .weather-card.day {
+  background: linear-gradient(135deg, #0B2545 0%, #1D4ED8 100%) !important;
+}
+
+.farmer-dashboard-layout .weather-card.night {
+  background: linear-gradient(135deg, #0B2545 0%, #0F172A 100%) !important;
+}
+
+.farmer-dashboard-layout .weather-card.loading {
+  background: #F3F4F6 !important;
+  border-color: var(--af-border) !important;
+  color: var(--af-muted);
+  padding: 20px !important;
+}
+
+.farmer-dashboard-layout .weather-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.farmer-dashboard-layout .weather-primary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.farmer-dashboard-layout .weather-icon-main {
+  font-size: 38px;
+  line-height: 1;
+}
+
+.farmer-dashboard-layout .weather-temp {
+  font-size: 30px;
+  font-weight: 700;
+  color: #fff;
+  display: block;
+  line-height: 1;
+}
+
+.farmer-dashboard-layout .weather-desc {
+  font-size: 12px;
+  color: rgba(255,255,255,0.72);
+  display: block;
+  margin-top: 2px;
+}
+
+.farmer-dashboard-layout .weather-details-mini {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.farmer-dashboard-layout .location-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.farmer-dashboard-layout .min-max {
+  font-size: 11px;
+  color: rgba(255,255,255,0.60);
+}
+
+/* Decorative blobs — hide, we use gradient instead */
+.farmer-dashboard-layout .bg-decor-1,
+.farmer-dashboard-layout .bg-decor-2 { display: none; }
+
+/* ─── MarketTicker ───────────────────────────────────────────── */
+.farmer-dashboard-layout .market-card {
+  background: var(--af-card) !important;
+  border: 1px solid var(--af-border) !important;
+  padding: 16px !important;
+}
+
+.farmer-dashboard-layout .market-card-header {
+  margin-bottom: 8px;
+}
+
+.farmer-dashboard-layout .market-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--af-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 2px;
+}
+
+.farmer-dashboard-layout .market-subtitle {
+  font-size: 11px;
+  color: var(--af-muted);
+  margin: 0;
+}
+
+/* Shared market-item base (reset card look) */
+.farmer-dashboard-layout .market-item {
+  background: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  padding: 9px 0 !important;
+  border-bottom: 1px solid #F3F4F6 !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-top: none !important;
+}
+
+.farmer-dashboard-layout .market-item:last-child {
+  border-bottom: none !important;
+}
+
+/* MarketTicker: horizontal row layout */
+.farmer-dashboard-layout .market-ticker .market-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0;
+}
+
+.farmer-dashboard-layout .market-ticker .market-line-1 {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+.farmer-dashboard-layout .market-ticker .market-line-2 {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  margin-right: 10px;
+}
+
+.farmer-dashboard-layout .market-product {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--af-text);
+}
+
+.farmer-dashboard-layout .market-tag {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--af-muted);
+  background: #F3F4F6;
+  border-radius: 5px;
+  padding: 2px 5px;
+}
+
+.farmer-dashboard-layout .market-price {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--af-navy);
+}
+
+.farmer-dashboard-layout .market-delta {
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+
+.farmer-dashboard-layout .delta-up   { color: var(--af-success); }
+.farmer-dashboard-layout .delta-down { color: var(--af-danger); }
+.farmer-dashboard-layout .delta-flat { color: var(--af-muted); }
+.farmer-dashboard-layout .delta-arrow { font-size: 10px; }
+
+/* ─── SaleTab layout ─────────────────────────────────────────── */
+.farmer-dashboard-layout .sale-card {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 16px !important;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ─── PricesGrid ─────────────────────────────────────────────── */
+.farmer-dashboard-layout .prices-card {
+  background: var(--af-card) !important;
+  border: 1px solid var(--af-border) !important;
+  border-radius: 14px !important;
+  padding: 16px !important;
+}
+
+.farmer-dashboard-layout .prices-card .market-grid {
+  display: flex;
+  flex-direction: column;
+}
+
+.farmer-dashboard-layout .prices-card .market-item {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  border-left: 3px solid var(--af-border) !important;
+  padding-left: 10px !important;
+  border-radius: 0 !important;
+}
+
+.farmer-dashboard-layout .prices-card .market-item-up {
+  border-left-color: var(--af-success) !important;
+}
+
+.farmer-dashboard-layout .prices-card .market-item-down {
+  border-left-color: var(--af-danger) !important;
+}
+
+.farmer-dashboard-layout .prices-card .market-item-flat {
+  border-left-color: #D1D5DB !important;
+}
+
+.farmer-dashboard-layout .prices-card .market-line-1 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.farmer-dashboard-layout .market-price-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--af-navy);
+}
+
+.farmer-dashboard-layout .market-diff {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.farmer-dashboard-layout .market-diff.market-item-up   { color: var(--af-success); }
+.farmer-dashboard-layout .market-diff.market-item-down { color: var(--af-danger); }
+.farmer-dashboard-layout .market-diff.market-item-flat { color: var(--af-muted); }
+.farmer-dashboard-layout .market-diff-placeholder      { visibility: hidden; }
+
+/* ─── BidForm ────────────────────────────────────────────────── */
+.farmer-dashboard-layout .bid-form-embedded {
+  background: var(--af-card);
+  border: 1px solid var(--af-border);
+  border-radius: 14px;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.farmer-dashboard-layout .bid-form-embedded h2 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--af-navy);
+  margin: 0 0 14px;
+}
+
+.farmer-dashboard-layout .bid-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.farmer-dashboard-layout .bid-input-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+  display: block;
+}
+
+.farmer-dashboard-layout .bid-input-field {
+  width: 100%;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--af-text);
+  background: #fff;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.farmer-dashboard-layout .bid-input-field:focus {
+  border-color: var(--af-blue);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+}
+
+.farmer-dashboard-layout .bid-form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.farmer-dashboard-layout .form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.farmer-dashboard-layout .btn.primary-btn,
+.farmer-dashboard-layout .btn.primary-btn.full-width,
+.farmer-dashboard-layout .bid-submit-btn {
+  width: 100%;
+  background: var(--af-navy) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 10px !important;
+  padding: 13px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  cursor: pointer;
+  transition: background 0.15s;
+  letter-spacing: 0.01em;
+  box-shadow: none !important;
+}
+
+.farmer-dashboard-layout .btn.primary-btn:hover:not(:disabled),
+.farmer-dashboard-layout .bid-submit-btn:hover:not(:disabled) {
+  background: #1B3A6B !important;
+}
+
+.farmer-dashboard-layout .btn.primary-btn:disabled,
+.farmer-dashboard-layout .bid-submit-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Success / error badges inside bid form */
+.farmer-dashboard-layout .bid-form-embedded .badge {
+  font-size: 13px;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 0;
+}
+
+.farmer-dashboard-layout .bid-form-embedded .badge.accepted {
+  background: #F0FDF4;
+  color: var(--af-success);
+  border: 1px solid #BBF7D0;
+}
+
+.farmer-dashboard-layout .bid-form-embedded .badge.rejected {
+  background: #FEF2F2;
+  color: var(--af-danger);
+  border: 1px solid #FECACA;
+}
+
+/* ─── SiloPriceTable (read-only in Sale) ─────────────────────── */
+.farmer-dashboard-layout .silo-table-wrap {
+  background: var(--af-card);
+  border: 1px solid var(--af-border);
+  border-radius: 14px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.farmer-dashboard-layout .silo-table-header h3 {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--af-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 12px 16px 8px;
+  margin: 0;
+}
+
+.farmer-dashboard-layout .silo-table-scroll {
+  overflow-x: auto;
+}
+
+.farmer-dashboard-layout .silo-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.farmer-dashboard-layout .silo-table thead th {
+  background: #F9FAFB;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--af-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 8px 12px;
+  text-align: right;
+  border-bottom: 1px solid var(--af-border);
+  white-space: nowrap;
+}
+
+.farmer-dashboard-layout .silo-table thead th.silo-sticky-head {
+  text-align: left;
+  position: sticky;
+  left: 0;
+  background: #F9FAFB;
+  z-index: 1;
+}
+
+.farmer-dashboard-layout .silo-table tbody td {
+  padding: 9px 12px;
+  border-bottom: 1px solid #F9FAFB;
+  vertical-align: middle;
+}
+
+.farmer-dashboard-layout .silo-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.farmer-dashboard-layout .silo-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--af-text);
+  white-space: nowrap;
+  position: sticky;
+  left: 0;
+  background: var(--af-card);
+}
+
+.farmer-dashboard-layout .silo-cell {
+  text-align: right;
+}
+
+.farmer-dashboard-layout .silo-cell-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--af-navy);
+}
+
+.farmer-dashboard-layout .silo-cell-value.silo-cell-value-manual {
+  color: var(--af-warning);
+}
+
+/* ─── Desktop ≥ 640px ────────────────────────────────────────── */
+@media (min-width: 640px) {
+  .farmer-dashboard-layout .dashboard-home-stack {
+    padding: 20px;
+    gap: 4px;
+  }
+  .farmer-dashboard-layout .sale-card {
+    padding: 20px !important;
+  }
+}
+
+/* ─── Desktop ≥ 1024px ───────────────────────────────────────── */
+@media (min-width: 1024px) {
+  .farmer-dashboard-layout .dashboard-home-stack {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 24px 0;
+    gap: 4px;
+  }
+
+  .farmer-dashboard-layout .sale-card {
+    max-width: 680px !important;
+    margin: 0 auto !important;
+    padding: 24px 0 !important;
+  }
+}
