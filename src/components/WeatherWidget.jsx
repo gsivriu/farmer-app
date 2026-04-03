@@ -87,21 +87,6 @@ const WeatherWidget = () => {
     return () => clearInterval(intervalId);
   }, [coords]);
 
-  useEffect(() => {
-    if (!weather) return;
-    const isNight = weather.isDay === 0;
-    try {
-      window.localStorage.setItem("theme", isNight ? "dark" : "light");
-    } catch {
-      // ignore storage errors
-    }
-    const root = document.documentElement;
-    if (isNight) root.classList.add("theme-dark");
-    else root.classList.remove("theme-dark");
-    window.dispatchEvent(
-      new CustomEvent("weather-theme-change", { detail: { isNight } })
-    );
-  }, [weather]);
 
   const handleSearch = async (text) => {
     setSearchQuery(text);
