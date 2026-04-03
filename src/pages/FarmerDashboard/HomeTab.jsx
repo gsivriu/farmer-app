@@ -11,12 +11,14 @@ export default function HomeTab() {
           <FarmerProgress embedded />
         </div>
 
-        <div className="home-card-secondary">
-          <ExchangeRatesCard />
-        </div>
+        <div className="home-cards-row">
+          <div className="card dashboard-card home-card-secondary">
+            <ExchangeRatesCard />
+          </div>
 
-        <div className="card dashboard-card home-card-secondary">
-          <WeatherWidget />
+          <div className="card dashboard-card home-card-secondary">
+            <WeatherWidget />
+          </div>
         </div>
 
         <div className="card dashboard-card home-card-tertiary">

@@ -1,4 +1,33 @@
+/* Exchange + Weather side-by-side squares — applies on all screen sizes */
+.home-cards-row {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  width: 100%;
+}
+
+.home-cards-row .home-card-secondary {
+  flex: 1;
+  min-width: 0;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Make inner card components fill the square */
+.home-cards-row .home-card-secondary .exchange-section,
+.home-cards-row .home-card-secondary .weather-card {
+  flex: 1;
+  height: 100%;
+  box-sizing: border-box;
+}
+
 @media screen and (min-width: 1024px) {
+  .home-cards-row {
+    gap: 24px;
+  }
+
   .dashboard-home-stack {
     display: flex;
     flex-direction: column;
