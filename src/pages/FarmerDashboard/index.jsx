@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import "./FarmerDashboard.css";
-import "./agri-fintech.css";
 import HomeTab from "./HomeTab";
 import SaleTab from "./SaleTab";
 import ActivityTab from "./ActivityTab";
