@@ -10,7 +10,7 @@
 .home-cards-row .home-card-secondary {
   flex: 1;
   min-width: 0;
-  height: 192px; /* 24 × 8pt — fits exchange (header + 3 rows) comfortably */
+  min-height: 192px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -74,7 +74,7 @@
   }
 
   .home-cards-row .home-card-secondary {
-    height: 200px; /* slightly more breathing room on desktop */
+    min-height: 200px;
   }
 
   .dashboard-home-stack {

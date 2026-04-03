@@ -70,6 +70,10 @@ const FUTURES = [
   export default function MarketTicker() {
     return (
       <div>
+        <div className="ticker-card-header">
+          <span className="ticker-card-title">Futures</span>
+          <span className="ticker-card-sub">Indicative only</span>
+        </div>
         <div className="market-ticker">
           {FUTURES.map((f) => {
             const delta = getDeltaInfo(f.change);
@@ -92,7 +96,6 @@ const FUTURES = [
             );
           })}
         </div>
-        <p className="ticker-note">Indicative values only</p>
       </div>
     );
   }

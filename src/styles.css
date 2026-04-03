@@ -1380,6 +1380,45 @@ select.input:focus {
   gap: 10px;
 }
 
+/* =========================
+   SKELETON LOADING
+   ========================= */
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position: 600px 0; }
+}
+
+.skeleton-line {
+  border-radius: 4px;
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 1200px 100%;
+  animation: shimmer 1.4s infinite linear;
+  display: block;
+}
+
+.skeleton-title  { width: 80px;  height: 15px; }
+.skeleton-badge  { width: 72px;  height: 22px; border-radius: 999px; }
+.skeleton-label  { width: 48px;  height: 12px; }
+.skeleton-value  { width: 72px;  height: 12px; }
+.skeleton-price  { width: 110px; height: 20px; }
+
+.bid-row-skeleton {
+  cursor: default;
+  pointer-events: none;
+}
+
+.bid-row-skeleton:hover {
+  transform: none !important;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
+}
+
+.theme-dark .skeleton-line,
+.theme-dark .skeleton-badge {
+  background: linear-gradient(90deg, #1f2937 25%, #263143 50%, #1f2937 75%);
+  background-size: 1200px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
 /* Invalid field state */
 .bid-input-field[aria-invalid="true"] {
   border-color: #dc2626;
@@ -1424,6 +1463,74 @@ select.input:focus {
   background-color: rgba(239, 68, 68, 0.12);
   color: #fca5a5;
   border-color: rgba(239, 68, 68, 0.2);
+}
+
+/* =========================
+   HOME GREETING
+   ========================= */
+.home-greeting {
+  padding: 2px 2px 0;
+}
+
+.home-greeting-text {
+  font-size: 20px;
+  font-weight: 500;
+  color: #334155;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+.home-greeting-text strong {
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.theme-dark .home-greeting-text {
+  color: #94a3b8;
+}
+
+.theme-dark .home-greeting-text strong {
+  color: #f1f5f9;
+}
+
+/* =========================
+   MARKET TICKER HEADER
+   ========================= */
+.ticker-card-header {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.ticker-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #475569;
+}
+
+.ticker-card-sub {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.theme-dark .ticker-card-title {
+  color: #9ca3af;
+}
+
+.theme-dark .ticker-card-sub {
+  color: #4b5563;
+}
+
+/* Modal close button — icon style */
+.modal-close-btn {
+  font-size: 16px;
+  line-height: 1;
+  padding: 6px 10px !important;
+  min-width: 32px;
+  min-height: 32px;
 }
 
 /* =========================
@@ -1656,6 +1763,36 @@ select.input:focus {
   border-top: 1px solid #f1f5f9;
   text-align: right;
   letter-spacing: 0.01em;
+}
+
+/* Bid card header right — status + action chip */
+.bid-card-header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+/* "Action required" chip on countered bids */
+.bid-action-required-chip {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #92400e;
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  border-radius: 999px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+.theme-dark .bid-action-required-chip {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.35);
+  color: #fbbf24;
 }
 
 /* dark mode */

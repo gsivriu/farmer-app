@@ -47,6 +47,30 @@ const parseOptionalNumber = (value) => {
   return Number.isFinite(num) ? num : NaN;
 };
 
+function SkeletonBidRow() {
+  return (
+    <div className="bid-row bid-row-skeleton" aria-hidden="true">
+      <div className="bid-card-header">
+        <div className="skeleton-line skeleton-title" />
+        <div className="skeleton-line skeleton-badge" />
+      </div>
+      <div className="bid-card-row bid-card-row-price">
+        <div className="skeleton-line skeleton-label" />
+        <div className="skeleton-line skeleton-price" />
+      </div>
+      <div className="bid-card-row">
+        <div className="skeleton-line skeleton-label" />
+        <div className="skeleton-line skeleton-value" />
+      </div>
+      <div className="bid-card-row">
+        <div className="skeleton-line skeleton-label" />
+        <div className="skeleton-line skeleton-value" />
+      </div>
+      <div className="bid-card-hint" style={{ visibility: "hidden" }}>—</div>
+    </div>
+  );
+}
+
 export default function ActivityTab() {
   const { bids, fetchBids, addFarmerRewardsPoints } = useAppContext();
 
@@ -157,6 +181,13 @@ export default function ActivityTab() {
     [statsRows]
   );
 
+  const activeFilterCount = [
+    productFilter !== "all",
+    statusFilter !== "all",
+    !!dateFrom,
+    !!dateTo,
+  ].filter(Boolean).length;
+
   // ── Handlers ────────────────────────────────────────────────────────────────
 
   const handleAcceptCounter = async (bid) => {
@@ -215,18 +246,22 @@ export default function ActivityTab() {
             <div className="activity-header-actions">
               <button type="button" className="btn small outline" onClick={() => setFiltersOpen(true)}>
                 Filters
-                {(productFilter !== "all" || statusFilter !== "all" || dateFrom || dateTo) && (
-                  <span className="filter-active-dot" aria-label="active filters" />
+                {activeFilterCount > 0 && (
+                  <span className="filter-active-dot" aria-label={`${activeFilterCount} active filters`} />
                 )}
               </button>
               <button type="button" className="btn small outline" onClick={() => setShowStats((prev) => !prev)}>
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" style={{ marginRight: 5 }}>
+                  <rect x="1" y="7" width="3" height="6" rx="1" fill="currentColor" opacity="0.5"/>
+                  <rect x="5.5" y="4" width="3" height="9" rx="1" fill="currentColor" opacity="0.75"/>
+                  <rect x="10" y="1" width="3" height="12" rx="1" fill="currentColor"/>
+                </svg>
                 Stats
               </button>
             </div>
           </div>
 
           <div className="card-body">
-            {loading && <p>Loading data...</p>}
             {error && <p className="badge rejected">{error}</p>}
 
             {showStats && (
@@ -264,7 +299,13 @@ export default function ActivityTab() {
             )}
 
             <div className="dashboard-section">
-              {filteredBids.length === 0 ? (
+              {loading ? (
+                <div className="bid-list" aria-label="Loading bids" aria-busy="true">
+                  <SkeletonBidRow />
+                  <SkeletonBidRow />
+                  <SkeletonBidRow />
+                </div>
+              ) : filteredBids.length === 0 ? (
                 <div className="activity-empty-state">
                   <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
                     <rect x="6" y="10" width="28" height="22" rx="4" stroke="#cbd5e1" strokeWidth="2" fill="none"/>
@@ -288,6 +329,7 @@ export default function ActivityTab() {
                       b.status === "accepted" ? "is-accepted"
                       : b.status === "rejected" ? "is-rejected"
                       : b.status === "countered" ? "is-countered"
+                      : b.status === "farmer_countered" ? "is-farmer-countered"
                       : "is-pending";
                     const hasCounterPrice = hasPositiveNumber(b.counter_price);
                     const activePrice = hasCounterPrice ? Number(b.counter_price) : Number(b.price);
@@ -325,9 +367,14 @@ export default function ActivityTab() {
                               <div className="bid-card-subtitle">Contract: {b.contract_no}</div>
                             )}
                           </div>
-                          <span className={`status-badge status-${statusClass.slice(3)}`}>
-                            {statusLabel}
-                          </span>
+                          <div className="bid-card-header-right">
+                            {b.status === "countered" && (
+                              <span className="bid-action-required-chip">Action required</span>
+                            )}
+                            <span className={`status-badge status-${statusClass.slice(3)}`}>
+                              {statusLabel}
+                            </span>
+                          </div>
                         </div>
 
                         <div className="bid-card-section-label">Details</div>
@@ -351,7 +398,7 @@ export default function ActivityTab() {
                           <span className="bid-card-value">{formatDateOnly(b.created_at)}</span>
                         </div>
 
-                        <div className="bid-card-hint">View details →</div>
+                        <div className="bid-card-hint">View details ›</div>
                       </div>
                     );
                   })}
@@ -368,6 +415,7 @@ export default function ActivityTab() {
           className="bid-modal-backdrop"
           role="dialog"
           aria-modal="true"
+          aria-labelledby="bid-detail-modal-title"
           onClick={() => { setSelectedBid(null); setFarmerActionError(null); setFarmerCounterSent(false); }}
         >
           <div
@@ -375,13 +423,14 @@ export default function ActivityTab() {
             onClick={(event) => { event.stopPropagation(); setFarmerConfirmAction(null); }}
           >
             <div className="bid-modal-header">
-              <h3>Bid details</h3>
+              <h3 id="bid-detail-modal-title">Bid details</h3>
               <button
                 type="button"
-                className="btn small ghost"
+                className="btn small ghost modal-close-btn"
+                aria-label="Close bid details"
                 onClick={() => { setSelectedBid(null); setFarmerActionError(null); setFarmerCounterSent(false); }}
               >
-                Close
+                ✕
               </button>
             </div>
             <div className="bid-modal-body">
@@ -459,10 +508,14 @@ export default function ActivityTab() {
             </div>
 
             {farmerActionError && (
-              <p className="badge rejected" style={{ margin: "8px 0 0 0" }}>{farmerActionError}</p>
+              <p className="bid-form-feedback bid-feedback-error" style={{ margin: "8px 0 0 0" }} role="alert">
+                {farmerActionError}
+              </p>
             )}
             {farmerCounterSent && (
-              <p className="badge accepted" style={{ margin: "8px 0 0 0" }}>Counter offer sent to admin.</p>
+              <p className="bid-form-feedback bid-feedback-success" style={{ margin: "8px 0 0 0" }}>
+                Counter offer sent to admin.
+              </p>
             )}
 
             {selectedBid.status === "countered" && !farmerCounterSent && (
@@ -487,7 +540,7 @@ export default function ActivityTab() {
                     <>
                       <button
                         type="button"
-                        className="btn small ghost farmer-reject-btn"
+                        className="btn small farmer-reject-btn"
                         disabled={isLocked}
                         onClick={(event) => {
                           event.stopPropagation();
@@ -499,7 +552,7 @@ export default function ActivityTab() {
                       </button>
                       <button
                         type="button"
-                        className="btn small ghost farmer-counter-btn"
+                        className="btn small farmer-counter-btn"
                         disabled={!hasChanges || counterInvalid || isLocked}
                         onClick={(event) => {
                           event.stopPropagation();
@@ -511,7 +564,7 @@ export default function ActivityTab() {
                       </button>
                       <button
                         type="button"
-                        className="btn small ghost farmer-accept-btn"
+                        className="btn small farmer-accept-btn"
                         disabled={hasChanges || isLocked}
                         onClick={(event) => {
                           event.stopPropagation();
@@ -536,13 +589,19 @@ export default function ActivityTab() {
           className="bid-modal-backdrop"
           role="dialog"
           aria-modal="true"
+          aria-labelledby="filters-modal-title"
           onClick={() => setFiltersOpen(false)}
         >
           <div className="bid-modal" onClick={(event) => event.stopPropagation()}>
             <div className="bid-modal-header">
-              <h3>Filters</h3>
-              <button type="button" className="btn small outline" onClick={() => setFiltersOpen(false)}>
-                Close
+              <h3 id="filters-modal-title">Filters</h3>
+              <button
+                type="button"
+                className="btn small ghost modal-close-btn"
+                aria-label="Close filters"
+                onClick={() => setFiltersOpen(false)}
+              >
+                ✕
               </button>
             </div>
             <div className="bid-modal-body">
