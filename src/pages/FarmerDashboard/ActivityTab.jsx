@@ -215,6 +215,9 @@ export default function ActivityTab() {
             <div className="activity-header-actions">
               <button type="button" className="btn small outline" onClick={() => setFiltersOpen(true)}>
                 Filters
+                {(productFilter !== "all" || statusFilter !== "all" || dateFrom || dateTo) && (
+                  <span className="filter-active-dot" aria-label="active filters" />
+                )}
               </button>
               <button type="button" className="btn small outline" onClick={() => setShowStats((prev) => !prev)}>
                 Stats
@@ -262,7 +265,22 @@ export default function ActivityTab() {
 
             <div className="dashboard-section">
               {filteredBids.length === 0 ? (
-                <p className="small-text">You have no bids yet.</p>
+                <div className="activity-empty-state">
+                  <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+                    <rect x="6" y="10" width="28" height="22" rx="4" stroke="#cbd5e1" strokeWidth="2" fill="none"/>
+                    <path d="M13 18h14M13 23h8" stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round"/>
+                    <circle cx="30" cy="10" r="6" fill="#f1f5f9" stroke="#e2e8f0" strokeWidth="1.5"/>
+                    <path d="M30 7v3l2 1.5" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                  <p className="activity-empty-title">
+                    {userBids.length === 0 ? "No bids yet" : "No bids match your filters"}
+                  </p>
+                  <p className="activity-empty-sub">
+                    {userBids.length === 0
+                      ? "Place your first bid from the Sale tab."
+                      : "Try adjusting or clearing the filters."}
+                  </p>
+                </div>
               ) : (
                 <div className="bid-list">
                   {filteredBids.map((b) => {
@@ -314,7 +332,7 @@ export default function ActivityTab() {
 
                         <div className="bid-card-section-label">Details</div>
 
-                        <div className="bid-card-row">
+                        <div className="bid-card-row bid-card-row-price">
                           <span className="bid-card-label">Price</span>
                           <span className={`bid-card-value${hasCounterPrice && b.status === "countered" ? " bid-card-counter-value" : ""}`}>
                             {formatCompactNumber(activePrice)} {unit}

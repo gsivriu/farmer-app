@@ -505,6 +505,50 @@ body.weather-modal-open {
   margin: 0;
 }
 
+/* Active filter indicator dot */
+.filter-active-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--brand);
+  margin-left: 6px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+/* Empty state */
+.activity-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  text-align: center;
+  gap: 8px;
+}
+
+.activity-empty-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #475569;
+  margin: 4px 0 0;
+}
+
+.activity-empty-sub {
+  font-size: 13px;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.theme-dark .activity-empty-title {
+  color: #94a3b8;
+}
+
+.theme-dark .activity-empty-sub {
+  color: #4b5563;
+}
+
 .activity-header-actions {
   display: flex;
   align-items: center;
@@ -1509,6 +1553,17 @@ select.input:focus {
   text-align: left;
   position: relative;
   overflow: hidden;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.bid-row:hover {
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.10);
+  transform: translateY(-1px);
+}
+
+.bid-row:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
 }
 
 /* ── Bushel-style bid card inner layout ─────────────────── */
@@ -1534,9 +1589,9 @@ select.input:focus {
 }
 
 .bid-card-section-label {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.6px;
   text-transform: uppercase;
   color: #94a3b8;
   padding: 6px 16px 4px 20px;
@@ -1570,12 +1625,37 @@ select.input:focus {
   color: #b91c1c;
 }
 
-.bid-card-hint {
-  font-size: 11px;
+/* Price row — hero styling, like a stock quote */
+.bid-card-row-price {
+  padding-top: 11px;
+  padding-bottom: 11px;
+}
+
+.bid-card-row-price .bid-card-label {
+  font-size: 12px;
+  font-weight: 500;
   color: #94a3b8;
-  padding: 6px 16px 11px 20px;
+}
+
+.bid-card-row-price .bid-card-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.theme-dark .bid-card-row-price .bid-card-value {
+  color: #f8fafc;
+}
+
+.bid-card-hint {
+  font-size: 12px;
+  color: #cbd5e1;
+  padding: 7px 16px 11px 20px;
   border-top: 1px solid #f1f5f9;
   text-align: right;
+  letter-spacing: 0.01em;
 }
 
 /* dark mode */
@@ -1889,8 +1969,8 @@ select.input:focus {
 }
 
 .theme-dark .bid-row.is-countered {
-  background: #111827;
-  border-color: #1f2937;
+  background: rgba(245, 158, 11, 0.07);
+  border-color: rgba(245, 158, 11, 0.3);
 }
 
 .bid-row.is-accepted {
@@ -1906,7 +1986,8 @@ select.input:focus {
 }
 
 .bid-row.is-countered {
-  border-color: #f1f5f9;
+  border-color: #fde68a;
+  background: #fffbeb;
 }
 
 .bid-row.is-accepted::before,
