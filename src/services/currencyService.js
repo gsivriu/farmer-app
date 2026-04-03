@@ -1,40 +1,22 @@
-const fetchWithTimeout = (url, timeoutMs = 5000) => {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  return fetch(url, { signal: controller.signal }).finally(() =>
-    clearTimeout(timer)
-  );
+import { supabase } from "../supabaseClient";
+
+const FALLBACK = {
+  ronToEur: 4.97,
+  ronToUsd: 4.58,
+  eurToUsd: 1.08,
+  lastUpdated: "Offline/Error",
 };
 
 export const getExchangeRates = async () => {
   try {
-    const responseEur = await fetchWithTimeout(
-      "https://api.frankfurter.app/latest?from=EUR&to=RON,USD"
-    );
-    const dataEur = await responseEur.json();
+    const { data, error } = await supabase.functions.invoke("exchange-rates");
 
-    const responseUsd = await fetchWithTimeout(
-      "https://api.frankfurter.app/latest?from=USD&to=RON"
-    );
-    const dataUsd = await responseUsd.json();
+    if (error) throw error;
+    if (!data?.ronToEur || !data?.ronToUsd) throw new Error("Date incomplete");
 
-    if (!dataEur?.rates || !dataUsd?.rates) {
-      throw new Error("Date incomplete de la API");
-    }
-
-    return {
-      ronToEur: dataEur.rates.RON,
-      ronToUsd: dataUsd.rates.RON,
-      eurToUsd: dataEur.rates.USD,
-      lastUpdated: dataEur.date,
-    };
+    return data;
   } catch (error) {
-    console.error("Eroare API Frankfurter:", error);
-    return {
-      ronToEur: 4.97,
-      ronToUsd: 4.58,
-      eurToUsd: 1.08,
-      lastUpdated: "Offline/Error",
-    };
+    console.error("Eroare exchange rates:", error);
+    return FALLBACK;
   }
 };
