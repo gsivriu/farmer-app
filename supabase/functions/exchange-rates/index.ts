@@ -36,9 +36,13 @@ Deno.serve(async (req) => {
 
   try {
     const [resEur, resUsd] = await Promise.all([
-      fetch("https://api.frankfurter.app/latest?from=EUR&to=RON,USD"),
-      fetch("https://api.frankfurter.app/latest?from=USD&to=RON"),
+      fetch("https://open.er-api.com/v6/latest/EUR"),
+      fetch("https://open.er-api.com/v6/latest/USD"),
     ]);
+
+    if (!resEur.ok || !resUsd.ok) {
+      throw new Error(`API error: EUR=${resEur.status} USD=${resUsd.status}`);
+    }
 
     const [dataEur, dataUsd] = await Promise.all([
       resEur.json(),
@@ -46,14 +50,14 @@ Deno.serve(async (req) => {
     ]);
 
     if (!dataEur?.rates || !dataUsd?.rates) {
-      throw new Error("Date incomplete de la API Frankfurter");
+      throw new Error("Date incomplete de la API");
     }
 
     const result = {
       ronToEur: dataEur.rates.RON,
       ronToUsd: dataUsd.rates.RON,
       eurToUsd: dataEur.rates.USD,
-      lastUpdated: dataEur.date,
+      lastUpdated: dataEur.time_last_update_utc?.slice(0, 10) ?? new Date().toISOString().slice(0, 10),
     };
 
     return new Response(JSON.stringify(result), {
