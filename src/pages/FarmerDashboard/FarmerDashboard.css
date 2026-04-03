@@ -1,31 +1,38 @@
-/* Exchange + Weather side-by-side squares — applies on all screen sizes */
+/* Exchange + Weather side-by-side — applies on all screen sizes */
 .home-cards-row {
   display: flex;
   flex-direction: row;
   gap: 16px;
   width: 100%;
+  align-items: stretch;
 }
 
 .home-cards-row .home-card-secondary {
   flex: 1;
   min-width: 0;
-  aspect-ratio: 1 / 1;
+  height: 192px; /* 24 × 8pt — fits exchange (header + 3 rows) comfortably */
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
-/* Make inner card components fill the square */
+/* Inner components fill the card height */
 .home-cards-row .home-card-secondary .exchange-section,
 .home-cards-row .home-card-secondary .weather-card {
   flex: 1;
-  height: 100%;
+  min-height: 0;
+  margin: 0;
   box-sizing: border-box;
+  border-radius: 12px;
 }
 
 @media screen and (min-width: 1024px) {
   .home-cards-row {
     gap: 24px;
+  }
+
+  .home-cards-row .home-card-secondary {
+    height: 200px; /* slightly more breathing room on desktop */
   }
 
   .dashboard-home-stack {
