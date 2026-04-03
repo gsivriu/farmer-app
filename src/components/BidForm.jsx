@@ -143,18 +143,31 @@ export default function BidForm({ onBidCreated, embedded = false }) {
     if (onBidCreated) onBidCreated();
   };
 
+  const qtyInvalid = !!error && error.includes("quantity");
+  const priceInvalid = !!error && error.includes("price");
+  const dateInvalid = !!error && error.includes("date");
+
   const content = (
     <>
       <h2>Place a bid</h2>
 
-      {message && <p className="badge accepted">{message}</p>}
-      {error && <p className="badge rejected">{error}</p>}
+      {message && (
+        <p className="bid-form-feedback bid-feedback-success" role="status">
+          {message}
+        </p>
+      )}
+      {error && (
+        <p className="bid-form-feedback bid-feedback-error" role="alert" id="bid-form-error">
+          {error}
+        </p>
+      )}
 
-      <form className="form" onSubmit={handleSubmit}>
+      <form className="form" onSubmit={handleSubmit} autoComplete="off" noValidate>
         {/* PRODUCT */}
         <div className="bid-input-container">
-          <label className="bid-input-label">Product</label>
+          <label className="bid-input-label" htmlFor="bid-product">Product</label>
           <select
+            id="bid-product"
             className="bid-input-field"
             value={product}
             onChange={(e) => setProduct(e.target.value)}
@@ -170,12 +183,18 @@ export default function BidForm({ onBidCreated, embedded = false }) {
         {/* QUANTITY + TOLERANCE */}
         <div className="bid-form-grid-2">
           <div className="bid-input-container">
-            <label className="bid-input-label">Quantity (t)</label>
+            <label className="bid-input-label" htmlFor="bid-quantity">Quantity (t)</label>
             <input
+              id="bid-quantity"
               className="bid-input-field"
               type="number"
+              inputMode="decimal"
               min="0"
               step="0.01"
+              required
+              aria-required="true"
+              aria-invalid={qtyInvalid || undefined}
+              aria-describedby={qtyInvalid ? "bid-form-error" : undefined}
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
               placeholder="ex: 100"
@@ -183,10 +202,12 @@ export default function BidForm({ onBidCreated, embedded = false }) {
           </div>
 
           <div className="bid-input-container">
-            <label className="bid-input-label">Tolerance (%)</label>
+            <label className="bid-input-label" htmlFor="bid-tolerance">Tolerance (%)</label>
             <input
+              id="bid-tolerance"
               className="bid-input-field"
               type="number"
+              inputMode="numeric"
               min="0"
               max="100"
               step="1"
@@ -200,12 +221,18 @@ export default function BidForm({ onBidCreated, embedded = false }) {
         {/* PRICE + CURRENCY */}
         <div className="bid-form-grid-2">
           <div className="bid-input-container">
-            <label className="bid-input-label">Price (/t)</label>
+            <label className="bid-input-label" htmlFor="bid-price">Price (/t)</label>
             <input
+              id="bid-price"
               className="bid-input-field"
               type="number"
+              inputMode="decimal"
               min="0"
               step="0.5"
+              required
+              aria-required="true"
+              aria-invalid={priceInvalid || undefined}
+              aria-describedby={priceInvalid ? "bid-form-error" : undefined}
               value={price}
               onChange={(e) => setPrice(e.target.value)}
               placeholder="ex: 200"
@@ -213,8 +240,9 @@ export default function BidForm({ onBidCreated, embedded = false }) {
           </div>
 
           <div className="bid-input-container">
-            <label className="bid-input-label">Currency</label>
+            <label className="bid-input-label" htmlFor="bid-currency">Currency</label>
             <select
+              id="bid-currency"
               className="bid-input-field"
               value={currency}
               onChange={(e) => setCurrency(e.target.value)}
@@ -229,8 +257,9 @@ export default function BidForm({ onBidCreated, embedded = false }) {
         {/* PARITY + LOCATION */}
         <div className="bid-form-grid-2">
           <div className="bid-input-container">
-            <label className="bid-input-label">Parity</label>
+            <label className="bid-input-label" htmlFor="bid-parity">Parity</label>
             <select
+              id="bid-parity"
               className="bid-input-field"
               value={parity}
               onChange={(e) => setParity(e.target.value)}
@@ -245,8 +274,9 @@ export default function BidForm({ onBidCreated, embedded = false }) {
 
           {!isFreightParity(parity) && (
             <div className="bid-input-container">
-              <label className="bid-input-label">Delivery location</label>
+              <label className="bid-input-label" htmlFor="bid-location">Delivery location</label>
               <select
+                id="bid-location"
                 className="bid-input-field"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
@@ -267,8 +297,9 @@ export default function BidForm({ onBidCreated, embedded = false }) {
         {isFreightParity(parity) && (
           <div className="bid-form-grid-2">
             <div className="bid-input-container">
-              <label className="bid-input-label">Loading location</label>
+              <label className="bid-input-label" htmlFor="bid-loading-location">Loading location</label>
               <input
+                id="bid-loading-location"
                 className="bid-input-field"
                 type="text"
                 value={loadingLocation}
@@ -282,8 +313,9 @@ export default function BidForm({ onBidCreated, embedded = false }) {
         {/* DELIVERY DATES - NATIVE, MOBILE SAFE */}
         <div className="bid-form-grid-2">
           <div className="bid-input-container">
-            <label className="bid-input-label">Delivery start</label>
+            <label className="bid-input-label" htmlFor="bid-delivery-start">Delivery start</label>
             <input
+              id="bid-delivery-start"
               type="date"
               className="bid-input-field"
               value={deliveryStart}
@@ -292,10 +324,13 @@ export default function BidForm({ onBidCreated, embedded = false }) {
           </div>
 
           <div className="bid-input-container">
-            <label className="bid-input-label">Delivery end</label>
+            <label className="bid-input-label" htmlFor="bid-delivery-end">Delivery end</label>
             <input
+              id="bid-delivery-end"
               type="date"
               className="bid-input-field"
+              aria-invalid={dateInvalid || undefined}
+              aria-describedby={dateInvalid ? "bid-form-error" : undefined}
               value={deliveryEnd}
               onChange={(e) => setDeliveryEnd(e.target.value)}
             />
@@ -304,8 +339,9 @@ export default function BidForm({ onBidCreated, embedded = false }) {
 
         {/* CROP YEAR */}
         <div className="bid-input-container">
-          <label className="bid-input-label">Crop year</label>
+          <label className="bid-input-label" htmlFor="bid-crop-year">Crop year</label>
           <select
+            id="bid-crop-year"
             className="bid-input-field"
             value={cropYear}
             onChange={(e) => setCropYear(e.target.value)}
@@ -318,8 +354,9 @@ export default function BidForm({ onBidCreated, embedded = false }) {
 
         {/* REMARKS */}
         <div className="bid-input-container">
-          <label className="bid-input-label">Remarks (optional)</label>
+          <label className="bid-input-label" htmlFor="bid-remarks">Remarks (optional)</label>
           <textarea
+            id="bid-remarks"
             className="bid-input-field"
             rows={2}
             value={remarks}
@@ -332,6 +369,7 @@ export default function BidForm({ onBidCreated, embedded = false }) {
           className="btn primary-btn full-width bid-submit-btn"
           type="submit"
           disabled={loading}
+          aria-disabled={loading}
         >
           {loading ? "Submitting..." : "Submit bid"}
         </button>

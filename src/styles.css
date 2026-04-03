@@ -1232,11 +1232,24 @@ select.bid-input-field {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238b8e98' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+}
+
+.theme-dark select.bid-input-field {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%239aa3b2' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
 }
 
 .bid-input-field:focus {
   background-color: #f2f2f2;
-  border-color: #e4e4e4;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(185, 16, 30, 0.12);
+  outline: none;
+}
+
+.bid-input-field:focus:not(:focus-visible) {
   box-shadow: none;
 }
 
@@ -1252,7 +1265,12 @@ select.bid-input-field {
 
 .theme-dark .bid-input-field:focus {
   background-color: #111827;
-  border-color: #263143;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.18);
+  outline: none;
+}
+
+.theme-dark .bid-input-field:focus:not(:focus-visible) {
   box-shadow: none;
 }
 
@@ -1316,6 +1334,52 @@ select.input:focus {
 
 .bid-form-card .form {
   gap: 10px;
+}
+
+/* Invalid field state */
+.bid-input-field[aria-invalid="true"] {
+  border-color: #dc2626;
+}
+
+.bid-input-field[aria-invalid="true"]:focus {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+}
+
+/* Form feedback messages */
+.bid-form-feedback {
+  display: block;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: normal;
+  margin-bottom: 4px;
+}
+
+.bid-feedback-success {
+  background-color: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #6ee7b7;
+}
+
+.bid-feedback-error {
+  background-color: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+
+.theme-dark .bid-feedback-success {
+  background-color: rgba(16, 185, 129, 0.12);
+  color: #6ee7b7;
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.theme-dark .bid-feedback-error {
+  background-color: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.2);
 }
 
 /* =========================
@@ -2609,6 +2673,7 @@ select.input:focus {
   background: var(--brand) !important;
   color: #ffffff !important;
   border-color: var(--brand) !important;
+  min-height: 48px;
 }
 
 .bid-submit-btn:hover {
