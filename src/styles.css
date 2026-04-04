@@ -1786,10 +1786,10 @@ select.input:focus {
   gap: var(--sp-4);
 }
 
-/* Desktop: 2-column card grid — clean, enterprise layout */
+/* Desktop: single column — cards stacked vertically */
 @media (min-width: 1024px) {
   .bid-list {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
     gap: var(--sp-5);
   }
 }
