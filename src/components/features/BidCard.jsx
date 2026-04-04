@@ -80,11 +80,12 @@ export default function BidCard({ bid, onClick, onAccept, onReject, onCounter })
         {/* Row 1: Commodity | Status */}
         <div className="bc-field">
           <span className="bc-label">Commodity</span>
-          <span className="bc-val" style={{ color: style.productColor }}>
+          <span className="bc-val bc-val-product">
             {getProductLabelSafe(bid.product)}
           </span>
         </div>
         <div className="bc-field bc-field-right bc-field-status">
+          <span className="bc-label bc-label-status">Status</span>
           <span
             className="bc-badge"
             style={{ background: style.badgeBg, color: style.badgeText }}

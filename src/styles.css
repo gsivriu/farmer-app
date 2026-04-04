@@ -2071,14 +2071,15 @@ select.input:focus {
 .theme-dark .bid-card-timestamp { color: #4b5563; }
 
 /* ── BidCard inner layout (bc-* namespace) ───────────────────
-   Body: 2-column grid (4 rows) + action bar footer
-   Typography matches farmer bid-card-* conventions.
+   Desktop: 2-column grid (4 rows) + centered action bar
+   Mobile:  single column, stacked rows (≤640px)
    ────────────────────────────────────────────────────────── */
 
-/* Body grid */
+/* Body grid — desktop default */
 .bc-body {
   display: grid;
   grid-template-columns: 1fr 1fr;
+  column-gap: 20px;
 }
 
 /* Each cell — label left, value right */
@@ -2086,21 +2087,25 @@ select.input:focus {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 9px 16px 9px 20px;
+  padding: 9px 12px 9px 20px;
   border-top: 1px solid var(--color-border-medium);
   gap: 10px;
   min-height: 36px;
 }
 
+/* Right-column cells — no divider, pad symmetrically */
 .bc-field-right {
-  padding-left: 14px;
+  padding-left: 0;
   padding-right: 20px;
-  border-left: 1px solid var(--color-border-medium);
 }
 
-/* Status cell — badge only, no label */
+/* Status cell — badge right-aligned on desktop, hidden label */
 .bc-field-status {
-  justify-content: flex-start;
+  justify-content: flex-end;
+}
+
+.bc-label-status {
+  display: none;
 }
 
 .bc-label {
@@ -2124,6 +2129,11 @@ select.input:focus {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Commodity value — black bold, same weight as farmer/price */
+.bc-val-product {
+  font-weight: 700;
 }
 
 .bc-val-price {
@@ -2153,19 +2163,19 @@ select.input:focus {
   white-space: nowrap;
 }
 
-/* Action bar — full-width footer, buttons right-aligned */
+/* Action bar — centered buttons */
 .bc-actions-bar {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   padding: 10px 16px;
   border-top: 1px solid var(--color-border-medium);
 }
 
 /* Action buttons */
 .bc-btn {
-  padding: 5px 12px;
+  padding: 6px 16px;
   border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
@@ -2197,9 +2207,30 @@ select.input:focus {
   border-color: #93c5fd;
 }
 
+/* ── Mobile: single-column stack (≤640px) ────────────────── */
+@media (max-width: 640px) {
+  .bc-body {
+    grid-template-columns: 1fr;
+    column-gap: 0;
+  }
+
+  .bc-field-right {
+    padding-left: 20px;
+    padding-right: 16px;
+  }
+
+  /* Status cell: show label, space-between like other rows */
+  .bc-field-status {
+    justify-content: space-between;
+  }
+
+  .bc-label-status {
+    display: inline;
+  }
+}
+
 /* Dark mode */
 .theme-dark .bc-field { border-top-color: #1f2937; }
-.theme-dark .bc-field-right { border-left-color: #1f2937; }
 .theme-dark .bc-label { color: #9ca3af; }
 .theme-dark .bc-val { color: #e2e8f0; }
 .theme-dark .bc-val-unit { color: #6b7280; }
