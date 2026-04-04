@@ -3,7 +3,59 @@
    8pt spacing grid | token-driven | mobile-first
    ══════════════════════════════════════════════════════════ */
 
-/* ── Home: Exchange + Weather ────────────────────────────── */
+/* ── Home: Prices & Futures cards ───────────────────────── */
+.home-card-prices,
+.home-card-futures {
+  border-radius: 16px;
+  padding: 20px 24px;
+  background: #ffffff;
+  border: 1px solid var(--glass-border);
+  box-sizing: border-box;
+}
+
+.theme-dark .home-card-prices,
+.theme-dark .home-card-futures {
+  background: #111827;
+  border-color: #1f2937;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Strip inner market-card double-card visual */
+.home-card-prices .market-card {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+/* Prices grid: compact rows, 2-col on mobile */
+.home-card-prices .market-grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 6px;
+}
+
+@media (max-width: 599px) {
+  .home-card-prices .market-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+  }
+
+  .home-card-prices .market-item {
+    padding: 8px 10px 12px;
+  }
+}
+
+/* Futures card — strip inner card margins */
+.home-card-futures .market-ticker {
+  margin: 0;
+}
+
+.home-card-futures .market-card {
+  margin: 0;
+}
+
+/* ── Home: Exchange + Weather row ────────────────────────── */
 /* Mobile: stacked vertically — no overlap, full readability  */
 .home-cards-row {
   display: flex;
@@ -81,6 +133,37 @@
   color: var(--color-text-2);
 }
 
+/* ── Home: Compact gamification on mobile ────────────────── */
+/* Force 3-col reward grid inside home-card-primary (overrides
+   the global 1-col rule at max-width: 650px) */
+.home-card-primary .reward-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 599px) {
+  .home-card-primary .reward-card {
+    padding: 10px 8px;
+  }
+
+  .home-card-primary .reward-title {
+    font-size: 13px;
+  }
+
+  .home-card-primary .reward-card .small-text {
+    font-size: 10px;
+    line-height: 1.3;
+  }
+
+  .home-card-primary .lock-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .home-card-primary .progress-meta {
+    font-size: 13px;
+  }
+}
+
 /* ── Desktop: Home stack ─────────────────────────────────── */
 @media screen and (min-width: 1024px) {
   .home-cards-row {
@@ -127,38 +210,61 @@
     border-color: var(--color-border) !important;
     box-shadow: var(--shadow-lg) !important;
   }
+
+  /* Prices & Futures larger padding on desktop */
+  .home-card-prices,
+  .home-card-futures {
+    padding: 24px;
+  }
+
+  /* Nested card components - remove redundant card styling when inside grid cards */
+  .home-card-secondary .exchange-card {
+    margin: 0;
+    border: none;
+    box-shadow: none;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    width: 100%;
+  }
+
+  .theme-dark .home-card-secondary .exchange-card {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+  }
+
+  .home-card-secondary .weather-card {
+    margin: 0;
+    border-radius: 12px;
+  }
+
+  /* Market ticker adjustments inside futures card */
+  .home-card-futures .market-ticker {
+    margin: 0;
+  }
+
+  .home-card-futures .market-card {
+    margin: 0;
+  }
 }
 
-/* ── Sale Tab: two-column on desktop ─────────────────────── */
-.sale-layout {
+/* ── Sale Tab: form-only layout ──────────────────────────── */
+.sale-form-only {
   display: flex;
-  flex-direction: column;
-  gap: var(--sp-4);
+  justify-content: center;
   width: 100%;
 }
 
-/* Mobile: bid form stacks above prices for action-first UX */
-.sale-form-pane {
-  order: -1;
+.sale-form-only .sale-form-pane {
+  width: 100%;
+  order: 0;
 }
 
 @media (min-width: 1024px) {
-  .sale-layout {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--sp-6);
-    align-items: start;
-  }
-
-  /* Desktop: prices left, bid form right — canonical reading order */
-  .sale-prices-pane {
-    order: 0;
-  }
-
-  .sale-form-pane {
-    order: 1;
-    position: sticky;
-    top: var(--sp-6);
+  .sale-form-only .sale-form-pane {
+    max-width: 680px;
+    position: static;
   }
 }
 
