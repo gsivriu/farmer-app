@@ -1816,26 +1816,25 @@ select.input:focus {
 }
 
 /* ── Bid card inner layout — uniform B2B data rows ──────── */
-/* Header: title left, badge right — same padding-right as data rows
-   so badge right edge aligns with values (199 EUR/t etc.) */
+/* Header: title left, badge absolute top-right.
+   position:relative on header + position:absolute on badge
+   guarantees badge is pinned to same right edge as data values. */
 .bid-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  position: relative;
   padding: 12px var(--sp-5) 10px var(--sp-5);
-  gap: var(--sp-3);
 }
 
 .bid-card-header-main {
-  flex: 1;
-  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
+  padding-right: 90px; /* clear space for badge */
 }
 
 .bid-card-header-badge {
-  flex-shrink: 0;
+  position: absolute;
+  top: 12px;
+  right: var(--sp-5); /* same as data row padding-right */
   display: flex;
   flex-direction: column;
   align-items: flex-end;
