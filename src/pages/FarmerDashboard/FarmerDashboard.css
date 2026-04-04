@@ -137,34 +137,43 @@
   color: var(--color-text-2);
 }
 
-/* ── Home: Compact gamification on mobile ────────────────── */
-/* Force 3-col reward grid inside home-card-primary (overrides
-   the global 1-col rule at max-width: 650px) */
+/* ── Home: Compact gamification — always 3 cols ─────────── */
+/* Overrides the global 1-col / 2-col rules in styles.css   */
 .home-card-primary .reward-grid {
   grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
 }
 
-@media (max-width: 599px) {
+/* Mobile: hide description text so titles + icons fit cleanly
+   in the narrow 3-column layout without wrapping             */
+@media (max-width: 767px) {
   .home-card-primary .reward-card {
-    padding: 10px 8px;
-  }
-
-  .home-card-primary .reward-title {
-    font-size: 13px;
+    padding: 12px 10px;
   }
 
   .home-card-primary .reward-card .small-text {
-    font-size: 10px;
-    line-height: 1.3;
+    display: none;
+  }
+
+  .home-card-primary .reward-title {
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
   }
 
   .home-card-primary .lock-icon {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+
+  .home-card-primary .reward-top {
+    align-items: center;
+    gap: 4px;
   }
 
   .home-card-primary .progress-meta {
-    font-size: 13px;
+    font-size: 14px;
   }
 }
 
