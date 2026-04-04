@@ -1824,29 +1824,30 @@ select.input:focus {
 }
 
 /* ── Bid card inner layout — uniform B2B data rows ──────── */
-/* Header: title left, badge absolute top-right.
-   position:relative on header + position:absolute on badge
-   guarantees badge is pinned to same right edge as data values. */
+/* Header: same grid as data rows.
+   col 1 = 1fr (title + subtitle), col 2 = auto (badge).
+   Same padding as data rows → badge right edge aligns with values. */
 .bid-card-header {
-  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
   padding: 12px var(--sp-5) 10px var(--sp-5);
+  gap: var(--sp-3);
 }
 
 .bid-card-header-main {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding-right: 90px; /* clear space for badge */
+  min-width: 0;
 }
 
 .bid-card-header-badge {
-  position: absolute;
-  top: 12px;
-  right: var(--sp-5); /* same as data row padding-right */
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 4px;
+  padding-top: 1px;
 }
 
 .bid-card-title {
