@@ -1818,10 +1818,9 @@ select.input:focus {
 /* ── Bid card inner layout — uniform B2B data rows ──────── */
 .bid-card-header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  flex-direction: column;
   padding: var(--sp-4) var(--sp-4) var(--sp-3) var(--sp-5);
-  gap: var(--sp-3);
+  gap: 2px;
 }
 
 .bid-card-title {
@@ -1870,6 +1869,7 @@ select.input:focus {
 
 /* One value style for ALL rows — weight 600, size 14px, right-aligned */
 .bid-card-value {
+  flex: 1;
   font-size: var(--text-sm);
   font-weight: 600;
   color: var(--color-text-1);
@@ -1900,21 +1900,29 @@ select.input:focus {
   color: var(--color-text-1);
 }
 
-/* "View details ›" — minimal tap affordance */
+/* Footer — always at bottom: status badge left, view details right */
+.bid-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--sp-2) var(--sp-4) var(--sp-3) var(--sp-5);
+  border-top: 1px solid var(--color-border);
+  gap: var(--sp-3);
+  min-height: 40px;
+}
+
+.bid-card-footer-left {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+
+/* "View details ›" — always top-right of footer */
 .bid-card-hint {
   font-size: var(--text-2xs);
   color: var(--color-text-3);
-  padding: var(--sp-2) var(--sp-4) var(--sp-3) var(--sp-4);
-  border-top: 1px solid var(--color-border);
-  text-align: right;
-}
-
-/* Bid card header right — status + action chip */
-.bid-card-header-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 5px;
+  white-space: nowrap;
   flex-shrink: 0;
 }
 
@@ -1946,7 +1954,8 @@ select.input:focus {
 .theme-dark .bid-card-row { border-top-color: var(--color-border); }
 .theme-dark .bid-card-label { color: var(--color-text-3); }
 .theme-dark .bid-card-value { color: var(--color-text-1); }
-.theme-dark .bid-card-hint { border-top-color: var(--color-border); color: var(--color-text-4); }
+.theme-dark .bid-card-footer { border-top-color: var(--color-border); }
+.theme-dark .bid-card-hint { color: var(--color-text-4); }
 .theme-dark .bid-card-counter-value { color: var(--color-error-text); }
 
 /* ── BidCard standalone component (features/BidCard.jsx) ──── */

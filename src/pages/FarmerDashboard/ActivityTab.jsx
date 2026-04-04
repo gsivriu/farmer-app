@@ -361,20 +361,10 @@ export default function ActivityTab() {
                         }}
                       >
                         <div className="bid-card-header">
-                          <div>
-                            <div className="bid-card-title">{getProductLabelSafe(b.product)}</div>
-                            {b.status === "accepted" && b.contract_no && (
-                              <div className="bid-card-subtitle">Contract: {b.contract_no}</div>
-                            )}
-                          </div>
-                          <div className="bid-card-header-right">
-                            {b.status === "countered" && (
-                              <span className="bid-action-required-chip">Action required</span>
-                            )}
-                            <span className={`status-badge status-${statusClass.slice(3)}`}>
-                              {statusLabel}
-                            </span>
-                          </div>
+                          <div className="bid-card-title">{getProductLabelSafe(b.product)}</div>
+                          {b.status === "accepted" && b.contract_no && (
+                            <div className="bid-card-subtitle">Contract: {b.contract_no}</div>
+                          )}
                         </div>
 
                         <div className="bid-card-section-label">Details</div>
@@ -398,7 +388,17 @@ export default function ActivityTab() {
                           <span className="bid-card-value">{formatDateOnly(b.created_at)}</span>
                         </div>
 
-                        <div className="bid-card-hint">View details ›</div>
+                        <div className="bid-card-footer">
+                          <div className="bid-card-footer-left">
+                            <span className={`status-badge status-${statusClass.slice(3)}`}>
+                              {statusLabel}
+                            </span>
+                            {b.status === "countered" && (
+                              <span className="bid-action-required-chip">Action required</span>
+                            )}
+                          </div>
+                          <span className="bid-card-hint">View details ›</span>
+                        </div>
                       </div>
                     );
                   })}
