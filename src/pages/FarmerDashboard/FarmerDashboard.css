@@ -1,8 +1,13 @@
-/* Exchange + Weather side-by-side — applies on all screen sizes */
+/* ══════════════════════════════════════════════════════════
+   FarmerDashboard layout — premium enterprise grid
+   8pt spacing grid | token-driven | mobile-first
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Home: Exchange + Weather side-by-side ───────────────── */
 .home-cards-row {
   display: flex;
   flex-direction: row;
-  gap: 16px;
+  gap: var(--sp-4);
   width: 100%;
   align-items: stretch;
 }
@@ -23,41 +28,41 @@
   min-height: 0;
   margin: 0;
   box-sizing: border-box;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
 }
 
-/* ── Dark mode: card background ── */
+/* ── Dark mode: card background ─────────────────────────── */
 .theme-dark .home-cards-row .home-card-secondary {
-  background: #111827;
-  border-color: #1f2937;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  box-shadow: var(--shadow-md);
 }
 
-/* ── Dark mode: Exchange text colors ── */
+/* ── Dark mode: Exchange text colors ─────────────────────── */
 .theme-dark .home-cards-row .exchange-section .exchange-title {
-  color: #f3f4f6;
+  color: var(--color-text-1);
 }
 
 .theme-dark .home-cards-row .exchange-section .exchange-updated {
-  color: #6b7280;
+  color: var(--color-text-3);
 }
 
 .theme-dark .home-cards-row .exchange-section .exchange-row {
-  color: #d1d5db;
-  border-color: rgba(255, 255, 255, 0.07);
+  color: var(--color-text-2);
+  border-color: var(--color-border);
 }
 
 .theme-dark .home-cards-row .exchange-section .exchange-pair {
-  color: #9ca3af;
+  color: var(--color-text-2);
 }
 
 .theme-dark .home-cards-row .exchange-section .exchange-value {
-  color: #f9fafb;
+  color: var(--color-text-1);
 }
 
 .theme-dark .home-cards-row .exchange-section .exchange-calc-btn {
-  border-color: rgba(255, 255, 255, 0.12);
-  color: #9ca3af;
+  border-color: var(--color-border-medium);
+  color: var(--color-text-2);
 }
 
 .theme-dark .home-cards-row .exchange-section .exchange-calc-btn:hover {
@@ -65,12 +70,13 @@
 }
 
 .theme-dark .home-cards-row .exchange-section .exchange-calc-btn svg {
-  color: #9ca3af;
+  color: var(--color-text-2);
 }
 
+/* ── Desktop: Home stack ─────────────────────────────────── */
 @media screen and (min-width: 1024px) {
   .home-cards-row {
-    gap: 24px;
+    gap: var(--sp-6);
   }
 
   .home-cards-row .home-card-secondary {
@@ -81,7 +87,7 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    gap: 32px;
+    gap: var(--sp-8);
   }
 
   .dashboard-home-stack .card {
@@ -89,7 +95,7 @@
   }
 
   .home-card-primary {
-    padding-bottom: 12px;
+    padding-bottom: var(--sp-3);
   }
 
   .dashboard-home-stack .progress-card {
@@ -97,12 +103,11 @@
   }
 
   .dashboard-home-stack .exchange-card {
-    border-radius: 24px !important;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
-      0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
-    border: 1px solid #e2e8f0 !important;
-    padding: 24px !important;
-    background-color: #ffffff !important;
+    border-radius: var(--radius-xl) !important;
+    box-shadow: var(--shadow-md) !important;
+    border: 1px solid var(--color-border) !important;
+    padding: var(--sp-6) !important;
+    background-color: var(--color-surface) !important;
     width: 100%;
     box-sizing: border-box;
     margin-top: 0 !important;
@@ -110,12 +115,46 @@
   }
 
   .theme-dark .dashboard-home-stack .exchange-card {
-    background-color: #0f172a !important;
-    border-color: #1f2937 !important;
-    box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.55) !important;
+    background-color: var(--color-surface) !important;
+    border-color: var(--color-border) !important;
+    box-shadow: var(--shadow-lg) !important;
   }
 }
 
+/* ── Sale Tab: two-column on desktop ─────────────────────── */
+.sale-layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  width: 100%;
+}
+
+/* Mobile: bid form stacks above prices for action-first UX */
+.sale-form-pane {
+  order: -1;
+}
+
+@media (min-width: 1024px) {
+  .sale-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-6);
+    align-items: start;
+  }
+
+  /* Desktop: prices left, bid form right — canonical reading order */
+  .sale-prices-pane {
+    order: 0;
+  }
+
+  .sale-form-pane {
+    order: 1;
+    position: sticky;
+    top: var(--sp-6);
+  }
+}
+
+/* ── Active tab fix ──────────────────────────────────────── */
 .tab-content.active .bid-details .bid-field,
 .tab-content.active .bid-details-compact .bid-field {
   gap: 2px !important;

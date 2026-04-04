@@ -7,13 +7,17 @@ export default function SaleTab() {
   const { commodities, fetchBids } = useAppContext();
 
   return (
-    <div className="dashboard-row full">
-      <div className="card dashboard-card sale-card">
+    <div className="sale-layout">
+      {/* Left pane: live prices + silo reference */}
+      <div className="card dashboard-card sale-card sale-prices-pane">
         <PricesGrid />
         <div className="section-divider" />
-        <BidForm onBidCreated={fetchBids} embedded />
-        <div className="section-divider" />
         <SiloPriceTable commodities={commodities} readOnly />
+      </div>
+
+      {/* Right pane: bid form — always accessible */}
+      <div className="card dashboard-card sale-card sale-form-pane">
+        <BidForm onBidCreated={fetchBids} embedded />
       </div>
     </div>
   );
