@@ -1816,36 +1816,45 @@ select.input:focus {
 }
 
 /* ── Bid card inner layout — uniform B2B data rows ──────── */
-/* Header: product name left, status badge right — always same row */
+/* Header: same grid as data rows — badge always column 2, row 1.
+   Independent of whether subtitle exists (no vertical drift). */
 .bid-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: var(--sp-4) var(--sp-4) var(--sp-3) var(--sp-5);
-  gap: var(--sp-3);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  align-items: center;
+  padding: 12px var(--sp-5) 10px var(--sp-5);
+  gap: 0 var(--sp-4);
 }
 
+/* .bid-card-header-main is no longer needed — title/subtitle go directly */
 .bid-card-header-main {
-  flex: 1;
-  min-width: 0;
-}
-
-.bid-card-header-badge {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
+  display: contents; /* transparent — children placed in grid directly */
 }
 
 .bid-card-title {
+  grid-column: 1;
+  grid-row: 1;
   font-weight: 700;
   font-size: var(--text-base);
   color: var(--color-text-1);
   line-height: 1.3;
+  align-self: center;
+}
+
+.bid-card-header-badge {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  justify-self: end;
 }
 
 .bid-card-subtitle {
+  grid-column: 1;
+  grid-row: 2;
   font-size: var(--text-2xs);
   color: var(--color-text-3);
   margin-top: 2px;
@@ -1871,7 +1880,7 @@ select.input:focus {
   grid-template-columns: max-content 1fr;
   align-items: center;
   padding: 0 var(--sp-5) 0 var(--sp-5);
-  min-height: 44px;
+  min-height: 32px;
   border-top: 1px solid var(--color-border-medium);
   gap: var(--sp-4);
   width: 100%;
@@ -1923,9 +1932,9 @@ select.input:focus {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  padding: var(--sp-2) var(--sp-4) var(--sp-3) var(--sp-5);
+  padding: 6px var(--sp-5) 8px var(--sp-5);
   border-top: 1px solid var(--color-border);
-  min-height: 36px;
+  min-height: 28px;
 }
 
 /* "View details ›" */
