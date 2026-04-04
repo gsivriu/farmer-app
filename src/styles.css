@@ -1862,34 +1862,37 @@ select.input:focus {
   border: none;
 }
 
-/* ── All data rows — absolutely uniform. No exceptions. ─────
-   Hierarchy = weight + color only. Never size inflation.
+/* ── All data rows — two-column grid: label left, value right ─
+   Grid guarantees values snap to the same right column edge,
+   regardless of label or value text length.
    ─────────────────────────────────────────────────────────── */
 .bid-card-row {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: max-content 1fr;
   align-items: center;
-  padding: 0 var(--sp-4) 0 var(--sp-5);
+  padding: 0 var(--sp-5) 0 var(--sp-5);
   min-height: 44px;
   border-top: 1px solid var(--color-border-medium);
-  gap: var(--sp-3);
+  gap: var(--sp-4);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .bid-card-label {
   font-size: var(--text-xs);
   color: var(--color-text-2);
   font-weight: 400;
-  flex-shrink: 0;
+  white-space: nowrap;
 }
 
-/* One value style for ALL rows — weight 600, size 14px, right-aligned */
+/* Value always flush to right edge of the card */
 .bid-card-value {
-  flex: 1;
   font-size: var(--text-sm);
   font-weight: 600;
   color: var(--color-text-1);
   text-align: right;
   font-variant-numeric: tabular-nums;
+  word-break: break-word;
 }
 
 .bid-card-counter-value {
