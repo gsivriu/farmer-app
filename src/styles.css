@@ -1816,16 +1816,30 @@ select.input:focus {
 }
 
 /* ── Bid card inner layout — uniform B2B data rows ──────── */
-/* Header: product name only — no badge. Clean left column. */
+/* Header: title left, badge right — same padding-right as data rows
+   so badge right edge aligns with values (199 EUR/t etc.) */
 .bid-card-header {
   display: flex;
-  flex-direction: column;
-  padding: 12px var(--sp-5) 8px var(--sp-5);
-  gap: 2px;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px var(--sp-5) 10px var(--sp-5);
+  gap: var(--sp-3);
 }
 
 .bid-card-header-main {
-  display: contents;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bid-card-header-badge {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
 }
 
 .bid-card-title {
@@ -1838,21 +1852,6 @@ select.input:focus {
 .bid-card-subtitle {
   font-size: var(--text-2xs);
   color: var(--color-text-3);
-}
-
-/* Badge row: sits between header and price row.
-   Same padding-right as data rows — badge edge aligns with values. */
-.bid-card-badge-row {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: var(--sp-2);
-  padding: 6px var(--sp-5) 8px var(--sp-5);
-  border-top: 1px solid var(--color-border-medium);
-}
-
-.bid-card-header-badge {
-  display: none; /* no longer used */
 }
 
 /* "DETAILS" label — eliminated visually. Rows follow header directly. */
