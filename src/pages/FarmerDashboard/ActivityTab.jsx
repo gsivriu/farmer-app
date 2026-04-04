@@ -368,9 +368,6 @@ export default function ActivityTab() {
                             )}
                           </div>
                           <div className="bid-card-header-badge">
-                            {b.status === "countered" && (
-                              <span className="bid-action-required-chip">Action required</span>
-                            )}
                             <span className={`status-badge status-${statusClass.slice(3)}`}>
                               {statusLabel}
                             </span>

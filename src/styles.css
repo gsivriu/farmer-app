@@ -2303,7 +2303,6 @@ select.input:focus {
 
 .bid-row.is-countered {
   border-color: #fde68a;
-  background: #fffbeb;
 }
 
 .bid-row.is-accepted::before,
