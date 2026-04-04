@@ -74,18 +74,11 @@ export default function BidCard({ bid, onClick, onAccept, onReject, onCounter })
       }}
     >
 
-      {/* ── Body: 2-column grid ── */}
+      {/* ── Body: single column ── */}
       <div className="bc-body">
 
-        {/* Row 1: Commodity | Status */}
-        <div className="bc-field">
-          <span className="bc-label">Commodity</span>
-          <span className="bc-val bc-val-product">
-            {getProductLabelSafe(bid.product)}
-          </span>
-        </div>
-        <div className="bc-field bc-field-right bc-field-status">
-          <span className="bc-label bc-label-status">Status</span>
+        <div className="bc-field bc-field-status">
+          <span className="bc-label">Status</span>
           <span
             className="bc-badge"
             style={{ background: style.badgeBg, color: style.badgeText }}
@@ -94,17 +87,23 @@ export default function BidCard({ bid, onClick, onAccept, onReject, onCounter })
           </span>
         </div>
 
-        {/* Row 2: Farmer | Offer date */}
+        <div className="bc-field">
+          <span className="bc-label">Commodity</span>
+          <span className="bc-val bc-val-product">
+            {getProductLabelSafe(bid.product)}
+          </span>
+        </div>
+
         <div className="bc-field">
           <span className="bc-label">Farmer</span>
           <span className="bc-val bc-val-truncate">{bid.farmer_email || bid.farmer_id || "-"}</span>
         </div>
-        <div className="bc-field bc-field-right">
+
+        <div className="bc-field">
           <span className="bc-label">Offer date</span>
           <span className="bc-val">{formatDateTime(bid.created_at)}</span>
         </div>
 
-        {/* Row 3: Price | Delivery period */}
         <div className="bc-field">
           <span className="bc-label">Price</span>
           <span className={`bc-val bc-val-price${isCounter ? " bc-val-counter" : ""}`}>
@@ -112,17 +111,18 @@ export default function BidCard({ bid, onClick, onAccept, onReject, onCounter })
             <span className="bc-val-unit">{unit}</span>
           </span>
         </div>
-        <div className="bc-field bc-field-right">
+
+        <div className="bc-field">
           <span className="bc-label">Delivery</span>
           <span className="bc-val">{formatDeliveryRange(bid.delivery_start, bid.delivery_end)}</span>
         </div>
 
-        {/* Row 4: Parity | Crop year */}
         <div className="bc-field">
           <span className="bc-label">Parity</span>
           <span className="bc-val">{parityDisplay}</span>
         </div>
-        <div className="bc-field bc-field-right">
+
+        <div className="bc-field">
           <span className="bc-label">Crop year</span>
           <span className="bc-val">{bid.crop_year || "-"}</span>
         </div>

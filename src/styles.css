@@ -2071,41 +2071,23 @@ select.input:focus {
 .theme-dark .bid-card-timestamp { color: #4b5563; }
 
 /* ── BidCard inner layout (bc-* namespace) ───────────────────
-   Desktop: 2-column grid (4 rows) + centered action bar
-   Mobile:  single column, stacked rows (≤640px)
+   Single-column stacked rows on all screen sizes.
    ────────────────────────────────────────────────────────── */
 
-/* Body grid — desktop default */
 .bc-body {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  column-gap: 20px;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Each cell — label left, value right */
+/* Each row — label left, value right */
 .bc-field {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 9px 12px 9px 20px;
+  padding: 9px 20px;
   border-top: 1px solid var(--color-border-medium);
-  gap: 10px;
+  gap: 12px;
   min-height: 36px;
-}
-
-/* Right-column cells — no divider, pad symmetrically */
-.bc-field-right {
-  padding-left: 0;
-  padding-right: 20px;
-}
-
-/* Status cell — badge right-aligned on desktop, hidden label */
-.bc-field-status {
-  justify-content: flex-end;
-}
-
-.bc-label-status {
-  display: none;
 }
 
 .bc-label {
@@ -2131,7 +2113,7 @@ select.input:focus {
   white-space: nowrap;
 }
 
-/* Commodity value — black bold, same weight as farmer/price */
+/* Commodity value — bold, same as price */
 .bc-val-product {
   font-weight: 700;
 }
@@ -2205,28 +2187,6 @@ select.input:focus {
   background: #dbeafe;
   color: #1e40af;
   border-color: #93c5fd;
-}
-
-/* ── Mobile: single-column stack (≤640px) ────────────────── */
-@media (max-width: 640px) {
-  .bc-body {
-    grid-template-columns: 1fr;
-    column-gap: 0;
-  }
-
-  .bc-field-right {
-    padding-left: 20px;
-    padding-right: 16px;
-  }
-
-  /* Status cell: show label, space-between like other rows */
-  .bc-field-status {
-    justify-content: space-between;
-  }
-
-  .bc-label-status {
-    display: inline;
-  }
 }
 
 /* Dark mode */
