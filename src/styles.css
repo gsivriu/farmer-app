@@ -416,49 +416,37 @@ body.weather-modal-open {
   color: var(--color-text-1);
 }
 
-/* buttons in top-bar — min 44px touch target (iOS HIG + WCAG 2.5.5) */
-.top-bar button {
-  border-radius: 999px;
-  padding: 0 16px;
-  height: 44px;
-  line-height: 44px;
-  border: 1px solid var(--brand);
-  background: transparent;
-  color: var(--brand);
-  font-size: 13px;
+/* Top-bar action buttons — refined, editorial, not pill-shaped */
+.top-bar .btn.small.outline {
+  height: 32px;
+  padding: 0 var(--sp-3);
+  border-radius: var(--radius-md);
+  border-color: var(--color-border-strong);
+  color: var(--color-text-2);
+  font-size: var(--text-xs);
   font-weight: 500;
-  cursor: pointer;
-  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
-}
-
-.theme-dark .top-bar button {
-  border-color: rgba(255, 255, 255, 0.4);
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.top-bar button:hover {
-  background: rgba(185, 16, 30, 0.08);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
-}
-
-.top-bar .btn.primary-btn,
-.top-bar .btn.outline {
   background: transparent;
-  color: var(--gray);
-  border-color: var(--gray-light);
+  line-height: 32px;
+  transition: background var(--t-base), color var(--t-base);
 }
 
-.theme-dark .top-bar .btn.primary-btn,
-.theme-dark .top-bar .btn.outline {
+.top-bar .btn.small.outline:hover {
+  background: var(--color-canvas-subtle);
+  border-color: var(--color-border-strong);
+  color: var(--color-text-1);
+  transform: none;
+  box-shadow: none;
+}
+
+.theme-dark .top-bar .btn.small.outline {
+  border-color: var(--color-border-medium);
+  color: var(--color-text-2);
   background: transparent;
-  color: #94a3b8;
-  border-color: #1f2937;
 }
 
-.theme-dark .top-bar button:hover {
-  background: rgba(255, 255, 255, 0.2);
+.theme-dark .top-bar .btn.small.outline:hover {
+  background: var(--color-surface-2);
+  color: var(--color-text-1);
 }
 
 /* =========================
@@ -1036,11 +1024,11 @@ label {
 .farmer-dashboard-layout {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: var(--sp-6);
   width: 100%;
   font-family: var(--font-main);
-  font-size: 15px;
-  color: #374151;
+  font-size: var(--text-base);
+  color: var(--color-text-1);
 }
 
 .dashboard-surface .farmer-dashboard-layout .dashboard-card,
@@ -1827,94 +1815,99 @@ select.input:focus {
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
 }
 
-/* ── Bushel-style bid card inner layout ─────────────────── */
+/* ── Bid card inner layout — uniform B2B data rows ──────── */
 .bid-card-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 14px 16px 12px 20px;
-  gap: 10px;
+  padding: var(--sp-4) var(--sp-4) var(--sp-3) var(--sp-5);
+  gap: var(--sp-3);
 }
 
 .bid-card-title {
   font-weight: 700;
-  font-size: 15px;
-  color: #1e293b;
+  font-size: var(--text-base);
+  color: var(--color-text-1);
   line-height: 1.3;
 }
 
 .bid-card-subtitle {
-  font-size: 11px;
-  color: #94a3b8;
+  font-size: var(--text-2xs);
+  color: var(--color-text-3);
   margin-top: 2px;
 }
 
 .bid-card-section-label {
-  font-size: 11px;
+  font-size: var(--text-2xs);
   font-weight: 700;
-  letter-spacing: 0.6px;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
-  color: #94a3b8;
-  padding: 6px 16px 4px 20px;
-  border-top: 1px solid #f1f5f9;
+  color: var(--color-text-3);
+  padding: var(--sp-2) var(--sp-4) var(--sp-1) var(--sp-5);
+  border-top: 1px solid var(--color-border);
 }
 
+/* All data rows share identical rhythm — no dramatic size jumps */
 .bid-card-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 9px 16px 9px 20px;
-  border-top: 1px solid #f1f5f9;
-  gap: 12px;
+  padding: var(--sp-2) var(--sp-4) var(--sp-2) var(--sp-5);
+  border-top: 1px solid var(--color-border);
+  gap: var(--sp-3);
+  min-height: 40px;
 }
 
 .bid-card-label {
-  font-size: 13px;
-  color: #64748b;
+  font-size: var(--text-xs);
+  color: var(--color-text-3);
   font-weight: 400;
   flex-shrink: 0;
 }
 
 .bid-card-value {
-  font-size: 13px;
-  font-weight: 700;
-  color: #1e293b;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-1);
   text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 .bid-card-counter-value {
-  color: #b91c1c;
+  color: var(--color-error);
 }
 
-/* Price row — hero styling, like a stock quote */
+/* Price row — same height as all other rows, distinguished only
+   by weight + tabular-nums — not by size inflation */
 .bid-card-row-price {
-  padding-top: 11px;
-  padding-bottom: 11px;
+  padding-top: var(--sp-2);
+  padding-bottom: var(--sp-2);
 }
 
 .bid-card-row-price .bid-card-label {
-  font-size: 12px;
+  font-size: var(--text-xs);
   font-weight: 500;
-  color: #94a3b8;
+  color: var(--color-text-3);
 }
 
 .bid-card-row-price .bid-card-value {
-  font-size: 18px;
+  font-size: var(--text-md);
   font-weight: 700;
-  color: #0f172a;
+  color: var(--color-text-1);
   letter-spacing: -0.02em;
-  line-height: 1.1;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
 }
 
 .theme-dark .bid-card-row-price .bid-card-value {
-  color: #f8fafc;
+  color: var(--color-text-1);
 }
 
 .bid-card-hint {
-  font-size: 12px;
-  color: #cbd5e1;
-  padding: 7px 16px 11px 20px;
-  border-top: 1px solid #f1f5f9;
+  font-size: var(--text-2xs);
+  color: var(--color-text-4);
+  padding: var(--sp-2) var(--sp-4) var(--sp-3) var(--sp-5);
+  border-top: 1px solid var(--color-border);
   text-align: right;
   letter-spacing: 0.01em;
 }
@@ -1950,14 +1943,14 @@ select.input:focus {
 }
 
 /* dark mode */
-.theme-dark .bid-card-title { color: #f1f5f9; }
-.theme-dark .bid-card-subtitle { color: #4b5563; }
-.theme-dark .bid-card-section-label { color: #4b5563; border-top-color: #1f2937; }
-.theme-dark .bid-card-row { border-top-color: #1f2937; }
-.theme-dark .bid-card-label { color: #94a3b8; }
-.theme-dark .bid-card-value { color: #f1f5f9; }
-.theme-dark .bid-card-hint { border-top-color: #1f2937; color: #4b5563; }
-.theme-dark .bid-card-counter-value { color: #f87171; }
+.theme-dark .bid-card-title { color: var(--color-text-1); }
+.theme-dark .bid-card-subtitle { color: var(--color-text-3); }
+.theme-dark .bid-card-section-label { color: var(--color-text-3); border-top-color: var(--color-border); }
+.theme-dark .bid-card-row { border-top-color: var(--color-border); }
+.theme-dark .bid-card-label { color: var(--color-text-3); }
+.theme-dark .bid-card-value { color: var(--color-text-1); }
+.theme-dark .bid-card-hint { border-top-color: var(--color-border); color: var(--color-text-4); }
+.theme-dark .bid-card-counter-value { color: var(--color-error-text); }
 
 /* ── BidCard standalone component (features/BidCard.jsx) ──── */
 .bid-card {
