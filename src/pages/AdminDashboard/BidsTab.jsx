@@ -168,6 +168,16 @@ export default function BidsTab({ active }) {
     return null;
   };
 
+  // Direct accept/reject from card — no modal, no freight validation needed
+  const submitDirectDecision = async (action, bid) => {
+    const { error } = await supabase.from("bids").update({ status: action }).eq("id", bid.id);
+    if (error) { console.error("Decision error:", error.message); return; }
+    if (action === "accepted" && bid.farmer_id) {
+      await addFarmerRewardsPoints(bid.farmer_id, Number(bid.quantity || 0));
+    }
+    await fetchBids();
+  };
+
   const submitAdminDecision = async (action, targetBid = null) => {
     const bid = targetBid ?? adminSelectedBid;
     if (!bid) return;
@@ -336,8 +346,8 @@ export default function BidsTab({ active }) {
                 key={b.id}
                 bid={b}
                 onClick={() => openAdminModal(b, null)}
-                onAccept={() => openAdminModal(b, "accepted")}
-                onReject={() => openAdminModal(b, "rejected")}
+                onAccept={() => submitDirectDecision("accepted", b)}
+                onReject={() => submitDirectDecision("rejected", b)}
                 onCounter={() => openAdminModal(b, "countered")}
               />
             ))}

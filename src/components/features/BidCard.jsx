@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { getProductLabelSafe } from "../../utils/productLabels";
 import { formatCompactNumber, hasPositiveNumber } from "../../utils/numberFormat";
 import { formatDeliveryRange, formatLocationDisplay, isFreightParity } from "../../utils/formatting";
@@ -49,6 +50,7 @@ const ACTIONABLE = new Set(["pending", "farmer_countered"]);
 
 // ── BidCard ──────────────────────────────────────────────────────────────────
 export default function BidCard({ bid, onClick, onAccept, onReject, onCounter }) {
+  const [confirming, setConfirming] = useState(null); // null | "accepted" | "rejected"
   const style = getStatusStyle(bid.status);
   const unit = `${bid.currency || (bid.product === "sunflower" ? "USD" : "EUR")}/t`;
   const { price, isCounter } = resolveDisplayPrice(bid);
@@ -62,15 +64,21 @@ export default function BidCard({ bid, onClick, onAccept, onReject, onCounter })
     ? (location && location !== "-" ? `${bid.parity} ${location}` : bid.parity)
     : "-";
 
+  const handleCardClick = () => {
+    if (confirming) { setConfirming(null); return; }
+    onClick?.();
+  };
+
   return (
     <div
       role="button"
       tabIndex={0}
       className="bid-card"
       style={{ borderLeft: `4px solid ${style.borderColor}` }}
-      onClick={onClick}
+      onClick={handleCardClick}
       onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick?.(); }
+        if (e.key === "Escape") { setConfirming(null); return; }
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleCardClick(); }
       }}
     >
 
@@ -137,21 +145,38 @@ export default function BidCard({ bid, onClick, onAccept, onReject, onCounter })
           onKeyDown={(e) => e.stopPropagation()}
         >
           {onReject && (
-            <button type="button" className="bc-btn bc-btn-reject"
-              onClick={(e) => { e.stopPropagation(); onReject(); }}>
-              Reject
+            <button
+              type="button"
+              className={`bc-btn bc-btn-reject${confirming === "rejected" ? " bc-btn-confirming" : confirming ? " bc-btn-dimmed" : ""}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (confirming === "rejected") { setConfirming(null); onReject(); }
+                else setConfirming("rejected");
+              }}
+            >
+              {confirming === "rejected" ? "Confirm?" : "Reject"}
             </button>
           )}
           {onCounter && (
-            <button type="button" className="bc-btn bc-btn-counter"
-              onClick={(e) => { e.stopPropagation(); onCounter(); }}>
+            <button
+              type="button"
+              className={`bc-btn bc-btn-counter${confirming ? " bc-btn-dimmed" : ""}`}
+              onClick={(e) => { e.stopPropagation(); setConfirming(null); onCounter(); }}
+            >
               Counter
             </button>
           )}
           {onAccept && (
-            <button type="button" className="bc-btn bc-btn-accept"
-              onClick={(e) => { e.stopPropagation(); onAccept(); }}>
-              Accept
+            <button
+              type="button"
+              className={`bc-btn bc-btn-accept${confirming === "accepted" ? " bc-btn-confirming" : confirming ? " bc-btn-dimmed" : ""}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (confirming === "accepted") { setConfirming(null); onAccept(); }
+                else setConfirming("accepted");
+              }}
+            >
+              {confirming === "accepted" ? "Confirm?" : "Accept"}
             </button>
           )}
         </div>

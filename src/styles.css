@@ -2189,6 +2189,24 @@ select.input:focus {
   border-color: #93c5fd;
 }
 
+/* Inline confirm state — solid fill */
+.bc-btn-accept.bc-btn-confirming {
+  background: #166534;
+  color: #fff;
+  border-color: #166534;
+}
+
+.bc-btn-reject.bc-btn-confirming {
+  background: #991b1b;
+  color: #fff;
+  border-color: #991b1b;
+}
+
+/* Other buttons fade when one is confirming */
+.bc-btn-dimmed {
+  opacity: 0.3;
+}
+
 /* Dark mode */
 .theme-dark .bc-field { border-top-color: #1f2937; }
 .theme-dark .bc-label { color: #9ca3af; }
