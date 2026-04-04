@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../supabaseClient";
-import { useAppContext } from "../../context/AppContext.jsx";
 import FarmerProgress from "../../components/FarmerProgress";
 import ExchangeRatesCard from "../../components/ExchangeRatesCard";
 import WeatherWidget from "../../components/WeatherWidget";
 import MarketTicker from "../../components/MarketTicker";
 import PricesGrid from "../../components/PricesGrid";
-import SiloPriceTable from "../../components/SiloPriceTable";
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -17,8 +15,6 @@ function getGreeting() {
 
 export default function HomeTab() {
   const [displayName, setDisplayName] = useState("");
-  const { commodities } = useAppContext();
-
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (!data?.user) return;
@@ -42,11 +38,9 @@ export default function HomeTab() {
           </div>
         )}
 
-        {/* Ameropa CPT Constanta prices + Silo prices */}
+        {/* Ameropa CPT Constanta prices */}
         <div className="card dashboard-card home-card-prices">
           <PricesGrid />
-          <div className="section-divider" />
-          <SiloPriceTable commodities={commodities} readOnly />
         </div>
 
         {/* Futures */}
