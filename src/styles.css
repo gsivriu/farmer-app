@@ -1781,9 +1781,17 @@ select.input:focus {
    BID LIST (Farmer Activity)
    ========================= */
 .bid-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--sp-4);
+}
+
+/* Desktop: 2-column card grid — clean, enterprise layout */
+@media (min-width: 1024px) {
+  .bid-list {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--sp-5);
+  }
 }
 
 .bid-row {
@@ -1793,10 +1801,10 @@ select.input:focus {
   gap: 0;
   width: 100%;
   padding: 0;
-  border-radius: 16px;
-  border: 1px solid #f1f5f9;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
   font-variant-numeric: tabular-nums;
   cursor: pointer;
   text-align: left;
