@@ -34,13 +34,6 @@ function formatDateTime(value) {
   });
 }
 
-function formatDateOnly(value) {
-  if (!value) return "-";
-  const dt = new Date(value);
-  if (Number.isNaN(dt.getTime())) return "-";
-  return dt.toLocaleDateString("en-GB", { year: "2-digit", month: "2-digit", day: "2-digit" });
-}
-
 function resolveDisplayPrice(bid) {
   const s = String(bid.status || "").toLowerCase();
   if (s === "accepted" || s === "rejected") {
@@ -65,6 +58,10 @@ export default function BidCard({ bid, onClick, onAccept, onReject, onCounter })
     ? formatLocationDisplay(bid.loading_location || "-")
     : formatLocationDisplay(bid.delivery_location || "-");
 
+  const parityDisplay = bid.parity
+    ? (location && location !== "-" ? `${bid.parity} ${location}` : bid.parity)
+    : "-";
+
   return (
     <div
       role="button"
@@ -77,95 +74,87 @@ export default function BidCard({ bid, onClick, onAccept, onReject, onCounter })
       }}
     >
 
-      {/* ── 1. HEADER: fermier (stânga) + commodity (dreapta) ── */}
-      <div className="bc-header">
-        <span className="bc-farmer">{bid.farmer_email || bid.farmer_id}</span>
-        <span className="bc-commodity" style={{ color: style.productColor }}>
-          {getProductLabelSafe(bid.product)}
-        </span>
-      </div>
+      {/* ── Body: 2-column grid ── */}
+      <div className="bc-body">
 
-      {/* ── 2. HIGHLIGHT ROW: preț mare + cantitate ─────────── */}
-      <div className="bc-price-row">
-        <span className={`bc-price${isCounter ? " bc-price-counter" : ""}`}>
-          {formatCompactNumber(price)}{" "}
-          <span className="bc-price-unit">{unit}</span>
-        </span>
-        <span className="bc-qty">{formatCompactNumber(bid.quantity)} t</span>
-      </div>
-
-      {/* ── 3. GRID 2 COLOANE: detalii secundare ────────────── */}
-      <div className="bc-details">
-
-        {/* Locație | Tip ofertă */}
+        {/* Row 1: Commodity | Status */}
         <div className="bc-field">
-          <span className="bc-field-label">Location</span>
-          <span className="bc-field-value">{location}</span>
-        </div>
-        <div className="bc-field bc-field-right">
-          <span className="bc-field-label">Offer Type</span>
-          <span className="bc-field-value">{bid.parity || "-"}</span>
-        </div>
-
-        {/* Perioadă livrare | Expirare */}
-        <div className="bc-field">
-          <span className="bc-field-label">Delivery Period</span>
-          <span className="bc-field-value">
-            {formatDeliveryRange(bid.delivery_start, bid.delivery_end)}
+          <span className="bc-label">Commodity</span>
+          <span className="bc-val" style={{ color: style.productColor }}>
+            {getProductLabelSafe(bid.product)}
           </span>
         </div>
-        <div className="bc-field bc-field-right">
-          <span className="bc-field-label">
-            {bid.status === "accepted" && bid.contract_no ? "Contract" : "Offer date"}
-          </span>
-          <span className="bc-field-value">
-            {bid.status === "accepted" && bid.contract_no
-              ? bid.contract_no
-              : formatDateOnly(bid.created_at)}
-          </span>
-        </div>
-
-      </div>
-
-      {/* ── 4. FOOTER: status badge + butoane acțiuni ───────── */}
-      <div className="bc-footer">
-        <div className="bc-footer-left">
+        <div className="bc-field bc-field-right bc-field-status">
           <span
             className="bc-badge"
             style={{ background: style.badgeBg, color: style.badgeText }}
           >
             {getStatusLabel(bid.status)}
           </span>
-          <span className="bc-timestamp">{formatDateTime(bid.created_at)}</span>
         </div>
 
-        {isActionable && (onAccept || onReject || onCounter) && (
-          <div
-            className="bc-actions"
-            onClick={(e) => e.stopPropagation()}
-            onKeyDown={(e) => e.stopPropagation()}
-          >
-            {onReject && (
-              <button type="button" className="bc-btn bc-btn-reject"
-                onClick={(e) => { e.stopPropagation(); onReject(); }}>
-                Reject
-              </button>
-            )}
-            {onCounter && (
-              <button type="button" className="bc-btn bc-btn-counter"
-                onClick={(e) => { e.stopPropagation(); onCounter(); }}>
-                Counter
-              </button>
-            )}
-            {onAccept && (
-              <button type="button" className="bc-btn bc-btn-accept"
-                onClick={(e) => { e.stopPropagation(); onAccept(); }}>
-                Accept
-              </button>
-            )}
-          </div>
-        )}
+        {/* Row 2: Farmer | Offer date */}
+        <div className="bc-field">
+          <span className="bc-label">Farmer</span>
+          <span className="bc-val bc-val-truncate">{bid.farmer_email || bid.farmer_id || "-"}</span>
+        </div>
+        <div className="bc-field bc-field-right">
+          <span className="bc-label">Offer date</span>
+          <span className="bc-val">{formatDateTime(bid.created_at)}</span>
+        </div>
+
+        {/* Row 3: Price | Delivery period */}
+        <div className="bc-field">
+          <span className="bc-label">Price</span>
+          <span className={`bc-val bc-val-price${isCounter ? " bc-val-counter" : ""}`}>
+            {formatCompactNumber(price)}{" "}
+            <span className="bc-val-unit">{unit}</span>
+          </span>
+        </div>
+        <div className="bc-field bc-field-right">
+          <span className="bc-label">Delivery</span>
+          <span className="bc-val">{formatDeliveryRange(bid.delivery_start, bid.delivery_end)}</span>
+        </div>
+
+        {/* Row 4: Parity | Crop year */}
+        <div className="bc-field">
+          <span className="bc-label">Parity</span>
+          <span className="bc-val">{parityDisplay}</span>
+        </div>
+        <div className="bc-field bc-field-right">
+          <span className="bc-label">Crop year</span>
+          <span className="bc-val">{bid.crop_year || "-"}</span>
+        </div>
+
       </div>
+
+      {/* ── Action bar (only when actionable) ── */}
+      {isActionable && (onAccept || onReject || onCounter) && (
+        <div
+          className="bc-actions-bar"
+          onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
+        >
+          {onReject && (
+            <button type="button" className="bc-btn bc-btn-reject"
+              onClick={(e) => { e.stopPropagation(); onReject(); }}>
+              Reject
+            </button>
+          )}
+          {onCounter && (
+            <button type="button" className="bc-btn bc-btn-counter"
+              onClick={(e) => { e.stopPropagation(); onCounter(); }}>
+              Counter
+            </button>
+          )}
+          {onAccept && (
+            <button type="button" className="bc-btn bc-btn-accept"
+              onClick={(e) => { e.stopPropagation(); onAccept(); }}>
+              Accept
+            </button>
+          )}
+        </div>
+      )}
 
     </div>
   );
