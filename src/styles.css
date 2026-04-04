@@ -1824,48 +1824,36 @@ select.input:focus {
 }
 
 /* ── Bid card inner layout — uniform B2B data rows ──────── */
-/* ── Mobile: badge absolute pe .bid-row (care are position:relative).
-   Ancorat la top:12px right:sp-5 — aceeași linie cu titlul, același
-   right ca valorile de sub el. Independent de orice layout din header. */
+/* ── Header: flex pe ambele breakpoints.
+   Badge rămâne în flux (nu absolute) — aliniat cu prima linie a titlului
+   prin align-items: center pe container și align-self: flex-start pe badge. */
 .bid-card-header {
-  padding: 12px var(--sp-5) 10px var(--sp-5);
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px var(--sp-5) 8px var(--sp-5);
+  gap: var(--sp-3);
 }
 
 .bid-card-header-main {
+  flex: 1 1 auto !important;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding-right: 96px; /* rezervă spațiu pentru badge — nu se suprapune cu titlul */
+  padding-right: 0;
 }
 
 .bid-card-header-badge {
-  position: absolute;
-  top: 12px;
-  right: var(--sp-5); /* identic cu padding-right al rândurilor de date */
+  flex: 0 0 auto !important;
+  position: static !important;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 4px;
-}
-
-/* ── Desktop: badge intră în fluxul normal (grid 1fr auto) ── */
-@media (min-width: 1024px) {
-  .bid-card-header {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: start;
-    gap: var(--sp-3);
-  }
-
-  .bid-card-header-main {
-    padding-right: 0;
-    min-width: 0;
-  }
-
-  .bid-card-header-badge {
-    position: static;
-    align-self: start;
-  }
+  align-self: flex-start;
 }
 
 .bid-card-title {
