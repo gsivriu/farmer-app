@@ -361,10 +361,20 @@ export default function ActivityTab() {
                         }}
                       >
                         <div className="bid-card-header">
-                          <div className="bid-card-title">{getProductLabelSafe(b.product)}</div>
-                          {b.status === "accepted" && b.contract_no && (
-                            <div className="bid-card-subtitle">Contract: {b.contract_no}</div>
-                          )}
+                          <div className="bid-card-header-main">
+                            <div className="bid-card-title">{getProductLabelSafe(b.product)}</div>
+                            {b.status === "accepted" && b.contract_no && (
+                              <div className="bid-card-subtitle">Contract: {b.contract_no}</div>
+                            )}
+                          </div>
+                          <div className="bid-card-header-badge">
+                            <span className={`status-badge status-${statusClass.slice(3)}`}>
+                              {statusLabel}
+                            </span>
+                            {b.status === "countered" && (
+                              <span className="bid-action-required-chip">Action required</span>
+                            )}
+                          </div>
                         </div>
 
                         <div className="bid-card-section-label">Details</div>
@@ -389,14 +399,6 @@ export default function ActivityTab() {
                         </div>
 
                         <div className="bid-card-footer">
-                          <div className="bid-card-footer-left">
-                            <span className={`status-badge status-${statusClass.slice(3)}`}>
-                              {statusLabel}
-                            </span>
-                            {b.status === "countered" && (
-                              <span className="bid-action-required-chip">Action required</span>
-                            )}
-                          </div>
                           <span className="bid-card-hint">View details ›</span>
                         </div>
                       </div>

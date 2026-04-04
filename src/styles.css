@@ -1816,11 +1816,26 @@ select.input:focus {
 }
 
 /* ── Bid card inner layout — uniform B2B data rows ──────── */
+/* Header: product name left, status badge right — always same row */
 .bid-card-header {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
   padding: var(--sp-4) var(--sp-4) var(--sp-3) var(--sp-5);
-  gap: 2px;
+  gap: var(--sp-3);
+}
+
+.bid-card-header-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.bid-card-header-badge {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
 }
 
 .bid-card-title {
@@ -1900,30 +1915,21 @@ select.input:focus {
   color: var(--color-text-1);
 }
 
-/* Footer — always at bottom: status badge left, view details right */
+/* Footer — "View details ›" right-aligned below data rows */
 .bid-card-footer {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   padding: var(--sp-2) var(--sp-4) var(--sp-3) var(--sp-5);
   border-top: 1px solid var(--color-border);
-  gap: var(--sp-3);
-  min-height: 40px;
+  min-height: 36px;
 }
 
-.bid-card-footer-left {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-2);
-  flex-wrap: wrap;
-}
-
-/* "View details ›" — always top-right of footer */
+/* "View details ›" */
 .bid-card-hint {
   font-size: var(--text-2xs);
   color: var(--color-text-3);
   white-space: nowrap;
-  flex-shrink: 0;
 }
 
 /* "Action required" chip on countered bids */
