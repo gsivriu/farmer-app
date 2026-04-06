@@ -147,10 +147,17 @@ export default function FarmerProgress({ embedded = false }) {
           aria-label="View gamification tiers"
           title="View rewards"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10" />
-            <line x1="12" y1="8" x2="12" y2="8.5" strokeWidth="2.2" />
-            <line x1="12" y1="11" x2="12" y2="16" />
+          {/* Bar chart with upward arrow — growth/progress icon */}
+          <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            {/* Bars */}
+            <rect x="2" y="15" width="3" height="6" rx="0.5" />
+            <rect x="7" y="11" width="3" height="10" rx="0.5" />
+            <rect x="12" y="7" width="3" height="14" rx="0.5" />
+            <rect x="17" y="3" width="3" height="18" rx="0.5" />
+            {/* Diagonal arrow line */}
+            <line x1="3" y1="16" x2="19" y2="3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            {/* Arrowhead */}
+            <polyline points="14,2 20,2 20,8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
       </div>
