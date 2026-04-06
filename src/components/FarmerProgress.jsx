@@ -134,7 +134,7 @@ export default function FarmerProgress({ embedded = false }) {
   }, [totalAccepted]);
 
   return (
-    <div className={embedded ? "progress-card" : "card progress-card"}>
+    <div className={embedded ? "progress-card" : "card progress-card"} onClick={() => setShowPopup(true)} style={{ cursor: "pointer" }}>
       {/* Header */}
       <div className="progress-head">
         <div className="progress-meta">
