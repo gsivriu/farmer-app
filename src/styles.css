@@ -6292,10 +6292,10 @@ select.input:focus {
    PROGRESS HEADER
    ========================= */
 .progress-head {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
   align-items: center;
-  column-gap: 20px;
+  justify-content: space-between;
+  gap: 8px;
   margin-bottom: 8px;
 }
 
@@ -7043,18 +7043,8 @@ select.input:focus {
     padding: 10px;
   }
 
-  .progress-head {
-    grid-template-columns: 1fr;
-    justify-items: start;
-    text-align: left;
-  }
-
   .progress-ring-center {
     margin-top: 6px;
-  }
-
-  .progress-head-spacer {
-    display: none;
   }
 
   .bid-list {
