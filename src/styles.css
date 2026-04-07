@@ -8442,6 +8442,19 @@ select.input:focus {
   --radius-sm: 4px;
 }
 
+/* Dark mode overrides for admin homepage tokens */
+.theme-dark {
+  --surface-page:   var(--color-canvas);
+  --surface-base:   var(--color-surface);
+  --surface-subtle: var(--color-surface-2);
+
+  --text-primary:   var(--color-text-1);
+  --text-secondary: var(--color-text-2);
+  --text-tertiary:  var(--color-text-3);
+
+  --hairline: 0.5px solid rgba(255, 255, 255, 0.08);
+}
+
 /* Neutralize old glass/gray background on admin pane */
 .admin-home-pane {
   background: var(--color-surface) !important;
@@ -8506,8 +8519,10 @@ select.input:focus {
   letter-spacing: 0.01em;
 }
 
-.ticker-delta.positive { color: #2a6130; }
+.ticker-delta.positive { color: #16a34a; }
 .ticker-delta.negative { color: var(--brand-red); }
+.theme-dark .ticker-delta.positive { color: #4ade80; }
+.theme-dark .ticker-delta.negative { color: #f87171; }
 
 .ticker-note {
   font-size: 11px;
