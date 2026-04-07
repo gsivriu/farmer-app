@@ -9389,14 +9389,17 @@ select.input:focus {
   .bid-modal-backdrop-details {
     align-items: flex-end;
     padding: 0;
+    /* Push sheet above home indicator / Safari toolbar */
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
   .bid-modal-backdrop-details .bid-modal.bid-modal-details {
     width: 100%;
     max-width: 100%;
-    max-height: 92vh;
+    /* dvh = dynamic viewport height (excludes browser chrome) */
+    max-height: 92dvh;
     border-radius: 16px 16px 0 0;
-    padding: 16px 20px 32px;
+    padding: 16px 20px calc(28px + env(safe-area-inset-bottom, 0px));
     overflow-y: auto;
   }
 
