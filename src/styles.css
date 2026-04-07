@@ -8799,35 +8799,39 @@ select.input:focus {
     gap: var(--space-5) 0;
   }
 
-  /* Single row on mobile: input shrinks, unit + button stay */
+  /* Mobile: input+unit on first row, confirm button full-width below */
   .home-page .admin-row {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    flex-wrap: nowrap;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "input unit"
+      "btn   btn";
     gap: 8px;
-    height: 40px;
+    height: auto;
   }
 
   .home-page .admin-input {
-    flex: 1;
-    min-width: 0;     /* allows input to shrink below content-size */
-    height: 40px;
-    font-size: 15px;
+    grid-area: input;
+    width: 100%;
+    height: 44px;
+    font-size: 16px;  /* prevent iOS auto-zoom */
   }
 
   .home-page .admin-unit {
+    grid-area: unit;
+    align-self: center;
     flex-shrink: 0;
     white-space: nowrap;
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .home-page .admin-btn {
-    flex-shrink: 0;
-    height: 40px;
-    padding: 0 16px;
-    font-size: 13px;
+    grid-area: btn;
+    height: 44px;
+    width: 100%;
+    font-size: 14px;
     white-space: nowrap;
+    border-radius: 10px;
   }
 
   .home-page .admin-price-item {
