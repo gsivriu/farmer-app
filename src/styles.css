@@ -9387,19 +9387,24 @@ select.input:focus {
 /* ── Mobile — bottom sheet ── */
 @media (max-width: 768px) {
   .bid-modal-backdrop-details {
+    /* Override inset:0 — anchor top/sides only, use dvh for height
+       so the backdrop bottom aligns with the visible viewport (above browser toolbar) */
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: auto;
+    height: 100dvh;
     align-items: flex-end;
     padding: 0;
-    /* Push sheet above home indicator / Safari toolbar */
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
   .bid-modal-backdrop-details .bid-modal.bid-modal-details {
     width: 100%;
     max-width: 100%;
-    /* dvh = dynamic viewport height (excludes browser chrome) */
     max-height: 92dvh;
     border-radius: 16px 16px 0 0;
-    padding: 16px 20px calc(28px + env(safe-area-inset-bottom, 0px));
+    padding: 16px 20px calc(24px + env(safe-area-inset-bottom, 0px));
     overflow-y: auto;
   }
 
