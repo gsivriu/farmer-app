@@ -8799,49 +8799,49 @@ select.input:focus {
     gap: var(--space-5) 0;
   }
 
-  /* Mobile: input+unit on first row, confirm button full-width below */
+  /* Mobile: single row — input shrinks, unit + button fixed */
+  .home-page .admin-price-item {
+    border: 1px solid var(--hairline-color, #eef0f3);
+    border-radius: 12px;
+    padding: 12px;
+    background: var(--surface-base);
+    overflow: hidden;
+  }
+
+  .home-page .admin-price-item:last-child {
+    border-bottom: 1px solid var(--hairline-color, #eef0f3);
+  }
+
   .home-page .admin-row {
     display: grid;
-    grid-template-columns: 1fr auto;
-    grid-template-areas:
-      "input unit"
-      "btn   btn";
+    grid-template-columns: minmax(0, 1fr) auto auto;
     gap: 8px;
+    align-items: center;
     height: auto;
   }
 
   .home-page .admin-input {
-    grid-area: input;
+    min-width: 0;
     width: 100%;
-    height: 44px;
+    height: 42px;
     font-size: 16px;  /* prevent iOS auto-zoom */
+    padding: 0 10px;
   }
 
   .home-page .admin-unit {
-    grid-area: unit;
-    align-self: center;
-    flex-shrink: 0;
     white-space: nowrap;
-    font-size: 13px;
+    font-size: 12px;
+    color: var(--text-tertiary);
+    flex-shrink: 0;
   }
 
   .home-page .admin-btn {
-    grid-area: btn;
-    height: 44px;
-    width: 100%;
-    font-size: 14px;
+    height: 42px;
+    padding: 0 14px;
+    font-size: 13px;
     white-space: nowrap;
-    border-radius: 10px;
-  }
-
-  .home-page .admin-price-item {
-    padding-bottom: var(--space-5);
-    border-bottom: var(--hairline);
-  }
-
-  .home-page .admin-price-item:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
+    flex-shrink: 0;
+    border-radius: 8px;
   }
 }
 
