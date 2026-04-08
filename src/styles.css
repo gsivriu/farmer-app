@@ -8530,6 +8530,36 @@ select.input:focus {
   margin-top: var(--space-3);
 }
 
+.ticker-unit {
+  font-size: 10px;
+  opacity: 0.65;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.ticker-pct {
+  opacity: 0.75;
+}
+
+/* Skeleton loading state */
+.ticker-skeleton {
+  background: var(--surface-2, #e5e7eb);
+  border-radius: 4px;
+  animation: ticker-pulse 1.4s ease-in-out infinite;
+}
+.theme-dark .ticker-skeleton {
+  background: rgba(255,255,255,0.08);
+}
+.ticker-label.ticker-skeleton  { height: 10px; width: 80px; margin-bottom: 10px; }
+.ticker-value.ticker-skeleton  { height: 22px; width: 64px; margin-bottom: 8px; }
+.ticker-skeleton--sm           { height: 10px; width: 48px; }
+
+@keyframes ticker-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+
 /* -------- EXCHANGE SECTION — micro-list, no card -------- */
 .exchange-section {
   display: flex;

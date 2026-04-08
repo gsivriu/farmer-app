@@ -1,102 +1,84 @@
-// src/components/MarketTicker.jsx
+import { useEffect, useState } from "react";
+import { getGrainFutures } from "../services/futuresService";
 
-// Demo values - can be replaced with live API data.
-const FUTURES = [
-    // MATIF Wheat
-    {
-      id: 1,
-      market: "MATIF",
-      product: "Wheat",
-      contract: "Mar 25",
-      price: 221.25,
-      change: +1.75,
-    },
-  
-    // MATIF Corn
-    {
-      id: 2,
-      market: "MATIF",
-      product: "Corn",
-      contract: "Jun 25",
-      price: 205.50,
-      change: -0.50,
-    },
-  
-    // MATIF Rapeseed
-    {
-      id: 3,
-      market: "MATIF",
-      product: "Rapeseed",
-      contract: "May 25",
-      price: 435.25,
-      change: +3.25,
-    },
-  
-    // CBOT Corn
-    {
-      id: 4,
-      market: "CBOT",
-      product: "Corn",
-      contract: "Jul 25",
-      price: 492.75,
-      change: +0.75,
-    },
-  ];
-  
-  function getDeltaInfo(change) {
-    const diff = change || 0;
-  
-    if (diff > 0) {
-      return {
-        arrow: "↗",
-        sign: "up",
-        label: `+${diff.toFixed(2)}`,
-      };
-    } else if (diff < 0) {
-      return {
-        arrow: "↘",
-        sign: "down",
-        label: diff.toFixed(2),
-      };
-    } else {
-      return {
-        arrow: "→",
-        sign: "flat",
-        label: "+0.00",
-      };
-    }
-  }
-  
-  export default function MarketTicker() {
-    return (
-      <div>
-        <div className="ticker-card-header">
-          <span className="ticker-card-title">Futures</span>
-          <span className="ticker-card-sub">Indicative only</span>
-        </div>
-        <div className="market-ticker">
-          {FUTURES.map((f) => {
-            const delta = getDeltaInfo(f.change);
-            const deltaClass =
-              "ticker-delta " +
-              (delta.sign === "up"
-                ? "positive"
-                : delta.sign === "down"
-                ? "negative"
-                : "");
+function getDeltaInfo(change) {
+  const diff = change ?? 0;
+  if (diff > 0) return { arrow: "↗", sign: "up",   label: `+${diff.toFixed(2)}` };
+  if (diff < 0) return { arrow: "↘", sign: "down", label: diff.toFixed(2) };
+  return       { arrow: "→", sign: "flat", label: "+0.00" };
+}
 
-            return (
-              <div key={f.id} className="market-ticker-item">
-                <div className="ticker-label">
-                  {f.market} · {f.product} · {f.contract}
-                </div>
-                <div className="ticker-value">{f.price.toFixed(2)}</div>
-                <span className={deltaClass}>{delta.label}</span>
-              </div>
-            );
-          })}
-        </div>
+function formatPrice(price, unit) {
+  if (price == null) return "—";
+  // USX/bu = US cents per bushel — display as-is (e.g. 445.75 ¢/bu)
+  return price.toFixed(2);
+}
+
+export default function MarketTicker() {
+  const [futures, setFutures] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [fetchedAt, setFetchedAt] = useState(null);
+
+  useEffect(() => {
+    let mounted = true;
+    getGrainFutures().then((data) => {
+      if (!mounted) return;
+      setFutures(data);
+      setFetchedAt(new Date());
+      setLoading(false);
+    });
+    return () => { mounted = false; };
+  }, []);
+
+  const timeLabel = fetchedAt
+    ? fetchedAt.toLocaleTimeString("ro-RO", { hour: "2-digit", minute: "2-digit" })
+    : null;
+
+  return (
+    <div>
+      <div className="ticker-card-header">
+        <span className="ticker-card-title">Futures</span>
+        <span className="ticker-card-sub">
+          {loading ? "Se încarcă…" : timeLabel ? `Actualizat ${timeLabel}` : "Indicativ"}
+        </span>
       </div>
-    );
-  }
-  
+
+      <div className="market-ticker">
+        {loading
+          ? [1, 2, 3].map((i) => (
+              <div key={i} className="market-ticker-item market-ticker-item--loading">
+                <div className="ticker-label ticker-skeleton" />
+                <div className="ticker-value ticker-skeleton" />
+                <div className="ticker-skeleton ticker-skeleton--sm" />
+              </div>
+            ))
+          : futures.map((f) => {
+              const delta = getDeltaInfo(f.change);
+              const deltaClass =
+                "ticker-delta " +
+                (delta.sign === "up" ? "positive" : delta.sign === "down" ? "negative" : "");
+
+              return (
+                <div key={f.symbol} className="market-ticker-item">
+                  <div className="ticker-label">
+                    {f.market} · {f.product}
+                    <span className="ticker-unit"> {f.unit}</span>
+                  </div>
+                  <div className="ticker-value">{formatPrice(f.price, f.unit)}</div>
+                  {f.price != null ? (
+                    <span className={deltaClass}>
+                      {delta.arrow} {delta.label}
+                      {f.changePercent != null && (
+                        <span className="ticker-pct"> ({f.changePercent > 0 ? "+" : ""}{f.changePercent.toFixed(2)}%)</span>
+                      )}
+                    </span>
+                  ) : (
+                    <span className="ticker-delta">—</span>
+                  )}
+                </div>
+              );
+            })}
+      </div>
+    </div>
+  );
+}
