@@ -61,7 +61,7 @@ export default function MarketTicker() {
               return (
                 <div key={f.symbol} className="market-ticker-item">
                   <div className="ticker-label">
-                    {f.market} · {f.product}
+                    {f.market} · {f.product} · {f.contract}
                     <span className="ticker-unit"> {f.unit}</span>
                   </div>
                   <div className="ticker-value">{formatPrice(f.price, f.unit)}</div>

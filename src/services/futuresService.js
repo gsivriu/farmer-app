@@ -2,9 +2,8 @@ import { supabase } from "../supabaseClient";
 
 // Static fallback — used when the Edge Function is unreachable
 const FALLBACK = [
-  { symbol: "ZC=F",   market: "CBOT",  product: "Corn",  unit: "USX/bu", price: null, change: null, changePercent: null },
-  { symbol: "ZW=F",   market: "CBOT",  product: "Wheat", unit: "USX/bu", price: null, change: null, changePercent: null },
-  { symbol: "EBM.PA", market: "MATIF", product: "Wheat", unit: "EUR/t",  price: null, change: null, changePercent: null },
+  { symbol: "ZCK26.CBT", market: "CBOT", product: "Corn",  unit: "USX/bu", contract: "May 26", price: null, change: null, changePercent: null },
+  { symbol: "ZWK26.CBT", market: "CBOT", product: "Wheat", unit: "USX/bu", contract: "May 26", price: null, change: null, changePercent: null },
 ];
 
 export async function getGrainFutures() {

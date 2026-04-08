@@ -3,10 +3,10 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// ZCK26.CBT = CBOT Corn May 2026 | ZWK26.CBT = CBOT Wheat May 2026
 const SYMBOLS = [
-  { symbol: "ZC=F",   market: "CBOT",  product: "Corn",  unit: "USX/bu" },
-  { symbol: "ZW=F",   market: "CBOT",  product: "Wheat", unit: "USX/bu" },
-  { symbol: "EBM.PA", market: "MATIF", product: "Wheat", unit: "EUR/t"  },
+  { symbol: "ZCK26.CBT", market: "CBOT",  product: "Corn",  unit: "USX/bu", contract: "May 26" },
+  { symbol: "ZWK26.CBT", market: "CBOT",  product: "Wheat", unit: "USX/bu", contract: "May 26" },
 ];
 
 async function fetchQuote(symbol: string) {
