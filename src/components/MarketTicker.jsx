@@ -1,21 +1,85 @@
 import { useEffect, useState } from "react";
 import { getGrainFutures } from "../services/futuresService";
 
-function getDeltaInfo(change) {
-  const diff = change ?? 0;
-  if (diff > 0) return { arrow: "↗", sign: "up",   label: `+${diff.toFixed(2)}` };
-  if (diff < 0) return { arrow: "↘", sign: "down", label: diff.toFixed(2) };
-  return       { arrow: "→", sign: "flat", label: "+0.00" };
+function fmt(val, decimals = 2) {
+  if (val == null) return "—";
+  return val.toFixed(decimals);
 }
 
-function formatPrice(price, unit) {
-  if (price == null) return "—";
-  // USX/bu = US cents per bushel — display as-is (e.g. 445.75 ¢/bu)
-  return price.toFixed(2);
+function ChangeCell({ change, changePercent }) {
+  if (change == null) return <td className="ft-td ft-change ft-neutral">—</td>;
+  const cls = change > 0 ? "positive" : change < 0 ? "negative" : "ft-neutral";
+  const sign = change > 0 ? "+" : "";
+  return (
+    <td className={`ft-td ft-change ${cls}`}>
+      {sign}{fmt(change)} ({sign}{fmt(changePercent)}%)
+    </td>
+  );
+}
+
+function ProductTable({ product, loading }) {
+  return (
+    <div className="ft-product">
+      <div className="ft-product-header">
+        <span className="ft-product-name">{product.market} · {product.product}</span>
+        <span className="ft-product-unit">{product.unit}</span>
+      </div>
+      <table className="ft-table">
+        <thead>
+          <tr>
+            <th className="ft-th">Contract</th>
+            <th className="ft-th ft-right">Last</th>
+            <th className="ft-th ft-right">+/−</th>
+            <th className="ft-th ft-right">Prev.</th>
+          </tr>
+        </thead>
+        <tbody>
+          {product.contracts.map((c) => (
+            <tr key={c.label} className="ft-tr">
+              <td className="ft-td ft-contract">{c.label}</td>
+              <td className="ft-td ft-right ft-last">{fmt(c.price)}</td>
+              <ChangeCell change={c.change} changePercent={c.changePercent} />
+              <td className="ft-td ft-right ft-prev">{fmt(c.prevClose)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function SkeletonTable() {
+  return (
+    <div className="ft-product">
+      <div className="ft-product-header">
+        <span className="ticker-skeleton" style={{ width: 120, height: 12, display: "inline-block", borderRadius: 4 }} />
+      </div>
+      <table className="ft-table">
+        <thead>
+          <tr>
+            {["Contract","Last","+/−","Prev."].map((h) => (
+              <th key={h} className="ft-th">{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {[1,2,3].map((i) => (
+            <tr key={i} className="ft-tr">
+              {[80,56,90,56].map((w, j) => (
+                <td key={j} className="ft-td">
+                  <span className="ticker-skeleton" style={{ width: w, height: 11, display: "inline-block", borderRadius: 3 }} />
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 }
 
 export default function MarketTicker() {
-  const [futures, setFutures] = useState([]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchedAt, setFetchedAt] = useState(null);
 
@@ -23,7 +87,7 @@ export default function MarketTicker() {
     let mounted = true;
     getGrainFutures().then((data) => {
       if (!mounted) return;
-      setFutures(data);
+      setProducts(data);
       setFetchedAt(new Date());
       setLoading(false);
     });
@@ -43,41 +107,11 @@ export default function MarketTicker() {
         </span>
       </div>
 
-      <div className="market-ticker">
+      <div className="ft-grid">
         {loading
-          ? [1, 2, 3].map((i) => (
-              <div key={i} className="market-ticker-item market-ticker-item--loading">
-                <div className="ticker-label ticker-skeleton" />
-                <div className="ticker-value ticker-skeleton" />
-                <div className="ticker-skeleton ticker-skeleton--sm" />
-              </div>
-            ))
-          : futures.map((f) => {
-              const delta = getDeltaInfo(f.change);
-              const deltaClass =
-                "ticker-delta " +
-                (delta.sign === "up" ? "positive" : delta.sign === "down" ? "negative" : "");
-
-              return (
-                <div key={f.symbol} className="market-ticker-item">
-                  <div className="ticker-label">
-                    {f.market} · {f.product} · {f.contract}
-                    <span className="ticker-unit"> {f.unit}</span>
-                  </div>
-                  <div className="ticker-value">{formatPrice(f.price, f.unit)}</div>
-                  {f.price != null ? (
-                    <span className={deltaClass}>
-                      {delta.arrow} {delta.label}
-                      {f.changePercent != null && (
-                        <span className="ticker-pct"> ({f.changePercent > 0 ? "+" : ""}{f.changePercent.toFixed(2)}%)</span>
-                      )}
-                    </span>
-                  ) : (
-                    <span className="ticker-delta">—</span>
-                  )}
-                </div>
-              );
-            })}
+          ? [1, 2].map((i) => <SkeletonTable key={i} />)
+          : products.map((p) => <ProductTable key={p.product} product={p} />)
+        }
       </div>
     </div>
   );

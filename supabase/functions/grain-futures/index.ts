@@ -3,10 +3,23 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// ZCK26.CBT = CBOT Corn May 2026 | ZWK26.CBT = CBOT Wheat May 2026
-const SYMBOLS = [
-  { symbol: "ZCK26.CBT", market: "CBOT",  product: "Corn",  unit: "USX/bu", contract: "May 26" },
-  { symbol: "ZWK26.CBT", market: "CBOT",  product: "Wheat", unit: "USX/bu", contract: "May 26" },
+const PRODUCTS = [
+  {
+    market: "CBOT", product: "Corn", unit: "USX/bu",
+    contracts: [
+      { symbol: "ZCK26.CBT", label: "May 26" },
+      { symbol: "ZCN26.CBT", label: "Jul 26" },
+      { symbol: "ZCU26.CBT", label: "Sep 26" },
+    ],
+  },
+  {
+    market: "CBOT", product: "Wheat", unit: "USX/bu",
+    contracts: [
+      { symbol: "ZWK26.CBT", label: "May 26" },
+      { symbol: "ZWN26.CBT", label: "Jul 26" },
+      { symbol: "ZWU26.CBT", label: "Sep 26" },
+    ],
+  },
 ];
 
 async function fetchQuote(symbol: string) {
@@ -32,7 +45,16 @@ async function fetchQuote(symbol: string) {
   const change: number = meta.regularMarketChange ?? (price - prevClose);
   const changePercent: number = meta.regularMarketChangePercent ?? (prevClose > 0 ? (change / prevClose) * 100 : 0);
 
-  return { price, change, changePercent, currency: meta.currency as string };
+  return {
+    price,
+    change,
+    changePercent,
+    prevClose: prevClose,
+    high: meta.regularMarketDayHigh ?? null,
+    low:  meta.regularMarketDayLow  ?? null,
+    volume: meta.regularMarketVolume ?? null,
+    currency: meta.currency as string,
+  };
 }
 
 Deno.serve(async (req) => {
@@ -51,17 +73,25 @@ Deno.serve(async (req) => {
     });
   }
 
-  const results = await Promise.allSettled(
-    SYMBOLS.map((s) => fetchQuote(s.symbol).then((q) => ({ ...s, ...q }))),
+  const products = await Promise.all(
+    PRODUCTS.map(async (p) => {
+      const rows = await Promise.allSettled(
+        p.contracts.map((c) => fetchQuote(c.symbol).then((q) => ({ label: c.label, symbol: c.symbol, ...q }))),
+      );
+      return {
+        market: p.market,
+        product: p.product,
+        unit: p.unit,
+        contracts: rows.map((r, i) => {
+          if (r.status === "fulfilled") return r.value;
+          console.error(`Failed ${p.contracts[i].symbol}:`, r.reason?.message);
+          return { label: p.contracts[i].label, symbol: p.contracts[i].symbol, price: null, change: null, changePercent: null, prevClose: null, high: null, low: null, volume: null, currency: null };
+        }),
+      };
+    }),
   );
 
-  const futures = results.map((r, i) => {
-    if (r.status === "fulfilled") return r.value;
-    console.error(`Failed ${SYMBOLS[i].symbol}:`, r.reason?.message);
-    return { ...SYMBOLS[i], price: null, change: null, changePercent: null, currency: null };
-  });
-
-  return new Response(JSON.stringify({ futures, fetchedAt: new Date().toISOString() }), {
+  return new Response(JSON.stringify({ products, fetchedAt: new Date().toISOString() }), {
     status: 200,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });

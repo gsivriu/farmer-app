@@ -8560,6 +8560,84 @@ select.input:focus {
   50%       { opacity: 0.45; }
 }
 
+/* -------- FUTURES TABLE (MarketTicker redesign) -------- */
+.ft-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.ft-product {
+  min-width: 0;
+}
+
+.ft-product-header {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.ft-product-name {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-secondary);
+}
+
+.ft-product-unit {
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+
+.ft-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ft-th {
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  padding: 3px 6px;
+  border-bottom: var(--hairline);
+  white-space: nowrap;
+}
+
+.ft-td {
+  padding: 5px 6px;
+  color: var(--text-primary);
+  border-bottom: var(--hairline);
+  white-space: nowrap;
+}
+
+.ft-tr:last-child .ft-td { border-bottom: none; }
+
+.ft-right { text-align: right; }
+.ft-th:first-child, .ft-td:first-child { padding-left: 0; }
+
+.ft-contract { font-weight: 500; color: var(--text-secondary); }
+.ft-last     { font-weight: 600; }
+.ft-prev     { color: var(--text-tertiary); font-size: 11px; }
+
+.ft-change.positive { color: #16a34a; }
+.ft-change.negative { color: var(--brand-red); }
+.ft-change.ft-neutral { color: var(--text-tertiary); }
+.ft-change { text-align: right; font-size: 11px; }
+
+.theme-dark .ft-change.positive { color: #4ade80; }
+.theme-dark .ft-change.negative { color: #f87171; }
+
+@media (max-width: 500px) {
+  .ft-grid { grid-template-columns: 1fr; }
+}
+
 /* -------- EXCHANGE SECTION — micro-list, no card -------- */
 .exchange-section {
   display: flex;
