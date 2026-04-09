@@ -25,7 +25,7 @@ export function CommoditiesProvider({ children }) {
   const fetchCommodities = useCallback(async () => {
     const { data, error } = await supabase
       .from("commodities")
-      .select("name, price, last_updated");
+      .select("name, price, last_price, last_updated");
 
     if (error || !Array.isArray(data)) return;
 
@@ -33,7 +33,8 @@ export function CommoditiesProvider({ children }) {
       data.map((row) => [
         normalizeName(row.name),
         {
-          price: Number(row.price),
+          price:       Number(row.price),
+          lastPrice:   row.last_price != null ? Number(row.last_price) : null,
           lastUpdated: row.last_updated ? String(row.last_updated) : null,
         },
       ])
@@ -43,17 +44,26 @@ export function CommoditiesProvider({ children }) {
       (prev.length ? prev : initialCommodities).map((c) => {
         const match = byName.get(normalizeName(c.name));
         if (!match || !Number.isFinite(match.price)) return c;
-        const oldPrice = Number(c.price || 0);
-        const nextPrice = Number(match.price);
+
+        const nextPrice   = match.price;
+        const nextLast    = match.lastPrice;   // previous price stored in DB
         const nextUpdated = match.lastUpdated;
-        if (nextUpdated && c.lastUpdated && nextUpdated === c.lastUpdated) return c;
-        const diff = nextPrice - oldPrice;
-        const trend = diff > 0 ? "up" : diff < 0 ? "down" : "flat";
+
+        // Compute trend from DB values — persistent across logout/login
+        // and independent per commodity.
+        let trend      = "flat";
+        let priceChange = 0;
+        if (nextLast != null) {
+          const diff = nextPrice - nextLast;
+          trend       = diff > 0 ? "up" : diff < 0 ? "down" : "flat";
+          priceChange = diff;
+        }
+
         return {
           ...c,
-          price: nextPrice,
-          lastPrice: oldPrice,
-          priceChange: diff === 0 ? 0 : diff,
+          price:       nextPrice,
+          lastPrice:   nextLast,
+          priceChange,
           trend,
           lastUpdated: nextUpdated || c.lastUpdated,
         };
@@ -67,29 +77,36 @@ export function CommoditiesProvider({ children }) {
   const updateCommodityPrice = async (id, newPrice) => {
     const target = commodities.find((c) => c.id === id);
     const targetName = target?.name || id;
-    const updatedAt = new Date().toISOString();
+    const oldPrice   = target ? Number(target.price) : null;
+    const updatedAt  = new Date().toISOString();
 
     const { error } = await supabase
       .from("commodities")
       .upsert(
-        { name: targetName, price: newPrice, last_updated: updatedAt },
+        {
+          name:         targetName,
+          price:        newPrice,
+          last_price:   oldPrice,   // persist previous price in DB
+          last_updated: updatedAt,
+        },
         { onConflict: "name" }
       );
 
     if (error) return { error };
 
+    // Update only the modified commodity in local state.
+    // All others keep their existing trend unchanged.
     setCommodities((prev) =>
       prev.map((c) => {
         if (c.id !== id) return c;
-        const oldPrice = Number(c.price || 0);
         const nextPrice = Number(newPrice);
-        const diff = nextPrice - oldPrice;
-        const trend = diff > 0 ? "up" : diff < 0 ? "down" : "flat";
+        const diff      = oldPrice != null ? nextPrice - oldPrice : 0;
+        const trend     = diff > 0 ? "up" : diff < 0 ? "down" : "flat";
         return {
           ...c,
-          price: nextPrice,
-          lastPrice: oldPrice,
-          priceChange: diff === 0 ? 0 : diff,
+          price:       nextPrice,
+          lastPrice:   oldPrice,
+          priceChange: diff,
           trend,
           lastUpdated: updatedAt,
         };
