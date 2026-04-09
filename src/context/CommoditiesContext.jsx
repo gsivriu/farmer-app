@@ -80,13 +80,14 @@ export function CommoditiesProvider({ children }) {
     const oldPrice   = target ? Number(target.price) : null;
     const updatedAt  = new Date().toISOString();
 
+    // Note: last_price is set automatically by DB trigger (trg_commodity_track_last_price).
+    // Do NOT send last_price from the client — the trigger uses OLD.price which is always correct.
     const { error } = await supabase
       .from("commodities")
       .upsert(
         {
           name:         targetName,
           price:        newPrice,
-          last_price:   oldPrice,   // persist previous price in DB
           last_updated: updatedAt,
         },
         { onConflict: "name" }
