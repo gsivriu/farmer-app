@@ -71,7 +71,21 @@ export function CommoditiesProvider({ children }) {
     );
   }, []);
 
+  // Fetch on mount (works when session already exists, e.g. page refresh).
   useEffect(() => { fetchCommodities(); }, [fetchCommodities]);
+
+  // Re-fetch after login: AppProvider mounts before auth, so the initial
+  // fetchCommodities runs without a session (RLS blocks it). SIGNED_IN fires
+  // once the session is established → fetch with auth → trends load correctly.
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN") {
+        fetchCommodities();
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [fetchCommodities]);
+
   useRealtimeSubscription("commodities", fetchCommodities);
 
   const updateCommodityPrice = async (id, newPrice) => {
