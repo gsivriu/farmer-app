@@ -12,21 +12,25 @@ const PRODUCT_OPTIONS = [
 ];
 
 const PARITY_OPTIONS = ["CPT", "DAP", "FCA", "FOR", "FOB", "CIF"];
+const CURRENCY_OPTIONS = ["EUR", "USD", "RON"];
+
+const currentYear = new Date().getFullYear();
+const CROP_YEAR_OPTIONS = [currentYear - 1, currentYear, currentYear + 1];
 
 export default function BidForm({ onBidCreated, embedded = false }) {
   const [product, setProduct] = useState("wheat");
-  const isSunflower = product === "sunflower";
-  const priceLabel = isSunflower ? "Price (USD/t)" : "Price (EUR/t)";
-
   const [quantity, setQuantity] = useState("");
   const [price, setPrice] = useState("");
+  const [currency, setCurrency] = useState("EUR");
   const [parity, setParity] = useState("CPT");
   const [locations, setLocations] = useState([]);
   const [location, setLocation] = useState("Port Constanța");
   const [loadingLocation, setLoadingLocation] = useState("");
-
   const [deliveryStart, setDeliveryStart] = useState("");
   const [deliveryEnd, setDeliveryEnd] = useState("");
+  const [cropYear, setCropYear] = useState(String(currentYear));
+  const [quantityTolerance, setQuantityTolerance] = useState("");
+  const [remarks, setRemarks] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
@@ -97,12 +101,16 @@ export default function BidForm({ onBidCreated, embedded = false }) {
       product,
       quantity: qtyNum,
       price: priceNum,
+      currency,
       parity,
       delivery_location: isFreightParity(parity) ? null : location || "Port Constanța",
       loading_location: isFreightParity(parity) ? loadingLocation || null : null,
       freight_cost: null,
       delivery_start: deliveryStart || null,
       delivery_end: deliveryEnd || null,
+      crop_year: cropYear ? Number(cropYear) : null,
+      quantity_tolerance: quantityTolerance ? Number(quantityTolerance) : null,
+      remarks: remarks.trim() || null,
       status: "pending",
     });
 
@@ -122,27 +130,44 @@ export default function BidForm({ onBidCreated, embedded = false }) {
     // Reset
     setQuantity("");
     setPrice("");
+    setCurrency("EUR");
     setParity("CPT");
     setLocation("Port Constanța");
     setLoadingLocation("");
     setDeliveryStart("");
     setDeliveryEnd("");
+    setCropYear(String(currentYear));
+    setQuantityTolerance("");
+    setRemarks("");
 
     if (onBidCreated) onBidCreated();
   };
+
+  const qtyInvalid = !!error && error.includes("quantity");
+  const priceInvalid = !!error && error.includes("price");
+  const dateInvalid = !!error && error.includes("date");
 
   const content = (
     <>
       <h2>Place a bid</h2>
 
-      {message && <p className="badge accepted">{message}</p>}
-      {error && <p className="badge rejected">{error}</p>}
+      {message && (
+        <p className="bid-form-feedback bid-feedback-success" role="status">
+          {message}
+        </p>
+      )}
+      {error && (
+        <p className="bid-form-feedback bid-feedback-error" role="alert" id="bid-form-error">
+          {error}
+        </p>
+      )}
 
-      <form className="form" onSubmit={handleSubmit}>
+      <form className="form" onSubmit={handleSubmit} autoComplete="off" noValidate>
         {/* PRODUCT */}
         <div className="bid-input-container">
-          <label className="bid-input-label">Product</label>
+          <label className="bid-input-label" htmlFor="bid-product">Product</label>
           <select
+            id="bid-product"
             className="bid-input-field"
             value={product}
             onChange={(e) => setProduct(e.target.value)}
@@ -155,15 +180,21 @@ export default function BidForm({ onBidCreated, embedded = false }) {
           </select>
         </div>
 
-        {/* QUANTITY + PRICE */}
+        {/* QUANTITY + TOLERANCE */}
         <div className="bid-form-grid-2">
           <div className="bid-input-container">
-            <label className="bid-input-label">Quantity (t)</label>
+            <label className="bid-input-label" htmlFor="bid-quantity">Quantity (t)</label>
             <input
+              id="bid-quantity"
               className="bid-input-field"
               type="number"
+              inputMode="decimal"
               min="0"
               step="0.01"
+              required
+              aria-required="true"
+              aria-invalid={qtyInvalid || undefined}
+              aria-describedby={qtyInvalid ? "bid-form-error" : undefined}
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
               placeholder="ex: 100"
@@ -171,24 +202,64 @@ export default function BidForm({ onBidCreated, embedded = false }) {
           </div>
 
           <div className="bid-input-container">
-            <label className="bid-input-label">{priceLabel}</label>
+            <label className="bid-input-label" htmlFor="bid-tolerance">Tolerance (%)</label>
             <input
+              id="bid-tolerance"
               className="bid-input-field"
               type="number"
+              inputMode="numeric"
+              min="0"
+              max="100"
+              step="1"
+              value={quantityTolerance}
+              onChange={(e) => setQuantityTolerance(e.target.value)}
+              placeholder="ex: 5"
+            />
+          </div>
+        </div>
+
+        {/* PRICE + CURRENCY */}
+        <div className="bid-form-grid-2">
+          <div className="bid-input-container">
+            <label className="bid-input-label" htmlFor="bid-price">Price (/t)</label>
+            <input
+              id="bid-price"
+              className="bid-input-field"
+              type="number"
+              inputMode="decimal"
               min="0"
               step="0.5"
+              required
+              aria-required="true"
+              aria-invalid={priceInvalid || undefined}
+              aria-describedby={priceInvalid ? "bid-form-error" : undefined}
               value={price}
               onChange={(e) => setPrice(e.target.value)}
-              placeholder={isSunflower ? "ex: 510" : "ex: 200"}
+              placeholder="ex: 200"
             />
+          </div>
+
+          <div className="bid-input-container">
+            <label className="bid-input-label" htmlFor="bid-currency">Currency</label>
+            <select
+              id="bid-currency"
+              className="bid-input-field"
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value)}
+            >
+              {CURRENCY_OPTIONS.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
           </div>
         </div>
 
         {/* PARITY + LOCATION */}
         <div className="bid-form-grid-2">
           <div className="bid-input-container">
-            <label className="bid-input-label">Parity</label>
+            <label className="bid-input-label" htmlFor="bid-parity">Parity</label>
             <select
+              id="bid-parity"
               className="bid-input-field"
               value={parity}
               onChange={(e) => setParity(e.target.value)}
@@ -203,8 +274,9 @@ export default function BidForm({ onBidCreated, embedded = false }) {
 
           {!isFreightParity(parity) && (
             <div className="bid-input-container">
-              <label className="bid-input-label">Delivery location</label>
+              <label className="bid-input-label" htmlFor="bid-location">Delivery location</label>
               <select
+                id="bid-location"
                 className="bid-input-field"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
@@ -225,8 +297,9 @@ export default function BidForm({ onBidCreated, embedded = false }) {
         {isFreightParity(parity) && (
           <div className="bid-form-grid-2">
             <div className="bid-input-container">
-              <label className="bid-input-label">Loading location</label>
+              <label className="bid-input-label" htmlFor="bid-loading-location">Loading location</label>
               <input
+                id="bid-loading-location"
                 className="bid-input-field"
                 type="text"
                 value={loadingLocation}
@@ -240,8 +313,9 @@ export default function BidForm({ onBidCreated, embedded = false }) {
         {/* DELIVERY DATES - NATIVE, MOBILE SAFE */}
         <div className="bid-form-grid-2">
           <div className="bid-input-container">
-            <label className="bid-input-label">Delivery start</label>
+            <label className="bid-input-label" htmlFor="bid-delivery-start">Delivery start</label>
             <input
+              id="bid-delivery-start"
               type="date"
               className="bid-input-field"
               value={deliveryStart}
@@ -250,20 +324,52 @@ export default function BidForm({ onBidCreated, embedded = false }) {
           </div>
 
           <div className="bid-input-container">
-            <label className="bid-input-label">Delivery end</label>
+            <label className="bid-input-label" htmlFor="bid-delivery-end">Delivery end</label>
             <input
+              id="bid-delivery-end"
               type="date"
               className="bid-input-field"
+              aria-invalid={dateInvalid || undefined}
+              aria-describedby={dateInvalid ? "bid-form-error" : undefined}
               value={deliveryEnd}
               onChange={(e) => setDeliveryEnd(e.target.value)}
             />
           </div>
         </div>
 
+        {/* CROP YEAR */}
+        <div className="bid-input-container">
+          <label className="bid-input-label" htmlFor="bid-crop-year">Crop year</label>
+          <select
+            id="bid-crop-year"
+            className="bid-input-field"
+            value={cropYear}
+            onChange={(e) => setCropYear(e.target.value)}
+          >
+            {CROP_YEAR_OPTIONS.map((y) => (
+              <option key={y} value={String(y)}>{y}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* REMARKS */}
+        <div className="bid-input-container">
+          <label className="bid-input-label" htmlFor="bid-remarks">Remarks (optional)</label>
+          <textarea
+            id="bid-remarks"
+            className="bid-input-field"
+            rows={2}
+            value={remarks}
+            onChange={(e) => setRemarks(e.target.value)}
+            placeholder="Any notes for the trader..."
+          />
+        </div>
+
         <button
           className="btn primary-btn full-width bid-submit-btn"
           type="submit"
           disabled={loading}
+          aria-disabled={loading}
         >
           {loading ? "Submitting..." : "Submit bid"}
         </button>

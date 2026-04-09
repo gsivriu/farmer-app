@@ -4,6 +4,7 @@ import { useAppContext } from "../../context/AppContext.jsx";
 import { getProductLabelSafe, PRODUCT_FILTER_KEYS } from "../../utils/productLabels";
 import { formatCompactNumber, hasPositiveNumber } from "../../utils/numberFormat";
 import { formatDeliveryRange, formatLocationDisplay, isFreightParity } from "../../utils/formatting";
+import BidCard from "../../components/features/BidCard.jsx";
 
 const formatDateOnly = (value) => {
   if (!value) return "-";
@@ -64,6 +65,15 @@ const normalizeOptionalText = (value) => {
   const trimmed = String(value ?? "").trim();
   return trimmed === "" ? null : trimmed;
 };
+
+function BidStatusBadge({ status }) {
+  const s = String(status || "").toLowerCase();
+  if (s === "accepted")        return <span className="bid-status-badge bid-status-accepted">Accepted</span>;
+  if (s === "rejected")        return <span className="bid-status-badge bid-status-rejected">Rejected</span>;
+  if (s === "countered")       return <span className="bid-status-badge bid-status-countered">Counter offer</span>;
+  if (s === "farmer_countered") return <span className="bid-status-badge bid-status-countered">Farmer counter</span>;
+  return <span className="bid-status-badge bid-status-pending">Pending</span>;
+}
 
 export default function BidsTab({ active }) {
   const { bids, fetchBids, addFarmerRewardsPoints } = useAppContext();
@@ -156,6 +166,16 @@ export default function BidsTab({ active }) {
     if (!hasFreight) return "Bid not submitted. Please complete transport fee.";
     if (!hasDelivery) return "Bid not submitted. Please complete delivery location.";
     return null;
+  };
+
+  // Direct accept/reject from card — no modal, no freight validation needed
+  const submitDirectDecision = async (action, bid) => {
+    const { error } = await supabase.from("bids").update({ status: action }).eq("id", bid.id);
+    if (error) { console.error("Decision error:", error.message); return; }
+    if (action === "accepted" && bid.farmer_id) {
+      await addFarmerRewardsPoints(bid.farmer_id, Number(bid.quantity || 0));
+    }
+    await fetchBids();
   };
 
   const submitAdminDecision = async (action, targetBid = null) => {
@@ -277,9 +297,8 @@ export default function BidsTab({ active }) {
         <div className="card-header admin-bids-header">
           <h2 className="market-title">All bids</h2>
           <div className="admin-bids-actions">
-            <button type="button" className="btn small outline" onClick={() => fetchBids()}>Refresh</button>
-            <button type="button" className="btn small outline filter-btn" onClick={() => setFiltersOpen(true)}>Filters</button>
-            <button type="button" className="btn small outline filter-btn" onClick={() => setShowStats((prev) => !prev)}>Stats</button>
+            <button type="button" className="btn small outline" onClick={() => setFiltersOpen(true)}>Filters</button>
+            <button type="button" className="btn small outline" onClick={() => setShowStats((prev) => !prev)}>Stats</button>
           </div>
         </div>
 
@@ -322,81 +341,16 @@ export default function BidsTab({ active }) {
 
         {!loading && !error && (
           <div className="admin-bid-list" style={{ marginTop: 14 }}>
-            {filteredBids.map((b) => {
-              const unit = b.product === "sunflower" ? "USD/t" : "EUR/t";
-              const statusClass =
-                b.status === "accepted" ? "is-accepted"
-                : b.status === "rejected" ? "is-rejected"
-                : b.status === "countered" ? "is-countered"
-                : b.status === "farmer_countered" ? "is-farmer-countered"
-                : "is-pending";
-              const acceptedPrice = getAcceptedPrice(b);
-              const showAccepted = b.status === "accepted" && acceptedPrice != null;
-              const showRejected = b.status === "rejected" && acceptedPrice != null;
-              const hasCounterPrice = hasPositiveNumber(b.counter_price);
-              const showCounter = !showAccepted && !showRejected && hasCounterPrice;
-              const showPending = !showCounter && !showAccepted && !showRejected;
-
-              return (
-                <div
-                  role="button"
-                  tabIndex={0}
-                  className={"bid-row admin-bid-row " + statusClass}
-                  key={b.id}
-                  onClick={() => openAdminModal(b, null)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" || event.key === " ") {
-                      event.preventDefault();
-                      openAdminModal(b, null);
-                    }
-                  }}
-                >
-                  <div className="bid-header">
-                    <div>
-                      <div className="bid-title">{getProductLabelSafe(b.product)}</div>
-                      <div className="bid-contract">Farmer: {b.farmer_email || b.farmer_id}</div>
-                    </div>
-                    <span className={`status-badge status-${statusClass.slice(3)}`}>
-                      {getStatusLabel(b.status)}
-                    </span>
-                  </div>
-                  <div className="admin-bid-info">
-                    <div className="admin-bid-column">
-                      <div className="bid-field">
-                        <span className="bid-value admin-bid-price">
-                          {showCounter ? (
-                            <span className="admin-bid-counter-value">
-                              {formatCompactNumber(b.counter_price)} {unit}
-                            </span>
-                          ) : showAccepted ? (
-                            `${formatCompactNumber(acceptedPrice)} ${unit}`
-                          ) : showRejected ? (
-                            `${formatCompactNumber(acceptedPrice)} ${unit}`
-                          ) : showPending ? (
-                            `${formatCompactNumber(b.price)} ${unit}`
-                          ) : "-"}
-                        </span>
-                      </div>
-                      <div className="bid-field">
-                        <span className="bid-value bid-parity-value">
-                          {formatParityDisplay(b, { detailed: true })}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="admin-bid-column admin-bid-column-right">
-                      <div className="bid-field bid-field-right">
-                        <span className="bid-label">Quantity</span>
-                        <span className="bid-value">{formatCompactNumber(b.quantity)} t</span>
-                      </div>
-                      <div className="bid-field bid-field-right">
-                        <span className="bid-label">Date</span>
-                        <span className="bid-value bid-date-value">{formatDateOnly(b.created_at)}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+            {filteredBids.map((b) => (
+              <BidCard
+                key={b.id}
+                bid={b}
+                onClick={() => openAdminModal(b, null)}
+                onAccept={() => submitDirectDecision("accepted", b)}
+                onReject={() => submitDirectDecision("rejected", b)}
+                onCounter={() => openAdminModal(b, "countered")}
+              />
+            ))}
 
             {filteredBids.length === 0 && (
               <div className="empty-state">
@@ -430,7 +384,7 @@ export default function BidsTab({ active }) {
       {/* Admin bid action modal */}
       {adminSelectedBid && (
         <div
-          className="bid-modal-backdrop"
+          className="bid-modal-backdrop bid-modal-backdrop-details"
           role="dialog"
           aria-modal="true"
           onClick={() => setAdminSelectedBid(null)}
@@ -439,17 +393,20 @@ export default function BidsTab({ active }) {
             className="bid-modal bid-modal-details"
             onClick={(event) => { event.stopPropagation(); setAdminConfirmAction(null); }}
           >
+            <div className="bid-detail-drag" aria-hidden="true" />
             <div className="bid-modal-header">
-              <h3>Bid details</h3>
-              <button type="button" className="btn small ghost" onClick={() => setAdminSelectedBid(null)}>
-                Close
+              <div className="bid-detail-header-left">
+                <div className="bid-detail-title-row">
+                  <h3 className="bid-detail-title">{getProductLabelSafe(adminSelectedBid.product)}</h3>
+                  <BidStatusBadge status={adminSelectedBid.status} />
+                </div>
+                <span className="bid-detail-date">{formatDateTime(adminSelectedBid.created_at)}</span>
+              </div>
+              <button type="button" className="bid-detail-close" onClick={() => setAdminSelectedBid(null)}>
+                ×
               </button>
             </div>
             <div className="bid-modal-body">
-              <div className="bid-modal-row">
-                <span className="bid-modal-label">Date</span>
-                <span className="bid-modal-value">{formatDateTime(adminSelectedBid.created_at)}</span>
-              </div>
               <div className="bid-modal-row">
                 <span className="bid-modal-label">Farmer</span>
                 <span className="bid-modal-value">{adminSelectedBid.farmer_email || adminSelectedBid.farmer_id}</span>
@@ -466,11 +423,11 @@ export default function BidsTab({ active }) {
                 <span className="bid-modal-label">Price</span>
                 <span className="bid-modal-value">
                   {adminSelectedBid.status === "accepted" && getAcceptedPrice(adminSelectedBid) != null ? (
-                    <>{formatCompactNumber(getAcceptedPrice(adminSelectedBid))}{" "}{adminSelectedBid.product === "sunflower" ? "USD/t" : "EUR/t"}</>
+                    <>{formatCompactNumber(getAcceptedPrice(adminSelectedBid))}{" "}{`${adminSelectedBid.currency || (adminSelectedBid.product === "sunflower" ? "USD" : "EUR")}/t`}</>
                   ) : hasPositiveNumber(adminSelectedBid.counter_price) ? (
-                    <>{formatCompactNumber(adminSelectedBid.counter_price)}{" "}{adminSelectedBid.product === "sunflower" ? "USD/t" : "EUR/t"}</>
+                    <>{formatCompactNumber(adminSelectedBid.counter_price)}{" "}{`${adminSelectedBid.currency || (adminSelectedBid.product === "sunflower" ? "USD" : "EUR")}/t`}</>
                   ) : (
-                    <>{formatCompactNumber(adminSelectedBid.price)}{" "}{adminSelectedBid.product === "sunflower" ? "USD/t" : "EUR/t"}</>
+                    <>{formatCompactNumber(adminSelectedBid.price)}{" "}{`${adminSelectedBid.currency || (adminSelectedBid.product === "sunflower" ? "USD" : "EUR")}/t`}</>
                   )}
                 </span>
               </div>
@@ -478,7 +435,7 @@ export default function BidsTab({ active }) {
                 <span className="bid-modal-label">Counter</span>
                 <span className="bid-modal-value bid-modal-counter">
                   <input
-                    className="input inline-input"
+                    className="bid-detail-counter-input"
                     type="number"
                     step="0.01"
                     inputMode="decimal"
@@ -487,7 +444,7 @@ export default function BidsTab({ active }) {
                     onChange={(e) => setAdminModalCounter(e.target.value)}
                   />
                   <span className="bid-modal-unit">
-                    {adminSelectedBid.product === "sunflower" ? "USD/t" : "EUR/t"}
+                    {`${adminSelectedBid.currency || (adminSelectedBid.product === "sunflower" ? "USD" : "EUR")}/t`}
                   </span>
                 </span>
               </div>
@@ -496,7 +453,7 @@ export default function BidsTab({ active }) {
                   <span className="bid-modal-label">Freight</span>
                   <span className="bid-modal-value bid-modal-counter">
                     <input
-                      className="input inline-input"
+                      className="bid-detail-counter-input"
                       type="number"
                       step="0.01"
                       inputMode="decimal"
@@ -505,7 +462,7 @@ export default function BidsTab({ active }) {
                       onChange={(e) => setAdminModalFreight(e.target.value)}
                     />
                     <span className="bid-modal-unit">
-                      {adminSelectedBid.product === "sunflower" ? "USD/t" : "EUR/t"}
+                      {`${adminSelectedBid.currency || (adminSelectedBid.product === "sunflower" ? "USD" : "EUR")}/t`}
                     </span>
                   </span>
                 </div>
@@ -545,6 +502,24 @@ export default function BidsTab({ active }) {
                   {formatDeliveryRange(adminSelectedBid.delivery_start, adminSelectedBid.delivery_end)}
                 </span>
               </div>
+              {adminSelectedBid.crop_year && (
+                <div className="bid-modal-row">
+                  <span className="bid-modal-label">Crop year</span>
+                  <span className="bid-modal-value">{adminSelectedBid.crop_year}</span>
+                </div>
+              )}
+              {adminSelectedBid.quantity_tolerance != null && (
+                <div className="bid-modal-row">
+                  <span className="bid-modal-label">Tolerance</span>
+                  <span className="bid-modal-value">±{adminSelectedBid.quantity_tolerance}%</span>
+                </div>
+              )}
+              {adminSelectedBid.remarks && (
+                <div className="bid-modal-row">
+                  <span className="bid-modal-label">Remarks</span>
+                  <span className="bid-modal-value">{adminSelectedBid.remarks}</span>
+                </div>
+              )}
               <div className="bid-modal-row">
                 <span className="bid-modal-label">Status</span>
                 <span className="bid-modal-value">{getStatusLabel(adminSelectedBid.status)}</span>
@@ -561,7 +536,7 @@ export default function BidsTab({ active }) {
                 {modalError}
               </div>
             )}
-            <div className="modal-actions">
+            <div className="bid-detail-footer">
               {(() => {
                 const currentCounter = parseOptionalNumber(adminModalCounter);
                 const originalCounter = parseOptionalNumber(adminModalOriginal.counter);
@@ -596,7 +571,7 @@ export default function BidsTab({ active }) {
                   <>
                     <button
                       type="button"
-                      className={`btn small ghost admin-reject-btn${adminConfirmAction === "rejected" ? " is-confirming" : ""}`}
+                      className={`bid-action-reject${adminConfirmAction === "rejected" ? " is-confirming" : ""}`}
                       disabled={isDecisionLocked}
                       onClick={(event) => {
                         event.stopPropagation();
@@ -608,7 +583,7 @@ export default function BidsTab({ active }) {
                     </button>
                     <button
                       type="button"
-                      className={`btn small ghost admin-counter-btn${adminConfirmAction === "countered" ? " is-confirming" : ""}`}
+                      className={`bid-action-counter${adminConfirmAction === "countered" ? " is-confirming" : ""}`}
                       disabled={isDecisionLocked || !hasChanges || counterInvalid || freightInvalid}
                       onClick={(event) => {
                         event.stopPropagation();
@@ -620,7 +595,7 @@ export default function BidsTab({ active }) {
                     </button>
                     <button
                       type="button"
-                      className={`btn small ghost admin-accept-btn${adminConfirmAction === "accepted" ? " is-confirming" : ""}`}
+                      className={`bid-action-accept${adminConfirmAction === "accepted" ? " is-confirming" : ""}`}
                       disabled={isDecisionLocked || hasChanges}
                       onClick={(event) => {
                         event.stopPropagation();
@@ -633,7 +608,7 @@ export default function BidsTab({ active }) {
                   </>
                 );
               })()}
-            </div>
+            </div>{/* bid-detail-footer */}
           </div>
         </div>
       )}
@@ -649,7 +624,7 @@ export default function BidsTab({ active }) {
           <div className="bid-modal" onClick={(event) => event.stopPropagation()}>
             <div className="bid-modal-header">
               <h3>Filters</h3>
-              <button type="button" className="btn small outline filter-btn" onClick={() => setFiltersOpen(false)}>
+              <button type="button" className="btn small outline" onClick={() => setFiltersOpen(false)}>
                 Close
               </button>
             </div>
@@ -717,10 +692,10 @@ export default function BidsTab({ active }) {
                 <input className="input" type="date" value={filterDeliveryTo} onChange={(e) => setFilterDeliveryTo(e.target.value)} />
               </div>
               <div className="filter-actions">
-                <button type="button" className="btn small outline filter-btn" onClick={() => setFiltersOpen(false)}>Apply</button>
+                <button type="button" className="btn small outline" onClick={() => setFiltersOpen(false)}>Apply</button>
                 <button
                   type="button"
-                  className="btn small outline filter-btn"
+                  className="btn small outline"
                   onClick={() => {
                     setListFarmerFilter("all");
                     setFilterProduct("all");

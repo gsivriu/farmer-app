@@ -38,20 +38,20 @@ export default function ExchangeRatesCard() {
   }
 
   return (
-    <div className="exchange-card">
-      <div className="card-header exchange-card-header">
-        <h3 className="market-title">Exchange</h3>
+    <div className="exchange-section">
+      <div className="exchange-header">
+        <span className="exchange-title">Exchange rates</span>
         <div className="exchange-header-actions">
-          <div className="small-text exchange-updated">
+          <span className="exchange-updated">
             Updated: {formatDateDMY(rates.lastUpdated)}
-          </div>
+          </span>
           <button
             type="button"
             className="exchange-calc-btn"
             onClick={() => setIsModalOpen(true)}
             aria-label="Open currency converter"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <rect x="5" y="3" width="14" height="18" rx="2" />
               <line x1="8" y1="8" x2="16" y2="8" />
               <line x1="8" y1="12" x2="10" y2="12" />
@@ -64,20 +64,16 @@ export default function ExchangeRatesCard() {
           </button>
         </div>
       </div>
-      <div className="exchange-divider exchange-divider-top" />
-      <div className="exchange-grid">
-        <div className="exchange-row">
-          <span>🇪🇺 1 EUR</span>
-          <span className="exchange-value">{rates.ronToEur} RON</span>
-        </div>
-        <div className="exchange-row">
-          <span>🇺🇸 1 USD</span>
-          <span className="exchange-value">{rates.ronToUsd} RON</span>
-        </div>
+      <div className="exchange-row">
+        <span className="exchange-pair">🇪🇺 1 EUR</span>
+        <span className="exchange-value">{rates.ronToEur} RON</span>
       </div>
-      <div className="exchange-divider" />
-      <div className="exchange-row exchange-row-muted">
-        <span>EUR/USD parity</span>
+      <div className="exchange-row">
+        <span className="exchange-pair">🇺🇸 1 USD</span>
+        <span className="exchange-value">{rates.ronToUsd} RON</span>
+      </div>
+      <div className="exchange-row">
+        <span className="exchange-pair">EUR/USD parity</span>
         <span className="exchange-value">{rates.eurToUsd}</span>
       </div>
 

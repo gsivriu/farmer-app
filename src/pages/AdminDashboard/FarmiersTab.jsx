@@ -37,14 +37,7 @@ function Toast({ toast, onDismiss }) {
 function StatusBadge({ status }) {
   const active = status === "active";
   return (
-    <span
-      style={{
-        display: "inline-block", padding: "2px 10px", borderRadius: "999px",
-        fontSize: "12px", fontWeight: 600,
-        background: active ? "rgba(16,185,129,0.15)" : "rgba(185,16,30,0.12)",
-        color: active ? "var(--green)" : "var(--red)",
-      }}
-    >
+    <span className={active ? "farmers-badge-active" : "farmers-badge-inactive"}>
       {active ? "Activ" : "Dezactivat"}
     </span>
   );
@@ -157,20 +150,18 @@ export default function FarmiersTab() {
   };
 
   return (
-    <div style={{ padding: "0 0 40px" }}>
+    <div className="farmers-page">
       <Toast toast={toast} onDismiss={() => setToast(null)} />
 
-      {/* ── B) INVITAȚIE ─────────────────────────────────────── */}
-      <section style={{ marginBottom: "32px" }}>
-        <h3 style={{ fontSize: "15px", fontWeight: 700, marginBottom: "14px", opacity: 0.85 }}>
-          Invită fermier nou
-        </h3>
+      {/* ── INVITAȚIE ─────────────────────────────────────── */}
+      <section className="farmers-invite">
+        <h3 className="farmers-section-eyebrow">Invită fermier nou</h3>
         <form onSubmit={handleInvite}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-            <label className="label" style={{ gridColumn: "1 / -1" }}>
-              Email *
+          <div className="farmers-form-grid">
+            <label className="farmers-form-group farmers-form-full">
+              <span className="farmers-form-label">Email *</span>
               <input
-                className="input"
+                className="farmers-input"
                 type="email"
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
@@ -178,10 +169,10 @@ export default function FarmiersTab() {
                 required
               />
             </label>
-            <label className="label" style={{ gridColumn: "1 / -1" }}>
-              Nume complet *
+            <label className="farmers-form-group farmers-form-full">
+              <span className="farmers-form-label">Nume complet *</span>
               <input
-                className="input"
+                className="farmers-input"
                 type="text"
                 value={inviteName}
                 onChange={(e) => setInviteName(e.target.value)}
@@ -189,10 +180,10 @@ export default function FarmiersTab() {
                 required
               />
             </label>
-            <label className="label">
-              Județ
+            <label className="farmers-form-group">
+              <span className="farmers-form-label">Județ</span>
               <select
-                className="input"
+                className="farmers-input farmers-select"
                 value={inviteJudet}
                 onChange={(e) => setInviteJudet(e.target.value)}
               >
@@ -202,10 +193,10 @@ export default function FarmiersTab() {
                 ))}
               </select>
             </label>
-            <label className="label">
-              Telefon
+            <label className="farmers-form-group">
+              <span className="farmers-form-label">Telefon</span>
               <input
-                className="input"
+                className="farmers-input"
                 type="tel"
                 value={inviteTelefon}
                 onChange={(e) => setInviteTelefon(e.target.value)}
@@ -214,73 +205,63 @@ export default function FarmiersTab() {
             </label>
           </div>
           <button
-            className="btn primary-btn"
+            className="farmers-invite-btn"
             type="submit"
             disabled={inviteLoading}
-            style={{ marginTop: "14px", minWidth: "180px" }}
           >
             {inviteLoading ? "Se trimite..." : "Trimite invitație"}
           </button>
         </form>
       </section>
 
-      <div className="surface-divider" style={{ margin: "0 0 24px" }} />
-
-      {/* ── A) LISTA FERMIERILOR ──────────────────────────────── */}
-      <section>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "14px", flexWrap: "wrap" }}>
-          <h3 style={{ fontSize: "15px", fontWeight: 700, margin: 0, opacity: 0.85, flex: "1 1 auto" }}>
+      {/* ── LISTA FERMIERILOR ──────────────────────────────── */}
+      <section className="farmers-list">
+        <div className="farmers-list-header">
+          <h3 className="farmers-list-title">
             Fermieri înregistrați
             {!loadingList && (
-              <span style={{ fontWeight: 400, opacity: 0.5, fontSize: "13px", marginLeft: "8px" }}>
-                ({filtered.length})
-              </span>
+              <span className="farmers-list-count">({filtered.length})</span>
             )}
           </h3>
           <input
-            className="input"
+            className="farmers-search"
             type="text"
             placeholder="Caută după nume sau email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{ maxWidth: "260px", flex: "0 0 auto" }}
           />
         </div>
 
         {loadingList ? (
-          <div style={{ textAlign: "center", padding: "2rem", opacity: 0.5 }}>Se încarcă...</div>
+          <div className="farmers-empty">Se încarcă...</div>
         ) : filtered.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "2rem", opacity: 0.5 }}>
+          <div className="farmers-empty">
             {search ? "Niciun rezultat." : "Nu există fermieri înregistrați."}
           </div>
         ) : (
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+          <div className="farmers-table-wrap">
+            <table className="farmers-table">
               <thead>
-                <tr style={{ borderBottom: "2px solid var(--gray-light)", textAlign: "left" }}>
+                <tr>
                   {["Nume complet", "Email", "Telefon", "Județ", "Status", "Data înregistrării", "Acțiuni"].map((h) => (
-                    <th key={h} style={{ padding: "8px 12px", fontWeight: 600, opacity: 0.7, whiteSpace: "nowrap" }}>{h}</th>
+                    <th key={h}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((f) => (
-                  <tr
-                    key={f.id}
-                    style={{ borderBottom: "1px solid var(--gray-light)" }}
-                  >
-                    <td style={{ padding: "10px 12px", fontWeight: 500 }}>{f.full_name || "—"}</td>
-                    <td style={{ padding: "10px 12px" }}>{f.email}</td>
-                    <td style={{ padding: "10px 12px" }}>{f.telefon || "—"}</td>
-                    <td style={{ padding: "10px 12px" }}>{f.judet || "—"}</td>
-                    <td style={{ padding: "10px 12px" }}><StatusBadge status={f.status} /></td>
-                    <td style={{ padding: "10px 12px", whiteSpace: "nowrap" }}>{formatDate(f.created_at)}</td>
-                    <td style={{ padding: "10px 12px" }}>
+                  <tr key={f.id}>
+                    <td className="farmers-td-primary">{f.full_name || "—"}</td>
+                    <td className="farmers-td-primary">{f.email}</td>
+                    <td className={f.telefon ? "farmers-td-secondary" : "farmers-td-empty"}>{f.telefon || "—"}</td>
+                    <td className={f.judet ? "farmers-td-secondary" : "farmers-td-empty"}>{f.judet || "—"}</td>
+                    <td><StatusBadge status={f.status} /></td>
+                    <td className="farmers-td-secondary farmers-td-nowrap">{formatDate(f.created_at)}</td>
+                    <td>
                       <button
-                        className={`btn small ${f.status === "active" ? "outline" : "primary-btn"}`}
+                        className="farmers-toggle-btn"
                         type="button"
                         onClick={() => toggleStatus(f)}
-                        style={{ whiteSpace: "nowrap" }}
                       >
                         {f.status === "active" ? "Dezactivează" : "Activează"}
                       </button>

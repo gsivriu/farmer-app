@@ -67,8 +67,19 @@ function DashboardShell({ darkMode, setDarkMode }) {
   }
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    window.location.replace("/login");
+    try {
+      // scope:'local' curăță sesiunea fără apel de rețea — funcționează
+      // chiar dacă env vars sunt incorecți sau serverul e inaccesibil
+      await supabase.auth.signOut({ scope: "local" });
+    } catch (_) {
+      // ignorăm eroarea — curățăm manual oricum
+    } finally {
+      // Fallback: ștergem toate cheile Supabase din localStorage
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith("sb-")) localStorage.removeItem(key);
+      });
+      window.location.replace("/login");
+    }
   };
 
   return (

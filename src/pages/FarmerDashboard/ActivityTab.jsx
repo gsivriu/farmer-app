@@ -47,6 +47,30 @@ const parseOptionalNumber = (value) => {
   return Number.isFinite(num) ? num : NaN;
 };
 
+function SkeletonBidRow() {
+  return (
+    <div className="bid-row bid-row-skeleton" aria-hidden="true">
+      <div className="bid-card-header">
+        <div className="skeleton-line skeleton-title" />
+        <div className="skeleton-line skeleton-badge" />
+      </div>
+      <div className="bid-card-row bid-card-row-price">
+        <div className="skeleton-line skeleton-label" />
+        <div className="skeleton-line skeleton-price" />
+      </div>
+      <div className="bid-card-row">
+        <div className="skeleton-line skeleton-label" />
+        <div className="skeleton-line skeleton-value" />
+      </div>
+      <div className="bid-card-row">
+        <div className="skeleton-line skeleton-label" />
+        <div className="skeleton-line skeleton-value" />
+      </div>
+      <div className="bid-card-hint" style={{ visibility: "hidden" }}>—</div>
+    </div>
+  );
+}
+
 export default function ActivityTab() {
   const { bids, fetchBids, addFarmerRewardsPoints } = useAppContext();
 
@@ -157,6 +181,13 @@ export default function ActivityTab() {
     [statsRows]
   );
 
+  const activeFilterCount = [
+    productFilter !== "all",
+    statusFilter !== "all",
+    !!dateFrom,
+    !!dateTo,
+  ].filter(Boolean).length;
+
   // ── Handlers ────────────────────────────────────────────────────────────────
 
   const handleAcceptCounter = async (bid) => {
@@ -213,17 +244,24 @@ export default function ActivityTab() {
           <div className="card-header activity-header-compact">
             <h2 className="market-title">My Activity</h2>
             <div className="activity-header-actions">
-              <button type="button" className="btn small outline filter-btn" onClick={() => setFiltersOpen(true)}>
+              <button type="button" className="btn small outline" onClick={() => setFiltersOpen(true)}>
                 Filters
+                {activeFilterCount > 0 && (
+                  <span className="filter-active-dot" aria-label={`${activeFilterCount} active filters`} />
+                )}
               </button>
-              <button type="button" className="btn small outline filter-btn" onClick={() => setShowStats((prev) => !prev)}>
+              <button type="button" className="btn small outline" onClick={() => setShowStats((prev) => !prev)}>
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" style={{ marginRight: 5 }}>
+                  <rect x="1" y="7" width="3" height="6" rx="1" fill="currentColor" opacity="0.5"/>
+                  <rect x="5.5" y="4" width="3" height="9" rx="1" fill="currentColor" opacity="0.75"/>
+                  <rect x="10" y="1" width="3" height="12" rx="1" fill="currentColor"/>
+                </svg>
                 Stats
               </button>
             </div>
           </div>
 
           <div className="card-body">
-            {loading && <p>Loading data...</p>}
             {error && <p className="badge rejected">{error}</p>}
 
             {showStats && (
@@ -261,8 +299,29 @@ export default function ActivityTab() {
             )}
 
             <div className="dashboard-section">
-              {filteredBids.length === 0 ? (
-                <p className="small-text">You have no bids yet.</p>
+              {loading ? (
+                <div className="bid-list" aria-label="Loading bids" aria-busy="true">
+                  <SkeletonBidRow />
+                  <SkeletonBidRow />
+                  <SkeletonBidRow />
+                </div>
+              ) : filteredBids.length === 0 ? (
+                <div className="activity-empty-state">
+                  <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+                    <rect x="6" y="10" width="28" height="22" rx="4" stroke="#cbd5e1" strokeWidth="2" fill="none"/>
+                    <path d="M13 18h14M13 23h8" stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round"/>
+                    <circle cx="30" cy="10" r="6" fill="#f1f5f9" stroke="#e2e8f0" strokeWidth="1.5"/>
+                    <path d="M30 7v3l2 1.5" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                  <p className="activity-empty-title">
+                    {userBids.length === 0 ? "No bids yet" : "No bids match your filters"}
+                  </p>
+                  <p className="activity-empty-sub">
+                    {userBids.length === 0
+                      ? "Place your first bid from the Sale tab."
+                      : "Try adjusting or clearing the filters."}
+                  </p>
+                </div>
               ) : (
                 <div className="bid-list">
                   {filteredBids.map((b) => {
@@ -270,10 +329,11 @@ export default function ActivityTab() {
                       b.status === "accepted" ? "is-accepted"
                       : b.status === "rejected" ? "is-rejected"
                       : b.status === "countered" ? "is-countered"
+                      : b.status === "farmer_countered" ? "is-farmer-countered"
                       : "is-pending";
                     const hasCounterPrice = hasPositiveNumber(b.counter_price);
                     const activePrice = hasCounterPrice ? Number(b.counter_price) : Number(b.price);
-                    const unit = b.product === "sunflower" ? "USD/t" : "EUR/t";
+                    const unit = `${b.currency || (b.product === "sunflower" ? "USD" : "EUR")}/t`;
                     const statusLabel = getStatusLabel(b.status);
 
                     return (
@@ -300,42 +360,44 @@ export default function ActivityTab() {
                           }
                         }}
                       >
-                        <div className="bid-header">
-                          <div>
-                            <div className="bid-title">{getProductLabelSafe(b.product)}</div>
+                        <div className="bid-card-header">
+                          <div className="bid-card-header-main">
+                            <div className="bid-card-title">{getProductLabelSafe(b.product)}</div>
                             {b.status === "accepted" && b.contract_no && (
-                              <div className="bid-contract">Contract: {b.contract_no}</div>
+                              <div className="bid-card-subtitle">Contract: {b.contract_no}</div>
                             )}
                           </div>
-                          <span className={`status-badge status-${statusClass.slice(3)}`}>
-                            {statusLabel}
-                          </span>
-                        </div>
-
-                        <div className="bid-details bid-details-compact">
-                          <div className="bid-field">
-                            <span className="bid-label">Quantity</span>
-                            <span className="bid-value bid-qty">{formatCompactNumber(b.quantity)} t</span>
-                          </div>
-                          <div className="bid-field bid-field-right">
-                            <span className="bid-label">Price</span>
-                            <span className={["bid-value", "bid-price", hasCounterPrice && b.status === "countered" ? "farmer-bid-counter-value" : ""].join(" ")}>
-                              {formatCompactNumber(activePrice)} {unit}
+                          <div className="bid-card-header-badge">
+                            <span className={`status-badge status-${statusClass.slice(3)}`}>
+                              {statusLabel}
                             </span>
                           </div>
                         </div>
 
-                        <div className="bid-details bid-details-compact">
-                          <div className="bid-field">
-                            <span className="bid-value bid-parity-value">{formatParityDisplay(b)}</span>
-                          </div>
+                        <div className="bid-card-section-label">Details</div>
+
+                        <div className="bid-card-row bid-card-row-price">
+                          <span className="bid-card-label">Price</span>
+                          <span className={`bid-card-value${hasCounterPrice && b.status === "countered" ? " bid-card-counter-value" : ""}`}>
+                            {formatCompactNumber(activePrice)} {unit}
+                          </span>
+                        </div>
+                        <div className="bid-card-row">
+                          <span className="bid-card-label">Quantity</span>
+                          <span className="bid-card-value">{formatCompactNumber(b.quantity)} t</span>
+                        </div>
+                        <div className="bid-card-row">
+                          <span className="bid-card-label">Parity</span>
+                          <span className="bid-card-value">{formatParityDisplay(b)}</span>
+                        </div>
+                        <div className="bid-card-row">
+                          <span className="bid-card-label">Offer date</span>
+                          <span className="bid-card-value">{formatDateOnly(b.created_at)}</span>
                         </div>
 
-                        <div className="bid-footer">
-                          Offer date:{" "}
-                          <span className="bid-date-value">{formatDateOnly(b.created_at)}</span>
+                        <div className="bid-card-footer">
+                          <span className="bid-card-hint">View details ›</span>
                         </div>
-                        <div className="bid-hint">View details &gt;</div>
                       </div>
                     );
                   })}
@@ -352,6 +414,7 @@ export default function ActivityTab() {
           className="bid-modal-backdrop"
           role="dialog"
           aria-modal="true"
+          aria-labelledby="bid-detail-modal-title"
           onClick={() => { setSelectedBid(null); setFarmerActionError(null); setFarmerCounterSent(false); }}
         >
           <div
@@ -359,13 +422,14 @@ export default function ActivityTab() {
             onClick={(event) => { event.stopPropagation(); setFarmerConfirmAction(null); }}
           >
             <div className="bid-modal-header">
-              <h3>Bid details</h3>
+              <h3 id="bid-detail-modal-title">Bid details</h3>
               <button
                 type="button"
-                className="btn small ghost"
+                className="btn small ghost modal-close-btn"
+                aria-label="Close bid details"
                 onClick={() => { setSelectedBid(null); setFarmerActionError(null); setFarmerCounterSent(false); }}
               >
-                Close
+                ✕
               </button>
             </div>
             <div className="bid-modal-body">
@@ -394,7 +458,7 @@ export default function ActivityTab() {
                     onChange={(e) => setFarmerModalCounter(e.target.value)}
                   />
                   <span className="bid-modal-unit">
-                    {selectedBid.product === "sunflower" ? "USD/t" : "EUR/t"}
+                    {`${selectedBid.currency || (selectedBid.product === "sunflower" ? "USD" : "EUR")}/t`}
                   </span>
                 </span>
               </div>
@@ -422,13 +486,35 @@ export default function ActivityTab() {
                   {formatDeliveryRange(selectedBid.delivery_start, selectedBid.delivery_end)}
                 </span>
               </div>
+              {selectedBid.crop_year && (
+                <div className="bid-modal-row">
+                  <span className="bid-modal-label">Crop year</span>
+                  <span className="bid-modal-value">{selectedBid.crop_year}</span>
+                </div>
+              )}
+              {selectedBid.quantity_tolerance != null && (
+                <div className="bid-modal-row">
+                  <span className="bid-modal-label">Tolerance</span>
+                  <span className="bid-modal-value">±{selectedBid.quantity_tolerance}%</span>
+                </div>
+              )}
+              {selectedBid.remarks && (
+                <div className="bid-modal-row">
+                  <span className="bid-modal-label">Remarks</span>
+                  <span className="bid-modal-value">{selectedBid.remarks}</span>
+                </div>
+              )}
             </div>
 
             {farmerActionError && (
-              <p className="badge rejected" style={{ margin: "8px 0 0 0" }}>{farmerActionError}</p>
+              <p className="bid-form-feedback bid-feedback-error" style={{ margin: "8px 0 0 0" }} role="alert">
+                {farmerActionError}
+              </p>
             )}
             {farmerCounterSent && (
-              <p className="badge accepted" style={{ margin: "8px 0 0 0" }}>Counter offer sent to admin.</p>
+              <p className="bid-form-feedback bid-feedback-success" style={{ margin: "8px 0 0 0" }}>
+                Counter offer sent to admin.
+              </p>
             )}
 
             {selectedBid.status === "countered" && !farmerCounterSent && (
@@ -453,7 +539,7 @@ export default function ActivityTab() {
                     <>
                       <button
                         type="button"
-                        className="btn small ghost farmer-reject-btn"
+                        className="btn small farmer-reject-btn"
                         disabled={isLocked}
                         onClick={(event) => {
                           event.stopPropagation();
@@ -465,7 +551,7 @@ export default function ActivityTab() {
                       </button>
                       <button
                         type="button"
-                        className="btn small ghost farmer-counter-btn"
+                        className="btn small farmer-counter-btn"
                         disabled={!hasChanges || counterInvalid || isLocked}
                         onClick={(event) => {
                           event.stopPropagation();
@@ -477,7 +563,7 @@ export default function ActivityTab() {
                       </button>
                       <button
                         type="button"
-                        className="btn small ghost farmer-accept-btn"
+                        className="btn small farmer-accept-btn"
                         disabled={hasChanges || isLocked}
                         onClick={(event) => {
                           event.stopPropagation();
@@ -502,13 +588,19 @@ export default function ActivityTab() {
           className="bid-modal-backdrop"
           role="dialog"
           aria-modal="true"
+          aria-labelledby="filters-modal-title"
           onClick={() => setFiltersOpen(false)}
         >
           <div className="bid-modal" onClick={(event) => event.stopPropagation()}>
             <div className="bid-modal-header">
-              <h3>Filters</h3>
-              <button type="button" className="btn small outline filter-btn" onClick={() => setFiltersOpen(false)}>
-                Close
+              <h3 id="filters-modal-title">Filters</h3>
+              <button
+                type="button"
+                className="btn small ghost modal-close-btn"
+                aria-label="Close filters"
+                onClick={() => setFiltersOpen(false)}
+              >
+                ✕
               </button>
             </div>
             <div className="bid-modal-body">
@@ -543,12 +635,12 @@ export default function ActivityTab() {
               </div>
 
               <div className="filter-actions">
-                <button type="button" className="btn small outline filter-btn" onClick={() => setFiltersOpen(false)}>
+                <button type="button" className="btn small outline" onClick={() => setFiltersOpen(false)}>
                   Apply
                 </button>
                 <button
                   type="button"
-                  className="btn small outline filter-btn"
+                  className="btn small outline"
                   onClick={() => { setProductFilter("all"); setStatusFilter("all"); setDateFrom(""); setDateTo(""); }}
                 >
                   Reset
