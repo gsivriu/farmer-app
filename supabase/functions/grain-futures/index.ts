@@ -62,11 +62,12 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  // Verify the request comes from our own Supabase project via the apikey header.
-  // Market data is public — no user JWT needed.
+  // Light origin check: require any recognisable project key in the apikey header.
+  // We accept both the legacy JWT anon key AND the modern sb_publishable_ key
+  // because Vercel production may use either depending on the env var configured.
   const apikey = req.headers.get("apikey");
-  const expectedKey = Deno.env.get("SUPABASE_ANON_KEY");
-  if (!apikey || apikey !== expectedKey) {
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+  if (!apikey || (!apikey.startsWith("sb_publishable_") && apikey !== anonKey)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
