@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { Analytics } from "@vercel/analytics/react";
 import "./App.css";
 import { supabase } from "./supabaseClient";
 import { useAuth } from "./hooks/useAuth";
+import { usePushNotifications, useConsumePendingPushNav } from "./hooks/usePushNotifications";
 
 import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
@@ -55,6 +56,11 @@ function RegisterPage() {
 // ─── Dashboard shell (după login) ────────────────────────────────────────────
 function DashboardShell({ darkMode, setDarkMode }) {
   const { role, aalLevel, mfaEnrolled } = useAuth();
+  const navigate = useNavigate();
+
+  // Push notifications — only for farmers on native iOS
+  usePushNotifications(role === "farmer" ? navigate : null);
+  useConsumePendingPushNav(role === "farmer" ? navigate : null);
 
   // Trader fără 2FA enrollat → forțat la setup
   if (role === "admin" && !mfaEnrolled) {
