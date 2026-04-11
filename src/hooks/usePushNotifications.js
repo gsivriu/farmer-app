@@ -1,11 +1,11 @@
 import { useEffect, useRef } from "react";
-import { Capacitor } from "@capacitor/core";
+import { Capacitor, registerPlugin } from "@capacitor/core";
 import { supabase } from "../supabaseClient";
 
-// Dynamic import — avoids bundling the native package for web/Vercel builds.
-// @vite-ignore tells Rollup to skip resolution of this import entirely.
-const getPushNotifications = () =>
-  import(/* @vite-ignore */ "@capacitor/push-notifications").then((m) => m.PushNotifications);
+// Access the native PushNotifications plugin via Capacitor's plugin registry.
+// This avoids importing @capacitor/push-notifications (which can't be resolved
+// in the Vercel web build) while still calling the native iOS plugin correctly.
+const getPushNotifications = () => registerPlugin("PushNotifications");
 
 const SESSION_KEY = "pending_push_nav";
 
@@ -31,7 +31,7 @@ export function usePushNotifications(navigate) {
     let PushNotificationsRef = null;
 
     async function setup() {
-      const PushNotifications = await getPushNotifications();
+      const PushNotifications = getPushNotifications();
       PushNotificationsRef = PushNotifications;
 
       // 1. Request permission
@@ -41,15 +41,22 @@ export function usePushNotifications(navigate) {
       // 2. Add listeners BEFORE register() — the registration event fires
       //    asynchronously but could arrive before listeners if added after.
       PushNotifications.addListener("registration", async ({ value: token }) => {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+        console.log("[Push] APNs token received, length:", token?.length);
+        const { data: { user }, error: authErr } = await supabase.auth.getUser();
+        if (authErr) { console.error("[Push] getUser error:", authErr); return; }
+        if (!user) { console.error("[Push] No user session at registration time"); return; }
 
-        await supabase
+        const { error: upsertErr } = await supabase
           .from("device_tokens")
           .upsert(
             { user_id: user.id, token, platform: "ios", updated_at: new Date().toISOString() },
             { onConflict: "user_id,token" },
           );
+        if (upsertErr) {
+          console.error("[Push] device_tokens upsert failed:", upsertErr);
+        } else {
+          console.log("[Push] Token saved OK for user:", user.id.slice(0, 8));
+        }
       });
 
       PushNotifications.addListener("registrationError", (err) => {
