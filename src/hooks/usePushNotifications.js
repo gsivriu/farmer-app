@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Capacitor } from "@capacitor/core";
 import { PushNotifications } from "@capacitor/push-notifications";
 import { supabase } from "../supabaseClient";
@@ -14,23 +14,23 @@ const SESSION_KEY = "pending_push_nav";
  * sessionStorage and let the navigation layer consume it on mount.
  */
 export function usePushNotifications(navigate) {
-  useEffect(() => {
-    // Only run on native iOS — no-op in browser / Expo Go
-    if (!Capacitor.isNativePlatform()) return;
+  // Keep navigate in a ref so the listener always has the latest value
+  // without navigate being a dependency that re-runs the registration effect.
+  const navigateRef = useRef(navigate);
+  useEffect(() => { navigateRef.current = navigate; }, [navigate]);
 
-    let registered = false;
+  useEffect(() => {
+    // Only run on native iOS — no-op in browser
+    if (!Capacitor.isNativePlatform()) return;
 
     async function setup() {
       // 1. Request permission
       const { receive } = await PushNotifications.requestPermissions();
       if (receive !== "granted") return;
 
-      // 2. Register with APNs
-      await PushNotifications.register();
-
-      // 3. Token received → upsert in DB
+      // 2. Add listeners BEFORE register() — the registration event fires
+      //    asynchronously but could arrive before listeners if added after.
       PushNotifications.addListener("registration", async ({ value: token }) => {
-        registered = true;
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
@@ -42,28 +42,27 @@ export function usePushNotifications(navigate) {
           );
       });
 
-      // 4. Notification tapped while app is in foreground or background
+      PushNotifications.addListener("registrationError", (err) => {
+        console.error("Push registration error:", err);
+      });
+
       PushNotifications.addListener("pushNotificationActionPerformed", (action) => {
         const data = action.notification?.data ?? {};
         if (!data.screen) return;
 
-        if (navigate) {
-          // Navigation is ready — go directly
-          handleNavigation(navigate, data);
+        if (navigateRef.current) {
+          handleNavigation(navigateRef.current, data);
         } else {
-          // Cold launch: navigator not mounted yet → stash for later
           try {
             sessionStorage.setItem(SESSION_KEY, JSON.stringify(data));
           } catch (_) {
-            // sessionStorage unavailable (e.g. private mode) — silent fail
+            // sessionStorage unavailable — silent fail
           }
         }
       });
 
-      // 5. Registration error
-      PushNotifications.addListener("registrationError", (err) => {
-        console.error("Push registration error:", err);
-      });
+      // 3. Register with APNs — token arrives via "registration" listener above
+      await PushNotifications.register();
     }
 
     setup();
@@ -71,7 +70,7 @@ export function usePushNotifications(navigate) {
     return () => {
       PushNotifications.removeAllListeners();
     };
-  }, [navigate]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps — intentionally runs once
 }
 
 /**
