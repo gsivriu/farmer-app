@@ -2,9 +2,10 @@ import { useEffect, useRef } from "react";
 import { Capacitor } from "@capacitor/core";
 import { supabase } from "../supabaseClient";
 
-// Dynamic import — avoids bundling the native package for web/Vercel builds
+// Dynamic import — avoids bundling the native package for web/Vercel builds.
+// @vite-ignore tells Rollup to skip resolution of this import entirely.
 const getPushNotifications = () =>
-  import("@capacitor/push-notifications").then((m) => m.PushNotifications);
+  import(/* @vite-ignore */ "@capacitor/push-notifications").then((m) => m.PushNotifications);
 
 const SESSION_KEY = "pending_push_nav";
 
@@ -26,8 +27,12 @@ export function usePushNotifications(navigate) {
     // Only run on native iOS — no-op in browser
     if (!Capacitor.isNativePlatform()) return;
 
+    // Hold a reference so the cleanup function can call removeAllListeners
+    let PushNotificationsRef = null;
+
     async function setup() {
       const PushNotifications = await getPushNotifications();
+      PushNotificationsRef = PushNotifications;
 
       // 1. Request permission
       const { receive } = await PushNotifications.requestPermissions();
@@ -73,7 +78,7 @@ export function usePushNotifications(navigate) {
     setup();
 
     return () => {
-      PushNotifications.removeAllListeners();
+      PushNotificationsRef?.removeAllListeners();
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps — intentionally runs once
 }
