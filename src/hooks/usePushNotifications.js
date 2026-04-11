@@ -1,7 +1,10 @@
 import { useEffect, useRef } from "react";
 import { Capacitor } from "@capacitor/core";
-import { PushNotifications } from "@capacitor/push-notifications";
 import { supabase } from "../supabaseClient";
+
+// Dynamic import — avoids bundling the native package for web/Vercel builds
+const getPushNotifications = () =>
+  import("@capacitor/push-notifications").then((m) => m.PushNotifications);
 
 const SESSION_KEY = "pending_push_nav";
 
@@ -24,6 +27,8 @@ export function usePushNotifications(navigate) {
     if (!Capacitor.isNativePlatform()) return;
 
     async function setup() {
+      const PushNotifications = await getPushNotifications();
+
       // 1. Request permission
       const { receive } = await PushNotifications.requestPermissions();
       if (receive !== "granted") return;
