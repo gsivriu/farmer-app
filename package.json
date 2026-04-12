@@ -21,6 +21,7 @@
     "@capacitor/cli": "^8.0.0",
     "@capacitor/core": "^8.0.0",
     "@capacitor/ios": "^8.0.0",
+    "@capacitor/push-notifications": "^8.0.0",
     "@sentry/react": "^10.46.0",
     "@sentry/vite-plugin": "^5.1.1",
     "@supabase/supabase-js": "^2.87.0",
