@@ -26,8 +26,7 @@ export default function PricesGrid() {
       <div className="market-grid">
         {commodities.map((c) => {
           
-          // Sunflower is quoted in USD.
-          const unit = c.id === "sunflower" ? "USD/t" : "EUR/t";
+          const unit = `${c.currency || "EUR"}/t`;
 
           // Display trend arrow and price delta.
           let trendText = "";

@@ -9,16 +9,24 @@ export default function HomeTab() {
   const { commodities, updateCommodityPrice } = useAppContext();
 
   const [draftPrices, setDraftPrices] = useState({});
+  const [draftCurrencies, setDraftCurrencies] = useState({});
   const [priceNotice, setPriceNotice] = useState("");
 
   useEffect(() => {
     setDraftPrices(
       Object.fromEntries((commodities || []).map((c) => [c.id, String(c.price)]))
     );
+    setDraftCurrencies(
+      Object.fromEntries((commodities || []).map((c) => [c.id, c.currency || "EUR"]))
+    );
   }, [commodities]);
 
   const handleDraftChange = (id, value) => {
     setDraftPrices((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleCurrencyChange = (id, value) => {
+    setDraftCurrencies((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleSavePrice = async (id) => {
@@ -34,7 +42,8 @@ export default function HomeTab() {
       return;
     }
 
-    const { error } = await updateCommodityPrice(id, num);
+    const currency = draftCurrencies[id] || "EUR";
+    const { error } = await updateCommodityPrice(id, num, currency);
     if (error) {
       alert("Error updating price: " + error.message);
       return;
@@ -68,9 +77,15 @@ export default function HomeTab() {
                   onChange={(e) => handleDraftChange(c.id, e.target.value)}
                   placeholder="ex: 200"
                 />
-                <span className="admin-unit">
-                  {c.id === "sunflower" ? "USD/t" : "EUR/t"}
-                </span>
+                <select
+                  className="admin-currency-select"
+                  value={draftCurrencies?.[c.id] ?? "EUR"}
+                  onChange={(e) => handleCurrencyChange(c.id, e.target.value)}
+                >
+                  <option value="EUR">EUR/t</option>
+                  <option value="RON">RON/t</option>
+                  <option value="USD">USD/t</option>
+                </select>
                 <button
                   type="button"
                   className="admin-btn"

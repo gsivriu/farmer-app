@@ -8818,6 +8818,36 @@ select.input:focus {
   flex-shrink: 0;
 }
 
+.home-page .admin-currency-select {
+  height: 36px;
+  padding: 0 6px;
+  font-size: 11px;
+  font-family: var(--font-main);
+  color: var(--text-tertiary);
+  background: transparent;
+  border: 1px solid hsl(0, 0%, 80%);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  flex-shrink: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 18px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23999' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 4px center;
+}
+
+.home-page .admin-currency-select:focus {
+  outline: none;
+  border-color: hsl(0, 0%, 60%);
+}
+
+.theme-dark .home-page .admin-currency-select {
+  border-color: #1f2937;
+  color: #9ca3af;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%236b7280' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+}
+
 .home-page .admin-btn {
   height: 36px;
   padding: 0 var(--space-6);
@@ -8941,6 +8971,12 @@ select.input:focus {
     font-size: 12px;
     color: var(--text-tertiary);
     flex-shrink: 0;
+  }
+
+  .home-page .admin-currency-select {
+    height: 42px;
+    font-size: 14px;  /* prevent iOS auto-zoom */
+    padding: 0 22px 0 8px;
   }
 
   .home-page .admin-btn {

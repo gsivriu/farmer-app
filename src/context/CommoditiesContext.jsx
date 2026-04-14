@@ -3,11 +3,11 @@ import { supabase } from "../supabaseClient";
 import { useRealtimeSubscription } from "../hooks/useRealtimeSubscription";
 
 const initialCommodities = [
-  { id: "wheat",     name: "Grâu",              price: 200, basis: "CPT Constanța", lastPrice: null, priceChange: 0, trend: "flat", lastUpdated: null },
-  { id: "barley",    name: "Orz",               price: 180, basis: "CPT Constanța", lastPrice: null, priceChange: 0, trend: "flat", lastUpdated: null },
-  { id: "corn",      name: "Porumb",             price: 190, basis: "CPT Constanța", lastPrice: null, priceChange: 0, trend: "flat", lastUpdated: null },
-  { id: "rapeseed",  name: "Rapiță",             price: 420, basis: "CPT Constanța", lastPrice: null, priceChange: 0, trend: "flat", lastUpdated: null },
-  { id: "sunflower", name: "Floarea soarelui",   price: 380, basis: "CPT Constanța", lastPrice: null, priceChange: 0, trend: "flat", lastUpdated: null },
+  { id: "wheat",     name: "Grâu",              price: 200, currency: "EUR", basis: "CPT Constanța", lastPrice: null, priceChange: 0, trend: "flat", lastUpdated: null },
+  { id: "barley",    name: "Orz",               price: 180, currency: "EUR", basis: "CPT Constanța", lastPrice: null, priceChange: 0, trend: "flat", lastUpdated: null },
+  { id: "corn",      name: "Porumb",             price: 190, currency: "EUR", basis: "CPT Constanța", lastPrice: null, priceChange: 0, trend: "flat", lastUpdated: null },
+  { id: "rapeseed",  name: "Rapiță",             price: 420, currency: "EUR", basis: "CPT Constanța", lastPrice: null, priceChange: 0, trend: "flat", lastUpdated: null },
+  { id: "sunflower", name: "Floarea soarelui",   price: 380, currency: "USD", basis: "CPT Constanța", lastPrice: null, priceChange: 0, trend: "flat", lastUpdated: null },
 ];
 
 const normalizeName = (value) =>
@@ -25,7 +25,7 @@ export function CommoditiesProvider({ children }) {
   const fetchCommodities = useCallback(async () => {
     const { data, error } = await supabase
       .from("commodities")
-      .select("name, price, last_price, last_updated");
+      .select("name, price, currency, last_price, last_updated");
 
     if (error || !Array.isArray(data)) return;
 
@@ -34,6 +34,7 @@ export function CommoditiesProvider({ children }) {
         normalizeName(row.name),
         {
           price:       Number(row.price),
+          currency:    row.currency || "EUR",
           lastPrice:   row.last_price != null ? Number(row.last_price) : null,
           lastUpdated: row.last_updated ? String(row.last_updated) : null,
         },
@@ -62,6 +63,7 @@ export function CommoditiesProvider({ children }) {
         return {
           ...c,
           price:       nextPrice,
+          currency:    match.currency,
           lastPrice:   nextLast,
           priceChange,
           trend,
@@ -88,10 +90,11 @@ export function CommoditiesProvider({ children }) {
 
   useRealtimeSubscription("commodities", fetchCommodities);
 
-  const updateCommodityPrice = async (id, newPrice) => {
+  const updateCommodityPrice = async (id, newPrice, newCurrency) => {
     const target = commodities.find((c) => c.id === id);
     const targetName = target?.name || id;
     const oldPrice   = target ? Number(target.price) : null;
+    const currency   = newCurrency || target?.currency || "EUR";
     const updatedAt  = new Date().toISOString();
 
     // Note: last_price is set automatically by DB trigger (trg_commodity_track_last_price).
@@ -102,6 +105,7 @@ export function CommoditiesProvider({ children }) {
         {
           name:         targetName,
           price:        newPrice,
+          currency,
           last_updated: updatedAt,
         },
         { onConflict: "name" }
@@ -120,6 +124,7 @@ export function CommoditiesProvider({ children }) {
         return {
           ...c,
           price:       nextPrice,
+          currency,
           lastPrice:   oldPrice,
           priceChange: diff,
           trend,

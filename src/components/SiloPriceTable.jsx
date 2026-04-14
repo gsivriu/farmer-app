@@ -63,7 +63,7 @@ export default function SiloPriceTable({ commodities = [], readOnly = false }) {
       id: c.id,
       name: c.name,
       price: Number(c.price || 0),
-      currency: c.id === "sunflower" ? "USD" : "EUR",
+      currency: c.currency || "EUR",
     }));
   }, [commodities]);
 
