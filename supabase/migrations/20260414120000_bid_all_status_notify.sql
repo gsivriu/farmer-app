@@ -2,6 +2,8 @@
 --   countered → shows counter_price offered by admin
 --   accepted  → shows final_price (fallback: counter_price → price)
 --   rejected  → shows the farmer's original price
+--
+-- Currency fallback: sunflower → USD, everything else → EUR
 
 CREATE OR REPLACE FUNCTION public.trg_bid_countered_notify()
 RETURNS trigger
@@ -26,7 +28,11 @@ BEGIN
     RETURN NEW;
   END IF;
 
-  _curr := COALESCE(NEW.currency, 'RON');
+  -- Currency: use stored value if present, otherwise infer from product
+  _curr := COALESCE(
+    NULLIF(TRIM(NEW.currency), ''),
+    CASE WHEN NEW.product = 'sunflower' THEN 'USD' ELSE 'EUR' END
+  );
 
   IF NEW.status = 'countered' THEN
     _price := COALESCE(NEW.counter_price, NEW.price)::text || ' ' || _curr || '/t';
