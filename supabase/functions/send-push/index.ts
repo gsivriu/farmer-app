@@ -62,8 +62,7 @@ async function sendToToken(
   title: string,
   body: string,
   data: Record<string, string>,
-  idempotencyKey: string,
-): Promise<"ok" | "gone" | "error"> {
+): Promise<{ outcome: "ok" | "gone" | "error"; apnsStatus?: number; apnsError?: string }> {
   const apnsHost = "https://api.push.apple.com";
   const url = `${apnsHost}/3/device/${deviceToken}`;
 
@@ -82,17 +81,17 @@ async function sendToToken(
       authorization: `bearer ${jwt}`,
       "apns-topic": bundleId,
       "apns-push-type": "alert",
-      "apns-id": idempotencyKey,
+      "apns-id": crypto.randomUUID(),
       "content-type": "application/json",
     },
     body: JSON.stringify(apnsPayload),
   });
 
-  if (res.status === 200) return "ok";
-  if (res.status === 410) return "gone"; // token no longer valid
+  if (res.status === 200) return { outcome: "ok" };
+  if (res.status === 410) return { outcome: "gone" }; // token no longer valid
   const errBody = await res.text().catch(() => "");
   console.error(`APNs ${res.status} for token ${deviceToken.slice(0, 8)}…: ${errBody}`);
-  return "error";
+  return { outcome: "error", apnsStatus: res.status, apnsError: errBody };
 }
 
 // ---------------------------------------------------------------------------
@@ -117,12 +116,11 @@ Deno.serve(async (req) => {
 
     const bundleId = Deno.env.get("APNS_BUNDLE_ID") ?? "com.gsivriu.farmerapp";
 
-    const { user_ids, title, body, data = {}, idempotency_key } = await req.json() as {
+    const { user_ids, title, body, data = {} } = await req.json() as {
       user_ids: string[];
       title: string;
       body: string;
       data?: Record<string, string>;
-      idempotency_key?: string;
     };
 
     if (!Array.isArray(user_ids) || user_ids.length === 0) {
@@ -141,15 +139,13 @@ Deno.serve(async (req) => {
     }
 
     const jwt = await getApnsJwt();
-    const baseKey = idempotency_key ?? `${title}:${Date.now()}`;
 
     // Fan-out — one push per token, failures isolated
     const results = await Promise.allSettled(
-      rows.map(async (row: { user_id: string; token: string }, i: number) => {
-        const key = `${baseKey}:${i}`;
-        const outcome = await sendToToken(row.token, bundleId, jwt, title, body, data, key);
+      rows.map(async (row: { user_id: string; token: string }) => {
+        const result = await sendToToken(row.token, bundleId, jwt, title, body, data);
 
-        if (outcome === "gone") {
+        if (result.outcome === "gone") {
           // Stale token — remove from DB so we don't keep sending
           await supabaseAdmin
             .from("device_tokens")
@@ -158,20 +154,29 @@ Deno.serve(async (req) => {
             .eq("token", row.token);
         }
 
-        return { user_id: row.user_id, outcome };
+        return { user_id: row.user_id, ...result };
       }),
     );
 
+    const errors: Array<{ apnsStatus?: number; apnsError?: string }> = [];
     const summary = results.reduce(
       (acc, r) => {
-        const outcome = r.status === "fulfilled" ? r.value.outcome : "error";
-        acc[outcome] = (acc[outcome] ?? 0) + 1;
+        if (r.status === "fulfilled") {
+          acc[r.value.outcome] = (acc[r.value.outcome] ?? 0) + 1;
+          if (r.value.outcome === "error") {
+            errors.push({ apnsStatus: r.value.apnsStatus, apnsError: r.value.apnsError });
+          }
+        } else {
+          acc["error"] = (acc["error"] ?? 0) + 1;
+        }
         return acc;
       },
       {} as Record<string, number>,
     );
 
-    return new Response(JSON.stringify({ sent: summary.ok ?? 0, ...summary }), { status: 200 });
+    const responseBody: Record<string, unknown> = { sent: summary.ok ?? 0, ...summary };
+    if (errors.length > 0) responseBody.apns_errors = errors;
+    return new Response(JSON.stringify(responseBody), { status: 200 });
   } catch (err) {
     console.error("send-push error:", err);
     return new Response(JSON.stringify({ error: String(err) }), { status: 500 });
