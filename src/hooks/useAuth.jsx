@@ -15,7 +15,17 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     let cancelled = false;
 
+    // Safety net: if onAuthStateChange never fires (e.g. hung token refresh),
+    // force-clear the session and redirect to login after 5 seconds.
+    const safetyTimeout = setTimeout(() => {
+      if (cancelled) return;
+      supabase.auth.signOut({ scope: "local" }).finally(() => {
+        window.location.replace("/login");
+      });
+    }, 5000);
+
     const loadProfile = async (currentUser) => {
+      clearTimeout(safetyTimeout);
       if (!currentUser) {
         if (cancelled) return;
         setUser(null);
@@ -77,6 +87,7 @@ export function AuthProvider({ children }) {
 
     return () => {
       cancelled = true;
+      clearTimeout(safetyTimeout);
       listener.subscription.unsubscribe();
     };
   }, []);
