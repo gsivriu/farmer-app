@@ -40,23 +40,29 @@ export default function PricesGrid() {
           const trendClass = getTrendClass(c.trend, c.lastPrice);
           const displayName = getProductLabelSafe(c.id, c.name);
 
+          const isStopped = c.active === false;
+
           return (
-            <div key={c.id} className={"market-item " + trendClass}>
+            <div key={c.id} className={"market-item " + trendClass + (isStopped ? " market-item--stopped" : "")}>
               <div className="market-line-1">
                 <span className="market-product">{displayName}</span>
-                <span className="market-price-cell">
-                  {Number(c.price).toFixed(2)} {unit}
-                  <span
-                    className={
-                      "market-diff " +
-                      trendClass +
-                      (trendText ? "" : " market-diff-placeholder")
-                    }
-                    aria-hidden={!trendText}
-                  >
-                    {trendText || "↑ +0"}
+                {isStopped ? (
+                  <span className="market-price-unavailable">Indisponibil</span>
+                ) : (
+                  <span className="market-price-cell">
+                    {Number(c.price).toFixed(2)} {unit}
+                    <span
+                      className={
+                        "market-diff " +
+                        trendClass +
+                        (trendText ? "" : " market-diff-placeholder")
+                      }
+                      aria-hidden={!trendText}
+                    >
+                      {trendText || "↑ +0"}
+                    </span>
                   </span>
-                </span>
+                )}
               </div>
             </div>
           );

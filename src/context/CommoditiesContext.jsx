@@ -3,11 +3,11 @@ import { supabase } from "../supabaseClient";
 import { useRealtimeSubscription } from "../hooks/useRealtimeSubscription";
 
 const initialCommodities = [
-  { id: "wheat",     name: "Grâu",              price: 200, basis: "CPT Constanța", lastPrice: null, priceChange: 0, trend: "flat", lastUpdated: null },
-  { id: "barley",    name: "Orz",               price: 180, basis: "CPT Constanța", lastPrice: null, priceChange: 0, trend: "flat", lastUpdated: null },
-  { id: "corn",      name: "Porumb",             price: 190, basis: "CPT Constanța", lastPrice: null, priceChange: 0, trend: "flat", lastUpdated: null },
-  { id: "rapeseed",  name: "Rapiță",             price: 420, basis: "CPT Constanța", lastPrice: null, priceChange: 0, trend: "flat", lastUpdated: null },
-  { id: "sunflower", name: "Floarea soarelui",   price: 380, basis: "CPT Constanța", lastPrice: null, priceChange: 0, trend: "flat", lastUpdated: null },
+  { id: "wheat",     name: "Grâu",              price: 200, currency: "EUR", active: true, basis: "CPT Constanța", lastPrice: null, priceChange: 0, trend: "flat", lastUpdated: null },
+  { id: "barley",    name: "Orz",               price: 180, currency: "EUR", active: true, basis: "CPT Constanța", lastPrice: null, priceChange: 0, trend: "flat", lastUpdated: null },
+  { id: "corn",      name: "Porumb",             price: 190, currency: "EUR", active: true, basis: "CPT Constanța", lastPrice: null, priceChange: 0, trend: "flat", lastUpdated: null },
+  { id: "rapeseed",  name: "Rapiță",             price: 420, currency: "EUR", active: true, basis: "CPT Constanța", lastPrice: null, priceChange: 0, trend: "flat", lastUpdated: null },
+  { id: "sunflower", name: "Floarea soarelui",   price: 380, currency: "USD", active: true, basis: "CPT Constanța", lastPrice: null, priceChange: 0, trend: "flat", lastUpdated: null },
 ];
 
 const normalizeName = (value) =>
@@ -25,7 +25,7 @@ export function CommoditiesProvider({ children }) {
   const fetchCommodities = useCallback(async () => {
     const { data, error } = await supabase
       .from("commodities")
-      .select("name, price, last_updated");
+      .select("name, price, currency, active, last_price, last_updated");
 
     if (error || !Array.isArray(data)) return;
 
@@ -33,7 +33,10 @@ export function CommoditiesProvider({ children }) {
       data.map((row) => [
         normalizeName(row.name),
         {
-          price: Number(row.price),
+          price:       Number(row.price),
+          currency:    row.currency || "EUR",
+          active:      row.active !== false,
+          lastPrice:   row.last_price != null ? Number(row.last_price) : null,
           lastUpdated: row.last_updated ? String(row.last_updated) : null,
         },
       ])
@@ -43,17 +46,28 @@ export function CommoditiesProvider({ children }) {
       (prev.length ? prev : initialCommodities).map((c) => {
         const match = byName.get(normalizeName(c.name));
         if (!match || !Number.isFinite(match.price)) return c;
-        const oldPrice = Number(c.price || 0);
-        const nextPrice = Number(match.price);
+
+        const nextPrice   = match.price;
+        const nextLast    = match.lastPrice;   // previous price stored in DB
         const nextUpdated = match.lastUpdated;
-        if (nextUpdated && c.lastUpdated && nextUpdated === c.lastUpdated) return c;
-        const diff = nextPrice - oldPrice;
-        const trend = diff > 0 ? "up" : diff < 0 ? "down" : "flat";
+
+        // Compute trend from DB values — persistent across logout/login
+        // and independent per commodity.
+        let trend      = "flat";
+        let priceChange = 0;
+        if (nextLast != null) {
+          const diff = nextPrice - nextLast;
+          trend       = diff > 0 ? "up" : diff < 0 ? "down" : "flat";
+          priceChange = diff;
+        }
+
         return {
           ...c,
-          price: nextPrice,
-          lastPrice: oldPrice,
-          priceChange: diff === 0 ? 0 : diff,
+          price:       nextPrice,
+          currency:    match.currency,
+          active:      match.active,
+          lastPrice:   nextLast,
+          priceChange,
           trend,
           lastUpdated: nextUpdated || c.lastUpdated,
         };
@@ -61,35 +75,63 @@ export function CommoditiesProvider({ children }) {
     );
   }, []);
 
+  // Fetch on mount (works when session already exists, e.g. page refresh).
   useEffect(() => { fetchCommodities(); }, [fetchCommodities]);
+
+  // Re-fetch after login: AppProvider mounts before auth, so the initial
+  // fetchCommodities runs without a session (RLS blocks it). SIGNED_IN fires
+  // once the session is established → fetch with auth → trends load correctly.
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN") {
+        fetchCommodities();
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [fetchCommodities]);
+
   useRealtimeSubscription("commodities", fetchCommodities);
 
-  const updateCommodityPrice = async (id, newPrice) => {
+  const updateCommodityPrice = async (id, newPrice, newCurrency) => {
     const target = commodities.find((c) => c.id === id);
     const targetName = target?.name || id;
-    const updatedAt = new Date().toISOString();
+    const oldPrice   = target ? Number(target.price) : null;
+    const currency   = newCurrency || target?.currency || "EUR";
+    const updatedAt  = new Date().toISOString();
 
+    // Note: last_price is set automatically by DB trigger (trg_commodity_track_last_price).
+    // Do NOT send last_price from the client — the trigger uses OLD.price which is always correct.
+    // Always set active = true on Confirm: if the commodity was stopped, confirming a price re-activates it.
     const { error } = await supabase
       .from("commodities")
       .upsert(
-        { name: targetName, price: newPrice, last_updated: updatedAt },
+        {
+          name:         targetName,
+          price:        newPrice,
+          currency,
+          active:       true,
+          last_updated: updatedAt,
+        },
         { onConflict: "name" }
       );
 
     if (error) return { error };
 
+    // Update only the modified commodity in local state.
+    // All others keep their existing trend unchanged.
     setCommodities((prev) =>
       prev.map((c) => {
         if (c.id !== id) return c;
-        const oldPrice = Number(c.price || 0);
         const nextPrice = Number(newPrice);
-        const diff = nextPrice - oldPrice;
-        const trend = diff > 0 ? "up" : diff < 0 ? "down" : "flat";
+        const diff      = oldPrice != null ? nextPrice - oldPrice : 0;
+        const trend     = diff > 0 ? "up" : diff < 0 ? "down" : "flat";
         return {
           ...c,
-          price: nextPrice,
-          lastPrice: oldPrice,
-          priceChange: diff === 0 ? 0 : diff,
+          price:       nextPrice,
+          currency,
+          active:      true,
+          lastPrice:   oldPrice,
+          priceChange: diff,
           trend,
           lastUpdated: updatedAt,
         };
@@ -99,8 +141,26 @@ export function CommoditiesProvider({ children }) {
     return { error: null };
   };
 
+  const stopCommodity = async (id) => {
+    const target = commodities.find((c) => c.id === id);
+    if (!target) return { error: { message: "Commodity not found" } };
+
+    const { error } = await supabase
+      .from("commodities")
+      .update({ active: false })
+      .eq("name", target.name);
+
+    if (error) return { error };
+
+    setCommodities((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, active: false } : c))
+    );
+
+    return { error: null };
+  };
+
   return (
-    <CommoditiesContext.Provider value={{ commodities, fetchCommodities, updateCommodityPrice }}>
+    <CommoditiesContext.Provider value={{ commodities, fetchCommodities, updateCommodityPrice, stopCommodity }}>
       {children}
     </CommoditiesContext.Provider>
   );
