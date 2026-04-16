@@ -27,26 +27,35 @@ export function AuthProvider({ children }) {
         return;
       }
 
-      const [profileResult, aalResult] = await Promise.all([
-        supabase
-          .from("profiles")
-          .select("role, status, full_name, sharp_id, telefon, judet")
-          .eq("id", currentUser.id)
-          .single(),
-        supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
-      ]);
+      let profileResult, aalResult;
+      try {
+        [profileResult, aalResult] = await Promise.all([
+          supabase
+            .from("profiles")
+            .select("role, status, full_name, sharp_id, telefon, judet")
+            .eq("id", currentUser.id)
+            .single(),
+          supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
+        ]);
+      } catch {
+        if (cancelled) return;
+        await supabase.auth.signOut({ scope: "local" });
+        window.location.replace("/login");
+        return;
+      }
 
       if (cancelled) return;
 
       // Can't determine role — sign out rather than fall back to "farmer"
       if (profileResult.error || !profileResult.data) {
-        await supabase.auth.signOut();
+        await supabase.auth.signOut({ scope: "local" });
         window.location.replace("/login");
         return;
       }
 
       if (profileResult.data.status === "disabled") {
-        await supabase.auth.signOut();
+        await supabase.auth.signOut({ scope: "local" });
+        setLoading(false);
         return;
       }
 
