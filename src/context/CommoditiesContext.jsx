@@ -3,11 +3,11 @@ import { supabase } from "../supabaseClient";
 import { useRealtimeSubscription } from "../hooks/useRealtimeSubscription";
 
 const initialCommodities = [
-  { id: "wheat",     name: "Grâu",              price: 200, currency: "EUR", basis: "CPT Constanța", lastPrice: null, priceChange: 0, trend: "flat", lastUpdated: null },
-  { id: "barley",    name: "Orz",               price: 180, currency: "EUR", basis: "CPT Constanța", lastPrice: null, priceChange: 0, trend: "flat", lastUpdated: null },
-  { id: "corn",      name: "Porumb",             price: 190, currency: "EUR", basis: "CPT Constanța", lastPrice: null, priceChange: 0, trend: "flat", lastUpdated: null },
-  { id: "rapeseed",  name: "Rapiță",             price: 420, currency: "EUR", basis: "CPT Constanța", lastPrice: null, priceChange: 0, trend: "flat", lastUpdated: null },
-  { id: "sunflower", name: "Floarea soarelui",   price: 380, currency: "USD", basis: "CPT Constanța", lastPrice: null, priceChange: 0, trend: "flat", lastUpdated: null },
+  { id: "wheat",     name: "Grâu",              price: 200, currency: "EUR", active: true, basis: "CPT Constanța", lastPrice: null, priceChange: 0, trend: "flat", lastUpdated: null },
+  { id: "barley",    name: "Orz",               price: 180, currency: "EUR", active: true, basis: "CPT Constanța", lastPrice: null, priceChange: 0, trend: "flat", lastUpdated: null },
+  { id: "corn",      name: "Porumb",             price: 190, currency: "EUR", active: true, basis: "CPT Constanța", lastPrice: null, priceChange: 0, trend: "flat", lastUpdated: null },
+  { id: "rapeseed",  name: "Rapiță",             price: 420, currency: "EUR", active: true, basis: "CPT Constanța", lastPrice: null, priceChange: 0, trend: "flat", lastUpdated: null },
+  { id: "sunflower", name: "Floarea soarelui",   price: 380, currency: "USD", active: true, basis: "CPT Constanța", lastPrice: null, priceChange: 0, trend: "flat", lastUpdated: null },
 ];
 
 const normalizeName = (value) =>
@@ -25,7 +25,7 @@ export function CommoditiesProvider({ children }) {
   const fetchCommodities = useCallback(async () => {
     const { data, error } = await supabase
       .from("commodities")
-      .select("name, price, currency, last_price, last_updated");
+      .select("name, price, currency, active, last_price, last_updated");
 
     if (error || !Array.isArray(data)) return;
 
@@ -35,6 +35,7 @@ export function CommoditiesProvider({ children }) {
         {
           price:       Number(row.price),
           currency:    row.currency || "EUR",
+          active:      row.active !== false,
           lastPrice:   row.last_price != null ? Number(row.last_price) : null,
           lastUpdated: row.last_updated ? String(row.last_updated) : null,
         },
@@ -64,6 +65,7 @@ export function CommoditiesProvider({ children }) {
           ...c,
           price:       nextPrice,
           currency:    match.currency,
+          active:      match.active,
           lastPrice:   nextLast,
           priceChange,
           trend,
@@ -99,6 +101,7 @@ export function CommoditiesProvider({ children }) {
 
     // Note: last_price is set automatically by DB trigger (trg_commodity_track_last_price).
     // Do NOT send last_price from the client — the trigger uses OLD.price which is always correct.
+    // Always set active = true on Confirm: if the commodity was stopped, confirming a price re-activates it.
     const { error } = await supabase
       .from("commodities")
       .upsert(
@@ -106,6 +109,7 @@ export function CommoditiesProvider({ children }) {
           name:         targetName,
           price:        newPrice,
           currency,
+          active:       true,
           last_updated: updatedAt,
         },
         { onConflict: "name" }
@@ -125,6 +129,7 @@ export function CommoditiesProvider({ children }) {
           ...c,
           price:       nextPrice,
           currency,
+          active:      true,
           lastPrice:   oldPrice,
           priceChange: diff,
           trend,
@@ -136,8 +141,26 @@ export function CommoditiesProvider({ children }) {
     return { error: null };
   };
 
+  const stopCommodity = async (id) => {
+    const target = commodities.find((c) => c.id === id);
+    if (!target) return { error: { message: "Commodity not found" } };
+
+    const { error } = await supabase
+      .from("commodities")
+      .update({ active: false })
+      .eq("name", target.name);
+
+    if (error) return { error };
+
+    setCommodities((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, active: false } : c))
+    );
+
+    return { error: null };
+  };
+
   return (
-    <CommoditiesContext.Provider value={{ commodities, fetchCommodities, updateCommodityPrice }}>
+    <CommoditiesContext.Provider value={{ commodities, fetchCommodities, updateCommodityPrice, stopCommodity }}>
       {children}
     </CommoditiesContext.Provider>
   );
