@@ -1641,29 +1641,21 @@ select.input:focus {
 .ticker-card-header {
   display: flex;
   align-items: baseline;
-  gap: 10px;
-  margin-bottom: 4px;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .ticker-card-title {
   font-size: 13px;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #475569;
+  color: var(--text-secondary);
 }
 
 .ticker-card-sub {
   font-size: 11px;
-  color: #94a3b8;
-}
-
-.theme-dark .ticker-card-title {
-  color: #9ca3af;
-}
-
-.theme-dark .ticker-card-sub {
-  color: #4b5563;
+  color: var(--text-tertiary);
 }
 
 /* Modal close button — icon style */
@@ -8564,8 +8556,8 @@ select.input:focus {
 .ft-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-top: 10px;
+  gap: 24px;
+  margin-top: 16px;
 }
 
 .ft-product {
@@ -8575,67 +8567,73 @@ select.input:focus {
 .ft-product-header {
   display: flex;
   align-items: baseline;
-  gap: 6px;
-  margin-bottom: 6px;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .ft-product-name {
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.06em;
   color: var(--text-secondary);
 }
 
 .ft-product-unit {
-  font-size: 10px;
+  font-size: 11px;
+  font-weight: 500;
   color: var(--text-tertiary);
 }
 
 .ft-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 12px;
+  table-layout: fixed;
+  font-size: 13px;
   font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
 }
 
+.ft-th:nth-child(1), .ft-td:nth-child(1) { width: 26%; }
+.ft-th:nth-child(2), .ft-td:nth-child(2) { width: 22%; }
+.ft-th:nth-child(3), .ft-td:nth-child(3) { width: 30%; }
+.ft-th:nth-child(4), .ft-td:nth-child(4) { width: 22%; }
+
 .ft-th {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-tertiary);
-  padding: 3px 6px;
+  padding: 6px 8px;
   border-bottom: var(--hairline);
   white-space: nowrap;
 }
 
 .ft-td {
-  padding: 5px 6px;
+  padding: 8px;
   color: var(--text-primary);
-  border-bottom: var(--hairline);
   white-space: nowrap;
 }
 
-.ft-tr:last-child .ft-td { border-bottom: none; }
-
 .ft-right { text-align: right; }
 .ft-th:first-child, .ft-td:first-child { padding-left: 0; }
+.ft-th:last-child, .ft-td:last-child { padding-right: 0; }
 
-.ft-contract { font-weight: 500; color: var(--text-secondary); }
+.ft-contract { font-weight: 500; color: var(--text-primary); }
 .ft-last     { font-weight: 600; }
-.ft-prev     { color: var(--text-tertiary); font-size: 11px; }
+.ft-prev     { color: var(--text-tertiary); }
 
 .ft-change.positive { color: #16a34a; }
 .ft-change.negative { color: var(--brand-red); }
 .ft-change.ft-neutral { color: var(--text-tertiary); }
-.ft-change { text-align: right; font-size: 11px; }
+.ft-change { text-align: right; }
 
 .theme-dark .ft-change.positive { color: #4ade80; }
 .theme-dark .ft-change.negative { color: #f87171; }
 
 @media (max-width: 500px) {
-  .ft-grid { grid-template-columns: 1fr; }
+  .ft-grid { grid-template-columns: 1fr; gap: 16px; }
 }
 
 /* -------- EXCHANGE SECTION — micro-list, no card -------- */
