@@ -416,6 +416,18 @@ body.weather-modal-open {
   color: var(--color-text-1);
 }
 
+.ameropa-role-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.theme-dark .ameropa-role-label {
+  color: var(--color-text-2);
+}
+
 /* Top-bar action buttons — refined, editorial, not pill-shaped */
 .top-bar .btn.small.outline {
   height: 32px;
@@ -3487,11 +3499,22 @@ select.input:focus {
   display: inline-flex;
   align-items: baseline;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 6px;
   white-space: nowrap;
   width: auto;
   justify-self: end;
   font-variant-numeric: tabular-nums;
+}
+
+.prices-card .market-price-number {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.prices-card .market-unit {
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--text-tertiary);
 }
 
 .prices-card .market-diff {
@@ -4647,13 +4670,15 @@ select.input:focus {
    WEATHER WIDGET
    ========================= */
 .weather-card {
-  border-radius: 20px;
-  padding: 20px;
-  color: white;
-  margin-bottom: 24px;
+  border-radius: 0;
+  padding: 0;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  margin-bottom: 0;
+  box-shadow: none;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
   cursor: pointer;
   min-height: 120px;
   display: flex;
@@ -4661,16 +4686,19 @@ select.input:focus {
   justify-content: center;
 }
 
-.weather-card.day {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-}
-
-.weather-card.night {
-  background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
-}
-
+/* Day / night / rain no longer tint the card — icon + temp carry the theme */
+.weather-card.day,
+.weather-card.night,
 .weather-card.rain {
-  background: linear-gradient(135deg, #37474f 0%, #607d8b 100%);
+  background: transparent;
+}
+
+.theme-dark .weather-card,
+.theme-dark .weather-card.day,
+.theme-dark .weather-card.night,
+.theme-dark .weather-card.rain {
+  background: transparent;
+  color: var(--color-text-1);
 }
 
 .weather-info {
@@ -4696,15 +4724,25 @@ select.input:focus {
   font-size: 36px;
   font-weight: 700;
   line-height: 1;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.theme-dark .weather-temp {
+  color: var(--color-text-1);
 }
 
 .weather-desc {
   font-size: 13px;
-  opacity: 0.9;
+  color: var(--text-secondary);
   display: block;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.theme-dark .weather-desc {
+  color: var(--color-text-2);
 }
 
 .weather-details-mini {
@@ -4716,25 +4754,34 @@ select.input:focus {
 }
 
 .location-name {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
   max-width: 150px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.min-max {
-  font-size: 12px;
-  opacity: 0.85;
+.theme-dark .location-name {
+  color: var(--color-text-2);
 }
 
+.min-max {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.theme-dark .min-max {
+  color: var(--color-text-3);
+}
+
+/* Decorative blobs no longer visible on the neutral surface — hide */
 .bg-decor-1,
 .bg-decor-2 {
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  pointer-events: none;
+  display: none;
 }
 
 .bg-decor-1 {
@@ -5565,11 +5612,11 @@ select.input:focus {
    DESKTOP-ONLY OPTIMIZATIONS (≥1024px)
    ========================= */
 @media screen and (min-width: 1024px) {
-  /* Weather Card - Desktop */
+  /* Weather Card - Desktop (content layer inside home-card-secondary) */
   .weather-card {
-    padding: 24px 32px;
-    border-radius: 16px;
-    margin-bottom: 32px;
+    padding: 0;
+    border-radius: 0;
+    margin-bottom: 0;
     min-height: 140px;
   }
 
@@ -6326,14 +6373,38 @@ select.input:focus {
 }
 
 .progress-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   text-align: left;
-  font-size: 15px;
-  font-weight: 500;
-  color: #374151;
+  color: var(--text-primary);
 }
 
-.theme-dark .progress-meta {
+.progress-meta-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.progress-meta-value {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.progress-meta-value b {
+  font-weight: 700;
+}
+
+.theme-dark .progress-meta-value {
   color: #e5e7eb;
+}
+
+.theme-dark .progress-meta-label {
+  color: var(--color-text-3);
 }
 
 .progress-ring-center {
@@ -8721,25 +8792,63 @@ select.input:focus {
 
 .exchange-section .exchange-calc-btn {
   background: transparent;
-  border: var(--hairline);
-  border-radius: var(--radius-sm);
-  padding: 4px 6px;
+  border: 1px solid hsl(0, 0%, 88%);
+  border-radius: 10px;
+  padding: 0;
   color: var(--text-secondary);
-  width: auto;
-  height: auto;
+  width: 36px;
+  height: 36px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, border-color 0.15s;
 }
 
 .exchange-section .exchange-calc-btn:hover {
-  background: hsl(0, 0%, 94%);
+  background: hsl(0, 0%, 96%);
+  border-color: hsl(0, 0%, 80%);
+}
+
+.exchange-section .exchange-calc-btn:active {
+  background: hsl(0, 0%, 92%);
 }
 
 .exchange-section .exchange-calc-btn svg {
   color: var(--text-secondary);
+}
+
+/* Retry button — shown only on offline/error state */
+.exchange-section .exchange-retry-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid #fecaca;
+  border-radius: 999px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.exchange-section .exchange-retry-btn:hover {
+  background: #fee2e2;
+}
+
+.theme-dark .exchange-section .exchange-retry-btn {
+  background: rgba(185, 28, 28, 0.12);
+  border-color: rgba(254, 202, 202, 0.3);
+  color: #fca5a5;
+}
+
+/* Parity row — stacked flag pair as visual anchor */
+.exchange-section .exchange-pair-flags {
+  font-size: 14px;
+  letter-spacing: -2px;
+  margin-right: 4px;
 }
 
 /* -------- LIST PRICE SECTION -------- */

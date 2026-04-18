@@ -49,7 +49,8 @@ export default function PricesGrid() {
                   <span className="market-price-unavailable">Indisponibil</span>
                 ) : (
                   <span className="market-price-cell">
-                    {Number(c.price).toFixed(2)} {unit}
+                    <span className="market-price-number">{Number(c.price).toFixed(2)}</span>
+                    <span className="market-unit">{unit}</span>
                     <span
                       className={
                         "market-diff " +

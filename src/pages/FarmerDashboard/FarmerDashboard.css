@@ -3,18 +3,35 @@
    8pt spacing grid | token-driven | mobile-first
    ══════════════════════════════════════════════════════════ */
 
-/* ── Home: Prices & Futures cards ───────────────────────── */
+/* ── Home stack: consistent 16px gap between cards on mobile ── */
+.dashboard-home-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.dashboard-home-stack > .card {
+  margin-bottom: 0;
+}
+
+/* ── Home: all home cards share the same card surface on mobile ── */
 .home-card-prices,
-.home-card-futures {
+.home-card-futures,
+.home-card-primary,
+.home-cards-row .home-card-secondary {
   border-radius: 16px;
-  padding: 20px 24px;
+  padding: 16px;
   background: #ffffff;
   border: 1px solid var(--glass-border);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.03);
   box-sizing: border-box;
 }
 
 .theme-dark .home-card-prices,
-.theme-dark .home-card-futures {
+.theme-dark .home-card-futures,
+.theme-dark .home-card-primary,
+.theme-dark .home-cards-row .home-card-secondary {
   background: #111827;
   border-color: #1f2937;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -29,25 +46,32 @@
   box-shadow: none;
 }
 
-/* Prices grid: single column, identical to sale tab layout */
+/* Prices grid: compact list with hairline dividers */
 .home-card-prices .market-grid {
   grid-template-columns: 1fr;
-  gap: 2px;
+  gap: 0;
 }
 
 .home-card-prices .market-item {
   border: none;
-  border-radius: 12px;
-  padding: 12px 16px;
+  border-radius: 0;
+  padding: 10px 0;
+  background: transparent;
   overflow: hidden;
+  border-bottom: var(--hairline);
+}
+
+.home-card-prices .market-item:last-child {
+  border-bottom: none;
 }
 
 .theme-dark .home-card-prices .market-item {
-  border: none;
+  border-top: none;
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
 }
 
-.home-card-prices .market-item + .market-item {
-  border-top: none;
+.theme-dark .home-card-prices .market-item:last-child {
+  border-bottom: none;
 }
 
 /* Futures card — strip inner card margins */
