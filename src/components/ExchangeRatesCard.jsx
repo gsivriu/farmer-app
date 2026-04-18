@@ -34,22 +34,27 @@ export default function ExchangeRatesCard() {
   }, []);
 
   if (!rates) {
-    return <p className="small-text">Loading exchange rates...</p>;
+    return <p className="small-text">Se încarcă cursurile...</p>;
   }
+
+  const isOfflineOrError =
+    typeof rates.lastUpdated === "string" &&
+    /offline|error/i.test(rates.lastUpdated);
+  const updatedLabel = isOfflineOrError
+    ? "Indisponibil"
+    : `Actualizat: ${formatDateDMY(rates.lastUpdated)}`;
 
   return (
     <div className="exchange-section">
       <div className="exchange-header">
-        <span className="exchange-title">Exchange rates</span>
+        <span className="exchange-title">Cursuri valutare</span>
         <div className="exchange-header-actions">
-          <span className="exchange-updated">
-            Updated: {formatDateDMY(rates.lastUpdated)}
-          </span>
+          <span className="exchange-updated">{updatedLabel}</span>
           <button
             type="button"
             className="exchange-calc-btn"
             onClick={() => setIsModalOpen(true)}
-            aria-label="Open currency converter"
+            aria-label="Deschide convertor valutar"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <rect x="5" y="3" width="14" height="18" rx="2" />
@@ -73,7 +78,7 @@ export default function ExchangeRatesCard() {
         <span className="exchange-value">{rates.ronToUsd} RON</span>
       </div>
       <div className="exchange-row">
-        <span className="exchange-pair">EUR/USD parity</span>
+        <span className="exchange-pair">Paritate EUR/USD</span>
         <span className="exchange-value">{rates.eurToUsd}</span>
       </div>
 

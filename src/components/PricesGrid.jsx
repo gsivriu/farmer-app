@@ -17,9 +17,9 @@ export default function PricesGrid() {
   return (
     <div className="market-card prices-card">
       <div className="market-card-header">
-        <h3 className="market-title">Ameropa CPT Constanta prices</h3>
+        <h3 className="market-title">Prețuri Ameropa CPT Constanța</h3>
         <p className="market-subtitle">
-          Updated today {todayLabel} after 12:00.
+          Actualizat azi {todayLabel} după ora 12:00.
         </p>
       </div>
 

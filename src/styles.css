@@ -3325,21 +3325,28 @@ select.input:focus {
 
 .prices-card .market-card-header {
   margin-top: 0;
-  gap: 0;
-  margin-bottom: 24px;
+  gap: 4px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
 }
 
 .prices-card .market-grid {
-  gap: 2px;
+  gap: 0;
 }
 
 .prices-card .market-title {
-  font-size: 18px;
+  font-size: 13px;
   font-weight: 700;
-  margin: 0 0 2px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin: 0;
 }
 
 .prices-card .market-subtitle {
+  font-size: 11px;
+  color: var(--text-tertiary);
   margin: 0;
 }
 
@@ -3439,43 +3446,51 @@ select.input:focus {
 }
 
 .prices-card .market-item {
-  padding: 12px 16px;
+  padding: 10px 0;
+  border: none;
+  background: transparent;
+  border-radius: 0;
+  border-bottom: var(--hairline);
+}
+
+.prices-card .market-item:last-child {
+  border-bottom: none;
 }
 
 .prices-card .market-line-1 {
   align-items: center;
-  font-size: 15px;
+  font-size: 14px;
   margin-bottom: 0;
   display: grid;
-  grid-template-columns: minmax(120px, 1fr) 180px;
-  gap: 14px;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
 }
 
 .prices-card .market-product {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
-  line-height: 1.25;
+  line-height: 1.3;
 }
 
 
 .prices-card .market-price {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
-  line-height: 1.25;
+  line-height: 1.3;
 }
 
 .prices-card .market-price-cell {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
-  line-height: 1.25;
-  text-align: center;
+  line-height: 1.3;
+  text-align: right;
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 8px;
   white-space: nowrap;
-  width: 180px;
-  justify-self: center;
+  width: auto;
+  justify-self: end;
   font-variant-numeric: tabular-nums;
 }
 
@@ -8651,13 +8666,13 @@ select.input:focus {
   margin-bottom: var(--space-4);
 }
 
-/* Section eyebrow — whispers */
+/* Section eyebrow — unified with FUTURES / prices */
 .exchange-title {
-  font-size: 11px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-tertiary);
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
 }
 
 .exchange-section .exchange-updated {

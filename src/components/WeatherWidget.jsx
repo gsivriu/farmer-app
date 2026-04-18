@@ -22,9 +22,9 @@ const WeatherWidget = () => {
   const [weather, setWeather] = useState(null);
   const [locationName, setLocationName] = useState(() => {
     try {
-      return localStorage.getItem(STORAGE_NAME_KEY) || "Locating...";
+      return localStorage.getItem(STORAGE_NAME_KEY) || "Localizare...";
     } catch {
-      return "Locating...";
+      return "Localizare...";
     }
   });
   const [coords, setCoords] = useState(() => {
@@ -59,16 +59,16 @@ const WeatherWidget = () => {
         (pos) => {
           const nextCoords = { lat: pos.coords.latitude, lon: pos.coords.longitude };
           setCoords(nextCoords);
-          setLocationName("Your location");
+          setLocationName("Locația ta");
           try {
             localStorage.setItem(STORAGE_COORDS_KEY, JSON.stringify(nextCoords));
-            localStorage.setItem(STORAGE_NAME_KEY, "Your location");
+            localStorage.setItem(STORAGE_NAME_KEY, "Locația ta");
           } catch {
             // ignore storage errors
           }
         },
         () => {
-          setLocationName("Bucharest");
+          setLocationName("București");
         }
       );
     }
@@ -113,7 +113,7 @@ const WeatherWidget = () => {
     }
   };
 
-  if (!weather) return <div className="weather-card loading">Loading...</div>;
+  if (!weather) return <div className="weather-card loading">Se încarcă...</div>;
 
   const cardTheme = weather.isDay === 0 ? "night" : "day";
   const condition = getWeatherCondition(
