@@ -6,14 +6,14 @@ export default function NewsTab({ active }) {
   return (
     <div className="dashboard-row full">
       <div className="card">
-        <div className="card-header news-header-balanced">
-          <h2 className="market-title">News</h2>
+        <div className="card-header news-header-balanced activity-header-compact">
+          <h2 className="market-title">Știri</h2>
         </div>
         <div className="card-body">
-          {newsLoading && <p className="small-text">Loading news...</p>}
+          {newsLoading && <p className="small-text">Se încarcă știrile…</p>}
           {newsError && <p className="badge rejected">{newsError}</p>}
           {!newsLoading && !newsError && newsItems.length === 0 && (
-            <p className="small-text">No relevant news found.</p>
+            <p className="small-text">Nu au fost găsite știri relevante.</p>
           )}
           {!newsLoading && !newsError && newsItems.length > 0 && (
             <div className="news-list">
@@ -38,7 +38,7 @@ export default function NewsTab({ active }) {
                     <div className="small-text">
                       {item.source?.name ? item.source.name + " • " : ""}
                       {item.publishedAt
-                        ? new Date(item.publishedAt).toLocaleDateString("en-GB")
+                        ? new Date(item.publishedAt).toLocaleDateString("ro-RO")
                         : ""}
                     </div>
                   </div>
