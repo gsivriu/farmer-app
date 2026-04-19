@@ -645,8 +645,14 @@ body.weather-modal-open {
   padding: 6px 0;
 }
 
+/* Activity page title — unified with FUTURES / PREȚURI / CURSURI VALUTARE eyebrow */
 .activity-header-compact .market-title {
   margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
 }
 
 /* Active filter indicator dot */
@@ -2662,21 +2668,26 @@ select.input:focus {
   border-bottom-color: #334155;
 }
 
+/* Modal headings — unified with FUTURES / PREȚURI / CURSURI VALUTARE eyebrow */
 .bid-modal-header h3 {
   margin: 0;
-  font-size: 16px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
 }
 
 .bid-modal-details .bid-modal-header h3 {
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: 0.01em;
-  color: #64748b;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
   text-transform: uppercase;
 }
 
 .theme-dark .bid-modal-details .bid-modal-header h3 {
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .bid-modal-header .btn.small.ghost {
@@ -6657,6 +6668,15 @@ select.input:focus {
     font-weight: 700;
     letter-spacing: -0.01em;
     margin-bottom: 0;
+  }
+
+  /* Activity eyebrow keeps unified 13px uppercase on desktop */
+  .activity-header-compact .market-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
   }
 
   .activity-header-compact {

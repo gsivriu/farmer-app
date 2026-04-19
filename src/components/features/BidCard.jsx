@@ -18,18 +18,18 @@ export function getStatusStyle(status) {
 
 function getStatusLabel(status) {
   const s = String(status || "").toLowerCase();
-  if (s === "accepted")          return "Accepted";
-  if (s === "rejected")          return "Rejected";
-  if (s === "countered")         return "Counter offer";
-  if (s === "farmer_countered")  return "Farmer counter";
-  return "Pending";
+  if (s === "accepted")          return "Acceptat";
+  if (s === "rejected")          return "Respins";
+  if (s === "countered")         return "Contra-ofertă";
+  if (s === "farmer_countered")  return "Răspuns fermier";
+  return "În așteptare";
 }
 
 function formatDateTime(value) {
   if (!value) return "-";
   const dt = new Date(value);
   if (Number.isNaN(dt.getTime())) return "-";
-  return dt.toLocaleString("en-GB", {
+  return dt.toLocaleString("ro-RO", {
     year: "numeric", month: "2-digit", day: "2-digit",
     hour: "2-digit", minute: "2-digit",
   });
@@ -86,7 +86,7 @@ export default function BidCard({ bid, onClick, onAccept, onReject, onCounter })
       <div className="bc-body">
 
         <div className="bc-field bc-field-status">
-          <span className="bc-label">Status</span>
+          <span className="bc-label">Stare</span>
           <span
             className="bc-badge"
             style={{ background: style.badgeBg, color: style.badgeText }}
@@ -96,24 +96,24 @@ export default function BidCard({ bid, onClick, onAccept, onReject, onCounter })
         </div>
 
         <div className="bc-field">
-          <span className="bc-label">Commodity</span>
+          <span className="bc-label">Produs</span>
           <span className="bc-val bc-val-product">
             {getProductLabelSafe(bid.product)}
           </span>
         </div>
 
         <div className="bc-field">
-          <span className="bc-label">Farmer</span>
+          <span className="bc-label">Fermier</span>
           <span className="bc-val bc-val-truncate">{bid.farmer_email || bid.farmer_id || "-"}</span>
         </div>
 
         <div className="bc-field">
-          <span className="bc-label">Offer date</span>
+          <span className="bc-label">Data ofertei</span>
           <span className="bc-val">{formatDateTime(bid.created_at)}</span>
         </div>
 
         <div className="bc-field">
-          <span className="bc-label">Price</span>
+          <span className="bc-label">Preț</span>
           <span className={`bc-val bc-val-price${isCounter ? " bc-val-counter" : ""}`}>
             {formatCompactNumber(price)}{" "}
             <span className="bc-val-unit">{unit}</span>
@@ -121,17 +121,17 @@ export default function BidCard({ bid, onClick, onAccept, onReject, onCounter })
         </div>
 
         <div className="bc-field">
-          <span className="bc-label">Delivery</span>
+          <span className="bc-label">Livrare</span>
           <span className="bc-val">{formatDeliveryRange(bid.delivery_start, bid.delivery_end)}</span>
         </div>
 
         <div className="bc-field">
-          <span className="bc-label">Parity</span>
+          <span className="bc-label">Paritate</span>
           <span className="bc-val">{parityDisplay}</span>
         </div>
 
         <div className="bc-field">
-          <span className="bc-label">Crop year</span>
+          <span className="bc-label">An recoltă</span>
           <span className="bc-val">{bid.crop_year || "-"}</span>
         </div>
 
@@ -154,7 +154,7 @@ export default function BidCard({ bid, onClick, onAccept, onReject, onCounter })
                 else setConfirming("rejected");
               }}
             >
-              {confirming === "rejected" ? "Confirm?" : "Reject"}
+              {confirming === "rejected" ? "Confirmi?" : "Respinge"}
             </button>
           )}
           {onCounter && (
@@ -163,7 +163,7 @@ export default function BidCard({ bid, onClick, onAccept, onReject, onCounter })
               className={`bc-btn bc-btn-counter${confirming ? " bc-btn-dimmed" : ""}`}
               onClick={(e) => { e.stopPropagation(); setConfirming(null); onCounter(); }}
             >
-              Counter
+              Contra-ofertă
             </button>
           )}
           {onAccept && (
@@ -176,7 +176,7 @@ export default function BidCard({ bid, onClick, onAccept, onReject, onCounter })
                 else setConfirming("accepted");
               }}
             >
-              {confirming === "accepted" ? "Confirm?" : "Accept"}
+              {confirming === "accepted" ? "Confirmi?" : "Acceptă"}
             </button>
           )}
         </div>
