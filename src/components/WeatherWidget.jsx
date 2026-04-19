@@ -6,16 +6,16 @@ const STORAGE_NAME_KEY = "savedWeatherName";
 
 const getWeatherCondition = (code, isDay) => {
   const value = Number(code);
-  if (value === 0) return { label: "Clear sky", icon: isDay ? "☀️" : "🌙" };
+  if (value === 0) return { label: "Cer senin", icon: isDay ? "☀️" : "🌙" };
   if (value >= 1 && value <= 3)
-    return { label: value === 3 ? "Overcast" : "Partly cloudy", icon: isDay ? "⛅" : "☁️" };
-  if (value === 45 || value === 48) return { label: "Fog", icon: "🌫️" };
+    return { label: value === 3 ? "Înnorat" : "Parțial noros", icon: isDay ? "⛅" : "☁️" };
+  if (value === 45 || value === 48) return { label: "Ceață", icon: "🌫️" };
   if ((value >= 51 && value <= 67) || (value >= 80 && value <= 82))
-    return { label: "Rain", icon: "🌧️" };
+    return { label: "Ploaie", icon: "🌧️" };
   if ((value >= 71 && value <= 77) || (value >= 85 && value <= 86))
-    return { label: "Snow", icon: "❄️" };
-  if (value >= 95 && value <= 99) return { label: "Storm", icon: "⛈️" };
-  return { label: "Clear sky", icon: isDay ? "☀️" : "🌙" };
+    return { label: "Ninsoare", icon: "❄️" };
+  if (value >= 95 && value <= 99) return { label: "Furtună", icon: "⛈️" };
+  return { label: "Cer senin", icon: isDay ? "☀️" : "🌙" };
 };
 
 const WeatherWidget = () => {
@@ -154,7 +154,7 @@ const WeatherWidget = () => {
               Min {weather.min}° / Max {weather.max}°
             </span>
             <span className="min-max">
-              Wind: {Math.round(weather.windSpeed || 0)} km/h
+              Vânt: {Math.round(weather.windSpeed || 0)} km/h
             </span>
           </div>
         </div>

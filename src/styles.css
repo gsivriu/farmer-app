@@ -8493,6 +8493,12 @@ select.input:focus {
 :root {
   --brand-red: #b9101e;
 
+  /* Semantic — price direction, shared across Futures/prices/any delta UI */
+  --semantic-up:        #16a34a;
+  --semantic-up-dark:   #4ade80;
+  --semantic-down:      var(--brand-red);
+  --semantic-down-dark: #f87171;
+
   /* Surfaces — white base */
   --surface-page:   #ffffff;
   --surface-base:   #ffffff;
@@ -8711,13 +8717,20 @@ select.input:focus {
 .ft-last     { font-weight: 600; }
 .ft-prev     { color: var(--text-tertiary); }
 
-.ft-change.positive { color: #16a34a; }
-.ft-change.negative { color: var(--brand-red); }
+.ft-change.positive { color: var(--semantic-up, #16a34a); }
+.ft-change.negative { color: var(--semantic-down, var(--brand-red)); }
 .ft-change.ft-neutral { color: var(--text-tertiary); }
 .ft-change { text-align: right; }
 
-.theme-dark .ft-change.positive { color: #4ade80; }
-.theme-dark .ft-change.negative { color: #f87171; }
+.theme-dark .ft-change.positive { color: var(--semantic-up-dark, #4ade80); }
+.theme-dark .ft-change.negative { color: var(--semantic-down-dark, #f87171); }
+
+/* Row hover — desktop only; pointer: fine filter skips touch devices */
+@media (hover: hover) and (pointer: fine) {
+  .ft-tr { transition: background-color 0.12s ease; }
+  .ft-tr:hover { background-color: var(--surface-subtle, hsl(0, 0%, 97%)); }
+  .theme-dark .ft-tr:hover { background-color: rgba(255, 255, 255, 0.04); }
+}
 
 @media (max-width: 500px) {
   .ft-grid { grid-template-columns: 1fr; gap: 16px; }
