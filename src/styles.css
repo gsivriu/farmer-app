@@ -1283,11 +1283,27 @@ label {
   margin: 32px 0 0;
 }
 
+.sale-card .bid-form-embedded .bid-form-heading {
+  margin: 0 0 20px;
+}
+
 .sale-card .bid-form-embedded h2 {
-  margin: 0 0 16px;
+  margin: 0 0 4px;
   font-size: 19px;
   font-weight: 700;
   letter-spacing: -0.02em;
+  color: var(--color-text-1);
+}
+
+.sale-card .bid-form-embedded .bid-form-subtitle {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--color-text-3);
+}
+
+.theme-dark .sale-card .bid-form-embedded .bid-form-subtitle {
+  color: var(--color-text-3);
 }
 
 .sale-card .bid-form-embedded {
@@ -1404,11 +1420,11 @@ label {
 
 .bid-input-label {
   font-size: 12px;
-  color: #8b8e98;
+  color: var(--color-text-3, #8b8e98);
   font-weight: 600;
   margin-left: 2px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.06em;
 }
 
 .bid-input-field {
