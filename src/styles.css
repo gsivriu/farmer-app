@@ -3088,6 +3088,50 @@ select.input:focus {
   gap: 6px;
 }
 
+/* Filters modal — aligned with BidForm input pattern */
+.bid-modal-body-filters {
+  gap: 18px;
+  padding-top: 2px;
+}
+
+.bid-modal-body-filters .bid-form-grid-2 {
+  gap: 14px;
+}
+
+.bid-modal-body-filters .bid-input-container {
+  margin-bottom: 0;
+}
+
+.bid-modal-body-filters .filter-actions {
+  margin-top: 6px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border-medium);
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.filter-btn-reset {
+  min-height: 40px;
+  padding: 8px 18px;
+  font-weight: 600;
+  border-radius: 10px;
+}
+
+.filter-btn-apply {
+  background: var(--brand) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--brand) !important;
+  min-height: 40px;
+  padding: 8px 20px;
+  font-weight: 600;
+  border-radius: 10px;
+}
+
+.filter-btn-apply:hover {
+  background: var(--brand-dark) !important;
+  border-color: var(--brand-dark) !important;
+}
+
 .admin-bids-header {
   display: flex;
   align-items: center;

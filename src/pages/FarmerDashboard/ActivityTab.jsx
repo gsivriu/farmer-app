@@ -603,47 +603,77 @@ export default function ActivityTab() {
                 ✕
               </button>
             </div>
-            <div className="bid-modal-body">
-              <div className="filter-group">
-                <label className="label">Produs</label>
-                <select className="input" value={productFilter} onChange={(e) => setProductFilter(e.target.value)}>
-                  <option value="all">Toate</option>
-                  {PRODUCT_FILTER_KEYS.map((key) => (
-                    <option key={key} value={key}>{getProductLabelSafe(key)}</option>
-                  ))}
-                </select>
+            <div className="bid-modal-body bid-modal-body-filters">
+              <div className="bid-form-grid-2">
+                <div className="bid-input-container">
+                  <label className="bid-input-label" htmlFor="filter-product">Produs</label>
+                  <select
+                    id="filter-product"
+                    className="bid-input-field"
+                    value={productFilter}
+                    onChange={(e) => setProductFilter(e.target.value)}
+                  >
+                    <option value="all">Toate</option>
+                    {PRODUCT_FILTER_KEYS.map((key) => (
+                      <option key={key} value={key}>{getProductLabelSafe(key)}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="bid-input-container">
+                  <label className="bid-input-label" htmlFor="filter-status">Stare ofertă</label>
+                  <select
+                    id="filter-status"
+                    className="bid-input-field"
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                  >
+                    <option value="all">Toate</option>
+                    <option value="accepted">Acceptate</option>
+                    <option value="rejected">Respinse</option>
+                    <option value="pending">În așteptare</option>
+                  </select>
+                </div>
               </div>
 
-              <div className="filter-group">
-                <label className="label">Stare ofertă</label>
-                <select className="input" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                  <option value="all">Toate</option>
-                  <option value="accepted">Acceptate</option>
-                  <option value="rejected">Respinse</option>
-                  <option value="pending">În așteptare</option>
-                </select>
-              </div>
+              <div className="bid-form-grid-2">
+                <div className="bid-input-container">
+                  <label className="bid-input-label" htmlFor="filter-date-from">Perioada · de la</label>
+                  <input
+                    id="filter-date-from"
+                    className="bid-input-field"
+                    type="date"
+                    value={dateFrom}
+                    onChange={(e) => setDateFrom(e.target.value)}
+                  />
+                </div>
 
-              <div className="filter-group">
-                <label className="label">Data ofertei (de la)</label>
-                <input className="input" type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
-              </div>
-
-              <div className="filter-group">
-                <label className="label">Data ofertei (până la)</label>
-                <input className="input" type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+                <div className="bid-input-container">
+                  <label className="bid-input-label" htmlFor="filter-date-to">Perioada · până la</label>
+                  <input
+                    id="filter-date-to"
+                    className="bid-input-field"
+                    type="date"
+                    value={dateTo}
+                    onChange={(e) => setDateTo(e.target.value)}
+                  />
+                </div>
               </div>
 
               <div className="filter-actions">
-                <button type="button" className="btn small outline" onClick={() => setFiltersOpen(false)}>
-                  Aplică
-                </button>
                 <button
                   type="button"
-                  className="btn small outline"
+                  className="btn small ghost filter-btn-reset"
                   onClick={() => { setProductFilter("all"); setStatusFilter("all"); setDateFrom(""); setDateTo(""); }}
                 >
                   Resetează
+                </button>
+                <button
+                  type="button"
+                  className="btn small primary-btn filter-btn-apply"
+                  onClick={() => setFiltersOpen(false)}
+                >
+                  Aplică filtrele
                 </button>
               </div>
             </div>
