@@ -8959,11 +8959,12 @@ select.input:focus {
 }
 
 .list-price-title {
-  font-size: 11px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-tertiary);
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  margin: 0;
 }
 
 .home-page .admin-price-notice {
@@ -9306,11 +9307,11 @@ select.input:focus {
 
 /* ── Eyebrow / section label ── */
 .farmers-section-eyebrow {
-  font-size: 11px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-tertiary);
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
   margin: 0 0 var(--space-6);
 }
 
@@ -9333,8 +9334,10 @@ select.input:focus {
 
 .farmers-form-label {
   font-size: 12px;
-  font-weight: 500;
-  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-3, #8b8e98);
 }
 
 .farmers-input {
@@ -9399,9 +9402,11 @@ select.input:focus {
 }
 
 .farmers-list-title {
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
   margin: 0;
 }
 
