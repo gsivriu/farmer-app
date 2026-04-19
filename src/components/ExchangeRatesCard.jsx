@@ -95,10 +95,7 @@ export default function ExchangeRatesCard() {
         <span className="exchange-value">{rates.ronToUsd} RON</span>
       </div>
       <div className="exchange-row">
-        <span className="exchange-pair">
-          <span className="exchange-pair-flags" aria-hidden>🇪🇺🇺🇸</span>
-          Paritate EUR/USD
-        </span>
+        <span className="exchange-pair">Paritate EUR/USD</span>
         <span className="exchange-value">{rates.eurToUsd}</span>
       </div>
 
