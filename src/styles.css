@@ -1285,25 +1285,26 @@ label {
 
 .sale-card .bid-form-embedded .bid-form-heading {
   margin: 0 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
+/* Section eyebrow — unified with FUTURES / PREȚURI / CURSURI VALUTARE */
 .sale-card .bid-form-embedded h2 {
-  margin: 0 0 4px;
-  font-size: 19px;
+  margin: 0;
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--color-text-1);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
 }
 
 .sale-card .bid-form-embedded .bid-form-subtitle {
   margin: 0;
-  font-size: 13px;
+  font-size: 11px;
   line-height: 1.45;
-  color: var(--color-text-3);
-}
-
-.theme-dark .sale-card .bid-form-embedded .bid-form-subtitle {
-  color: var(--color-text-3);
+  color: var(--text-tertiary);
 }
 
 .sale-card .bid-form-embedded {
