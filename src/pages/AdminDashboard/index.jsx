@@ -21,14 +21,14 @@ export default function AdminDashboard() {
           className={"nav-item " + (activeTab === "home" ? "active" : "")}
           onClick={() => setActiveTab("home")}
         >
-          Home
+          Acasă
         </button>
         <button
           type="button"
           className={"nav-item " + (activeTab === "bids" ? "active" : "")}
           onClick={() => setActiveTab("bids")}
         >
-          Farmer Bids
+          Oferte
         </button>
         <button
           type="button"
@@ -73,7 +73,7 @@ export default function AdminDashboard() {
           <svg className="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M4 10.5L12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1v-9.5z" />
           </svg>
-          <span className="nav-label">Home</span>
+          <span className="nav-label">Acasă</span>
         </button>
         <button
           type="button"
@@ -84,7 +84,7 @@ export default function AdminDashboard() {
             <path d="M4 7.5V6a2 2 0 0 1 2-2h8l6 6v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V16" />
             <path d="M14 4v6h6" />
           </svg>
-          <span className="nav-label">Bids</span>
+          <span className="nav-label">Oferte</span>
         </button>
         <button
           type="button"

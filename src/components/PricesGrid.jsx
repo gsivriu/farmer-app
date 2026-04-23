@@ -17,9 +17,9 @@ export default function PricesGrid() {
   return (
     <div className="market-card prices-card">
       <div className="market-card-header">
-        <h3 className="market-title">Ameropa CPT Constanta prices</h3>
+        <h3 className="market-title">Prețuri Ameropa CPT Constanța</h3>
         <p className="market-subtitle">
-          Updated today {todayLabel} after 12:00.
+          Actualizat azi {todayLabel} după ora 12:00.
         </p>
       </div>
 
@@ -49,7 +49,8 @@ export default function PricesGrid() {
                   <span className="market-price-unavailable">Indisponibil</span>
                 ) : (
                   <span className="market-price-cell">
-                    {Number(c.price).toFixed(2)} {unit}
+                    <span className="market-price-number">{Number(c.price).toFixed(2)}</span>
+                    <span className="market-unit">{unit}</span>
                     <span
                       className={
                         "market-diff " +

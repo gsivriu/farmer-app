@@ -35,23 +35,23 @@ export default function HomeTab() {
     const num = Number(raw);
 
     if (!raw || raw.trim() === "") {
-      alert("Enter a price before confirming.");
+      alert("Introdu un preț înainte de confirmare.");
       return;
     }
     if (!Number.isFinite(num) || num <= 0) {
-      alert("Enter a valid price greater than 0.");
+      alert("Introdu un preț valid, mai mare decât 0.");
       return;
     }
 
     const currency = draftCurrencies[id] || "EUR";
     const { error } = await updateCommodityPrice(id, num, currency);
     if (error) {
-      alert("Error updating price: " + error.message);
+      alert("Eroare la actualizarea prețului: " + error.message);
       return;
     }
 
     setDraftPrices((prev) => ({ ...prev, [id]: String(num) }));
-    setPriceNotice(`New list price for ${getProductLabelSafe(id)} has been set.`);
+    setPriceNotice(`Prețul de listă pentru ${getProductLabelSafe(id)} a fost actualizat.`);
   };
 
   const handleStop = async (id) => {
@@ -59,10 +59,10 @@ export default function HomeTab() {
     const { error } = await stopCommodity(id);
     setLoadingStop((prev) => ({ ...prev, [id]: false }));
     if (error) {
-      alert("Error stopping commodity: " + error.message);
+      alert("Eroare la oprirea produsului: " + error.message);
       return;
     }
-    setPriceNotice(`${getProductLabelSafe(id)} acquisitions stopped.`);
+    setPriceNotice(`Achiziții ${getProductLabelSafe(id)} oprite.`);
   };
 
   return (
@@ -72,7 +72,7 @@ export default function HomeTab() {
 
       <div className="list-price-section">
         <div className="list-price-header">
-          <h2 className="list-price-title">List price</h2>
+          <h2 className="list-price-title">Prețuri de listă</h2>
           {priceNotice && <p className="admin-price-notice">{priceNotice}</p>}
         </div>
 
@@ -111,7 +111,7 @@ export default function HomeTab() {
                     className="admin-btn"
                     onClick={() => handleSavePrice(c.id)}
                   >
-                    {isStopped ? "Reactivează" : "Confirm"}
+                    {isStopped ? "Reactivează" : "Confirmă"}
                   </button>
                   {!isStopped && (
                     <button

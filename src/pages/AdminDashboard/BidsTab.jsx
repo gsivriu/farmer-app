@@ -10,14 +10,14 @@ const formatDateOnly = (value) => {
   if (!value) return "-";
   const dt = new Date(value);
   if (Number.isNaN(dt.getTime())) return "-";
-  return dt.toLocaleDateString("en-GB", { year: "numeric", month: "2-digit", day: "2-digit" });
+  return dt.toLocaleDateString("ro-RO", { year: "numeric", month: "2-digit", day: "2-digit" });
 };
 
 const formatDateTime = (value) => {
   if (!value) return "-";
   const dt = new Date(value);
   if (Number.isNaN(dt.getTime())) return "-";
-  return dt.toLocaleString("en-GB", {
+  return dt.toLocaleString("ro-RO", {
     year: "numeric", month: "2-digit", day: "2-digit",
     hour: "2-digit", minute: "2-digit",
   });
@@ -25,11 +25,11 @@ const formatDateTime = (value) => {
 
 const getStatusLabel = (status) => {
   const value = String(status || "").toLowerCase();
-  if (value === "accepted") return "Accepted";
-  if (value === "rejected") return "Rejected";
-  if (value === "countered") return "Counter offer";
-  if (value === "farmer_countered") return "Farmer counter";
-  return "Pending";
+  if (value === "accepted") return "Acceptat";
+  if (value === "rejected") return "Respins";
+  if (value === "countered") return "Contra-ofertă";
+  if (value === "farmer_countered") return "Răspuns fermier";
+  return "În așteptare";
 };
 
 const getAcceptedPrice = (bid) => {
@@ -48,8 +48,8 @@ const formatParityDisplay = (bid, { detailed = false } = {}) => {
   const loading = formatLocationDisplay(bid.loading_location || "-");
   if (parity === "FCA" || parity === "FOB" || parity === "FOR") {
     return detailed
-      ? `${parity} ${loading} with delivery at ${delivery}`
-      : `${parity} ${loading} to ${delivery}`;
+      ? `${parity} ${loading} cu livrare la ${delivery}`
+      : `${parity} ${loading} la ${delivery}`;
   }
   return `${parity} ${delivery}`;
 };
@@ -68,11 +68,11 @@ const normalizeOptionalText = (value) => {
 
 function BidStatusBadge({ status }) {
   const s = String(status || "").toLowerCase();
-  if (s === "accepted")        return <span className="bid-status-badge bid-status-accepted">Accepted</span>;
-  if (s === "rejected")        return <span className="bid-status-badge bid-status-rejected">Rejected</span>;
-  if (s === "countered")       return <span className="bid-status-badge bid-status-countered">Counter offer</span>;
-  if (s === "farmer_countered") return <span className="bid-status-badge bid-status-countered">Farmer counter</span>;
-  return <span className="bid-status-badge bid-status-pending">Pending</span>;
+  if (s === "accepted")         return <span className="bid-status-badge bid-status-accepted">Acceptat</span>;
+  if (s === "rejected")         return <span className="bid-status-badge bid-status-rejected">Respins</span>;
+  if (s === "countered")        return <span className="bid-status-badge bid-status-countered">Contra-ofertă</span>;
+  if (s === "farmer_countered") return <span className="bid-status-badge bid-status-countered">Răspuns fermier</span>;
+  return <span className="bid-status-badge bid-status-pending">În așteptare</span>;
 }
 
 export default function BidsTab({ active }) {
@@ -162,9 +162,9 @@ export default function BidsTab({ active }) {
     const freightNum = Number(freightRaw);
     const hasFreight = freightRaw != null && String(freightRaw).trim() !== "" && Number.isFinite(freightNum) && freightNum > 0;
     const hasDelivery = String(deliveryRaw || "").trim() !== "";
-    if (!hasFreight && !hasDelivery) return "Bid not submitted. Please complete transport fee and delivery location.";
-    if (!hasFreight) return "Bid not submitted. Please complete transport fee.";
-    if (!hasDelivery) return "Bid not submitted. Please complete delivery location.";
+    if (!hasFreight && !hasDelivery) return "Oferta nu a fost trimisă. Completează tariful de transport și locația de livrare.";
+    if (!hasFreight) return "Oferta nu a fost trimisă. Completează tariful de transport.";
+    if (!hasDelivery) return "Oferta nu a fost trimisă. Completează locația de livrare.";
     return null;
   };
 
@@ -194,11 +194,11 @@ export default function BidsTab({ active }) {
     const payload = { status: action };
     if (action === "countered") {
       const counterNum = parseOptionalNumber(counterValue);
-      if (!Number.isFinite(counterNum) || counterNum <= 0) { setModalError("Enter a valid counter price."); return; }
+      if (!Number.isFinite(counterNum) || counterNum <= 0) { setModalError("Introdu un preț de contra-ofertă valid."); return; }
       payload.counter_price = counterNum;
       if (isFreightParity(bid.parity)) {
         const freightNum = parseOptionalNumber(freightValue);
-        if (!Number.isFinite(freightNum) || freightNum <= 0) { setModalError("Enter a valid transport fee."); return; }
+        if (!Number.isFinite(freightNum) || freightNum <= 0) { setModalError("Introdu un tarif de transport valid."); return; }
         payload.freight_cost = freightNum;
         payload.delivery_location = normalizeOptionalText(deliveryValue);
       }
@@ -206,7 +206,7 @@ export default function BidsTab({ active }) {
 
     setModalError(null);
     const { error } = await supabase.from("bids").update(payload).eq("id", bid.id);
-    if (error) { setModalError("Error while sending update: " + error.message); return; }
+    if (error) { setModalError("Eroare la trimiterea actualizării: " + error.message); return; }
 
     if (action === "accepted" && bid.farmer_id) {
       await addFarmerRewardsPoints(bid.farmer_id, Number(bid.quantity || 0));
@@ -294,26 +294,33 @@ export default function BidsTab({ active }) {
   return (
     <>
       <div className="card admin-card dashboard-card">
-        <div className="card-header admin-bids-header">
-          <h2 className="market-title">All bids</h2>
+        <div className="card-header admin-bids-header activity-header-compact">
+          <h2 className="market-title">Toate ofertele</h2>
           <div className="admin-bids-actions">
-            <button type="button" className="btn small outline" onClick={() => setFiltersOpen(true)}>Filters</button>
-            <button type="button" className="btn small outline" onClick={() => setShowStats((prev) => !prev)}>Stats</button>
+            <button type="button" className="btn small outline" onClick={() => setFiltersOpen(true)}>Filtre</button>
+            <button type="button" className="btn small outline" onClick={() => setShowStats((prev) => !prev)}>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" style={{ marginRight: 5 }}>
+                <rect x="1" y="7" width="3" height="6" rx="1" fill="currentColor" opacity="0.5"/>
+                <rect x="5.5" y="4" width="3" height="9" rx="1" fill="currentColor" opacity="0.75"/>
+                <rect x="10" y="1" width="3" height="12" rx="1" fill="currentColor"/>
+              </svg>
+              Statistici
+            </button>
           </div>
         </div>
 
         {showStats && (
           <div style={{ marginTop: 12 }}>
             {statsRows.length === 0 ? (
-              <p className="small-text">No stats available for selected filters.</p>
+              <p className="small-text">Nu există statistici pentru filtrele selectate.</p>
             ) : (
               <div className="table-wrapper">
                 <table className="table stats-table">
                   <thead>
                     <tr>
-                      <th>Product</th>
-                      <th>Volume (t)</th>
-                      <th>Average price</th>
+                      <th>Produs</th>
+                      <th>Volum (t)</th>
+                      <th>Preț mediu</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -325,7 +332,7 @@ export default function BidsTab({ active }) {
                       </tr>
                     ))}
                     <tr className="stats-total-row">
-                      <td>Total</td>
+                      <td>TOTAL</td>
                       <td>{Number(statsTotalQty || 0).toFixed(2)}</td>
                       <td>-</td>
                     </tr>
@@ -336,7 +343,7 @@ export default function BidsTab({ active }) {
           </div>
         )}
 
-        {loading && <p className="small-text" style={{ marginTop: 12 }}>Loading...</p>}
+        {loading && <p className="small-text" style={{ marginTop: 12 }}>Se încarcă…</p>}
         {error && <p className="badge rejected" style={{ marginTop: 12 }}>{error}</p>}
 
         {!loading && !error && (
@@ -357,8 +364,8 @@ export default function BidsTab({ active }) {
                 <svg className="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2M12 12h.01M12 16h.01" />
                 </svg>
-                <p className="empty-state-title">No bids found</p>
-                <p className="empty-state-subtitle">No results for the current filters. Try adjusting or resetting them.</p>
+                <p className="empty-state-title">Nicio ofertă găsită</p>
+                <p className="empty-state-subtitle">Nicio ofertă nu corespunde filtrelor selectate. Încearcă să ajustezi sau resetezi filtrele.</p>
                 <button
                   type="button"
                   className="btn small outline"
@@ -373,7 +380,7 @@ export default function BidsTab({ active }) {
                     setFilterLoadingLocation("all");
                   }}
                 >
-                  Reset filters
+                  Resetează filtrele
                 </button>
               </div>
             )}
@@ -408,19 +415,19 @@ export default function BidsTab({ active }) {
             </div>
             <div className="bid-modal-body">
               <div className="bid-modal-row">
-                <span className="bid-modal-label">Farmer</span>
+                <span className="bid-modal-label">Fermier</span>
                 <span className="bid-modal-value">{adminSelectedBid.farmer_email || adminSelectedBid.farmer_id}</span>
               </div>
               <div className="bid-modal-row">
-                <span className="bid-modal-label">Product</span>
+                <span className="bid-modal-label">Produs</span>
                 <span className="bid-modal-value">{getProductLabelSafe(adminSelectedBid.product)}</span>
               </div>
               <div className="bid-modal-row">
-                <span className="bid-modal-label">Quantity</span>
+                <span className="bid-modal-label">Cantitate</span>
                 <span className="bid-modal-value">{formatCompactNumber(adminSelectedBid.quantity)} t</span>
               </div>
               <div className="bid-modal-row">
-                <span className="bid-modal-label">Price</span>
+                <span className="bid-modal-label">Preț</span>
                 <span className="bid-modal-value">
                   {adminSelectedBid.status === "accepted" && getAcceptedPrice(adminSelectedBid) != null ? (
                     <>{formatCompactNumber(getAcceptedPrice(adminSelectedBid))}{" "}{`${adminSelectedBid.currency || (adminSelectedBid.product === "sunflower" ? "USD" : "EUR")}/t`}</>
@@ -432,7 +439,7 @@ export default function BidsTab({ active }) {
                 </span>
               </div>
               <div className="bid-modal-row">
-                <span className="bid-modal-label">Counter</span>
+                <span className="bid-modal-label">Contra-ofertă</span>
                 <span className="bid-modal-value bid-modal-counter">
                   <input
                     className="bid-detail-counter-input"
@@ -450,7 +457,7 @@ export default function BidsTab({ active }) {
               </div>
               {isFreightParity(adminSelectedBid.parity) && (
                 <div className="bid-modal-row">
-                  <span className="bid-modal-label">Freight</span>
+                  <span className="bid-modal-label">Transport</span>
                   <span className="bid-modal-value bid-modal-counter">
                     <input
                       className="bid-detail-counter-input"
@@ -468,7 +475,7 @@ export default function BidsTab({ active }) {
                 </div>
               )}
               <div className="bid-modal-row">
-                <span className="bid-modal-label">Parity</span>
+                <span className="bid-modal-label">Paritate</span>
                 <span className="bid-modal-value">
                   {isFreightParity(adminSelectedBid.parity) ? (
                     <span className="bid-modal-parity-edit">
@@ -476,13 +483,13 @@ export default function BidsTab({ active }) {
                         {String(adminSelectedBid.parity || "").toUpperCase()}{" "}
                         {adminSelectedBid.loading_location || "-"}
                       </span>
-                      <span className="bid-modal-parity-separator">to</span>
+                      <span className="bid-modal-parity-separator">la</span>
                       <select
                         className="input inline-select bid-modal-inline-select"
                         value={adminModalDelivery}
                         onChange={(e) => setAdminModalDelivery(e.target.value)}
                       >
-                        <option value="">Delivery location</option>
+                        <option value="">Locație livrare</option>
                         {adminModalDelivery && !deliveryLocations.includes(adminModalDelivery) && (
                           <option value={adminModalDelivery}>{formatLocationDisplay(adminModalDelivery)}</option>
                         )}
@@ -497,31 +504,31 @@ export default function BidsTab({ active }) {
                 </span>
               </div>
               <div className="bid-modal-row">
-                <span className="bid-modal-label">Delivery</span>
+                <span className="bid-modal-label">Livrare</span>
                 <span className="bid-modal-value">
                   {formatDeliveryRange(adminSelectedBid.delivery_start, adminSelectedBid.delivery_end)}
                 </span>
               </div>
               {adminSelectedBid.crop_year && (
                 <div className="bid-modal-row">
-                  <span className="bid-modal-label">Crop year</span>
+                  <span className="bid-modal-label">An recoltă</span>
                   <span className="bid-modal-value">{adminSelectedBid.crop_year}</span>
                 </div>
               )}
               {adminSelectedBid.quantity_tolerance != null && (
                 <div className="bid-modal-row">
-                  <span className="bid-modal-label">Tolerance</span>
+                  <span className="bid-modal-label">Toleranță</span>
                   <span className="bid-modal-value">±{adminSelectedBid.quantity_tolerance}%</span>
                 </div>
               )}
               {adminSelectedBid.remarks && (
                 <div className="bid-modal-row">
-                  <span className="bid-modal-label">Remarks</span>
+                  <span className="bid-modal-label">Observații</span>
                   <span className="bid-modal-value">{adminSelectedBid.remarks}</span>
                 </div>
               )}
               <div className="bid-modal-row">
-                <span className="bid-modal-label">Status</span>
+                <span className="bid-modal-label">Stare</span>
                 <span className="bid-modal-value">{getStatusLabel(adminSelectedBid.status)}</span>
               </div>
               {adminSelectedBid.status === "accepted" && adminSelectedBid.contract_no && (
@@ -579,7 +586,7 @@ export default function BidsTab({ active }) {
                         submitAdminDecision("rejected");
                       }}
                     >
-                      {adminConfirmAction === "rejected" ? "Confirm?" : "Reject"}
+                      {adminConfirmAction === "rejected" ? "Confirmi?" : "Respinge"}
                     </button>
                     <button
                       type="button"
@@ -591,7 +598,7 @@ export default function BidsTab({ active }) {
                         submitAdminDecision("countered");
                       }}
                     >
-                      {adminConfirmAction === "countered" ? "Confirm?" : "Counter offer"}
+                      {adminConfirmAction === "countered" ? "Confirmi?" : "Contra-ofertă"}
                     </button>
                     <button
                       type="button"
@@ -603,7 +610,7 @@ export default function BidsTab({ active }) {
                         submitAdminDecision("accepted");
                       }}
                     >
-                      {adminConfirmAction === "accepted" ? "Confirm?" : "Accept"}
+                      {adminConfirmAction === "accepted" ? "Confirmi?" : "Acceptă"}
                     </button>
                   </>
                 );
@@ -623,79 +630,112 @@ export default function BidsTab({ active }) {
         >
           <div className="bid-modal" onClick={(event) => event.stopPropagation()}>
             <div className="bid-modal-header">
-              <h3>Filters</h3>
-              <button type="button" className="btn small outline" onClick={() => setFiltersOpen(false)}>
-                Close
+              <h3 id="admin-filters-modal-title">Filtre</h3>
+              <button
+                type="button"
+                className="btn small ghost modal-close-btn"
+                aria-label="Închide filtrele"
+                onClick={() => setFiltersOpen(false)}
+              >
+                ✕
               </button>
             </div>
-            <div className="bid-modal-body">
-              <div className="filter-group">
-                <label className="label">Farmer</label>
-                <select className="input" value={listFarmerFilter} onChange={(e) => setListFarmerFilter(e.target.value)}>
-                  <option value="all">All farmers</option>
-                  {(farmers || []).map((f) => (
-                    <option key={f.id} value={f.id}>{f.email || f.id}</option>
-                  ))}
-                </select>
+            <div className="bid-modal-body bid-modal-body-filters">
+
+              {/* Fermier + Produs */}
+              <div className="bid-form-grid-2">
+                <div className="bid-input-container">
+                  <label className="bid-input-label" htmlFor="af-farmer">Fermier</label>
+                  <select id="af-farmer" className="bid-input-field" value={listFarmerFilter} onChange={(e) => setListFarmerFilter(e.target.value)}>
+                    <option value="all">Toți fermierii</option>
+                    {(farmers || []).map((f) => (
+                      <option key={f.id} value={f.id}>{f.email || f.id}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="bid-input-container">
+                  <label className="bid-input-label" htmlFor="af-product">Produs</label>
+                  <select id="af-product" className="bid-input-field" value={filterProduct} onChange={(e) => setFilterProduct(e.target.value)}>
+                    <option value="all">Toate</option>
+                    {PRODUCT_FILTER_KEYS.map((key) => (
+                      <option key={key} value={key}>{getProductLabelSafe(key)}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
-              <div className="filter-group">
-                <label className="label">Product</label>
-                <select className="input" value={filterProduct} onChange={(e) => setFilterProduct(e.target.value)}>
-                  <option value="all">All</option>
-                  {PRODUCT_FILTER_KEYS.map((key) => (
-                    <option key={key} value={key}>{getProductLabelSafe(key)}</option>
-                  ))}
-                </select>
+
+              {/* Stare ofertă + Paritate */}
+              <div className="bid-form-grid-2">
+                <div className="bid-input-container">
+                  <label className="bid-input-label" htmlFor="af-status">Stare ofertă</label>
+                  <select id="af-status" className="bid-input-field" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+                    <option value="all">Toate</option>
+                    <option value="accepted">Acceptate</option>
+                    <option value="rejected">Respinse</option>
+                    <option value="pending">În așteptare</option>
+                  </select>
+                </div>
+                <div className="bid-input-container">
+                  <label className="bid-input-label" htmlFor="af-parity">Paritate</label>
+                  <select id="af-parity" className="bid-input-field" value={filterParity} onChange={(e) => setFilterParity(e.target.value)}>
+                    <option value="all">Toate</option>
+                    {["CPT", "DAP", "FCA", "FOR", "FOB", "CIF"].map((p) => (
+                      <option key={p} value={p}>{p}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
-              <div className="filter-group">
-                <label className="label">Bid status</label>
-                <select className="input" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
-                  <option value="all">All</option>
-                  <option value="accepted">Accepted</option>
-                  <option value="rejected">Rejected</option>
-                  <option value="pending">Pending</option>
-                </select>
+
+              {/* Locație livrare + Locație încărcare */}
+              <div className="bid-form-grid-2">
+                <div className="bid-input-container">
+                  <label className="bid-input-label" htmlFor="af-delivery-loc">Locație livrare</label>
+                  <select id="af-delivery-loc" className="bid-input-field" value={filterDeliveryLocation} onChange={(e) => setFilterDeliveryLocation(e.target.value)}>
+                    <option value="all">Toate</option>
+                    {deliveryLocationOptions.map((loc) => (
+                      <option key={loc} value={loc}>{formatLocationDisplay(loc)}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="bid-input-container">
+                  <label className="bid-input-label" htmlFor="af-loading-loc">Locație încărcare</label>
+                  <select id="af-loading-loc" className="bid-input-field" value={filterLoadingLocation} onChange={(e) => setFilterLoadingLocation(e.target.value)}>
+                    <option value="all">Toate</option>
+                    {loadingLocationOptions.map((loc) => (
+                      <option key={loc} value={loc}>{formatLocationDisplay(loc)}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
-              <div className="filter-group">
-                <label className="label">Parity</label>
-                <select className="input" value={filterParity} onChange={(e) => setFilterParity(e.target.value)}>
-                  <option value="all">All</option>
-                  {["CPT", "DAP", "FCA", "FOR", "FOB", "CIF"].map((p) => (
-                    <option key={p} value={p}>{p}</option>
-                  ))}
-                </select>
+
+              {/* Livrare de la + până la */}
+              <div className="bid-form-grid-2">
+                <div className="bid-input-container">
+                  <label className="bid-input-label" htmlFor="af-from">Livrare · de la</label>
+                  <input
+                    id="af-from"
+                    className="bid-input-field"
+                    type="date"
+                    value={filterDeliveryFrom}
+                    onChange={(e) => setFilterDeliveryFrom(e.target.value)}
+                  />
+                </div>
+                <div className="bid-input-container">
+                  <label className="bid-input-label" htmlFor="af-to">Livrare · până la</label>
+                  <input
+                    id="af-to"
+                    className="bid-input-field"
+                    type="date"
+                    value={filterDeliveryTo}
+                    onChange={(e) => setFilterDeliveryTo(e.target.value)}
+                  />
+                </div>
               </div>
-              <div className="filter-group">
-                <label className="label">Delivery location</label>
-                <select className="input" value={filterDeliveryLocation} onChange={(e) => setFilterDeliveryLocation(e.target.value)}>
-                  <option value="all">All</option>
-                  {deliveryLocationOptions.map((loc) => (
-                    <option key={loc} value={loc}>{formatLocationDisplay(loc)}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="filter-group">
-                <label className="label">Loading location</label>
-                <select className="input" value={filterLoadingLocation} onChange={(e) => setFilterLoadingLocation(e.target.value)}>
-                  <option value="all">All</option>
-                  {loadingLocationOptions.map((loc) => (
-                    <option key={loc} value={loc}>{formatLocationDisplay(loc)}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="filter-group">
-                <label className="label">Delivery (from)</label>
-                <input className="input" type="date" value={filterDeliveryFrom} onChange={(e) => setFilterDeliveryFrom(e.target.value)} />
-              </div>
-              <div className="filter-group">
-                <label className="label">Delivery (to)</label>
-                <input className="input" type="date" value={filterDeliveryTo} onChange={(e) => setFilterDeliveryTo(e.target.value)} />
-              </div>
+
               <div className="filter-actions">
-                <button type="button" className="btn small outline" onClick={() => setFiltersOpen(false)}>Apply</button>
                 <button
                   type="button"
-                  className="btn small outline"
+                  className="btn small ghost filter-btn-reset"
                   onClick={() => {
                     setListFarmerFilter("all");
                     setFilterProduct("all");
@@ -707,7 +747,14 @@ export default function BidsTab({ active }) {
                     setFilterLoadingLocation("all");
                   }}
                 >
-                  Reset
+                  Resetează
+                </button>
+                <button
+                  type="button"
+                  className="btn small primary-btn filter-btn-apply"
+                  onClick={() => setFiltersOpen(false)}
+                >
+                  Aplică filtrele
                 </button>
               </div>
             </div>

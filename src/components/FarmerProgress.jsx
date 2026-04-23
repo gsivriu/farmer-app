@@ -138,14 +138,16 @@ export default function FarmerProgress({ embedded = false }) {
       {/* Header */}
       <div className="progress-head">
         <div className="progress-meta">
-          Total delivered: <b>{fmt0(totalAccepted)}</b> /{" "}
-          <b>{fmt0(progress.nextT)}</b> t
+          <span className="progress-meta-label">Livrat</span>
+          <span className="progress-meta-value">
+            <b>{fmt0(totalAccepted)}</b> / {fmt0(progress.nextT)} t
+          </span>
         </div>
         <button
           className="progress-info-btn"
           onClick={() => setShowPopup(true)}
-          aria-label="View gamification tiers"
-          title="View rewards"
+          aria-label="Vezi nivelurile de recompense"
+          title="Vezi recompensele"
         >
           {/* Bar chart with upward arrow — growth/progress icon */}
           <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">

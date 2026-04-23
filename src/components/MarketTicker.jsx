@@ -3,7 +3,8 @@ import { getGrainFutures } from "../services/futuresService";
 
 function fmt(val, decimals = 2) {
   if (val == null) return "—";
-  return val.toFixed(decimals);
+  // Use real minus sign (U+2212) instead of hyphen-minus from toFixed
+  return val.toFixed(decimals).replace("-", "\u2212");
 }
 
 function ChangeCell({ change, changePercent }) {

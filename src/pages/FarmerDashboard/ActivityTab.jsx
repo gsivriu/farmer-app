@@ -18,7 +18,7 @@ const formatDateTime = (value) => {
   if (!value) return "-";
   const dt = new Date(value);
   if (Number.isNaN(dt.getTime())) return "-";
-  return dt.toLocaleString("en-GB", {
+  return dt.toLocaleString("ro-RO", {
     year: "numeric", month: "2-digit", day: "2-digit",
     hour: "2-digit", minute: "2-digit",
   });
@@ -28,16 +28,16 @@ const formatDateOnly = (value) => {
   if (!value) return "-";
   const dt = new Date(value);
   if (Number.isNaN(dt.getTime())) return "-";
-  return dt.toLocaleDateString("en-GB", { year: "2-digit", month: "2-digit", day: "2-digit" });
+  return dt.toLocaleDateString("ro-RO", { year: "2-digit", month: "2-digit", day: "2-digit" });
 };
 
 const getStatusLabel = (status) => {
   const value = String(status || "").toLowerCase();
-  if (value === "accepted") return "Accepted";
-  if (value === "rejected") return "Rejected";
-  if (value === "countered") return "Counter offer";
-  if (value === "farmer_countered") return "Counter sent";
-  return "Pending";
+  if (value === "accepted") return "Acceptat";
+  if (value === "rejected") return "Respins";
+  if (value === "countered") return "Contra-ofertă";
+  if (value === "farmer_countered") return "Răspuns trimis";
+  return "În așteptare";
 };
 
 const parseOptionalNumber = (value) => {
@@ -196,7 +196,7 @@ export default function ActivityTab() {
       .from("bids")
       .update({ status: "accepted", final_price: finalPrice })
       .eq("id", bid.id);
-    if (updErr) { setFarmerActionError("Error while accepting: " + updErr.message); return; }
+    if (updErr) { setFarmerActionError("Eroare la acceptare: " + updErr.message); return; }
     setLocalBids((prev) =>
       prev.map((x) => x.id === bid.id ? { ...x, status: "accepted", final_price: finalPrice } : x)
     );
@@ -211,7 +211,7 @@ export default function ActivityTab() {
   const handleRejectCounter = async (bid) => {
     const { error: updErr } = await supabase
       .from("bids").update({ status: "rejected" }).eq("id", bid.id);
-    if (updErr) { setFarmerActionError("Error while rejecting: " + updErr.message); return; }
+    if (updErr) { setFarmerActionError("Eroare la respingere: " + updErr.message); return; }
     setLocalBids((prev) => prev.map((x) => (x.id === bid.id ? { ...x, status: "rejected" } : x)));
     setFarmerConfirmAction(null);
     setFarmerActionLocks((prev) => ({ ...prev, [bid.id]: { locked: true, lastCounter: null } }));
@@ -221,10 +221,10 @@ export default function ActivityTab() {
 
   const handleCounterBack = async (bid) => {
     const value = Number(farmerModalCounter);
-    if (!Number.isFinite(value) || value <= 0) { setFarmerActionError("Enter a valid price."); return; }
+    if (!Number.isFinite(value) || value <= 0) { setFarmerActionError("Introdu un preț valid."); return; }
     const { error: updErr } = await supabase
       .from("bids").update({ counter_price: value, status: "farmer_countered" }).eq("id", bid.id);
-    if (updErr) { setFarmerActionError("Error while countering: " + updErr.message); return; }
+    if (updErr) { setFarmerActionError("Eroare la trimiterea contra-ofertei: " + updErr.message); return; }
     setLocalBids((prev) =>
       prev.map((x) => x.id === bid.id ? { ...x, counter_price: value, status: "farmer_countered" } : x)
     );
@@ -242,12 +242,12 @@ export default function ActivityTab() {
       <div className="dashboard-row full">
         <div className="card">
           <div className="card-header activity-header-compact">
-            <h2 className="market-title">My Activity</h2>
+            <h2 className="market-title">Activitatea mea</h2>
             <div className="activity-header-actions">
               <button type="button" className="btn small outline" onClick={() => setFiltersOpen(true)}>
-                Filters
+                Filtre
                 {activeFilterCount > 0 && (
-                  <span className="filter-active-dot" aria-label={`${activeFilterCount} active filters`} />
+                  <span className="filter-active-dot" aria-label={`${activeFilterCount} filtre active`} />
                 )}
               </button>
               <button type="button" className="btn small outline" onClick={() => setShowStats((prev) => !prev)}>
@@ -256,7 +256,7 @@ export default function ActivityTab() {
                   <rect x="5.5" y="4" width="3" height="9" rx="1" fill="currentColor" opacity="0.75"/>
                   <rect x="10" y="1" width="3" height="12" rx="1" fill="currentColor"/>
                 </svg>
-                Stats
+                Statistici
               </button>
             </div>
           </div>
@@ -267,15 +267,15 @@ export default function ActivityTab() {
             {showStats && (
               <div className="dashboard-section">
                 {statsRows.length === 0 ? (
-                  <p className="small-text">No stats available for the selected filters.</p>
+                  <p className="small-text">Nu există statistici pentru filtrele selectate.</p>
                 ) : (
                   <div className="table-wrapper">
                     <table className="table stats-table">
                       <thead>
                         <tr>
-                          <th>Product</th>
-                          <th>Volume (t)</th>
-                          <th>Average price</th>
+                          <th>Produs</th>
+                          <th>Volum (t)</th>
+                          <th>Preț mediu</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -314,12 +314,12 @@ export default function ActivityTab() {
                     <path d="M30 7v3l2 1.5" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round"/>
                   </svg>
                   <p className="activity-empty-title">
-                    {userBids.length === 0 ? "No bids yet" : "No bids match your filters"}
+                    {userBids.length === 0 ? "Nicio ofertă încă" : "Nicio ofertă nu corespunde filtrelor"}
                   </p>
                   <p className="activity-empty-sub">
                     {userBids.length === 0
-                      ? "Place your first bid from the Sale tab."
-                      : "Try adjusting or clearing the filters."}
+                      ? "Trimite prima ofertă din tab-ul Vânzare."
+                      : "Încearcă să modifici sau să resetezi filtrele."}
                   </p>
                 </div>
               ) : (
@@ -374,29 +374,29 @@ export default function ActivityTab() {
                           </div>
                         </div>
 
-                        <div className="bid-card-section-label">Details</div>
+                        <div className="bid-card-section-label">Detalii</div>
 
                         <div className="bid-card-row bid-card-row-price">
-                          <span className="bid-card-label">Price</span>
+                          <span className="bid-card-label">Preț</span>
                           <span className={`bid-card-value${hasCounterPrice && b.status === "countered" ? " bid-card-counter-value" : ""}`}>
                             {formatCompactNumber(activePrice)} {unit}
                           </span>
                         </div>
                         <div className="bid-card-row">
-                          <span className="bid-card-label">Quantity</span>
+                          <span className="bid-card-label">Cantitate</span>
                           <span className="bid-card-value">{formatCompactNumber(b.quantity)} t</span>
                         </div>
                         <div className="bid-card-row">
-                          <span className="bid-card-label">Parity</span>
+                          <span className="bid-card-label">Paritate</span>
                           <span className="bid-card-value">{formatParityDisplay(b)}</span>
                         </div>
                         <div className="bid-card-row">
-                          <span className="bid-card-label">Offer date</span>
+                          <span className="bid-card-label">Data ofertei</span>
                           <span className="bid-card-value">{formatDateOnly(b.created_at)}</span>
                         </div>
 
                         <div className="bid-card-footer">
-                          <span className="bid-card-hint">View details ›</span>
+                          <span className="bid-card-hint">Vezi detalii ›</span>
                         </div>
                       </div>
                     );
@@ -422,11 +422,11 @@ export default function ActivityTab() {
             onClick={(event) => { event.stopPropagation(); setFarmerConfirmAction(null); }}
           >
             <div className="bid-modal-header">
-              <h3 id="bid-detail-modal-title">Bid details</h3>
+              <h3 id="bid-detail-modal-title">Detalii ofertă</h3>
               <button
                 type="button"
                 className="btn small ghost modal-close-btn"
-                aria-label="Close bid details"
+                aria-label="Închide detaliile ofertei"
                 onClick={() => { setSelectedBid(null); setFarmerActionError(null); setFarmerCounterSent(false); }}
               >
                 ✕
@@ -434,19 +434,19 @@ export default function ActivityTab() {
             </div>
             <div className="bid-modal-body">
               <div className="bid-modal-row">
-                <span className="bid-modal-label">Date</span>
+                <span className="bid-modal-label">Dată</span>
                 <span className="bid-modal-value">{formatDateTime(selectedBid.created_at)}</span>
               </div>
               <div className="bid-modal-row">
-                <span className="bid-modal-label">Product</span>
+                <span className="bid-modal-label">Produs</span>
                 <span className="bid-modal-value">{getProductLabelSafe(selectedBid.product)}</span>
               </div>
               <div className="bid-modal-row">
-                <span className="bid-modal-label">Quantity</span>
+                <span className="bid-modal-label">Cantitate</span>
                 <span className="bid-modal-value">{formatCompactNumber(selectedBid.quantity)} t</span>
               </div>
               <div className="bid-modal-row">
-                <span className="bid-modal-label">Price (Counter)</span>
+                <span className="bid-modal-label">Preț (Contra)</span>
                 <span className="bid-modal-value bid-modal-counter">
                   <input
                     className="input inline-input"
@@ -463,7 +463,7 @@ export default function ActivityTab() {
                 </span>
               </div>
               <div className="bid-modal-row">
-                <span className="bid-modal-label">Status</span>
+                <span className="bid-modal-label">Stare</span>
                 <span className="bid-modal-value">{getStatusLabel(selectedBid.status)}</span>
               </div>
               {selectedBid.status === "accepted" && selectedBid.contract_no && (
@@ -474,33 +474,33 @@ export default function ActivityTab() {
               )}
               {isFreightParity(selectedBid.parity) && (
                 <div className="bid-modal-row">
-                  <span className="bid-modal-label">Loading</span>
+                  <span className="bid-modal-label">Încărcare</span>
                   <span className="bid-modal-value">
                     {formatLocationDisplay(selectedBid.loading_location || "-")}
                   </span>
                 </div>
               )}
               <div className="bid-modal-row">
-                <span className="bid-modal-label">Delivery</span>
+                <span className="bid-modal-label">Livrare</span>
                 <span className="bid-modal-value">
                   {formatDeliveryRange(selectedBid.delivery_start, selectedBid.delivery_end)}
                 </span>
               </div>
               {selectedBid.crop_year && (
                 <div className="bid-modal-row">
-                  <span className="bid-modal-label">Crop year</span>
+                  <span className="bid-modal-label">An recoltă</span>
                   <span className="bid-modal-value">{selectedBid.crop_year}</span>
                 </div>
               )}
               {selectedBid.quantity_tolerance != null && (
                 <div className="bid-modal-row">
-                  <span className="bid-modal-label">Tolerance</span>
+                  <span className="bid-modal-label">Toleranță</span>
                   <span className="bid-modal-value">±{selectedBid.quantity_tolerance}%</span>
                 </div>
               )}
               {selectedBid.remarks && (
                 <div className="bid-modal-row">
-                  <span className="bid-modal-label">Remarks</span>
+                  <span className="bid-modal-label">Observații</span>
                   <span className="bid-modal-value">{selectedBid.remarks}</span>
                 </div>
               )}
@@ -513,7 +513,7 @@ export default function ActivityTab() {
             )}
             {farmerCounterSent && (
               <p className="bid-form-feedback bid-feedback-success" style={{ margin: "8px 0 0 0" }}>
-                Counter offer sent to admin.
+                Contra-oferta a fost trimisă către administrator.
               </p>
             )}
 
@@ -547,7 +547,7 @@ export default function ActivityTab() {
                           handleRejectCounter(selectedBid);
                         }}
                       >
-                        {farmerConfirmAction === "rejected" ? "Confirm?" : "Reject"}
+                        {farmerConfirmAction === "rejected" ? "Confirmi?" : "Respinge"}
                       </button>
                       <button
                         type="button"
@@ -559,7 +559,7 @@ export default function ActivityTab() {
                           handleCounterBack(selectedBid);
                         }}
                       >
-                        {farmerConfirmAction === "countered" ? "Confirm?" : "Counter offer"}
+                        {farmerConfirmAction === "countered" ? "Confirmi?" : "Contra-ofertă"}
                       </button>
                       <button
                         type="button"
@@ -571,7 +571,7 @@ export default function ActivityTab() {
                           handleAcceptCounter(selectedBid);
                         }}
                       >
-                        {farmerConfirmAction === "accepted" ? "Confirm?" : "Accept"}
+                        {farmerConfirmAction === "accepted" ? "Confirmi?" : "Acceptă"}
                       </button>
                     </>
                   );
@@ -593,57 +593,87 @@ export default function ActivityTab() {
         >
           <div className="bid-modal" onClick={(event) => event.stopPropagation()}>
             <div className="bid-modal-header">
-              <h3 id="filters-modal-title">Filters</h3>
+              <h3 id="filters-modal-title">Filtre</h3>
               <button
                 type="button"
                 className="btn small ghost modal-close-btn"
-                aria-label="Close filters"
+                aria-label="Închide filtrele"
                 onClick={() => setFiltersOpen(false)}
               >
                 ✕
               </button>
             </div>
-            <div className="bid-modal-body">
-              <div className="filter-group">
-                <label className="label">Product</label>
-                <select className="input" value={productFilter} onChange={(e) => setProductFilter(e.target.value)}>
-                  <option value="all">All</option>
-                  {PRODUCT_FILTER_KEYS.map((key) => (
-                    <option key={key} value={key}>{getProductLabelSafe(key)}</option>
-                  ))}
-                </select>
+            <div className="bid-modal-body bid-modal-body-filters">
+              <div className="bid-form-grid-2">
+                <div className="bid-input-container">
+                  <label className="bid-input-label" htmlFor="filter-product">Produs</label>
+                  <select
+                    id="filter-product"
+                    className="bid-input-field"
+                    value={productFilter}
+                    onChange={(e) => setProductFilter(e.target.value)}
+                  >
+                    <option value="all">Toate</option>
+                    {PRODUCT_FILTER_KEYS.map((key) => (
+                      <option key={key} value={key}>{getProductLabelSafe(key)}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="bid-input-container">
+                  <label className="bid-input-label" htmlFor="filter-status">Stare ofertă</label>
+                  <select
+                    id="filter-status"
+                    className="bid-input-field"
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                  >
+                    <option value="all">Toate</option>
+                    <option value="accepted">Acceptate</option>
+                    <option value="rejected">Respinse</option>
+                    <option value="pending">În așteptare</option>
+                  </select>
+                </div>
               </div>
 
-              <div className="filter-group">
-                <label className="label">Bid status</label>
-                <select className="input" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                  <option value="all">All</option>
-                  <option value="accepted">Accepted</option>
-                  <option value="rejected">Rejected</option>
-                  <option value="pending">Pending</option>
-                </select>
-              </div>
+              <div className="bid-form-grid-2">
+                <div className="bid-input-container">
+                  <label className="bid-input-label" htmlFor="filter-date-from">Perioada · de la</label>
+                  <input
+                    id="filter-date-from"
+                    className="bid-input-field"
+                    type="date"
+                    value={dateFrom}
+                    onChange={(e) => setDateFrom(e.target.value)}
+                  />
+                </div>
 
-              <div className="filter-group">
-                <label className="label">Bid date (from)</label>
-                <input className="input" type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
-              </div>
-
-              <div className="filter-group">
-                <label className="label">Bid date (to)</label>
-                <input className="input" type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+                <div className="bid-input-container">
+                  <label className="bid-input-label" htmlFor="filter-date-to">Perioada · până la</label>
+                  <input
+                    id="filter-date-to"
+                    className="bid-input-field"
+                    type="date"
+                    value={dateTo}
+                    onChange={(e) => setDateTo(e.target.value)}
+                  />
+                </div>
               </div>
 
               <div className="filter-actions">
-                <button type="button" className="btn small outline" onClick={() => setFiltersOpen(false)}>
-                  Apply
+                <button
+                  type="button"
+                  className="btn small ghost filter-btn-reset"
+                  onClick={() => { setProductFilter("all"); setStatusFilter("all"); setDateFrom(""); setDateTo(""); }}
+                >
+                  Resetează
                 </button>
                 <button
                   type="button"
-                  className="btn small outline"
-                  onClick={() => { setProductFilter("all"); setStatusFilter("all"); setDateFrom(""); setDateTo(""); }}
+                  className="btn small primary-btn filter-btn-apply"
+                  onClick={() => setFiltersOpen(false)}
                 >
-                  Reset
+                  Aplică filtrele
                 </button>
               </div>
             </div>

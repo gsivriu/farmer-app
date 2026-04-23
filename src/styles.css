@@ -416,6 +416,18 @@ body.weather-modal-open {
   color: var(--color-text-1);
 }
 
+.ameropa-role-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.theme-dark .ameropa-role-label {
+  color: var(--color-text-2);
+}
+
 /* Top-bar action buttons — refined, editorial, not pill-shaped */
 .top-bar .btn.small.outline {
   height: 32px;
@@ -633,8 +645,14 @@ body.weather-modal-open {
   padding: 6px 0;
 }
 
+/* Activity page title — unified with FUTURES / PREȚURI / CURSURI VALUTARE eyebrow */
 .activity-header-compact .market-title {
   margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
 }
 
 /* Active filter indicator dot */
@@ -1271,11 +1289,28 @@ label {
   margin: 32px 0 0;
 }
 
+.sale-card .bid-form-embedded .bid-form-heading {
+  margin: 0 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Section eyebrow — unified with FUTURES / PREȚURI / CURSURI VALUTARE */
 .sale-card .bid-form-embedded h2 {
-  margin: 0 0 16px;
-  font-size: 19px;
+  margin: 0;
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.sale-card .bid-form-embedded .bid-form-subtitle {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-tertiary);
 }
 
 .sale-card .bid-form-embedded {
@@ -1392,11 +1427,11 @@ label {
 
 .bid-input-label {
   font-size: 12px;
-  color: #8b8e98;
+  color: var(--color-text-3, #8b8e98);
   font-weight: 600;
   margin-left: 2px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.06em;
 }
 
 .bid-input-field {
@@ -1641,29 +1676,21 @@ select.input:focus {
 .ticker-card-header {
   display: flex;
   align-items: baseline;
-  gap: 10px;
-  margin-bottom: 4px;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .ticker-card-title {
   font-size: 13px;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #475569;
+  color: var(--text-secondary);
 }
 
 .ticker-card-sub {
   font-size: 11px;
-  color: #94a3b8;
-}
-
-.theme-dark .ticker-card-title {
-  color: #9ca3af;
-}
-
-.theme-dark .ticker-card-sub {
-  color: #4b5563;
+  color: var(--text-tertiary);
 }
 
 /* Modal close button — icon style */
@@ -1989,20 +2016,25 @@ select.input:focus {
   display: flex;
   flex-direction: column;
   width: 100%;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  max-width: 720px;
+  align-self: center;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--bc-tone, var(--color-border-strong));
+  background: var(--color-surface);
+  box-shadow: 0 1px 2px rgba(15, 13, 10, 0.04);
   font-variant-numeric: tabular-nums;
   cursor: pointer;
   text-align: left;
   position: relative;
   overflow: hidden;
-  transition: box-shadow 0.15s ease;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
 .bid-card:hover {
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.09);
+  box-shadow: 0 4px 12px rgba(15, 13, 10, 0.06);
+  border-color: var(--color-border-medium);
+  border-left-color: var(--bc-tone, var(--color-border-strong));
 }
 
 .bid-card-status-group {
@@ -2071,152 +2103,330 @@ select.input:focus {
 .theme-dark .bid-card-timestamp { color: #4b5563; }
 
 /* ── BidCard inner layout (bc-* namespace) ───────────────────
-   Single-column stacked rows on all screen sizes.
+   Enterprise grid layout — 3-column axis aligned on all rows.
+   Header · Hero · Meta share repeat(3, 1fr) so Date/Price/
+   Paritate/Acceptă button all align on the same right axis.
    ────────────────────────────────────────────────────────── */
 
 .bc-body {
-  display: flex;
-  flex-direction: column;
+  padding: var(--sp-5) var(--sp-6);
 }
 
-/* Each row — label left, value right */
-.bc-field {
+/* Grid for hero + meta (same right-axis for price and paritate) */
+.bc-hero,
+.bc-meta {
+  display: grid;
+  gap: var(--sp-4);
+}
+
+.bc-hero {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* ── 1. Header: flex so date sizes to content and never wraps ── */
+.bc-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 9px 20px;
-  border-top: 1px solid var(--color-border-medium);
-  gap: 12px;
-  min-height: 36px;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  padding-bottom: var(--sp-3);
 }
 
-.bc-label {
+.bc-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bc-tone-text, var(--color-text-2));
+  min-width: 0;
+}
+
+.bc-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--bc-tone, var(--color-text-3));
+  flex-shrink: 0;
+}
+
+.bc-date {
   font-size: var(--text-xs);
   color: var(--color-text-2);
-  font-weight: 400;
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
-.bc-val {
-  font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--color-text-1);
-  text-align: right;
-  font-variant-numeric: tabular-nums;
+/* ── 2. Hero: commodity + price ── */
+.bc-hero {
+  align-items: baseline;
+  padding: var(--sp-1) 0 var(--sp-5);
+}
+
+.bc-commodity {
+  grid-column: 1 / span 2;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   min-width: 0;
 }
 
-.bc-val-truncate {
+.bc-commodity-name {
+  font-size: var(--text-md);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-text-1);
+  line-height: 1.2;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* Commodity value — bold, same as price */
-.bc-val-product {
-  font-weight: 700;
-}
-
-.bc-val-price {
-  font-weight: 700;
-}
-
-.bc-val-counter {
-  color: #b91c1c;
-}
-
-.bc-val-unit {
+.bc-commodity-meta {
   font-size: var(--text-xs);
-  font-weight: 500;
   color: var(--color-text-2);
 }
 
-/* Status badge */
-.bc-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 10px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-}
-
-/* Action bar — centered buttons */
-.bc-actions-bar {
+.bc-price {
+  grid-column: 3;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border-top: 1px solid var(--color-border-medium);
+  align-items: baseline;
+  gap: var(--sp-1);
+  font-variant-numeric: tabular-nums;
 }
 
-/* Action buttons */
-.bc-btn {
-  padding: 6px 16px;
-  border-radius: 6px;
-  font-size: 12px;
+.bc-price-value {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-text-1);
+  line-height: 1;
+}
+
+.bc-price-unit {
+  font-size: var(--text-sm);
+  color: var(--color-text-2);
+  font-weight: 500;
+}
+
+.bc-price-counter .bc-price-value {
+  color: var(--color-info);
+}
+
+/* ── 3. Meta grid: 3 columns, weighted so Fermier gets more room ── */
+.bc-meta {
+  grid-template-columns: 2fr 1fr 1.5fr;
+  padding: var(--sp-4) 0;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.bc-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+
+.bc-meta-label {
+  font-size: var(--text-2xs);
   font-weight: 600;
-  cursor: pointer;
-  border: 1px solid transparent;
-  line-height: 1.4;
-  transition: opacity 0.12s ease;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-2);
+}
+
+.bc-meta-value {
+  font-size: var(--text-sm);
+  color: var(--color-text-1);
+  font-weight: 500;
+  line-height: 1.35;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.bc-btn:hover { opacity: 0.82; }
-.bc-btn:active { opacity: 0.65; }
-
-.bc-btn-accept {
-  background: #dcfce7;
-  color: #166534;
-  border-color: #86efac;
+/* ── 4. Action bar: neutral equal buttons ── */
+.bc-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-2);
+  padding: 0 var(--sp-6) var(--sp-5);
 }
 
-.bc-btn-reject {
-  background: #fee2e2;
-  color: #991b1b;
-  border-color: #fca5a5;
+.bc-btn {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-text-1);
+  font-family: inherit;
+  font-size: var(--text-xs);
+  font-weight: 500;
+  height: 36px;
+  padding: 0 var(--sp-2);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease, opacity 0.12s ease;
+  white-space: nowrap;
+  text-align: center;
 }
 
-.bc-btn-counter {
-  background: #dbeafe;
-  color: #1e40af;
-  border-color: #93c5fd;
+.bc-btn:hover {
+  background: var(--color-surface-2);
+  border-color: var(--color-text-3);
 }
 
-/* Inline confirm state — solid fill */
-.bc-btn-accept.bc-btn-confirming {
-  background: #166534;
-  color: #fff;
-  border-color: #166534;
+.bc-btn:active {
+  background: var(--color-surface-3);
 }
 
-.bc-btn-reject.bc-btn-confirming {
-  background: #991b1b;
-  color: #fff;
-  border-color: #991b1b;
+.bc-btn:focus-visible {
+  outline: 2px solid var(--color-text-1);
+  outline-offset: 2px;
 }
 
-/* Other buttons fade when one is confirming */
+/* Inline confirm — neutral dark fill (no color signal) */
+.bc-btn-confirming {
+  background: var(--color-text-1);
+  color: var(--color-text-inv);
+  border-color: var(--color-text-1);
+}
+
 .bc-btn-dimmed {
-  opacity: 0.3;
+  opacity: 0.35;
 }
 
-/* Dark mode */
-.theme-dark .bc-field { border-top-color: #1f2937; }
-.theme-dark .bc-label { color: #9ca3af; }
-.theme-dark .bc-val { color: #e2e8f0; }
-.theme-dark .bc-val-unit { color: #6b7280; }
-.theme-dark .bc-val-counter { color: #f87171; }
-.theme-dark .bc-actions-bar { border-top-color: #1f2937; }
-.theme-dark .bc-btn-accept { background: rgba(22,163,74,.18); color: #4ade80; border-color: rgba(22,163,74,.4); }
-.theme-dark .bc-btn-reject { background: rgba(239,68,68,.18); color: #f87171; border-color: rgba(239,68,68,.4); }
-.theme-dark .bc-btn-counter { background: rgba(59,130,246,.18); color: #93c5fd; border-color: rgba(59,130,246,.4); }
+/* ── Status tone — one variable set per state.
+   --bc-tone       → dot color + border-left color
+   --bc-tone-text  → eyebrow label ("ÎN AȘTEPTARE" etc.)
+   ────────────────────────────────────────────────── */
+.bid-card.bc-tone-warning { --bc-tone: #D4A017; --bc-tone-text: var(--color-warning-text); }
+.bid-card.bc-tone-success { --bc-tone: var(--color-success); --bc-tone-text: var(--color-success-text); }
+.bid-card.bc-tone-error   { --bc-tone: var(--color-error);   --bc-tone-text: var(--color-error-text); }
+.bid-card.bc-tone-info    { --bc-tone: var(--color-info);    --bc-tone-text: var(--color-info-text); }
+
+/* Dark mode — same structure, neutral feel */
+.theme-dark .bc-meta {
+  border-top-color: var(--color-border);
+  border-bottom-color: var(--color-border);
+}
+.theme-dark .bc-btn {
+  background: transparent;
+  border-color: var(--color-border-strong);
+  color: var(--color-text-1);
+}
+.theme-dark .bc-btn:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--color-text-2);
+}
+.theme-dark .bc-btn-confirming {
+  background: var(--color-text-1);
+  color: #0F0E0C;
+  border-color: var(--color-text-1);
+}
+
+/* ── Mobile (< 640px): collapse to farmer-style label-value rows ──
+   On narrow screens, the 3-column grid squishes content. Swap to a
+   single-column stack where every data point is a row with its label
+   on the left and its value flushed to the right — same pattern the
+   farmer dashboard uses.
+   ───────────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .bc-body {
+    padding: var(--sp-4);
+  }
+
+  /* Header: status + date row, with bottom hairline */
+  .bc-header {
+    padding-bottom: var(--sp-3);
+    margin-bottom: var(--sp-3);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  /* Hero: stack commodity as the title, price as its first data row */
+  .bc-hero {
+    display: block;
+    padding: 0 0 var(--sp-3);
+  }
+  .bc-commodity {
+    margin-bottom: var(--sp-3);
+  }
+  .bc-commodity-name {
+    font-size: var(--text-base);
+    font-weight: 700;
+  }
+  .bc-commodity-meta {
+    font-size: var(--text-2xs);
+  }
+  .bc-price {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    align-items: baseline;
+    gap: var(--sp-3);
+    padding: var(--sp-2) 0;
+    border-top: 1px solid var(--color-border);
+  }
+  .bc-price::before {
+    content: "Preț";
+    font-size: var(--text-xs);
+    font-weight: 400;
+    color: var(--color-text-2);
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .bc-price-value {
+    font-size: var(--text-sm);
+    font-weight: 700;
+    justify-self: end;
+  }
+  .bc-price-unit {
+    font-size: var(--text-2xs);
+  }
+
+  /* Meta: every item becomes a full-width label-value row */
+  .bc-meta {
+    display: block;
+    padding: 0;
+    border-top: none;
+    border-bottom: none;
+  }
+  .bc-meta-item {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    align-items: baseline;
+    gap: var(--sp-3);
+    padding: var(--sp-2) 0;
+    border-top: 1px solid var(--color-border);
+  }
+  .bc-meta-label {
+    font-size: var(--text-xs);
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--color-text-2);
+  }
+  .bc-meta-value {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    text-align: right;
+    justify-self: end;
+    max-width: 100%;
+  }
+
+  /* Action bar: tighter padding, same 3 equal buttons */
+  .bc-actions {
+    gap: var(--sp-2);
+    padding: var(--sp-3) var(--sp-4) var(--sp-4);
+  }
+}
 
 .theme-dark .bid-row {
   background: #111827;
@@ -2641,21 +2851,26 @@ select.input:focus {
   border-bottom-color: #334155;
 }
 
+/* Modal headings — unified with FUTURES / PREȚURI / CURSURI VALUTARE eyebrow */
 .bid-modal-header h3 {
   margin: 0;
-  font-size: 16px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
 }
 
 .bid-modal-details .bid-modal-header h3 {
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: 0.01em;
-  color: #64748b;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
   text-transform: uppercase;
 }
 
 .theme-dark .bid-modal-details .bid-modal-header h3 {
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .bid-modal-header .btn.small.ghost {
@@ -3056,6 +3271,50 @@ select.input:focus {
   gap: 6px;
 }
 
+/* Filters modal — aligned with BidForm input pattern */
+.bid-modal-body-filters {
+  gap: 18px;
+  padding-top: 2px;
+}
+
+.bid-modal-body-filters .bid-form-grid-2 {
+  gap: 14px;
+}
+
+.bid-modal-body-filters .bid-input-container {
+  margin-bottom: 0;
+}
+
+.bid-modal-body-filters .filter-actions {
+  margin-top: 6px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border-medium);
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.filter-btn-reset {
+  min-height: 40px;
+  padding: 8px 18px;
+  font-weight: 600;
+  border-radius: 10px;
+}
+
+.filter-btn-apply {
+  background: var(--brand) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--brand) !important;
+  min-height: 40px;
+  padding: 8px 20px;
+  font-weight: 600;
+  border-radius: 10px;
+}
+
+.filter-btn-apply:hover {
+  background: var(--brand-dark) !important;
+  border-color: var(--brand-dark) !important;
+}
+
 .admin-bids-header {
   display: flex;
   align-items: center;
@@ -3333,21 +3592,28 @@ select.input:focus {
 
 .prices-card .market-card-header {
   margin-top: 0;
-  gap: 0;
-  margin-bottom: 24px;
+  gap: 4px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
 }
 
 .prices-card .market-grid {
-  gap: 2px;
+  gap: 0;
 }
 
 .prices-card .market-title {
-  font-size: 18px;
+  font-size: 13px;
   font-weight: 700;
-  margin: 0 0 2px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin: 0;
 }
 
 .prices-card .market-subtitle {
+  font-size: 11px;
+  color: var(--text-tertiary);
   margin: 0;
 }
 
@@ -3447,44 +3713,63 @@ select.input:focus {
 }
 
 .prices-card .market-item {
-  padding: 12px 16px;
+  padding: 10px 0;
+  border: none;
+  background: transparent;
+  border-radius: 0;
+  border-bottom: var(--hairline);
+}
+
+.prices-card .market-item:last-child {
+  border-bottom: none;
 }
 
 .prices-card .market-line-1 {
   align-items: center;
-  font-size: 15px;
+  font-size: 14px;
   margin-bottom: 0;
   display: grid;
-  grid-template-columns: minmax(120px, 1fr) 180px;
-  gap: 14px;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
 }
 
 .prices-card .market-product {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
-  line-height: 1.25;
+  line-height: 1.3;
 }
 
 
 .prices-card .market-price {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
-  line-height: 1.25;
+  line-height: 1.3;
 }
 
 .prices-card .market-price-cell {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
-  line-height: 1.25;
-  text-align: center;
+  line-height: 1.3;
+  text-align: right;
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  align-items: baseline;
+  justify-content: flex-end;
   gap: 6px;
   white-space: nowrap;
-  width: 180px;
-  justify-self: center;
+  width: auto;
+  justify-self: end;
   font-variant-numeric: tabular-nums;
+}
+
+.prices-card .market-price-number {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.prices-card .market-unit {
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--text-tertiary);
 }
 
 .prices-card .market-diff {
@@ -4640,13 +4925,15 @@ select.input:focus {
    WEATHER WIDGET
    ========================= */
 .weather-card {
-  border-radius: 20px;
-  padding: 20px;
-  color: white;
-  margin-bottom: 24px;
+  border-radius: 0;
+  padding: 0;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  margin-bottom: 0;
+  box-shadow: none;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
   cursor: pointer;
   min-height: 120px;
   display: flex;
@@ -4654,16 +4941,19 @@ select.input:focus {
   justify-content: center;
 }
 
-.weather-card.day {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-}
-
-.weather-card.night {
-  background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
-}
-
+/* Day / night / rain no longer tint the card — icon + temp carry the theme */
+.weather-card.day,
+.weather-card.night,
 .weather-card.rain {
-  background: linear-gradient(135deg, #37474f 0%, #607d8b 100%);
+  background: transparent;
+}
+
+.theme-dark .weather-card,
+.theme-dark .weather-card.day,
+.theme-dark .weather-card.night,
+.theme-dark .weather-card.rain {
+  background: transparent;
+  color: var(--color-text-1);
 }
 
 .weather-info {
@@ -4689,15 +4979,25 @@ select.input:focus {
   font-size: 36px;
   font-weight: 700;
   line-height: 1;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.theme-dark .weather-temp {
+  color: var(--color-text-1);
 }
 
 .weather-desc {
   font-size: 13px;
-  opacity: 0.9;
+  color: var(--text-secondary);
   display: block;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.theme-dark .weather-desc {
+  color: var(--color-text-2);
 }
 
 .weather-details-mini {
@@ -4709,25 +5009,34 @@ select.input:focus {
 }
 
 .location-name {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
   max-width: 150px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.min-max {
-  font-size: 12px;
-  opacity: 0.85;
+.theme-dark .location-name {
+  color: var(--color-text-2);
 }
 
+.min-max {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.theme-dark .min-max {
+  color: var(--color-text-3);
+}
+
+/* Decorative blobs no longer visible on the neutral surface — hide */
 .bg-decor-1,
 .bg-decor-2 {
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  pointer-events: none;
+  display: none;
 }
 
 .bg-decor-1 {
@@ -5558,11 +5867,11 @@ select.input:focus {
    DESKTOP-ONLY OPTIMIZATIONS (≥1024px)
    ========================= */
 @media screen and (min-width: 1024px) {
-  /* Weather Card - Desktop */
+  /* Weather Card - Desktop (content layer inside home-card-secondary) */
   .weather-card {
-    padding: 24px 32px;
-    border-radius: 16px;
-    margin-bottom: 32px;
+    padding: 0;
+    border-radius: 0;
+    margin-bottom: 0;
     min-height: 140px;
   }
 
@@ -6319,14 +6628,38 @@ select.input:focus {
 }
 
 .progress-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   text-align: left;
-  font-size: 15px;
-  font-weight: 500;
-  color: #374151;
+  color: var(--text-primary);
 }
 
-.theme-dark .progress-meta {
+.progress-meta-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.progress-meta-value {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.progress-meta-value b {
+  font-weight: 700;
+}
+
+.theme-dark .progress-meta-value {
   color: #e5e7eb;
+}
+
+.theme-dark .progress-meta-label {
+  color: var(--color-text-3);
 }
 
 .progress-ring-center {
@@ -6562,6 +6895,15 @@ select.input:focus {
     font-weight: 700;
     letter-spacing: -0.01em;
     margin-bottom: 0;
+  }
+
+  /* Activity eyebrow keeps unified 13px uppercase on desktop */
+  .activity-header-compact .market-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
   }
 
   .activity-header-compact {
@@ -8415,6 +8757,12 @@ select.input:focus {
 :root {
   --brand-red: #b9101e;
 
+  /* Semantic — price direction, shared across Futures/prices/any delta UI */
+  --semantic-up:        #16a34a;
+  --semantic-up-dark:   #4ade80;
+  --semantic-down:      var(--brand-red);
+  --semantic-down-dark: #f87171;
+
   /* Surfaces — white base */
   --surface-page:   #ffffff;
   --surface-base:   #ffffff;
@@ -8564,8 +8912,8 @@ select.input:focus {
 .ft-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-top: 10px;
+  gap: 24px;
+  margin-top: 16px;
 }
 
 .ft-product {
@@ -8575,67 +8923,81 @@ select.input:focus {
 .ft-product-header {
   display: flex;
   align-items: baseline;
-  gap: 6px;
-  margin-bottom: 6px;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .ft-product-name {
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.06em;
   color: var(--text-secondary);
 }
 
 .ft-product-unit {
-  font-size: 10px;
+  font-size: 11px;
+  font-weight: 500;
   color: var(--text-tertiary);
 }
 
 .ft-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 12px;
+  table-layout: fixed;
+  font-size: 13px;
   font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
 }
 
+.ft-th:nth-child(1), .ft-td:nth-child(1) { width: 26%; }
+.ft-th:nth-child(2), .ft-td:nth-child(2) { width: 22%; }
+.ft-th:nth-child(3), .ft-td:nth-child(3) { width: 30%; }
+.ft-th:nth-child(4), .ft-td:nth-child(4) { width: 22%; }
+
 .ft-th {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
+  text-align: left;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-tertiary);
-  padding: 3px 6px;
+  padding: 6px 8px;
   border-bottom: var(--hairline);
   white-space: nowrap;
 }
 
 .ft-td {
-  padding: 5px 6px;
+  padding: 8px;
   color: var(--text-primary);
-  border-bottom: var(--hairline);
   white-space: nowrap;
 }
 
-.ft-tr:last-child .ft-td { border-bottom: none; }
-
 .ft-right { text-align: right; }
 .ft-th:first-child, .ft-td:first-child { padding-left: 0; }
+.ft-th:last-child, .ft-td:last-child { padding-right: 0; }
 
-.ft-contract { font-weight: 500; color: var(--text-secondary); }
+.ft-contract { font-weight: 500; color: var(--text-primary); }
 .ft-last     { font-weight: 600; }
-.ft-prev     { color: var(--text-tertiary); font-size: 11px; }
+.ft-prev     { color: var(--text-tertiary); }
 
-.ft-change.positive { color: #16a34a; }
-.ft-change.negative { color: var(--brand-red); }
+.ft-change.positive { color: var(--semantic-up, #16a34a); }
+.ft-change.negative { color: var(--semantic-down, var(--brand-red)); }
 .ft-change.ft-neutral { color: var(--text-tertiary); }
-.ft-change { text-align: right; font-size: 11px; }
+.ft-change { text-align: right; }
 
-.theme-dark .ft-change.positive { color: #4ade80; }
-.theme-dark .ft-change.negative { color: #f87171; }
+.theme-dark .ft-change.positive { color: var(--semantic-up-dark, #4ade80); }
+.theme-dark .ft-change.negative { color: var(--semantic-down-dark, #f87171); }
+
+/* Row hover — desktop only; pointer: fine filter skips touch devices */
+@media (hover: hover) and (pointer: fine) {
+  .ft-tr { transition: background-color 0.12s ease; }
+  .ft-tr:hover { background-color: var(--surface-subtle, hsl(0, 0%, 97%)); }
+  .theme-dark .ft-tr:hover { background-color: rgba(255, 255, 255, 0.04); }
+}
 
 @media (max-width: 500px) {
-  .ft-grid { grid-template-columns: 1fr; }
+  .ft-grid { grid-template-columns: 1fr; gap: 16px; }
 }
 
 /* -------- EXCHANGE SECTION — micro-list, no card -------- */
@@ -8652,13 +9014,13 @@ select.input:focus {
   margin-bottom: var(--space-4);
 }
 
-/* Section eyebrow — whispers */
+/* Section eyebrow — unified with FUTURES / prices */
 .exchange-title {
-  font-size: 11px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-tertiary);
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
 }
 
 .exchange-section .exchange-updated {
@@ -8707,25 +9069,63 @@ select.input:focus {
 
 .exchange-section .exchange-calc-btn {
   background: transparent;
-  border: var(--hairline);
-  border-radius: var(--radius-sm);
-  padding: 4px 6px;
+  border: 1px solid hsl(0, 0%, 88%);
+  border-radius: 10px;
+  padding: 0;
   color: var(--text-secondary);
-  width: auto;
-  height: auto;
+  width: 36px;
+  height: 36px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, border-color 0.15s;
 }
 
 .exchange-section .exchange-calc-btn:hover {
-  background: hsl(0, 0%, 94%);
+  background: hsl(0, 0%, 96%);
+  border-color: hsl(0, 0%, 80%);
+}
+
+.exchange-section .exchange-calc-btn:active {
+  background: hsl(0, 0%, 92%);
 }
 
 .exchange-section .exchange-calc-btn svg {
   color: var(--text-secondary);
+}
+
+/* Retry button — shown only on offline/error state */
+.exchange-section .exchange-retry-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid #fecaca;
+  border-radius: 999px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.exchange-section .exchange-retry-btn:hover {
+  background: #fee2e2;
+}
+
+.theme-dark .exchange-section .exchange-retry-btn {
+  background: rgba(185, 28, 28, 0.12);
+  border-color: rgba(254, 202, 202, 0.3);
+  color: #fca5a5;
+}
+
+/* Parity row — stacked flag pair as visual anchor */
+.exchange-section .exchange-pair-flags {
+  font-size: 14px;
+  letter-spacing: -2px;
+  margin-right: 4px;
 }
 
 /* -------- LIST PRICE SECTION -------- */
@@ -8742,11 +9142,12 @@ select.input:focus {
 }
 
 .list-price-title {
-  font-size: 11px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-tertiary);
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  margin: 0;
 }
 
 .home-page .admin-price-notice {
@@ -9089,11 +9490,11 @@ select.input:focus {
 
 /* ── Eyebrow / section label ── */
 .farmers-section-eyebrow {
-  font-size: 11px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-tertiary);
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
   margin: 0 0 var(--space-6);
 }
 
@@ -9116,8 +9517,10 @@ select.input:focus {
 
 .farmers-form-label {
   font-size: 12px;
-  font-weight: 500;
-  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-3, #8b8e98);
 }
 
 .farmers-input {
@@ -9182,9 +9585,11 @@ select.input:focus {
 }
 
 .farmers-list-title {
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
   margin: 0;
 }
 

@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bid Card — Redesign v2 Mockup</title>
+<style>
+  /* ──────────────────────────────────────────────────────────────────────
+     Design tokens
+     ────────────────────────────────────────────────────────────────────── */
+  :root {
+    /* Neutrals — warm, enterprise */
+    --bg:            #FAFAF9;
+    --surface:       #FFFFFF;
+    --surface-2:     #F5F5F4;
+    --border:        #E7E5E4;
+    --border-strong: #D6D3D1;
+    --text:          #1C1917;
+    --text-muted:    #57534E;
+    --text-subtle:   #78716C;
+    --text-faint:    #A8A29E;
+
+    /* Brand */
+    --brand:         #A11C2B;
+
+    /* Status (doar pentru dot + border-left) */
+    --pending:       #B45309;
+    --accepted:      #15803D;
+    --rejected:      #B91C1C;
+    --counter:       #1D4ED8;
+
+    /* Type scale — ratio 1.200 */
+    --fs-eyebrow: 11px;
+    --fs-sm:      13px;
+    --fs-base:    14px;
+    --fs-md:      16px;
+    --fs-lg:      18px;
+    --fs-xl:      22px;
+    --fs-2xl:     24px;
+
+    /* Radius */
+    --r-sm: 6px;
+    --r-md: 10px;
+
+    /* Shadow */
+    --shadow-sm: 0 1px 2px rgba(28,25,23,.04), 0 1px 1px rgba(28,25,23,.02);
+    --shadow-md: 0 4px 12px rgba(28,25,23,.06), 0 2px 4px rgba(28,25,23,.04);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: var(--fs-base);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .page {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 48px 32px 96px;
+  }
+
+  .page-header {
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .page-header h1 {
+    font-size: var(--fs-xl);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0 0 6px;
+  }
+  .page-header p {
+    font-size: var(--fs-sm);
+    color: var(--text-subtle);
+    margin: 0;
+  }
+
+  .section-label {
+    font-size: var(--fs-eyebrow);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+    margin: 32px 0 16px;
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     Bid Card — Desktop
+     ────────────────────────────────────────────────────────────────────── */
+  .bid-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--status-color, var(--pending));
+    border-radius: var(--r-md);
+    padding: 20px 28px 24px;
+    box-shadow: var(--shadow-sm);
+    max-width: 760px;
+    margin-bottom: 16px;
+    transition: box-shadow .15s ease, border-color .15s ease;
+  }
+  .bid-card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--border-strong);
+    border-left-color: var(--status-color, var(--pending));
+  }
+
+  /* ── Shared 3-column grid for every row ── */
+  .bc-header,
+  .bc-hero,
+  .bc-meta,
+  .bc-actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  /* ── 1. Header row ── */
+  .bc-header {
+    align-items: center;
+    padding-bottom: 14px;
+  }
+  .bc-status {
+    grid-column: 1 / span 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--fs-eyebrow);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .bc-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--status-color);
+    flex-shrink: 0;
+  }
+  .bc-date {
+    grid-column: 3;
+    font-size: var(--fs-sm);
+    color: var(--text-subtle);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── 2. Hero block (commodity + price) ── */
+  .bc-hero {
+    align-items: baseline;
+    padding: 4px 0 18px;
+  }
+  .bc-commodity {
+    grid-column: 1 / span 2;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .bc-commodity-name {
+    font-size: var(--fs-xl);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    line-height: 1.2;
+  }
+  .bc-commodity-meta {
+    font-size: var(--fs-sm);
+    color: var(--text-subtle);
+  }
+  .bc-price {
+    grid-column: 3;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+  .bc-price-value {
+    font-size: var(--fs-2xl);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    line-height: 1;
+  }
+  .bc-price-unit {
+    font-size: var(--fs-base);
+    color: var(--text-subtle);
+    font-weight: 500;
+  }
+
+  /* ── 3. Meta grid — 3 columns ── */
+  .bc-meta {
+    padding: 16px 0 18px;
+    border-top: 1px solid var(--surface-2);
+    border-bottom: 1px solid var(--surface-2);
+  }
+  .bc-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+  .bc-meta-label {
+    font-size: var(--fs-eyebrow);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+  }
+  .bc-meta-value {
+    font-size: var(--fs-base);
+    color: var(--text);
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ── 4. Action bar — neutral equal buttons ── */
+  .bc-actions {
+    padding-top: 18px;
+  }
+  .bc-btn {
+    appearance: none;
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text);
+    font-family: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    height: 40px;
+    padding: 0 16px;
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    transition: background .12s ease, border-color .12s ease, color .12s ease;
+  }
+  .bc-btn:hover {
+    background: var(--surface-2);
+    border-color: var(--text-faint);
+  }
+  .bc-btn:active {
+    background: var(--border);
+  }
+  .bc-btn:focus-visible {
+    outline: 2px solid var(--text);
+    outline-offset: 2px;
+  }
+
+  /* Status color modifiers */
+  .bid-card[data-status="pending"]  { --status-color: var(--pending); }
+  .bid-card[data-status="accepted"] { --status-color: var(--accepted); }
+  .bid-card[data-status="rejected"] { --status-color: var(--rejected); }
+  .bid-card[data-status="countered"]{ --status-color: var(--counter); }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     Mobile variant preview
+     ────────────────────────────────────────────────────────────────────── */
+  .mobile-frame {
+    width: 380px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 16px;
+    box-shadow: var(--shadow-md);
+  }
+  .mobile-frame .bid-card {
+    max-width: 100%;
+    padding: 18px 20px;
+  }
+  .mobile-frame .bc-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .mobile-frame .bc-meta {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .mobile-frame .bc-meta-item:first-child {
+    grid-column: 1 / -1;
+  }
+  .mobile-frame .bc-price-value {
+    font-size: 28px;
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     Side-by-side comparison
+     ────────────────────────────────────────────────────────────────────── */
+  .compare {
+    display: flex;
+    gap: 48px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .compare > div { flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="page-header">
+    <h1>Bid Card — Redesign v2</h1>
+    <p>Static mockup · neutral action buttons · 3-column meta grid · hero pattern (commodity ↔ price)</p>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       DESKTOP — toate stările
+       ════════════════════════════════════════════════════════════════════ -->
+  <div class="section-label">Desktop · Toate stările</div>
+
+  <!-- PENDING -->
+  <article class="bid-card" data-status="pending">
+    <header class="bc-header">
+      <span class="bc-status">
+        <span class="bc-status-dot"></span>
+        În așteptare
+      </span>
+      <time class="bc-date">05 Apr 2026 · 23:18</time>
+    </header>
+
+    <div class="bc-hero">
+      <div class="bc-commodity">
+        <div class="bc-commodity-name">Grâu</div>
+        <div class="bc-commodity-meta">An recoltă 2026</div>
+      </div>
+      <div class="bc-price">
+        <span class="bc-price-value">200</span>
+        <span class="bc-price-unit">EUR/t</span>
+      </div>
+    </div>
+
+    <div class="bc-meta">
+      <div class="bc-meta-item">
+        <span class="bc-meta-label">Fermier</span>
+        <span class="bc-meta-value">test@ameropa.com</span>
+      </div>
+      <div class="bc-meta-item">
+        <span class="bc-meta-label">Livrare</span>
+        <span class="bc-meta-value">—</span>
+      </div>
+      <div class="bc-meta-item">
+        <span class="bc-meta-label">Paritate</span>
+        <span class="bc-meta-value">CPT Port Constanța</span>
+      </div>
+    </div>
+
+    <div class="bc-actions">
+      <button class="bc-btn" type="button">Respinge</button>
+      <button class="bc-btn" type="button">Contra-ofertă</button>
+      <button class="bc-btn" type="button">Acceptă</button>
+    </div>
+  </article>
+
+  <!-- ACCEPTED -->
+  <article class="bid-card" data-status="accepted">
+    <header class="bc-header">
+      <span class="bc-status">
+        <span class="bc-status-dot"></span>
+        Acceptată
+      </span>
+      <time class="bc-date">04 Apr 2026 · 11:42</time>
+    </header>
+
+    <div class="bc-hero">
+      <div class="bc-commodity">
+        <div class="bc-commodity-name">Porumb</div>
+        <div class="bc-commodity-meta">An recoltă 2025</div>
+      </div>
+      <div class="bc-price">
+        <span class="bc-price-value">185</span>
+        <span class="bc-price-unit">EUR/t</span>
+      </div>
+    </div>
+
+    <div class="bc-meta">
+      <div class="bc-meta-item">
+        <span class="bc-meta-label">Fermier</span>
+        <span class="bc-meta-value">gsivriu@yahoo.com</span>
+      </div>
+      <div class="bc-meta-item">
+        <span class="bc-meta-label">Livrare</span>
+        <span class="bc-meta-value">15–30 Apr 2026</span>
+      </div>
+      <div class="bc-meta-item">
+        <span class="bc-meta-label">Paritate</span>
+        <span class="bc-meta-value">FCA Slobozia</span>
+      </div>
+    </div>
+    <!-- fără acțiuni — oferta e finalizată -->
+  </article>
+
+  <!-- COUNTERED -->
+  <article class="bid-card" data-status="countered">
+    <header class="bc-header">
+      <span class="bc-status">
+        <span class="bc-status-dot"></span>
+        Contra-ofertă
+      </span>
+      <time class="bc-date">03 Apr 2026 · 09:07</time>
+    </header>
+
+    <div class="bc-hero">
+      <div class="bc-commodity">
+        <div class="bc-commodity-name">Floarea-soarelui</div>
+        <div class="bc-commodity-meta">An recoltă 2026</div>
+      </div>
+      <div class="bc-price">
+        <span class="bc-price-value">465</span>
+        <span class="bc-price-unit">USD/t</span>
+      </div>
+    </div>
+
+    <div class="bc-meta">
+      <div class="bc-meta-item">
+        <span class="bc-meta-label">Fermier</span>
+        <span class="bc-meta-value">ferma.ion@example.ro</span>
+      </div>
+      <div class="bc-meta-item">
+        <span class="bc-meta-label">Livrare</span>
+        <span class="bc-meta-value">01–15 Sep 2026</span>
+      </div>
+      <div class="bc-meta-item">
+        <span class="bc-meta-label">Paritate</span>
+        <span class="bc-meta-value">CPT Port Constanța</span>
+      </div>
+    </div>
+
+    <div class="bc-actions">
+      <button class="bc-btn" type="button">Respinge</button>
+      <button class="bc-btn" type="button">Contra-ofertă</button>
+      <button class="bc-btn" type="button">Acceptă</button>
+    </div>
+  </article>
+
+  <!-- REJECTED -->
+  <article class="bid-card" data-status="rejected">
+    <header class="bc-header">
+      <span class="bc-status">
+        <span class="bc-status-dot"></span>
+        Respinsă
+      </span>
+      <time class="bc-date">02 Apr 2026 · 16:33</time>
+    </header>
+
+    <div class="bc-hero">
+      <div class="bc-commodity">
+        <div class="bc-commodity-name">Rapiță</div>
+        <div class="bc-commodity-meta">An recoltă 2025</div>
+      </div>
+      <div class="bc-price">
+        <span class="bc-price-value">520</span>
+        <span class="bc-price-unit">EUR/t</span>
+      </div>
+    </div>
+
+    <div class="bc-meta">
+      <div class="bc-meta-item">
+        <span class="bc-meta-label">Fermier</span>
+        <span class="bc-meta-value">agro.vest@example.ro</span>
+      </div>
+      <div class="bc-meta-item">
+        <span class="bc-meta-label">Livrare</span>
+        <span class="bc-meta-value">—</span>
+      </div>
+      <div class="bc-meta-item">
+        <span class="bc-meta-label">Paritate</span>
+        <span class="bc-meta-value">DAP Timișoara</span>
+      </div>
+    </div>
+    <!-- fără acțiuni — oferta e finalizată -->
+  </article>
+
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       MOBILE preview
+       ════════════════════════════════════════════════════════════════════ -->
+  <div class="section-label">Mobile · Preview</div>
+
+  <div class="compare">
+    <div class="mobile-frame">
+      <article class="bid-card" data-status="pending">
+        <header class="bc-header">
+          <span class="bc-status">
+            <span class="bc-status-dot"></span>
+            În așteptare
+          </span>
+          <time class="bc-date">05 Apr · 23:18</time>
+        </header>
+
+        <div class="bc-hero">
+          <div class="bc-commodity">
+            <div class="bc-commodity-name">Grâu</div>
+            <div class="bc-commodity-meta">An recoltă 2026</div>
+          </div>
+          <div class="bc-price">
+            <span class="bc-price-value">200</span>
+            <span class="bc-price-unit">EUR/t</span>
+          </div>
+        </div>
+
+        <div class="bc-meta">
+          <div class="bc-meta-item">
+            <span class="bc-meta-label">Fermier</span>
+            <span class="bc-meta-value">test@ameropa.com</span>
+          </div>
+          <div class="bc-meta-item">
+            <span class="bc-meta-label">Livrare</span>
+            <span class="bc-meta-value">—</span>
+          </div>
+          <div class="bc-meta-item">
+            <span class="bc-meta-label">Paritate</span>
+            <span class="bc-meta-value">CPT Constanța</span>
+          </div>
+        </div>
+
+        <div class="bc-actions">
+          <button class="bc-btn" type="button">Respinge</button>
+          <button class="bc-btn" type="button">Contra</button>
+          <button class="bc-btn" type="button">Acceptă</button>
+        </div>
+      </article>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

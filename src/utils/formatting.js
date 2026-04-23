@@ -27,7 +27,10 @@ export const formatLocationDisplay = (value) => {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase();
-  if (normalized === "port constanta") return "Constanta Port";
+  // Normalize variants to canonical Romanian form
+  if (normalized === "port constanta" || normalized === "constanta port") {
+    return "Port Constanța";
+  }
   return raw;
 };
 

@@ -1,15 +1,15 @@
 const PRODUCT_LABELS_BY_KEY = {
-  wheat: "Wheat",
-  grau: "Wheat",
-  barley: "Barley",
-  orz: "Barley",
-  corn: "Corn",
-  porumb: "Corn",
-  rapeseed: "Rapeseed",
-  rapita: "Rapeseed",
-  sunflower: "Sunflower",
-  "floarea soarelui": "Sunflower",
-  sfs: "Sunflower",
+  wheat: "Grâu",
+  grau: "Grâu",
+  barley: "Orz",
+  orz: "Orz",
+  corn: "Porumb",
+  porumb: "Porumb",
+  rapeseed: "Rapiță",
+  rapita: "Rapiță",
+  sunflower: "Floarea-soarelui",
+  "floarea soarelui": "Floarea-soarelui",
+  sfs: "Floarea-soarelui",
 };
 
 export const PRODUCT_FILTER_KEYS = [

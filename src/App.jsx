@@ -95,8 +95,8 @@ function DashboardShell({ darkMode, setDarkMode }) {
           <div className="header-left">
             <div>
               <div className="ameropa-title">AMEROPA</div>
-              <div style={{ fontSize: "10px", opacity: 0.7 }}>
-                {role === "admin" ? "Admin account" : "Farmer account"}
+              <div className="ameropa-role-label">
+                {role === "admin" ? "Cont administrator" : "Cont fermier"}
               </div>
             </div>
           </div>
