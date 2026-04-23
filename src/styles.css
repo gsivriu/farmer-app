@@ -2297,7 +2297,7 @@ select.input:focus {
    --bc-tone       → dot color + border-left color
    --bc-tone-text  → eyebrow label ("ÎN AȘTEPTARE" etc.)
    ────────────────────────────────────────────────── */
-.bid-card.bc-tone-warning { --bc-tone: var(--color-warning); --bc-tone-text: var(--color-warning-text); }
+.bid-card.bc-tone-warning { --bc-tone: #D4A017; --bc-tone-text: var(--color-warning-text); }
 .bid-card.bc-tone-success { --bc-tone: var(--color-success); --bc-tone-text: var(--color-success-text); }
 .bid-card.bc-tone-error   { --bc-tone: var(--color-error);   --bc-tone-text: var(--color-error-text); }
 .bid-card.bc-tone-info    { --bc-tone: var(--color-info);    --bc-tone-text: var(--color-info-text); }
