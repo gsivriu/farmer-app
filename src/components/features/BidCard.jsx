@@ -115,7 +115,9 @@ export default function BidCard({ bid, onClick, onAccept, onReject, onCounter })
         <div className="bc-meta">
           <div className="bc-meta-item">
             <span className="bc-meta-label">Fermier</span>
-            <span className="bc-meta-value">{bid.farmer_email || bid.farmer_id || "-"}</span>
+            <span className="bc-meta-value" title={bid.farmer_email || bid.farmer_id || "-"}>
+              {bid.farmer_email || bid.farmer_id || "-"}
+            </span>
           </div>
           <div className="bc-meta-item">
             <span className="bc-meta-label">Livrare</span>
@@ -123,7 +125,7 @@ export default function BidCard({ bid, onClick, onAccept, onReject, onCounter })
           </div>
           <div className="bc-meta-item">
             <span className="bc-meta-label">Paritate</span>
-            <span className="bc-meta-value">{parityDisplay}</span>
+            <span className="bc-meta-value" title={parityDisplay}>{parityDisplay}</span>
           </div>
         </div>
 

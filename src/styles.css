@@ -2112,23 +2112,27 @@ select.input:focus {
   padding: var(--sp-5) var(--sp-6);
 }
 
-/* Shared 3-column grid for header, hero, meta */
-.bc-header,
+/* Grid for hero + meta (same right-axis for price and paritate) */
 .bc-hero,
 .bc-meta {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
   gap: var(--sp-4);
 }
 
-/* ── 1. Header: status + date ── */
+.bc-hero {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* ── 1. Header: flex so date sizes to content and never wraps ── */
 .bc-header {
+  display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
   padding-bottom: var(--sp-3);
 }
 
 .bc-status {
-  grid-column: 1 / span 2;
   display: inline-flex;
   align-items: center;
   gap: var(--sp-2);
@@ -2137,6 +2141,7 @@ select.input:focus {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--bc-tone-text, var(--color-text-2));
+  min-width: 0;
 }
 
 .bc-status-dot {
@@ -2148,10 +2153,11 @@ select.input:focus {
 }
 
 .bc-date {
-  grid-column: 3;
   font-size: var(--text-xs);
   color: var(--color-text-2);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* ── 2. Hero: commodity + price ── */
@@ -2210,8 +2216,9 @@ select.input:focus {
   color: var(--color-info);
 }
 
-/* ── 3. Meta grid: 3 columns ── */
+/* ── 3. Meta grid: 3 columns, weighted so Fermier gets more room ── */
 .bc-meta {
+  grid-template-columns: 2fr 1fr 1.5fr;
   padding: var(--sp-4) 0;
   border-top: 1px solid var(--color-border);
   border-bottom: 1px solid var(--color-border);
@@ -2237,12 +2244,9 @@ select.input:focus {
   color: var(--color-text-1);
   font-weight: 500;
   line-height: 1.35;
-  word-break: break-word;
-  overflow-wrap: anywhere;
-}
-
-.bc-meta {
-  align-items: start;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ── 4. Action bar: neutral equal buttons ── */
