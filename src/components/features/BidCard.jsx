@@ -3,7 +3,7 @@ import { getProductLabelSafe } from "../../utils/productLabels";
 import { formatCompactNumber, hasPositiveNumber } from "../../utils/numberFormat";
 import { formatDeliveryRange, formatLocationDisplay, isFreightParity } from "../../utils/formatting";
 
-// ── Status helper — single source of truth ───────────────────────────────────
+// ── Status helpers — single source of truth ──────────────────────────────────
 export function getStatusStyle(status) {
   const s = String(status || "").toLowerCase();
   if (s === "accepted")
@@ -18,11 +18,19 @@ export function getStatusStyle(status) {
 
 function getStatusLabel(status) {
   const s = String(status || "").toLowerCase();
-  if (s === "accepted")          return "Acceptat";
-  if (s === "rejected")          return "Respins";
+  if (s === "accepted")          return "Acceptată";
+  if (s === "rejected")          return "Respinsă";
   if (s === "countered")         return "Contra-ofertă";
   if (s === "farmer_countered")  return "Răspuns fermier";
   return "În așteptare";
+}
+
+function getStatusToneClass(status) {
+  const s = String(status || "").toLowerCase();
+  if (s === "accepted") return "bc-tone-success";
+  if (s === "rejected") return "bc-tone-error";
+  if (s === "countered" || s === "farmer_countered") return "bc-tone-info";
+  return "bc-tone-warning";
 }
 
 function formatDateTime(value) {
@@ -51,7 +59,7 @@ const ACTIONABLE = new Set(["pending", "farmer_countered"]);
 // ── BidCard ──────────────────────────────────────────────────────────────────
 export default function BidCard({ bid, onClick, onAccept, onReject, onCounter }) {
   const [confirming, setConfirming] = useState(null); // null | "accepted" | "rejected"
-  const style = getStatusStyle(bid.status);
+  const toneClass = getStatusToneClass(bid.status);
   const unit = `${bid.currency || (bid.product === "sunflower" ? "USD" : "EUR")}/t`;
   const { price, isCounter } = resolveDisplayPrice(bid);
   const isActionable = ACTIONABLE.has(String(bid.status || "").toLowerCase());
@@ -73,81 +81,65 @@ export default function BidCard({ bid, onClick, onAccept, onReject, onCounter })
     <div
       role="button"
       tabIndex={0}
-      className="bid-card"
-      style={{ borderLeft: `4px solid ${style.borderColor}` }}
+      className={`bid-card ${toneClass}`}
       onClick={handleCardClick}
       onKeyDown={(e) => {
         if (e.key === "Escape") { setConfirming(null); return; }
         if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleCardClick(); }
       }}
     >
-
-      {/* ── Body: single column ── */}
       <div className="bc-body">
 
-        <div className="bc-field bc-field-status">
-          <span className="bc-label">Stare</span>
-          <span
-            className="bc-badge"
-            style={{ background: style.badgeBg, color: style.badgeText }}
-          >
+        {/* ── 1. Header: status + date ── */}
+        <div className="bc-header">
+          <span className="bc-status">
+            <span className="bc-status-dot" />
             {getStatusLabel(bid.status)}
           </span>
+          <time className="bc-date">{formatDateTime(bid.created_at)}</time>
         </div>
 
-        <div className="bc-field">
-          <span className="bc-label">Produs</span>
-          <span className="bc-val bc-val-product">
-            {getProductLabelSafe(bid.product)}
-          </span>
+        {/* ── 2. Hero: commodity + price ── */}
+        <div className="bc-hero">
+          <div className="bc-commodity">
+            <div className="bc-commodity-name">{getProductLabelSafe(bid.product)}</div>
+            <div className="bc-commodity-meta">An recoltă {bid.crop_year || "-"}</div>
+          </div>
+          <div className={`bc-price${isCounter ? " bc-price-counter" : ""}`}>
+            <span className="bc-price-value">{formatCompactNumber(price)}</span>
+            <span className="bc-price-unit">{unit}</span>
+          </div>
         </div>
 
-        <div className="bc-field">
-          <span className="bc-label">Fermier</span>
-          <span className="bc-val bc-val-truncate">{bid.farmer_email || bid.farmer_id || "-"}</span>
-        </div>
-
-        <div className="bc-field">
-          <span className="bc-label">Data ofertei</span>
-          <span className="bc-val">{formatDateTime(bid.created_at)}</span>
-        </div>
-
-        <div className="bc-field">
-          <span className="bc-label">Preț</span>
-          <span className={`bc-val bc-val-price${isCounter ? " bc-val-counter" : ""}`}>
-            {formatCompactNumber(price)}{" "}
-            <span className="bc-val-unit">{unit}</span>
-          </span>
-        </div>
-
-        <div className="bc-field">
-          <span className="bc-label">Livrare</span>
-          <span className="bc-val">{formatDeliveryRange(bid.delivery_start, bid.delivery_end)}</span>
-        </div>
-
-        <div className="bc-field">
-          <span className="bc-label">Paritate</span>
-          <span className="bc-val">{parityDisplay}</span>
-        </div>
-
-        <div className="bc-field">
-          <span className="bc-label">An recoltă</span>
-          <span className="bc-val">{bid.crop_year || "-"}</span>
+        {/* ── 3. Meta grid: 3 columns ── */}
+        <div className="bc-meta">
+          <div className="bc-meta-item">
+            <span className="bc-meta-label">Fermier</span>
+            <span className="bc-meta-value bc-truncate">{bid.farmer_email || bid.farmer_id || "-"}</span>
+          </div>
+          <div className="bc-meta-item">
+            <span className="bc-meta-label">Livrare</span>
+            <span className="bc-meta-value">{formatDeliveryRange(bid.delivery_start, bid.delivery_end)}</span>
+          </div>
+          <div className="bc-meta-item">
+            <span className="bc-meta-label">Paritate</span>
+            <span className="bc-meta-value bc-truncate">{parityDisplay}</span>
+          </div>
         </div>
 
       </div>
 
-      {/* ── Action bar (only when actionable) ── */}
+      {/* ── 4. Action bar — neutral equal buttons ── */}
       {isActionable && (onAccept || onReject || onCounter) && (
         <div
-          className="bc-actions-bar"
+          className="bc-actions"
           onClick={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
         >
           {onReject && (
             <button
               type="button"
-              className={`bc-btn bc-btn-reject${confirming === "rejected" ? " bc-btn-confirming" : confirming ? " bc-btn-dimmed" : ""}`}
+              className={`bc-btn${confirming === "rejected" ? " bc-btn-confirming" : confirming ? " bc-btn-dimmed" : ""}`}
               onClick={(e) => {
                 e.stopPropagation();
                 if (confirming === "rejected") { setConfirming(null); onReject(); }
@@ -160,7 +152,7 @@ export default function BidCard({ bid, onClick, onAccept, onReject, onCounter })
           {onCounter && (
             <button
               type="button"
-              className={`bc-btn bc-btn-counter${confirming ? " bc-btn-dimmed" : ""}`}
+              className={`bc-btn${confirming ? " bc-btn-dimmed" : ""}`}
               onClick={(e) => { e.stopPropagation(); setConfirming(null); onCounter(); }}
             >
               Contra-ofertă
@@ -169,7 +161,7 @@ export default function BidCard({ bid, onClick, onAccept, onReject, onCounter })
           {onAccept && (
             <button
               type="button"
-              className={`bc-btn bc-btn-accept${confirming === "accepted" ? " bc-btn-confirming" : confirming ? " bc-btn-dimmed" : ""}`}
+              className={`bc-btn${confirming === "accepted" ? " bc-btn-confirming" : confirming ? " bc-btn-dimmed" : ""}`}
               onClick={(e) => {
                 e.stopPropagation();
                 if (confirming === "accepted") { setConfirming(null); onAccept(); }

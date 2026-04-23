@@ -2016,20 +2016,23 @@ select.input:focus {
   display: flex;
   flex-direction: column;
   width: 100%;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--bc-tone, var(--color-border-strong));
+  background: var(--color-surface);
+  box-shadow: 0 1px 2px rgba(15, 13, 10, 0.04);
   font-variant-numeric: tabular-nums;
   cursor: pointer;
   text-align: left;
   position: relative;
   overflow: hidden;
-  transition: box-shadow 0.15s ease;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
 .bid-card:hover {
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.09);
+  box-shadow: 0 4px 12px rgba(15, 13, 10, 0.06);
+  border-color: var(--color-border-medium);
+  border-left-color: var(--bc-tone, var(--color-border-strong));
 }
 
 .bid-card-status-group {
@@ -2098,152 +2101,224 @@ select.input:focus {
 .theme-dark .bid-card-timestamp { color: #4b5563; }
 
 /* ── BidCard inner layout (bc-* namespace) ───────────────────
-   Single-column stacked rows on all screen sizes.
+   Enterprise grid layout — 3-column axis aligned on all rows.
+   Header · Hero · Meta share repeat(3, 1fr) so Date/Price/
+   Paritate/Acceptă button all align on the same right axis.
    ────────────────────────────────────────────────────────── */
 
 .bc-body {
-  display: flex;
-  flex-direction: column;
+  padding: var(--sp-5) var(--sp-6);
 }
 
-/* Each row — label left, value right */
-.bc-field {
-  display: flex;
-  justify-content: space-between;
+/* Shared 3-column grid for header, hero, meta */
+.bc-header,
+.bc-hero,
+.bc-meta {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-4);
+}
+
+/* ── 1. Header: status + date ── */
+.bc-header {
   align-items: center;
-  padding: 9px 20px;
-  border-top: 1px solid var(--color-border-medium);
-  gap: 12px;
-  min-height: 36px;
+  padding-bottom: var(--sp-3);
 }
 
-.bc-label {
-  font-size: var(--text-xs);
-  color: var(--color-text-2);
-  font-weight: 400;
-  white-space: nowrap;
+.bc-status {
+  grid-column: 1 / span 2;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bc-tone-text, var(--color-text-2));
+}
+
+.bc-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--bc-tone, var(--color-text-3));
   flex-shrink: 0;
 }
 
-.bc-val {
-  font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--color-text-1);
-  text-align: right;
+.bc-date {
+  grid-column: 3;
+  font-size: var(--text-xs);
+  color: var(--color-text-2);
   font-variant-numeric: tabular-nums;
+}
+
+/* ── 2. Hero: commodity + price ── */
+.bc-hero {
+  align-items: baseline;
+  padding: var(--sp-1) 0 var(--sp-5);
+}
+
+.bc-commodity {
+  grid-column: 1 / span 2;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   min-width: 0;
 }
 
-.bc-val-truncate {
+.bc-commodity-name {
+  font-size: var(--text-md);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-text-1);
+  line-height: 1.2;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* Commodity value — bold, same as price */
-.bc-val-product {
-  font-weight: 700;
-}
-
-.bc-val-price {
-  font-weight: 700;
-}
-
-.bc-val-counter {
-  color: #b91c1c;
-}
-
-.bc-val-unit {
+.bc-commodity-meta {
   font-size: var(--text-xs);
-  font-weight: 500;
   color: var(--color-text-2);
 }
 
-/* Status badge */
-.bc-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 10px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-}
-
-/* Action bar — centered buttons */
-.bc-actions-bar {
+.bc-price {
+  grid-column: 3;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border-top: 1px solid var(--color-border-medium);
+  align-items: baseline;
+  gap: var(--sp-1);
+  font-variant-numeric: tabular-nums;
 }
 
-/* Action buttons */
-.bc-btn {
-  padding: 6px 16px;
-  border-radius: 6px;
-  font-size: 12px;
+.bc-price-value {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-text-1);
+  line-height: 1;
+}
+
+.bc-price-unit {
+  font-size: var(--text-sm);
+  color: var(--color-text-2);
+  font-weight: 500;
+}
+
+.bc-price-counter .bc-price-value {
+  color: var(--color-info);
+}
+
+/* ── 3. Meta grid: 3 columns ── */
+.bc-meta {
+  padding: var(--sp-4) 0;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.bc-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+
+.bc-meta-label {
+  font-size: var(--text-2xs);
   font-weight: 600;
-  cursor: pointer;
-  border: 1px solid transparent;
-  line-height: 1.4;
-  transition: opacity 0.12s ease;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-2);
+}
+
+.bc-meta-value {
+  font-size: var(--text-sm);
+  color: var(--color-text-1);
+  font-weight: 500;
+}
+
+.bc-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.bc-btn:hover { opacity: 0.82; }
-.bc-btn:active { opacity: 0.65; }
-
-.bc-btn-accept {
-  background: #dcfce7;
-  color: #166534;
-  border-color: #86efac;
+/* ── 4. Action bar: neutral equal buttons ── */
+.bc-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-3);
+  padding: var(--sp-4) var(--sp-6);
 }
 
-.bc-btn-reject {
-  background: #fee2e2;
-  color: #991b1b;
-  border-color: #fca5a5;
+.bc-btn {
+  appearance: none;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-text-1);
+  font-family: inherit;
+  font-size: var(--text-xs);
+  font-weight: 500;
+  height: 36px;
+  padding: 0 var(--sp-3);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease, opacity 0.12s ease;
+  white-space: nowrap;
 }
 
-.bc-btn-counter {
-  background: #dbeafe;
-  color: #1e40af;
-  border-color: #93c5fd;
+.bc-btn:hover {
+  background: var(--color-surface-2);
+  border-color: var(--color-text-3);
 }
 
-/* Inline confirm state — solid fill */
-.bc-btn-accept.bc-btn-confirming {
-  background: #166534;
-  color: #fff;
-  border-color: #166534;
+.bc-btn:active {
+  background: var(--color-surface-3);
 }
 
-.bc-btn-reject.bc-btn-confirming {
-  background: #991b1b;
-  color: #fff;
-  border-color: #991b1b;
+.bc-btn:focus-visible {
+  outline: 2px solid var(--color-text-1);
+  outline-offset: 2px;
 }
 
-/* Other buttons fade when one is confirming */
+/* Inline confirm — neutral dark fill (no color signal) */
+.bc-btn-confirming {
+  background: var(--color-text-1);
+  color: var(--color-text-inv);
+  border-color: var(--color-text-1);
+}
+
 .bc-btn-dimmed {
-  opacity: 0.3;
+  opacity: 0.35;
 }
 
-/* Dark mode */
-.theme-dark .bc-field { border-top-color: #1f2937; }
-.theme-dark .bc-label { color: #9ca3af; }
-.theme-dark .bc-val { color: #e2e8f0; }
-.theme-dark .bc-val-unit { color: #6b7280; }
-.theme-dark .bc-val-counter { color: #f87171; }
-.theme-dark .bc-actions-bar { border-top-color: #1f2937; }
-.theme-dark .bc-btn-accept { background: rgba(22,163,74,.18); color: #4ade80; border-color: rgba(22,163,74,.4); }
-.theme-dark .bc-btn-reject { background: rgba(239,68,68,.18); color: #f87171; border-color: rgba(239,68,68,.4); }
-.theme-dark .bc-btn-counter { background: rgba(59,130,246,.18); color: #93c5fd; border-color: rgba(59,130,246,.4); }
+/* ── Status tone — one variable set per state.
+   --bc-tone       → dot color + border-left color
+   --bc-tone-text  → eyebrow label ("ÎN AȘTEPTARE" etc.)
+   ────────────────────────────────────────────────── */
+.bid-card.bc-tone-warning { --bc-tone: var(--color-warning); --bc-tone-text: var(--color-warning-text); }
+.bid-card.bc-tone-success { --bc-tone: var(--color-success); --bc-tone-text: var(--color-success-text); }
+.bid-card.bc-tone-error   { --bc-tone: var(--color-error);   --bc-tone-text: var(--color-error-text); }
+.bid-card.bc-tone-info    { --bc-tone: var(--color-info);    --bc-tone-text: var(--color-info-text); }
+
+/* Dark mode — same structure, neutral feel */
+.theme-dark .bc-meta {
+  border-top-color: var(--color-border);
+  border-bottom-color: var(--color-border);
+}
+.theme-dark .bc-btn {
+  background: transparent;
+  border-color: var(--color-border-strong);
+  color: var(--color-text-1);
+}
+.theme-dark .bc-btn:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--color-text-2);
+}
+.theme-dark .bc-btn-confirming {
+  background: var(--color-text-1);
+  color: #0F0E0C;
+  border-color: var(--color-text-1);
+}
 
 .theme-dark .bid-row {
   background: #111827;
