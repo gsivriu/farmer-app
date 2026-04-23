@@ -2236,12 +2236,13 @@ select.input:focus {
   font-size: var(--text-sm);
   color: var(--color-text-1);
   font-weight: 500;
+  line-height: 1.35;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
-.bc-truncate {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.bc-meta {
+  align-items: start;
 }
 
 /* ── 4. Action bar: neutral equal buttons ── */
