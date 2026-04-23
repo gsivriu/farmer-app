@@ -2333,6 +2333,101 @@ select.input:focus {
   border-color: var(--color-text-1);
 }
 
+/* ── Mobile (< 640px): collapse to farmer-style label-value rows ──
+   On narrow screens, the 3-column grid squishes content. Swap to a
+   single-column stack where every data point is a row with its label
+   on the left and its value flushed to the right — same pattern the
+   farmer dashboard uses.
+   ───────────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .bc-body {
+    padding: var(--sp-4);
+  }
+
+  /* Header: status + date row, with bottom hairline */
+  .bc-header {
+    padding-bottom: var(--sp-3);
+    margin-bottom: var(--sp-3);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  /* Hero: stack commodity as the title, price as its first data row */
+  .bc-hero {
+    display: block;
+    padding: 0 0 var(--sp-3);
+  }
+  .bc-commodity {
+    margin-bottom: var(--sp-3);
+  }
+  .bc-commodity-name {
+    font-size: var(--text-base);
+    font-weight: 700;
+  }
+  .bc-commodity-meta {
+    font-size: var(--text-2xs);
+  }
+  .bc-price {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    align-items: baseline;
+    gap: var(--sp-3);
+    padding: var(--sp-2) 0;
+    border-top: 1px solid var(--color-border);
+  }
+  .bc-price::before {
+    content: "Preț";
+    font-size: var(--text-xs);
+    font-weight: 400;
+    color: var(--color-text-2);
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .bc-price-value {
+    font-size: var(--text-sm);
+    font-weight: 700;
+    justify-self: end;
+  }
+  .bc-price-unit {
+    font-size: var(--text-2xs);
+  }
+
+  /* Meta: every item becomes a full-width label-value row */
+  .bc-meta {
+    display: block;
+    padding: 0;
+    border-top: none;
+    border-bottom: none;
+  }
+  .bc-meta-item {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    align-items: baseline;
+    gap: var(--sp-3);
+    padding: var(--sp-2) 0;
+    border-top: 1px solid var(--color-border);
+  }
+  .bc-meta-label {
+    font-size: var(--text-xs);
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--color-text-2);
+  }
+  .bc-meta-value {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    text-align: right;
+    justify-self: end;
+    max-width: 100%;
+  }
+
+  /* Action bar: tighter padding, same 3 equal buttons */
+  .bc-actions {
+    gap: var(--sp-2);
+    padding: var(--sp-3) var(--sp-4) var(--sp-4);
+  }
+}
+
 .theme-dark .bid-row {
   background: #111827;
   border-color: #1f2937;
