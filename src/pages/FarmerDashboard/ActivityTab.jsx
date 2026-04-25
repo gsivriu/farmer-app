@@ -4,6 +4,9 @@ import { useAppContext } from "../../context/AppContext.jsx";
 import { getProductLabelSafe, PRODUCT_FILTER_KEYS } from "../../utils/productLabels";
 import { formatCompactNumber, hasPositiveNumber } from "../../utils/numberFormat";
 import { formatDeliveryRange, formatLocationDisplay, isFreightParity } from "../../utils/formatting";
+import BidCardV2 from "../../components/features/BidCardV2.jsx";
+
+const IS_DEV_ENV = import.meta.env.VITE_ENV === "development";
 
 const formatParityDisplay = (bid) => {
   if (!bid?.parity) return "-";
@@ -335,6 +338,22 @@ export default function ActivityTab() {
                     const activePrice = hasCounterPrice ? Number(b.counter_price) : Number(b.price);
                     const unit = `${b.currency || (b.product === "sunflower" ? "USD" : "EUR")}/t`;
                     const statusLabel = getStatusLabel(b.status);
+
+                    if (IS_DEV_ENV) {
+                      return (
+                        <BidCardV2
+                          key={b.id}
+                          bid={b}
+                          onClick={() => {
+                            setSelectedBid(b);
+                            const counterValue = hasPositiveNumber(b.counter_price) ? String(b.counter_price) : "";
+                            setFarmerModalCounter(counterValue);
+                            setFarmerModalOriginal({ counter: counterValue });
+                            setFarmerConfirmAction(null);
+                          }}
+                        />
+                      );
+                    }
 
                     return (
                       <div

@@ -5,6 +5,10 @@ import { getProductLabelSafe, PRODUCT_FILTER_KEYS } from "../../utils/productLab
 import { formatCompactNumber, hasPositiveNumber } from "../../utils/numberFormat";
 import { formatDeliveryRange, formatLocationDisplay, isFreightParity } from "../../utils/formatting";
 import BidCard from "../../components/features/BidCard.jsx";
+import BidCardV2 from "../../components/features/BidCardV2.jsx";
+
+const IS_DEV_ENV = import.meta.env.VITE_ENV === "development";
+const BidCardComponent = IS_DEV_ENV ? BidCardV2 : BidCard;
 
 const formatDateOnly = (value) => {
   if (!value) return "-";
@@ -349,7 +353,7 @@ export default function BidsTab({ active }) {
         {!loading && !error && (
           <div className="admin-bid-list" style={{ marginTop: 14 }}>
             {filteredBids.map((b) => (
-              <BidCard
+              <BidCardComponent
                 key={b.id}
                 bid={b}
                 onClick={() => openAdminModal(b, null)}
