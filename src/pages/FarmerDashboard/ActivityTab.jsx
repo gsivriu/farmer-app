@@ -6,7 +6,10 @@ import { formatCompactNumber, hasPositiveNumber } from "../../utils/numberFormat
 import { formatDeliveryRange, formatLocationDisplay, isFreightParity } from "../../utils/formatting";
 import BidCardV2 from "../../components/features/BidCardV2.jsx";
 
-const IS_DEV_ENV = import.meta.env.VITE_ENV === "development";
+const IS_DEV_ENV =
+  import.meta.env.VITE_ENV === "development" ||
+  import.meta.env.DEV === true ||
+  String(import.meta.env.VITE_SUPABASE_URL || "").includes("eirqbksgxiiudgeezlob");
 
 const formatParityDisplay = (bid) => {
   if (!bid?.parity) return "-";
