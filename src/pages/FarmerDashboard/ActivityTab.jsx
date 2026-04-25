@@ -4,6 +4,7 @@ import { useAppContext } from "../../context/AppContext.jsx";
 import { getProductLabelSafe, PRODUCT_FILTER_KEYS } from "../../utils/productLabels";
 import { formatCompactNumber, hasPositiveNumber } from "../../utils/numberFormat";
 import { formatDeliveryRange, formatLocationDisplay, isFreightParity } from "../../utils/formatting";
+import BidCardV2 from "../../components/features/BidCardV2.jsx";
 
 const formatParityDisplay = (bid) => {
   if (!bid?.parity) return "-";
@@ -324,83 +325,19 @@ export default function ActivityTab() {
                 </div>
               ) : (
                 <div className="bid-list">
-                  {filteredBids.map((b) => {
-                    const statusClass =
-                      b.status === "accepted" ? "is-accepted"
-                      : b.status === "rejected" ? "is-rejected"
-                      : b.status === "countered" ? "is-countered"
-                      : b.status === "farmer_countered" ? "is-farmer-countered"
-                      : "is-pending";
-                    const hasCounterPrice = hasPositiveNumber(b.counter_price);
-                    const activePrice = hasCounterPrice ? Number(b.counter_price) : Number(b.price);
-                    const unit = `${b.currency || (b.product === "sunflower" ? "USD" : "EUR")}/t`;
-                    const statusLabel = getStatusLabel(b.status);
-
-                    return (
-                      <div
-                        role="button"
-                        tabIndex={0}
-                        key={b.id}
-                        className={"bid-row " + statusClass}
-                        onClick={() => {
-                          setSelectedBid(b);
-                          const counterValue = hasPositiveNumber(b.counter_price) ? String(b.counter_price) : "";
-                          setFarmerModalCounter(counterValue);
-                          setFarmerModalOriginal({ counter: counterValue });
-                          setFarmerConfirmAction(null);
-                        }}
-                        onKeyDown={(event) => {
-                          if (event.key === "Enter" || event.key === " ") {
-                            event.preventDefault();
-                            const counterValue = hasPositiveNumber(b.counter_price) ? String(b.counter_price) : "";
-                            setSelectedBid(b);
-                            setFarmerModalCounter(counterValue);
-                            setFarmerModalOriginal({ counter: counterValue });
-                            setFarmerConfirmAction(null);
-                          }
-                        }}
-                      >
-                        <div className="bid-card-header">
-                          <div className="bid-card-header-main">
-                            <div className="bid-card-title">{getProductLabelSafe(b.product)}</div>
-                            {b.status === "accepted" && b.contract_no && (
-                              <div className="bid-card-subtitle">Contract: {b.contract_no}</div>
-                            )}
-                          </div>
-                          <div className="bid-card-header-badge">
-                            <span className={`status-badge status-${statusClass.slice(3)}`}>
-                              {statusLabel}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="bid-card-section-label">Detalii</div>
-
-                        <div className="bid-card-row bid-card-row-price">
-                          <span className="bid-card-label">Preț</span>
-                          <span className={`bid-card-value${hasCounterPrice && b.status === "countered" ? " bid-card-counter-value" : ""}`}>
-                            {formatCompactNumber(activePrice)} {unit}
-                          </span>
-                        </div>
-                        <div className="bid-card-row">
-                          <span className="bid-card-label">Cantitate</span>
-                          <span className="bid-card-value">{formatCompactNumber(b.quantity)} t</span>
-                        </div>
-                        <div className="bid-card-row">
-                          <span className="bid-card-label">Paritate</span>
-                          <span className="bid-card-value">{formatParityDisplay(b)}</span>
-                        </div>
-                        <div className="bid-card-row">
-                          <span className="bid-card-label">Data ofertei</span>
-                          <span className="bid-card-value">{formatDateOnly(b.created_at)}</span>
-                        </div>
-
-                        <div className="bid-card-footer">
-                          <span className="bid-card-hint">Vezi detalii ›</span>
-                        </div>
-                      </div>
-                    );
-                  })}
+                  {filteredBids.map((b) => (
+                    <BidCardV2
+                      key={b.id}
+                      bid={b}
+                      onClick={() => {
+                        setSelectedBid(b);
+                        const counterValue = hasPositiveNumber(b.counter_price) ? String(b.counter_price) : "";
+                        setFarmerModalCounter(counterValue);
+                        setFarmerModalOriginal({ counter: counterValue });
+                        setFarmerConfirmAction(null);
+                      }}
+                    />
+                  ))}
                 </div>
               )}
             </div>
