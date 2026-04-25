@@ -6,8 +6,8 @@ import { supabase } from "./supabaseClient";
 import { useAuth } from "./hooks/useAuth";
 import { usePushNotifications, useConsumePendingPushNav } from "./hooks/usePushNotifications";
 
-import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
+import LoginPage from "./pages/LoginPage";
 import SetPassword from "./pages/SetPassword";
 import ProtectedRoute from "./components/ProtectedRoute";
 import FarmerDashboard from "./pages/FarmerDashboard";
@@ -26,22 +26,6 @@ function AuthShell({ children }) {
         <div className="login-body">{children}</div>
       </div>
     </div>
-  );
-}
-
-function LoginPage() {
-  const { user, loading } = useAuth();
-  if (!loading && user) return <Navigate to="/dashboard" replace />;
-  return (
-    <AuthShell>
-      <LoginForm />
-      <div className="login-switch">
-        Acces prin invitație?{" "}
-        <a className="login-link" href="/register">
-          Detalii
-        </a>
-      </div>
-    </AuthShell>
   );
 }
 
