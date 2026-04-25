@@ -40,7 +40,7 @@
   border-radius: var(--bcv2-radius-desktop);
   overflow: hidden;
   display: grid;
-  grid-template-columns: 4px 140px 160px 200px 1fr auto;
+  grid-template-columns: 4px 140px 160px 240px 1fr auto;
   align-items: center;
   min-height: 96px;
   transition: box-shadow 150ms ease-out;
@@ -70,7 +70,10 @@
 .bcv2-section.actions {
   border-right: none; min-width: 240px;
   flex-direction: row; align-items: center; justify-content: flex-end;
-  gap: 8px; padding-right: 20px;
+  gap: 8px;
+  /* Reserve space on the right for the absolute status badge so the
+     rightmost button (Respinge) doesn't overlap it. */
+  padding-right: 110px;
 }
 .bcv2-section.firm { flex: 1; }
 
