@@ -4,14 +4,9 @@ import { useAppContext } from "../../context/AppContext.jsx";
 import { getProductLabelSafe, PRODUCT_FILTER_KEYS } from "../../utils/productLabels";
 import { formatCompactNumber, hasPositiveNumber } from "../../utils/numberFormat";
 import { formatDeliveryRange, formatLocationDisplay, isFreightParity } from "../../utils/formatting";
-import BidCard from "../../components/features/BidCard.jsx";
 import BidCardV2 from "../../components/features/BidCardV2.jsx";
 
-const IS_DEV_ENV =
-  import.meta.env.VITE_ENV === "development" ||
-  import.meta.env.DEV === true ||
-  String(import.meta.env.VITE_SUPABASE_URL || "").includes("eirqbksgxiiudgeezlob");
-const BidCardComponent = IS_DEV_ENV ? BidCardV2 : BidCard;
+const BidCardComponent = BidCardV2;
 
 const formatDateOnly = (value) => {
   if (!value) return "-";
