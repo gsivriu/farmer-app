@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "../../supabaseClient";
 import { useAppContext } from "../../context/AppContext.jsx";
+import { useRealtimeSubscription } from "../../hooks/useRealtimeSubscription.js";
 import { getProductLabelSafe, PRODUCT_FILTER_KEYS } from "../../utils/productLabels";
 import { formatCompactNumber, hasPositiveNumber } from "../../utils/numberFormat";
 import { formatDeliveryRange, formatLocationDisplay, isFreightParity } from "../../utils/formatting";
@@ -73,7 +74,7 @@ function SkeletonBidRow() {
 }
 
 export default function ActivityTab() {
-  const { bids, fetchBids, addFarmerRewardsPoints } = useAppContext();
+  const { addFarmerRewardsPoints } = useAppContext();
 
   const [localBids, setLocalBids] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -93,14 +94,6 @@ export default function ActivityTab() {
   const [showStats, setShowStats] = useState(false);
   const [farmerId, setFarmerId] = useState(null);
 
-  useEffect(() => { fetchBids(); }, [fetchBids]);
-
-  useEffect(() => {
-    if (!Array.isArray(bids)) return;
-    setLocalBids(bids);
-    setLoading(false);
-  }, [bids]);
-
   useEffect(() => {
     let mounted = true;
     supabase.auth.getUser().then(({ data, error: userErr }) => {
@@ -109,6 +102,20 @@ export default function ActivityTab() {
     });
     return () => { mounted = false; };
   }, []);
+
+  const fetchFarmerBids = useCallback(async () => {
+    if (!farmerId) return;
+    const { data, error } = await supabase
+      .from("bids")
+      .select("*")
+      .eq("farmer_id", farmerId)
+      .order("created_at", { ascending: false });
+    if (!error && data) setLocalBids(data);
+    setLoading(false);
+  }, [farmerId]);
+
+  useEffect(() => { fetchFarmerBids(); }, [fetchFarmerBids]);
+  useRealtimeSubscription("bids", fetchFarmerBids);
 
   useEffect(() => {
     setFarmerActionLocks((prev) => {
@@ -131,10 +138,7 @@ export default function ActivityTab() {
 
   // ── Computations ────────────────────────────────────────────────────────────
 
-  const userBids = useMemo(() => {
-    if (!farmerId) return [];
-    return localBids.filter((b) => b.farmer_id === farmerId);
-  }, [localBids, farmerId]);
+  const userBids = localBids;
 
   const filteredBids = useMemo(() => {
     return userBids.filter((b) => {
