@@ -13,6 +13,7 @@ export function useRealtimeSubscription(table, onChanged) {
   useEffect(() => {
     let channel = null;
     let retryTimeout = null;
+    let retries = 0;
     let destroyed = false;
 
     const removeChannel = () => {
@@ -36,7 +37,11 @@ export function useRealtimeSubscription(table, onChanged) {
           if (destroyed) return;
           if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
             removeChannel();
-            retryTimeout = setTimeout(subscribe, 3000);
+            const delay = Math.min(3000 * Math.pow(2, retries), 30000);
+            retries++;
+            retryTimeout = setTimeout(subscribe, delay);
+          } else if (status === "SUBSCRIBED") {
+            retries = 0;
           }
         });
     };
