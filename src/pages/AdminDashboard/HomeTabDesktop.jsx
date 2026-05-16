@@ -5,8 +5,9 @@ import ExchangeRatesCard from "../../components/ExchangeRatesCard.jsx";
 import SiloPriceTable from "../../components/SiloPriceTable.jsx";
 import { getProductLabelSafe } from "../../utils/productLabels";
 import { formatCompactNumber, hasPositiveNumber } from "../../utils/numberFormat";
-import { formatDeliveryRange, isFreightParity, formatLocationDisplay } from "../../utils/formatting";
+import { isFreightParity, formatLocationDisplay } from "../../utils/formatting";
 import { supabase } from "../../supabaseClient";
+import AdminBidDetailModal from "../../components/AdminBidDetailModal.jsx";
 
 const T = {
   bg: "#F8F7F5",
@@ -217,14 +218,6 @@ function todayKey() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-const STATUS_LABEL_FULL = {
-  accepted: "Acceptat",
-  rejected: "Respins",
-  countered: "Contra-ofertă",
-  farmer_countered: "Răspuns fermier",
-  pending: "În așteptare",
-};
-
 function getBidDisplayPrice(b) {
   const s = String(b?.status || "").toLowerCase();
   if (s === "accepted") {
@@ -251,7 +244,7 @@ function formatParity(b) {
 }
 
 export default function HomeTabDesktop() {
-  const { commodities, bids, updateCommodityPrice, stopCommodity } = useAppContext();
+  const { commodities, bids, fetchBids, updateCommodityPrice, stopCommodity } = useAppContext();
 
   const [draftPrices, setDraftPrices] = useState({});
   const [draftCurrencies, setDraftCurrencies] = useState({});
@@ -645,180 +638,13 @@ export default function HomeTabDesktop() {
       </Card>
 
       {selectedBid && (
-        <BidDetailModal
-          bid={selectedBid}
-          farmer={farmersMap[selectedBid.farmer_id]}
+        <AdminBidDetailModal
+          bid={(bids || []).find((b) => b.id === selectedBid.id) || selectedBid}
           onClose={() => setSelectedBid(null)}
+          onUpdated={fetchBids}
         />
       )}
     </div>
   );
 }
 
-function BidDetailModal({ bid, farmer, onClose }) {
-  useEffect(() => {
-    const onKey = (e) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prevOverflow;
-    };
-  }, [onClose]);
-
-  const s = String(bid.status || "").toLowerCase();
-  const statusLabel = STATUS_LABEL_FULL[s] || "În așteptare";
-  const statusTone = STATUS_TONE[s] || "neutral";
-  const currency = getBidCurrency(bid);
-  const price = getBidDisplayPrice(bid);
-  const farmerName = farmer?.full_name || farmer?.email || bid.farmer_email || bid.farmer_id || "—";
-  const farmerSub = farmer?.full_name ? farmer?.email : null;
-  const createdAt = bid.created_at
-    ? new Date(bid.created_at).toLocaleString("ro-RO", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    : "—";
-
-  const Row = ({ label, value }) => (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        gap: 12,
-        padding: "11px 0",
-        borderTop: `1px solid ${T.borderS}`,
-        fontSize: 13,
-      }}
-    >
-      <span style={{ color: T.ink2 }}>{label}</span>
-      <span style={{ color: T.ink, fontWeight: 500, textAlign: "right", maxWidth: "60%" }}>{value}</span>
-    </div>
-  );
-
-  return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      onClick={onClose}
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(15,15,14,0.45)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 1000,
-        padding: 24,
-      }}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="am-home"
-        style={{
-          background: T.surface,
-          borderRadius: 16,
-          width: "min(520px, 100%)",
-          maxHeight: "90vh",
-          overflow: "auto",
-          border: `1px solid ${T.border}`,
-          boxShadow: "0 20px 60px rgba(15,15,14,0.18)",
-        }}
-      >
-        <div
-          style={{
-            padding: "18px 22px",
-            borderBottom: `1px solid ${T.border}`,
-            display: "flex",
-            alignItems: "flex-start",
-            justifyContent: "space-between",
-            gap: 12,
-          }}
-        >
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
-              <span style={{ fontSize: 18, fontWeight: 700, letterSpacing: -0.3 }}>
-                {getProductLabelSafe(bid.product)}
-              </span>
-              <Pill tone={statusTone}>{statusLabel}</Pill>
-            </div>
-            <div style={{ fontSize: 12, color: T.ink2 }}>{createdAt}</div>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Închide"
-            style={{
-              border: "none",
-              background: T.surface2,
-              color: T.ink,
-              width: 30,
-              height: 30,
-              borderRadius: 8,
-              fontSize: 18,
-              fontWeight: 500,
-              cursor: "pointer",
-              lineHeight: 1,
-            }}
-          >
-            ×
-          </button>
-        </div>
-
-        <div style={{ padding: "8px 22px 22px" }}>
-          <div style={{ display: "flex", gap: 16, padding: "16px 0 8px" }}>
-            <div style={{ flex: 1 }}>
-              <div className="am-label" style={{ marginBottom: 4 }}>Preț</div>
-              <div className="am-mono" style={{ fontSize: 22, fontWeight: 700, color: T.ink }}>
-                {formatCompactNumber(price)}
-                <span style={{ fontSize: 12, color: T.ink2, marginLeft: 6, fontWeight: 500 }}>
-                  {currency}/t
-                </span>
-              </div>
-            </div>
-            <div style={{ flex: 1 }}>
-              <div className="am-label" style={{ marginBottom: 4 }}>Cantitate</div>
-              <div className="am-mono" style={{ fontSize: 22, fontWeight: 700, color: T.ink }}>
-                {formatCompactNumber(bid.quantity)}
-                <span style={{ fontSize: 12, color: T.ink2, marginLeft: 6, fontWeight: 500 }}>t</span>
-              </div>
-            </div>
-          </div>
-
-          <Row
-            label="Fermier"
-            value={
-              <span>
-                <span style={{ display: "block" }}>{farmerName}</span>
-                {farmerSub && (
-                  <span style={{ display: "block", fontSize: 11.5, color: T.ink3 }}>{farmerSub}</span>
-                )}
-              </span>
-            }
-          />
-          <Row label="Paritate" value={formatParity(bid)} />
-          <Row label="Livrare" value={formatDeliveryRange(bid.delivery_start, bid.delivery_end) || "—"} />
-          {bid.crop_year && <Row label="An recoltă" value={bid.crop_year} />}
-          {bid.quantity_tolerance != null && (
-            <Row label="Toleranță" value={`±${bid.quantity_tolerance}%`} />
-          )}
-          {hasPositiveNumber(bid.counter_price) && s !== "accepted" && (
-            <Row
-              label="Contra-ofertă"
-              value={`${formatCompactNumber(bid.counter_price)} ${currency}/t`}
-            />
-          )}
-          {bid.remarks && <Row label="Observații" value={bid.remarks} />}
-          {bid.contract_no && s === "accepted" && <Row label="Contract" value={bid.contract_no} />}
-          <Row label="ID ofertă" value={<span className="am-mono">{bid.id}</span>} />
-        </div>
-      </div>
-    </div>
-  );
-}
