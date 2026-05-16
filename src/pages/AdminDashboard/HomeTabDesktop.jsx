@@ -398,7 +398,7 @@ export default function HomeTabDesktop() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "60px 1fr 130px 110px 100px 90px",
+              gridTemplateColumns: "1fr 130px 110px 180px",
               padding: "8px 18px",
               fontSize: 10.5,
               color: T.ink3,
@@ -408,40 +408,41 @@ export default function HomeTabDesktop() {
               borderBottom: `1px solid ${T.borderS}`,
             }}
           >
-            <div>Sym.</div>
             <div>Produs</div>
             <div style={{ textAlign: "right" }}>Preț</div>
             <div>Monedă</div>
-            <div>Status</div>
             <div style={{ textAlign: "right" }}>Acțiuni</div>
           </div>
           {(commodities || []).map((c, i, arr) => {
             const isStopped = c.active === false;
-            const sym = PRODUCT_SYMBOL[c.id] || String(c.id || "—").slice(0, 4).toUpperCase();
             return (
               <div
                 key={c.id}
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "60px 1fr 130px 110px 100px 90px",
+                  gridTemplateColumns: "1fr 130px 110px 180px",
                   padding: "11px 18px",
                   alignItems: "center",
                   borderBottom: i === arr.length - 1 ? "none" : `1px solid ${T.borderS}`,
                   gap: 8,
                 }}
               >
-                <div className="am-mono" style={{ fontSize: 12, fontWeight: 600 }}>
-                  {sym}
-                </div>
-                <div>
-                  <div style={{ fontSize: 13.5, fontWeight: 500 }}>{getProductLabelSafe(c.id, c.name)}</div>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 13.5, fontWeight: 500, whiteSpace: "nowrap" }}>
+                    {getProductLabelSafe(c.id, c.name)}
+                    {isStopped && (
+                      <span style={{ marginLeft: 8, fontSize: 11, color: T.err, fontWeight: 600 }}>
+                        · Oprit
+                      </span>
+                    )}
+                  </div>
                   <div style={{ fontSize: 11, color: T.ink2 }}>CPT Constanța</div>
                 </div>
                 <div>
                   <input
                     className="am-input"
                     type="number"
-                    step="0.01"
+                    step="0.5"
                     style={{ textAlign: "right" }}
                     value={draftPrices?.[c.id] ?? ""}
                     onChange={(e) => setDraftPrices((p) => ({ ...p, [c.id]: e.target.value }))}
@@ -459,7 +460,6 @@ export default function HomeTabDesktop() {
                     <option value="USD">USD/t</option>
                   </select>
                 </div>
-                <div>{isStopped ? <Pill tone="err">Oprit</Pill> : <Pill tone="ok">Activ</Pill>}</div>
                 <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
                   <button
                     type="button"
