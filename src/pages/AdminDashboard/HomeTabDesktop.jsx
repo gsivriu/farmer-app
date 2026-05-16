@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAppContext } from "../../context/AppContext.jsx";
-import MarketTicker from "../../components/MarketTicker.jsx";
+import MarketTickerDesktop from "../../components/MarketTickerDesktop.jsx";
 import ExchangeRatesCard from "../../components/ExchangeRatesCard.jsx";
 import SiloPriceTable from "../../components/SiloPriceTable.jsx";
 import { getProductLabelSafe } from "../../utils/productLabels";
@@ -609,9 +609,7 @@ export default function HomeTabDesktop() {
             <div style={{ fontSize: 14, fontWeight: 600 }}>Piețe de referință</div>
             <div style={{ fontSize: 11.5, color: T.ink2, marginTop: 2 }}>CBOT · MATIF · contracte futures</div>
           </div>
-          <div style={{ padding: 18 }} className="am-wrap-existing">
-            <MarketTicker />
-          </div>
+          <MarketTickerDesktop />
         </Card>
         <Card padding={0}>
           <div style={{ padding: "14px 18px", borderBottom: `1px solid ${T.border}` }}>
