@@ -171,15 +171,16 @@ function injectBaseCss() {
     .am-home * { box-sizing: border-box; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
     .am-home .am-mono { font-family: ${T.mono}; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
     .am-home .am-label { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: ${T.ink2}; font-weight: 600; }
-    .am-home input.am-input { font-family: ${T.mono}; font-variant-numeric: tabular-nums; background: ${T.surface}; border: 1px solid ${T.border}; border-radius: 8px; padding: 7px 10px; font-size: 13.5px; font-weight: 600; color: ${T.ink}; width: 100%; outline: none; }
+    .am-home input.am-input { font-family: ${T.mono}; font-variant-numeric: tabular-nums; background: ${T.surface}; border: 1px solid ${T.border}; border-radius: 8px; height: 36px; padding: 0 12px; font-size: 13.5px; font-weight: 600; color: ${T.ink}; width: 100%; outline: none; }
     .am-home input.am-input:focus { border-color: ${T.red}; box-shadow: 0 0 0 3px ${T.redSoft}; }
-    .am-home select.am-select { font-family: inherit; background: ${T.surface}; border: 1px solid ${T.border}; border-radius: 8px; padding: 7px 10px; font-size: 12.5px; font-weight: 500; color: ${T.ink}; outline: none; cursor: pointer; }
-    .am-home button.am-btn { font-family: inherit; cursor: pointer; border-radius: 8px; font-weight: 600; font-size: 12.5px; padding: 7px 12px; border: 1px solid transparent; transition: filter .15s ease; }
+    .am-home select.am-select { font-family: inherit; background: ${T.surface}; border: 1px solid ${T.border}; border-radius: 8px; height: 36px; padding: 0 10px; font-size: 12.5px; font-weight: 500; color: ${T.ink}; outline: none; cursor: pointer; width: 100%; }
+    .am-home button.am-btn { font-family: inherit; cursor: pointer; border-radius: 8px; font-weight: 600; font-size: 12.5px; height: 36px; padding: 0 14px; border: 1px solid transparent; transition: filter .15s ease, background-color .15s ease; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; }
     .am-home button.am-btn:hover { filter: brightness(0.96); }
     .am-home button.am-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .am-home button.am-btn-primary { background: ${T.red}; color: #fff; border-color: ${T.red}; }
     .am-home button.am-btn-ghost { background: transparent; color: ${T.ink}; border-color: ${T.border}; }
-    .am-home button.am-btn-danger { background: ${T.errSoft}; color: ${T.err}; }
+    .am-home button.am-btn-stop { background: transparent; color: ${T.err}; border-color: ${T.err}; filter: none; }
+    .am-home button.am-btn-stop:hover { background: ${T.errSoft}; filter: none; }
     .am-home .am-wrap-existing { padding: 0; }
     .am-home .am-wrap-existing > * { margin: 0 !important; }
     .am-home .am-wrap-existing .home-page { padding: 0 !important; gap: 0 !important; }
@@ -397,9 +398,10 @@ export default function HomeTabDesktop() {
           </div>
           <div
             style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 130px 110px 180px",
-              padding: "8px 18px",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "8px 20px",
               fontSize: 10.5,
               color: T.ink3,
               fontWeight: 600,
@@ -408,10 +410,10 @@ export default function HomeTabDesktop() {
               borderBottom: `1px solid ${T.borderS}`,
             }}
           >
-            <div>Produs</div>
-            <div style={{ textAlign: "right" }}>Preț</div>
-            <div>Monedă</div>
-            <div style={{ textAlign: "right" }}>Acțiuni</div>
+            <div style={{ flex: "0 0 35%" }}>Produs</div>
+            <div style={{ flex: "0 0 15%", textAlign: "right" }}>Preț</div>
+            <div style={{ flex: "0 0 12%" }}>Monedă</div>
+            <div style={{ marginLeft: "auto", textAlign: "right" }}>Acțiuni</div>
           </div>
           {(commodities || []).map((c, i, arr) => {
             const isStopped = c.active === false;
@@ -419,15 +421,14 @@ export default function HomeTabDesktop() {
               <div
                 key={c.id}
                 style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 130px 110px 180px",
-                  padding: "11px 18px",
+                  display: "flex",
                   alignItems: "center",
-                  borderBottom: i === arr.length - 1 ? "none" : `1px solid ${T.borderS}`,
                   gap: 8,
+                  padding: "12px 20px",
+                  borderBottom: i === arr.length - 1 ? "none" : `1px solid ${T.borderS}`,
                 }}
               >
-                <div style={{ minWidth: 0 }}>
+                <div style={{ flex: "0 0 35%", minWidth: 0 }}>
                   <div style={{ fontSize: 13.5, fontWeight: 500, whiteSpace: "nowrap" }}>
                     {getProductLabelSafe(c.id, c.name)}
                     {isStopped && (
@@ -438,7 +439,7 @@ export default function HomeTabDesktop() {
                   </div>
                   <div style={{ fontSize: 11, color: T.ink2 }}>CPT Constanța</div>
                 </div>
-                <div>
+                <div style={{ flex: "0 0 15%" }}>
                   <input
                     className="am-input"
                     type="number"
@@ -449,7 +450,7 @@ export default function HomeTabDesktop() {
                     placeholder="0,00"
                   />
                 </div>
-                <div>
+                <div style={{ flex: "0 0 12%" }}>
                   <select
                     className="am-select"
                     value={draftCurrencies?.[c.id] ?? "EUR"}
@@ -460,7 +461,7 @@ export default function HomeTabDesktop() {
                     <option value="USD">USD/t</option>
                   </select>
                 </div>
-                <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
+                <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
                   <button
                     type="button"
                     className="am-btn am-btn-primary"
@@ -472,7 +473,7 @@ export default function HomeTabDesktop() {
                   {!isStopped && (
                     <button
                       type="button"
-                      className="am-btn am-btn-danger"
+                      className="am-btn am-btn-stop"
                       onClick={() => handleStop(c.id)}
                       disabled={loadingStop[c.id]}
                     >
