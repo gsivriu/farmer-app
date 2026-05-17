@@ -78,7 +78,7 @@ function BidStatusBadge({ status }) {
   return <span className="bid-status-badge bid-status-pending">În așteptare</span>;
 }
 
-export default function BidsTab({ active }) {
+export default function BidsTab() {
   const { bids, fetchBids, addFarmerRewardsPoints } = useAppContext();
 
   const [farmers, setFarmers] = useState([]);
@@ -104,22 +104,6 @@ export default function BidsTab({ active }) {
   const [adminConfirmAction, setAdminConfirmAction] = useState(null);
   const [modalError, setModalError] = useState(null);
   const [deliveryLocations, setDeliveryLocations] = useState([]);
-
-  useEffect(() => { fetchBids(); }, [fetchBids]);
-
-  // Re-fetch when admin switches to bids tab
-  useEffect(() => {
-    if (active) fetchBids();
-  }, [active, fetchBids]);
-
-  // Re-fetch when the page becomes visible
-  useEffect(() => {
-    const handleVisibility = () => {
-      if (document.visibilityState === "visible") fetchBids();
-    };
-    document.addEventListener("visibilitychange", handleVisibility);
-    return () => document.removeEventListener("visibilitychange", handleVisibility);
-  }, [fetchBids]);
 
   useEffect(() => {
     if (!Array.isArray(bids)) return;
