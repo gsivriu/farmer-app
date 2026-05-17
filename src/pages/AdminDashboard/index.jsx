@@ -52,7 +52,7 @@ export default function AdminDashboard() {
         </div>
 
         <div className={activeTab === "bids" ? "tab-pane active" : "tab-pane"}>
-          <BidsTab active={activeTab === "bids"} />
+          <BidsTab />
         </div>
 
         <div className={activeTab === "farmers" ? "tab-pane active" : "tab-pane"}>
