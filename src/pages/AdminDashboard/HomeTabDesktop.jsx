@@ -56,60 +56,6 @@ const STATUS_LABEL = {
   pending: "În așteptare",
 };
 
-function Pill({ tone = "neutral", size = "sm", children }) {
-  const tones = {
-    neutral: { bg: T.surface2, fg: T.ink2, dot: T.ink3 },
-    ok: { bg: T.okSoft, fg: T.ok, dot: T.ok },
-    warn: { bg: T.warnSoft, fg: T.warn, dot: T.warn },
-    err: { bg: T.errSoft, fg: T.err, dot: T.err },
-    info: { bg: T.infoSoft, fg: T.info, dot: T.info },
-    red: { bg: T.redSoft, fg: T.red, dot: T.red },
-  };
-  const c = tones[tone] || tones.neutral;
-  const pad = size === "xs" ? "2px 7px" : "3px 9px";
-  const fs = size === "xs" ? 10.5 : 11.5;
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        padding: pad,
-        borderRadius: 999,
-        background: c.bg,
-        color: c.fg,
-        fontSize: fs,
-        fontWeight: 600,
-        letterSpacing: 0.02,
-        lineHeight: 1.2,
-        whiteSpace: "nowrap",
-      }}
-    >
-      <span style={{ width: 5, height: 5, borderRadius: 999, background: c.dot }} />
-      {children}
-    </span>
-  );
-}
-
-function Delta({ value, suffix = "%" }) {
-  const v = Number(value);
-  if (!Number.isFinite(v)) return null;
-  const up = v >= 0;
-  const color = v === 0 ? T.ink2 : up ? T.ok : T.err;
-  const arrow = v === 0 ? "·" : up ? "▲" : "▼";
-  const abs = Math.abs(v).toFixed(2);
-  return (
-    <span
-      className="am-mono"
-      style={{ color, fontSize: 12.5, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 4 }}
-    >
-      <span style={{ fontSize: 9, lineHeight: 1 }}>{arrow}</span>
-      {abs}
-      {suffix}
-    </span>
-  );
-}
-
 function Card({ children, padding = 16, style }) {
   return (
     <div
@@ -122,45 +68,6 @@ function Card({ children, padding = 16, style }) {
       }}
     >
       {children}
-    </div>
-  );
-}
-
-function Stat({ label, value, unit, delta }) {
-  return (
-    <div>
-      <div
-        style={{
-          fontSize: 11,
-          letterSpacing: 0.06,
-          textTransform: "uppercase",
-          color: T.ink2,
-          fontWeight: 600,
-          marginBottom: 6,
-        }}
-      >
-        {label}
-      </div>
-      <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-        <span
-          className="am-mono"
-          style={{
-            fontSize: 32,
-            fontWeight: 600,
-            color: T.ink,
-            letterSpacing: -0.4,
-            lineHeight: 1,
-          }}
-        >
-          {value}
-        </span>
-        {unit && <span style={{ fontSize: 12, color: T.ink2, fontWeight: 500 }}>{unit}</span>}
-      </div>
-      {delta !== undefined && delta !== null && (
-        <div style={{ marginTop: 6 }}>
-          <Delta value={delta} />
-        </div>
-      )}
     </div>
   );
 }
@@ -193,12 +100,6 @@ function injectBaseCss() {
   document.head.appendChild(s);
 }
 
-function formatNum(n, decimals = 0) {
-  const v = Number(n);
-  if (!Number.isFinite(v)) return "—";
-  return v.toLocaleString("ro-RO", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
-}
-
 function formatTimeAgo(dateStr) {
   if (!dateStr) return "—";
   const d = new Date(dateStr);
@@ -211,11 +112,6 @@ function formatTimeAgo(dateStr) {
   const days = Math.round(h / 24);
   if (days < 7) return `acum ${days}z`;
   return d.toLocaleDateString("ro-RO", { day: "2-digit", month: "short" });
-}
-
-function todayKey() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 function getBidDisplayPrice(b) {
@@ -311,40 +207,16 @@ export default function HomeTabDesktop() {
     window.setTimeout(() => setPriceNotice(""), 3500);
   };
 
-  // ── Derived KPIs ───────────────────────────────────────────────
-  const kpis = useMemo(() => {
-    const today = todayKey();
-    const list = bids || [];
-    let openCount = 0;
-    let acceptedTodayCount = 0;
-    let qtyToday = 0;
-    let valueTodayEur = 0;
-    for (const b of list) {
-      const s = String(b.status || "").toLowerCase();
-      const isOpen = s === "pending" || s === "countered" || s === "farmer_countered";
-      if (isOpen) openCount += 1;
-      const isToday = String(b.created_at || "").slice(0, 10) === today;
-      if (isToday && s === "accepted") acceptedTodayCount += 1;
-      if (isToday) {
-        const qty = Number(b.quantity || 0);
-        const price =
-          s === "accepted" && Number(b.counter_price) > 0
-            ? Number(b.counter_price)
-            : Number(b.counter_price) > 0
-              ? Number(b.counter_price)
-              : Number(b.price || 0);
-        qtyToday += Number.isFinite(qty) ? qty : 0;
-        if (Number.isFinite(qty) && Number.isFinite(price)) valueTodayEur += qty * price;
-      }
-    }
-    return { openCount, acceptedTodayCount, qtyToday, valueTodayEur };
-  }, [bids]);
-
   // ── Live activity ──────────────────────────────────────────────
   const liveEvents = useMemo(() => {
+    // eslint-disable-next-line react-hooks/purity
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
     const list = [...(bids || [])]
-      .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
-      .slice(0, 8);
+      .filter((b) => {
+        const t = new Date(b.created_at || 0).getTime();
+        return Number.isFinite(t) && t >= cutoff;
+      })
+      .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
     return list.map((b) => {
       const s = String(b.status || "").toLowerCase();
       const tone = STATUS_TONE[s] || "neutral";
@@ -388,7 +260,7 @@ export default function HomeTabDesktop() {
         <div>
           <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: -0.4 }}>Trading desk</div>
           <div style={{ fontSize: 12.5, color: T.ink2, marginTop: 3 }}>
-            {today} · {kpis.openCount} oferte deschise
+            {today}
           </div>
         </div>
         {priceNotice && (
@@ -405,22 +277,6 @@ export default function HomeTabDesktop() {
             {priceNotice}
           </div>
         )}
-      </div>
-
-      {/* KPI strip */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 20 }}>
-        <Card padding={16}>
-          <Stat label="Oferte deschise" value={formatNum(kpis.openCount)} />
-        </Card>
-        <Card padding={16}>
-          <Stat label="Volum azi" value={formatNum(kpis.qtyToday)} unit="t" />
-        </Card>
-        <Card padding={16}>
-          <Stat label="Valoare azi" value={formatNum(kpis.valueTodayEur)} unit="€" />
-        </Card>
-        <Card padding={16}>
-          <Stat label="Acceptate azi" value={formatNum(kpis.acceptedTodayCount)} />
-        </Card>
       </div>
 
       {/* Two-column: Prețuri de listă + Live activity */}
@@ -546,10 +402,10 @@ export default function HomeTabDesktop() {
           >
             <div style={{ fontSize: 14, fontWeight: 600 }}>Activitate recentă</div>
             <div style={{ fontSize: 11.5, color: T.ink2, marginTop: 2 }}>
-              Ultimele oferte trimise de fermieri
+              Ofertele din ultimele 24h
             </div>
           </div>
-          <div>
+          <div style={{ maxHeight: 480, overflowY: "auto" }}>
             {liveEvents.length === 0 && (
               <div style={{ padding: 24, color: T.ink2, fontSize: 13 }}>Nu există activitate recentă.</div>
             )}
