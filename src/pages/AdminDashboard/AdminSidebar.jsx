@@ -81,13 +81,18 @@ function injectCss() {
         background: ${T.surface};
         border-right: 1px solid ${T.border};
         padding: 14px 10px;
-        position: sticky;
-        top: 0;
-        align-self: start;
-        height: 100vh;
-        overflow-y: auto;
+        align-self: stretch;
+        min-height: 100vh;
         font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
         color: ${T.ink};
+      }
+      .am-sidebar .am-sidebar-inner {
+        position: sticky;
+        top: 0;
+        max-height: 100vh;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
       }
       .am-sidebar .am-brand {
         display: flex; align-items: center; gap: 10px;
@@ -153,6 +158,7 @@ export default function AdminSidebar({ activeTab, onChange }) {
 
   return (
     <aside className="am-sidebar" aria-label="Navigare administrator">
+      <div className="am-sidebar-inner">
       <div className="am-brand">
         <span className="am-brand-logo">A</span>
         <span className="am-brand-name">
@@ -181,6 +187,7 @@ export default function AdminSidebar({ activeTab, onChange }) {
       <div className="am-nav-spacer" />
 
       <div className="am-foot">Ameropa Grains România · 2026</div>
+      </div>
     </aside>
   );
 }
