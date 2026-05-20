@@ -6,6 +6,26 @@ import { formatCompactNumber, hasPositiveNumber } from "../../utils/numberFormat
 import { formatDeliveryRange, formatLocationDisplay, isFreightParity } from "../../utils/formatting";
 import BidCardV2 from "../../components/features/BidCardV2.jsx";
 import AdminBidDetailModal from "../../components/AdminBidDetailModal.jsx";
+import "./BidsTab.css";
+
+const PERIOD_OPTIONS = [
+  { value: "all", label: "Toate" },
+  { value: "1", label: "Astăzi" },
+  { value: "7", label: "Ultimele 7 zile" },
+  { value: "30", label: "Ultimele 30 zile" },
+  { value: "90", label: "Ultimele 90 zile" },
+  { value: "365", label: "Ultimul an" },
+];
+
+const periodCutoff = (value) => {
+  if (!value || value === "all") return null;
+  const days = Number(value);
+  if (!Number.isFinite(days) || days <= 0) return null;
+  const cutoff = new Date();
+  cutoff.setHours(0, 0, 0, 0);
+  cutoff.setDate(cutoff.getDate() - (days - 1));
+  return cutoff;
+};
 
 const BidCardComponent = BidCardV2;
 
@@ -93,6 +113,7 @@ export default function BidsTab() {
   const [filterDeliveryTo, setFilterDeliveryTo] = useState("");
   const [filterDeliveryLocation, setFilterDeliveryLocation] = useState("all");
   const [filterLoadingLocation, setFilterLoadingLocation] = useState("all");
+  const [filterPeriod, setFilterPeriod] = useState("30");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [showStats, setShowStats] = useState(false);
 
@@ -224,16 +245,10 @@ export default function BidsTab() {
 
   // ── Derived data ─────────────────────────────────────────────────────────────
 
-  const filteredBids = (bids || []).filter((b) => {
+  const periodCut = periodCutoff(filterPeriod);
+  const scopedBids = (bids || []).filter((b) => {
     if (listFarmerFilter !== "all" && b.farmer_id !== listFarmerFilter) return false;
     if (filterProduct !== "all" && b.product !== filterProduct) return false;
-    if (filterStatus !== "all") {
-      if (filterStatus === "pending") {
-        if (b.status !== "pending" && b.status !== "countered" && b.status !== "farmer_countered") return false;
-      } else if (b.status !== filterStatus) {
-        return false;
-      }
-    }
     if (filterParity !== "all" && b.parity !== filterParity) return false;
     if (filterDeliveryLocation !== "all" && (b.delivery_location || "-") !== filterDeliveryLocation) return false;
     if (filterLoadingLocation !== "all" && (b.loading_location || "-") !== filterLoadingLocation) return false;
@@ -244,7 +259,31 @@ export default function BidsTab() {
       if (filterDeliveryFrom && start < filterDeliveryFrom) return false;
       if (filterDeliveryTo && end > filterDeliveryTo) return false;
     }
+    if (periodCut) {
+      if (!b.created_at) return false;
+      const created = new Date(b.created_at);
+      if (Number.isNaN(created.getTime()) || created < periodCut) return false;
+    }
     return true;
+  });
+
+  const isPending = (s) => s === "pending" || s === "countered" || s === "farmer_countered";
+  const statusCounts = scopedBids.reduce(
+    (acc, b) => {
+      acc.all += 1;
+      if (b.status === "accepted") acc.accepted += 1;
+      else if (b.status === "rejected") acc.rejected += 1;
+      else if (isPending(b.status)) acc.pending += 1;
+      return acc;
+    },
+    { all: 0, accepted: 0, rejected: 0, pending: 0 },
+  );
+  const totalVolume = scopedBids.reduce((sum, b) => sum + Number(b.quantity || 0), 0);
+
+  const filteredBids = scopedBids.filter((b) => {
+    if (filterStatus === "all") return true;
+    if (filterStatus === "pending") return isPending(b.status);
+    return b.status === filterStatus;
   });
 
   const statsRows = (() => {
@@ -280,10 +319,21 @@ export default function BidsTab() {
 
   return (
     <>
-      <div className="card admin-card dashboard-card">
-        <div className="card-header admin-bids-header activity-header-compact">
-          <h2 className="market-title">Toate ofertele</h2>
-          <div className="admin-bids-actions">
+      <div className="card admin-card dashboard-card oferte-page">
+        <header className="oferte-head">
+          <div className="oferte-title">
+            <h2>Oferte</h2>
+            <div className="oferte-sub">
+              <span className="stat"><strong>{statusCounts.all}</strong>&nbsp;total</span>
+              <span className="sep" />
+              <span className="stat"><strong>{statusCounts.accepted}</strong>&nbsp;acceptate</span>
+              <span className="sep" />
+              <span className="stat"><strong>{statusCounts.rejected}</strong>&nbsp;respinse</span>
+              <span className="sep" />
+              <span className="stat"><strong>{formatCompactNumber(totalVolume)}</strong>&nbsp;t volum</span>
+            </div>
+          </div>
+          <div className="oferte-tools">
             <button type="button" className="btn small outline" onClick={() => setFiltersOpen(true)}>Filtre</button>
             <button type="button" className="btn small outline" onClick={() => setShowStats((prev) => !prev)}>
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" style={{ marginRight: 5 }}>
@@ -293,6 +343,91 @@ export default function BidsTab() {
               </svg>
               Statistici
             </button>
+          </div>
+        </header>
+
+        <div className="oferte-filter-bar">
+          <div className="oferte-tabs" role="tablist" aria-label="Filtrează după stare">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={filterStatus === "all"}
+              className={"oferte-tab" + (filterStatus === "all" ? " is-on" : "")}
+              onClick={() => setFilterStatus("all")}
+            >
+              Toate <span className="count">{statusCounts.all}</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={filterStatus === "accepted"}
+              className={"oferte-tab" + (filterStatus === "accepted" ? " is-on" : "")}
+              onClick={() => setFilterStatus("accepted")}
+            >
+              Acceptate <span className="count">{statusCounts.accepted}</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={filterStatus === "rejected"}
+              className={"oferte-tab" + (filterStatus === "rejected" ? " is-on" : "")}
+              onClick={() => setFilterStatus("rejected")}
+            >
+              Respinse <span className="count">{statusCounts.rejected}</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={filterStatus === "pending"}
+              className={"oferte-tab" + (filterStatus === "pending" ? " is-on" : "")}
+              onClick={() => setFilterStatus("pending")}
+            >
+              În așteptare <span className="count">{statusCounts.pending}</span>
+            </button>
+          </div>
+
+          <div className="oferte-dds">
+            <div className="oferte-dd-group" style={{ "--label-pad": "62px" }}>
+              <span className="lbl">Produs:</span>
+              <select
+                aria-label="Filtrează după produs"
+                className="oferte-dd"
+                value={filterProduct}
+                onChange={(e) => setFilterProduct(e.target.value)}
+              >
+                <option value="all">Toate</option>
+                {PRODUCT_FILTER_KEYS.map((key) => (
+                  <option key={key} value={key}>{getProductLabelSafe(key)}</option>
+                ))}
+              </select>
+            </div>
+            <div className="oferte-dd-group" style={{ "--label-pad": "64px" }}>
+              <span className="lbl">Fermier:</span>
+              <select
+                aria-label="Filtrează după fermier"
+                className="oferte-dd"
+                value={listFarmerFilter}
+                onChange={(e) => setListFarmerFilter(e.target.value)}
+              >
+                <option value="all">Toți</option>
+                {farmers.map((f) => (
+                  <option key={f.id} value={f.id}>{f.email || f.id}</option>
+                ))}
+              </select>
+            </div>
+            <div className="oferte-dd-group" style={{ "--label-pad": "75px" }}>
+              <span className="lbl">Perioadă:</span>
+              <select
+                aria-label="Filtrează după perioadă"
+                className="oferte-dd"
+                value={filterPeriod}
+                onChange={(e) => setFilterPeriod(e.target.value)}
+              >
+                {PERIOD_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
@@ -365,6 +500,7 @@ export default function BidsTab() {
                     setFilterDeliveryTo("");
                     setFilterDeliveryLocation("all");
                     setFilterLoadingLocation("all");
+                    setFilterPeriod("all");
                   }}
                 >
                   Resetează filtrele
@@ -508,6 +644,7 @@ export default function BidsTab() {
                     setFilterDeliveryTo("");
                     setFilterDeliveryLocation("all");
                     setFilterLoadingLocation("all");
+                    setFilterPeriod("all");
                   }}
                 >
                   Resetează
