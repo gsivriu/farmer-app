@@ -26,27 +26,6 @@ const periodCutoff = (value) => {
   return cutoff;
 };
 
-const AVATAR_PALETTE = [
-  "#E6DEDB", "#DDE6E0", "#E0DCE6", "#E6E0DC",
-  "#DCE6E2", "#E6DCDF", "#E6E3DC", "#DCE0E6", "#E2E6DC", "#E6DCE2",
-];
-
-const getInitials = (value) => {
-  const v = String(value || "").trim();
-  if (!v) return "—";
-  const local = v.includes("@") ? v.split("@")[0] : v;
-  const parts = local.split(/[.\s_-]+/).filter(Boolean);
-  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
-  return local.slice(0, 2).toUpperCase();
-};
-
-const hashCode = (str) => {
-  let h = 0;
-  for (let i = 0; i < str.length; i++) h = ((h << 5) - h + str.charCodeAt(i)) | 0;
-  return Math.abs(h);
-};
-const avatarColorFor = (id) => AVATAR_PALETTE[hashCode(String(id || "")) % AVATAR_PALETTE.length];
-
 const RO_MONTHS = ["ian.", "feb.", "mar.", "apr.", "mai", "iun.", "iul.", "aug.", "sep.", "oct.", "noi.", "dec."];
 const formatCardDate = (iso) => {
   if (!iso) return { day: "—", time: "" };
@@ -96,8 +75,6 @@ const statusVisual = (s) => STATUS_PILL[String(s || "").toLowerCase()] || STATUS
 
 function OfferCard({ bid, onOpen }) {
   const farmer = bid.farmer_email || bid.farmer_id || "—";
-  const initials = getInitials(farmer);
-  const avatarBg = avatarColorFor(bid.farmer_id || farmer);
   const date = formatCardDate(bid.created_at);
   const status = statusVisual(bid.status);
   const unit = `${bid.currency || (bid.product === "sunflower" ? "USD" : "EUR")}/t`;
@@ -120,10 +97,11 @@ function OfferCard({ bid, onOpen }) {
       <header className="offer-head">
         <div className="head-prod">
           <span className="prod-name">{getProductLabelSafe(bid.product)}</span>
+        </div>
+        <div className="head-recolta">
           <span className="recolta">Recoltă <span className="crop">{cropYear}</span></span>
         </div>
         <div className="head-fermier">
-          <span className="avatar" style={{ background: avatarBg }}>{initials}</span>
           <span className="fermier-email" title={farmer}>{farmer}</span>
         </div>
         <div className="head-status">
