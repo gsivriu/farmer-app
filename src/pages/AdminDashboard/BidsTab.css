@@ -24,20 +24,25 @@
   border: none;
   box-shadow: none;
   border-radius: 0;
-  padding: 40px 40px 32px;
-  max-width: 1280px;
-  margin: 0 auto;
+  padding: 26px 32px 22px;
+  margin: 0;
   width: 100%;
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 @media (max-width: 1023px) {
   .oferte-page.card {
-    padding: 24px 20px 24px;
+    padding: 20px 20px 22px;
+    gap: 20px;
   }
 }
 @media (max-width: 600px) {
   .oferte-page.card {
-    padding: 16px 12px 20px;
+    padding: 16px 14px 20px;
+    gap: 16px;
   }
 }
 
@@ -47,7 +52,7 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 24px;
-  padding: 0 0 22px;
+  padding: 0;
   flex-wrap: wrap;
 }
 .oferte-title h2 {
@@ -90,9 +95,8 @@
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  padding: 0 0 20px;
+  padding: 0;
 }
-.oferte-page .offer-list { margin-top: 0; }
 
 .oferte-tabs {
   display: inline-flex;

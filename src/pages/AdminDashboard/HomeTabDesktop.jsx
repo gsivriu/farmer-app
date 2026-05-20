@@ -247,7 +247,7 @@ export default function HomeTabDesktop() {
   });
 
   return (
-    <div className="am-home" style={{ padding: "40px 40px 32px" }}>
+    <div className="am-home" style={{ padding: "26px 32px 22px" }}>
       {/* Header */}
       <div
         style={{
