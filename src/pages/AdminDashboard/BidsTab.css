@@ -24,7 +24,7 @@
   border: none;
   box-shadow: none;
   border-radius: 0;
-  padding: 28px 32px 32px;
+  padding: 40px 40px 32px;
   max-width: 1280px;
   margin: 0 auto;
   width: 100%;
@@ -32,7 +32,7 @@
 
 @media (max-width: 1023px) {
   .oferte-page.card {
-    padding: 20px 18px 24px;
+    padding: 24px 20px 24px;
   }
 }
 @media (max-width: 600px) {
