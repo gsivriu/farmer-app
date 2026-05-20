@@ -583,7 +583,7 @@ export default function BidsTab() {
         {error && <p className="badge rejected" style={{ marginTop: 12 }}>{error}</p>}
 
         {!loading && !error && (
-          <div className="offer-list" style={{ marginTop: 14 }}>
+          <div className="offer-list">
             {filteredBids.map((b) => (
               <OfferCard
                 key={b.id}

@@ -16,13 +16,38 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* The Oferte page reads as an actual page, not a "card on a card".
+   Drop the inherited .card chrome and add page-grade padding so the
+   content breathes away from the sidebar and the right edge. */
+.oferte-page.card {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 28px 32px 32px;
+  max-width: 1280px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+@media (max-width: 1023px) {
+  .oferte-page.card {
+    padding: 20px 18px 24px;
+  }
+}
+@media (max-width: 600px) {
+  .oferte-page.card {
+    padding: 16px 12px 20px;
+  }
+}
+
 /* ── Page header ── */
 .oferte-head {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: 24px;
-  padding: 4px 0 18px;
+  padding: 0 0 22px;
   flex-wrap: wrap;
 }
 .oferte-title h2 {
@@ -65,8 +90,9 @@
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  padding: 0 0 16px;
+  padding: 0 0 20px;
 }
+.oferte-page .offer-list { margin-top: 0; }
 
 .oferte-tabs {
   display: inline-flex;
