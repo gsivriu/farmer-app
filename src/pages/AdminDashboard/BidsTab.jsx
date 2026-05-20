@@ -4,7 +4,6 @@ import { useAppContext } from "../../context/AppContext.jsx";
 import { getProductLabelSafe, PRODUCT_FILTER_KEYS } from "../../utils/productLabels";
 import { formatCompactNumber, hasPositiveNumber } from "../../utils/numberFormat";
 import { formatDeliveryRange, formatLocationDisplay, isFreightParity } from "../../utils/formatting";
-import BidCardV2 from "../../components/features/BidCardV2.jsx";
 import AdminBidDetailModal from "../../components/AdminBidDetailModal.jsx";
 import "./BidsTab.css";
 
@@ -27,7 +26,154 @@ const periodCutoff = (value) => {
   return cutoff;
 };
 
-const BidCardComponent = BidCardV2;
+const AVATAR_PALETTE = [
+  "#E6DEDB", "#DDE6E0", "#E0DCE6", "#E6E0DC",
+  "#DCE6E2", "#E6DCDF", "#E6E3DC", "#DCE0E6", "#E2E6DC", "#E6DCE2",
+];
+
+const getInitials = (value) => {
+  const v = String(value || "").trim();
+  if (!v) return "—";
+  const local = v.includes("@") ? v.split("@")[0] : v;
+  const parts = local.split(/[.\s_-]+/).filter(Boolean);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return local.slice(0, 2).toUpperCase();
+};
+
+const hashCode = (str) => {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = ((h << 5) - h + str.charCodeAt(i)) | 0;
+  return Math.abs(h);
+};
+const avatarColorFor = (id) => AVATAR_PALETTE[hashCode(String(id || "")) % AVATAR_PALETTE.length];
+
+const RO_MONTHS = ["ian.", "feb.", "mar.", "apr.", "mai", "iun.", "iul.", "aug.", "sep.", "oct.", "noi.", "dec."];
+const formatCardDate = (iso) => {
+  if (!iso) return { day: "—", time: "" };
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return { day: "—", time: "" };
+  const day = `${String(d.getDate()).padStart(2, "0")} ${RO_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+  const time = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  return { day, time };
+};
+
+const formatQuantity = (qty) => {
+  const n = Number(qty || 0);
+  if (!Number.isFinite(n)) return "—";
+  return new Intl.NumberFormat("ro-RO", { maximumFractionDigits: 2 }).format(n);
+};
+
+const formatCardPrice = (bid) => {
+  const s = String(bid?.status || "").toLowerCase();
+  const raw = (s === "accepted" || s === "rejected")
+    ? (bid.final_price ?? (hasPositiveNumber(bid.counter_price) ? bid.counter_price : bid.price))
+    : (hasPositiveNumber(bid.counter_price) ? bid.counter_price : bid.price);
+  const n = Number(raw);
+  if (!Number.isFinite(n)) return "—";
+  return new Intl.NumberFormat("ro-RO", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+};
+
+const formatCardDelivery = (bid) => {
+  if (!bid?.parity) return null;
+  const parity = String(bid.parity).toUpperCase();
+  const delivery = formatLocationDisplay(bid.delivery_location || "");
+  const loading = formatLocationDisplay(bid.loading_location || "");
+  if (isFreightParity(bid.parity)) {
+    const loc = (loading && loading !== "-") ? loading : (delivery && delivery !== "-" ? delivery : "");
+    return loc ? `${parity} ${loc}` : null;
+  }
+  return (delivery && delivery !== "-") ? `${parity} ${delivery}` : parity;
+};
+
+const STATUS_PILL = {
+  accepted: { cls: "ok",   label: "Acceptat" },
+  rejected: { cls: "err",  label: "Respins"  },
+  countered: { cls: "info", label: "Contra-ofertă" },
+  farmer_countered: { cls: "info", label: "Răspuns fermier" },
+  pending:  { cls: "warn", label: "În așteptare" },
+};
+const statusVisual = (s) => STATUS_PILL[String(s || "").toLowerCase()] || STATUS_PILL.pending;
+
+function OfferCard({ bid, onOpen }) {
+  const farmer = bid.farmer_email || bid.farmer_id || "—";
+  const initials = getInitials(farmer);
+  const avatarBg = avatarColorFor(bid.farmer_id || farmer);
+  const date = formatCardDate(bid.created_at);
+  const status = statusVisual(bid.status);
+  const unit = `${bid.currency || (bid.product === "sunflower" ? "USD" : "EUR")}/t`;
+  const deliveryLabel = formatCardDelivery(bid);
+  const cropYear = bid.crop_year || "—";
+
+  const open = (e) => { e.stopPropagation(); onOpen?.(); };
+  const handleKey = (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen?.(); }
+  };
+
+  return (
+    <article
+      className="offer-card"
+      role="button"
+      tabIndex={0}
+      onClick={() => onOpen?.()}
+      onKeyDown={handleKey}
+    >
+      <header className="offer-head">
+        <div className="head-prod">
+          <span className="prod-name">{getProductLabelSafe(bid.product)}</span>
+          <span className="recolta">Recoltă <span className="crop">{cropYear}</span></span>
+        </div>
+        <div className="head-fermier">
+          <span className="avatar" style={{ background: avatarBg }}>{initials}</span>
+          <span className="fermier-email" title={farmer}>{farmer}</span>
+        </div>
+        <div className="head-status">
+          <span className={`pill ${status.cls}`}><span className="dot" />{status.label}</span>
+          <button type="button" className="row-action" aria-label="Acțiuni" onClick={open}>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+              <circle cx="2.5" cy="6" r="1" />
+              <circle cx="6" cy="6" r="1" />
+              <circle cx="9.5" cy="6" r="1" />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <div className="offer-data">
+        <div className="field">
+          <span className="field-label">Cantitate</span>
+          <span className="field-value num">{formatQuantity(bid.quantity)}<span className="unit">t</span></span>
+        </div>
+        <div className="field">
+          <span className="field-label">Preț</span>
+          <span className="field-value num">{formatCardPrice(bid)}<span className="unit">{unit}</span></span>
+        </div>
+        <div className="field">
+          <span className="field-label">Livrare</span>
+          {deliveryLabel ? (
+            <div className="field-value">
+              <span className="pin">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M6 1.5c-2 0-3.5 1.5-3.5 3.5 0 2.5 3.5 5.5 3.5 5.5s3.5-3 3.5-5.5C9.5 3 8 1.5 6 1.5z" />
+                  <circle cx="6" cy="5" r="1.2" />
+                </svg>
+                <span>{deliveryLabel}</span>
+              </span>
+            </div>
+          ) : (
+            <div className="field-value muted">—</div>
+          )}
+        </div>
+        <div className="field date-field">
+          <span className="field-label">Data</span>
+          <span className="field-value-wrap">
+            <span className="field-value">{date.day}</span>
+            {date.time && <span className="field-sub">{date.time}</span>}
+          </span>
+        </div>
+      </div>
+    </article>
+  );
+}
 
 const formatDateOnly = (value) => {
   if (!value) return "-";
@@ -174,16 +320,6 @@ export default function BidsTab() {
     if (!hasFreight) return "Oferta nu a fost trimisă. Completează tariful de transport.";
     if (!hasDelivery) return "Oferta nu a fost trimisă. Completează locația de livrare.";
     return null;
-  };
-
-  // Direct accept/reject from card — no modal, no freight validation needed
-  const submitDirectDecision = async (action, bid) => {
-    const { error } = await supabase.from("bids").update({ status: action }).eq("id", bid.id);
-    if (error) { console.error("Decision error:", error.message); return; }
-    if (action === "accepted" && bid.farmer_id) {
-      await addFarmerRewardsPoints(bid.farmer_id, Number(bid.quantity || 0));
-    }
-    await fetchBids();
   };
 
   const submitAdminDecision = async (action, targetBid = null) => {
@@ -469,15 +605,12 @@ export default function BidsTab() {
         {error && <p className="badge rejected" style={{ marginTop: 12 }}>{error}</p>}
 
         {!loading && !error && (
-          <div className="admin-bid-list" style={{ marginTop: 14 }}>
+          <div className="offer-list" style={{ marginTop: 14 }}>
             {filteredBids.map((b) => (
-              <BidCardComponent
+              <OfferCard
                 key={b.id}
                 bid={b}
-                onClick={() => openAdminModal(b, null)}
-                onAccept={() => submitDirectDecision("accepted", b)}
-                onReject={() => submitDirectDecision("rejected", b)}
-                onCounter={() => openAdminModal(b, "countered")}
+                onOpen={() => openAdminModal(b, null)}
               />
             ))}
 
