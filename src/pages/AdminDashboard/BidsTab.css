@@ -191,8 +191,8 @@
 .oferte-page .offer-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  --card-py: 12px;
+  gap: 14px;
+  --card-py: 14px;
 }
 
 .offer-card {
