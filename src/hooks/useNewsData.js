@@ -27,6 +27,7 @@ export function useNewsData(active) {
             q: "agricultura OR cereale OR preturi",
             lang: "ro",
             max: 10,
+            sortby: "publishedAt",
           },
         });
 

@@ -66,12 +66,17 @@ Deno.serve(async (req) => {
       console.warn("JSON parsing failed, using default params.");
     }
 
-    const { q, lang, max } = requestBody;
+    const { q, lang, max, sortby, from } = requestBody;
 
     const searchTerm = encodeURIComponent(q || "agricultura");
+    const fromDate = from || (() => {
+      const d = new Date();
+      d.setDate(d.getDate() - 7);
+      return d.toISOString().split("T")[0];
+    })();
     const url = `https://gnews.io/api/v4/search?q=${searchTerm}&lang=${
       lang || "ro"
-    }&max=${max || 10}&apikey=${apiKey}`;
+    }&max=${max || 10}&sortby=${sortby || "publishedAt"}&from=${fromDate}&apikey=${apiKey}`;
 
     console.log(`Calling GNews: ${url.replace(apiKey, "HIDDEN_KEY")}`);
 
