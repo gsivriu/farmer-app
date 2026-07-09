@@ -127,7 +127,7 @@ export default function BidCardV2({ bid, onClick, onAccept, onReject, onCounter 
   const showActions = isActionable && (onAccept || onReject || onCounter);
 
   /* ── Footer / actions content ── */
-  const ActionButtons = ({ mobile = false }) => {
+  const renderActionButtons = ({ mobile = false } = {}) => {
     const stop = (e) => { e.stopPropagation(); };
     const accept = (e) => {
       e.stopPropagation();
@@ -198,7 +198,7 @@ export default function BidCardV2({ bid, onClick, onAccept, onReject, onCounter 
     );
   };
 
-  const FooterText = () => {
+  const renderFooterText = () => {
     if (skey === "accepted") return <span className="bcv2-footer-text">Acceptat · {resolvedRelative}</span>;
     if (skey === "rejected") return <span className="bcv2-footer-text">Respins · {resolvedRelative}</span>;
     if (skey === "info")     return <span className="bcv2-footer-text">{statusLabel} · {dateLabel}</span>;
@@ -272,7 +272,7 @@ export default function BidCardV2({ bid, onClick, onAccept, onReject, onCounter 
 
         {/* ─── MOBILE: footer ─── */}
         <div className="bcv2-m-footer" onClick={(e) => e.stopPropagation()}>
-          {showActions ? <ActionButtons mobile /> : <FooterText />}
+          {showActions ? renderActionButtons({ mobile: true }) : renderFooterText()}
         </div>
 
         {/* ─── DESKTOP: product + harvest ─── */}
@@ -307,7 +307,7 @@ export default function BidCardV2({ bid, onClick, onAccept, onReject, onCounter 
 
         {/* ─── DESKTOP: actions / footer ─── */}
         <div className="bcv2-section desktop-only actions" onClick={(e) => e.stopPropagation()}>
-          {showActions ? <ActionButtons /> : <FooterText />}
+          {showActions ? renderActionButtons() : renderFooterText()}
         </div>
       </article>
     </div>
