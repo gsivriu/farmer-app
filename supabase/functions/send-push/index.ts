@@ -114,6 +114,22 @@ Deno.serve(async (req) => {
       { auth: { autoRefreshToken: false, persistSession: false } },
     );
 
+    // Only the DB notification triggers may invoke this function. They attach a
+    // shared secret (x-webhook-secret) that lives in private.function_secrets.
+    // Reject anyone else — otherwise any holder of the public anon key could
+    // fan out arbitrary pushes to arbitrary users.
+    const webhookSecret = req.headers.get("x-webhook-secret") ?? "";
+    const { data: secretOk, error: secretErr } = await supabaseAdmin.rpc(
+      "verify_send_push_secret",
+      { candidate: webhookSecret },
+    );
+    if (secretErr || secretOk !== true) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     const bundleId = Deno.env.get("APNS_BUNDLE_ID") ?? "com.gsivriu.farmerapp";
 
     const { user_ids, title, body, data = {} } = await req.json() as {
