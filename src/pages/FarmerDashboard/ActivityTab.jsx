@@ -5,6 +5,7 @@ import { useRealtimeSubscription } from "../../hooks/useRealtimeSubscription.js"
 import { getProductLabelSafe, PRODUCT_FILTER_KEYS } from "../../utils/productLabels";
 import { formatCompactNumber, hasPositiveNumber } from "../../utils/numberFormat";
 import { formatDeliveryRange, formatLocationDisplay, isFreightParity } from "../../utils/formatting";
+import { computeAcceptedStats } from "../../utils/bidPricing";
 import BidCardV2 from "../../components/features/BidCardV2.jsx";
 
 const formatParityDisplay = (bid) => {
@@ -160,26 +161,7 @@ export default function ActivityTab() {
     });
   }, [userBids, productFilter, statusFilter, dateFrom, dateTo]);
 
-  const statsRows = useMemo(() => {
-    const map = new Map();
-    for (const b of filteredBids) {
-      const product = b.product || "unknown";
-      const qty = Number(b.quantity || 0);
-      const price =
-        b.final_price != null ? Number(b.final_price)
-        : b.counter_price != null ? Number(b.counter_price)
-        : Number(b.price || 0);
-      const prev = map.get(product) || { totalQty: 0, totalValue: 0 };
-      prev.totalQty += qty;
-      prev.totalValue += qty * price;
-      map.set(product, prev);
-    }
-    return Array.from(map.entries()).map(([product, v]) => ({
-      product,
-      totalQty: v.totalQty,
-      avgPrice: v.totalQty > 0 ? v.totalValue / v.totalQty : 0,
-    }));
-  }, [filteredBids]);
+  const statsRows = useMemo(() => computeAcceptedStats(filteredBids), [filteredBids]);
 
   const statsTotalQty = useMemo(
     () => statsRows.reduce((sum, row) => sum + Number(row.totalQty || 0), 0),
@@ -272,8 +254,10 @@ export default function ActivityTab() {
             {showStats && (
               <div className="dashboard-section">
                 {statsRows.length === 0 ? (
-                  <p className="small-text">Nu există statistici pentru filtrele selectate.</p>
+                  <p className="small-text">Nu există contracte acceptate pentru filtrele selectate.</p>
                 ) : (
+                  <>
+                  <p className="small-text" style={{ marginBottom: 8 }}>Doar contracte acceptate</p>
                   <div className="table-wrapper">
                     <table className="table stats-table">
                       <thead>
@@ -299,6 +283,7 @@ export default function ActivityTab() {
                       </tbody>
                     </table>
                   </div>
+                  </>
                 )}
               </div>
             )}

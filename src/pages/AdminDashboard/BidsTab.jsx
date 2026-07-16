@@ -4,6 +4,7 @@ import { useAppContext } from "../../context/AppContext.jsx";
 import { getProductLabelSafe, PRODUCT_FILTER_KEYS } from "../../utils/productLabels";
 import { formatCompactNumber, hasPositiveNumber } from "../../utils/numberFormat";
 import { formatDeliveryRange, formatLocationDisplay, isFreightParity } from "../../utils/formatting";
+import { getAcceptedPrice, computeAcceptedStats } from "../../utils/bidPricing";
 import BidCardV2 from "../../components/features/BidCardV2.jsx";
 
 const BidCardComponent = BidCardV2;
@@ -32,15 +33,6 @@ const getStatusLabel = (status) => {
   if (value === "countered") return "Contra-ofertă";
   if (value === "farmer_countered") return "Răspuns fermier";
   return "În așteptare";
-};
-
-const getAcceptedPrice = (bid) => {
-  if (!bid) return null;
-  const raw = bid.final_price != null ? bid.final_price
-    : hasPositiveNumber(bid.counter_price) ? bid.counter_price
-    : bid.price;
-  const num = Number(raw);
-  return Number.isFinite(num) ? num : null;
 };
 
 const formatParityDisplay = (bid, { detailed = false } = {}) => {
@@ -246,24 +238,7 @@ export default function BidsTab() {
     return true;
   });
 
-  const statsRows = (() => {
-    const map = new Map();
-    filteredBids.forEach((b) => {
-      const product = b.product || "unknown";
-      const qty = Number(b.quantity || 0);
-      const price = b.status === "accepted"
-        ? Number(getAcceptedPrice(b) || 0)
-        : Number(hasPositiveNumber(b.counter_price) ? b.counter_price : b.price ?? 0);
-      if (!map.has(product)) map.set(product, { product, totalQty: 0, totalValue: 0 });
-      const current = map.get(product);
-      current.totalQty += qty;
-      current.totalValue += qty * price;
-    });
-    return Array.from(map.values()).map((row) => ({
-      ...row,
-      avgPrice: row.totalQty ? row.totalValue / row.totalQty : 0,
-    }));
-  })();
+  const statsRows = computeAcceptedStats(filteredBids);
 
   const statsTotalQty = statsRows.reduce((sum, row) => sum + Number(row.totalQty || 0), 0);
 
@@ -298,8 +273,10 @@ export default function BidsTab() {
         {showStats && (
           <div style={{ marginTop: 12 }}>
             {statsRows.length === 0 ? (
-              <p className="small-text">Nu există statistici pentru filtrele selectate.</p>
+              <p className="small-text">Nu există contracte acceptate pentru filtrele selectate.</p>
             ) : (
+              <>
+              <p className="small-text" style={{ marginBottom: 8 }}>Doar contracte acceptate</p>
               <div className="table-wrapper">
                 <table className="table stats-table">
                   <thead>
@@ -325,6 +302,7 @@ export default function BidsTab() {
                   </tbody>
                 </table>
               </div>
+              </>
             )}
           </div>
         )}
