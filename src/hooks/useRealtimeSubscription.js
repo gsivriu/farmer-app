@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { App } from "@capacitor/app";
 import { supabase } from "../supabaseClient";
 
 /**
@@ -58,19 +59,37 @@ export function useRealtimeSubscription(table, onChanged) {
 
     const handleResume = () => {
       clearTimeout(retryTimeout);
+      retries = 0;
       subscribe();
       onChanged();
     };
 
     document.addEventListener("visibilitychange", handleVisibility);
-    document.addEventListener("resume", handleResume);
+
+    // Health check: catches WebSocket connections silently killed by iOS while
+    // the WKWebView was suspended, where neither visibilitychange nor a
+    // CHANNEL_ERROR ever fires.
+    const healthCheck = setInterval(() => {
+      if (document.visibilityState === "visible" && channel && channel.state !== "joined") {
+        clearTimeout(retryTimeout);
+        retries = 0;
+        subscribe();
+        onChanged();
+      }
+    }, 20000);
+
+    let appStateSub;
+    App.addListener("appStateChange", ({ isActive }) => {
+      if (isActive) handleResume();
+    }).then((sub) => { appStateSub = sub; });
 
     return () => {
       destroyed = true;
       clearTimeout(retryTimeout);
+      clearInterval(healthCheck);
       removeChannel();
       document.removeEventListener("visibilitychange", handleVisibility);
-      document.removeEventListener("resume", handleResume);
+      appStateSub?.remove();
     };
   }, [table, onChanged]);
 }
