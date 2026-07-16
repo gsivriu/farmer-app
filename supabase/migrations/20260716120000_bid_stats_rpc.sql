@@ -23,17 +23,29 @@
 -- farmers on submission date.
 -- ============================================================
 
+-- Changing the signature would overload rather than replace, leaving two
+-- bid_stats functions and an ambiguous PostgREST endpoint.
+DROP FUNCTION IF EXISTS public.bid_stats(
+    uuid, text, text, text, text, date, date, date, date, integer
+);
+
+-- The *_unset flags exist because a NULL location parameter already means "do
+-- not filter", so it cannot also mean "match rows whose location is NULL".
+-- Freight bids carry no delivery_location until an admin assigns one, and the
+-- list can filter for exactly those — the statistics must agree with it.
 CREATE OR REPLACE FUNCTION public.bid_stats(
-    p_farmer_id         uuid DEFAULT NULL,
-    p_product           text DEFAULT NULL,
-    p_parity            text DEFAULT NULL,
-    p_delivery_location text DEFAULT NULL,
-    p_loading_location  text DEFAULT NULL,
-    p_delivery_from     date DEFAULT NULL,
-    p_delivery_to       date DEFAULT NULL,
-    p_created_from      date DEFAULT NULL,
-    p_created_to        date DEFAULT NULL,
-    p_crop_year         integer DEFAULT NULL
+    p_farmer_id             uuid DEFAULT NULL,
+    p_product               text DEFAULT NULL,
+    p_parity                text DEFAULT NULL,
+    p_delivery_location     text DEFAULT NULL,
+    p_loading_location      text DEFAULT NULL,
+    p_delivery_from         date DEFAULT NULL,
+    p_delivery_to           date DEFAULT NULL,
+    p_created_from          date DEFAULT NULL,
+    p_created_to            date DEFAULT NULL,
+    p_crop_year             integer DEFAULT NULL,
+    p_delivery_location_unset boolean DEFAULT false,
+    p_loading_location_unset  boolean DEFAULT false
 )
 RETURNS TABLE (product text, total_qty numeric, avg_price numeric)
 LANGUAGE sql
@@ -52,13 +64,21 @@ AS $$
       AND (p_farmer_id         IS NULL OR b.farmer_id         = p_farmer_id)
       AND (p_product           IS NULL OR b.product           = p_product)
       AND (p_parity            IS NULL OR b.parity            = p_parity)
-      AND (p_delivery_location IS NULL OR b.delivery_location = p_delivery_location)
-      AND (p_loading_location  IS NULL OR b.loading_location  = p_loading_location)
       AND (p_delivery_from     IS NULL OR b.delivery_start   >= p_delivery_from)
       AND (p_delivery_to       IS NULL OR b.delivery_end     <= p_delivery_to)
       AND (p_created_from      IS NULL OR b.created_at::date >= p_created_from)
       AND (p_created_to        IS NULL OR b.created_at::date <= p_created_to)
       AND (p_crop_year         IS NULL OR b.crop_year         = p_crop_year)
+      AND (CASE
+             WHEN p_delivery_location_unset THEN b.delivery_location IS NULL
+             WHEN p_delivery_location IS NOT NULL THEN b.delivery_location = p_delivery_location
+             ELSE true
+           END)
+      AND (CASE
+             WHEN p_loading_location_unset THEN b.loading_location IS NULL
+             WHEN p_loading_location IS NOT NULL THEN b.loading_location = p_loading_location
+             ELSE true
+           END)
     GROUP BY b.product;
 $$;
 
@@ -67,11 +87,11 @@ $$;
 -- EXECUTE is granted to PUBLIC by default and anon inherits it, so revoking
 -- from anon alone is a no-op — the grant has to come off PUBLIC.
 REVOKE EXECUTE ON FUNCTION public.bid_stats(
-    uuid, text, text, text, text, date, date, date, date, integer
+    uuid, text, text, text, text, date, date, date, date, integer, boolean, boolean
 ) FROM PUBLIC;
 
 GRANT EXECUTE ON FUNCTION public.bid_stats(
-    uuid, text, text, text, text, date, date, date, date, integer
+    uuid, text, text, text, text, date, date, date, date, integer, boolean, boolean
 ) TO authenticated;
 
 -- Serves the admin aggregate (no farmer_id predicate): an index-only scan

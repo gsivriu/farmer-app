@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "../../supabaseClient";
 import { useAppContext } from "../../context/AppContext.jsx";
+import { useRealtimeSubscription } from "../../hooks/useRealtimeSubscription.js";
 import { getProductLabelSafe, PRODUCT_FILTER_KEYS } from "../../utils/productLabels";
 import { formatCompactNumber, hasPositiveNumber } from "../../utils/numberFormat";
 import { formatDeliveryRange, formatLocationDisplay, isFreightParity } from "../../utils/formatting";
@@ -8,6 +9,20 @@ import { getAcceptedPrice } from "../../utils/bidPricing";
 import BidCardV2 from "../../components/features/BidCardV2.jsx";
 
 const BidCardComponent = BidCardV2;
+
+const PAGE_SIZE = 50;
+
+// Explicit column list: `*` shipped every column of every row, and the payload
+// is the whole point here.
+const BID_COLUMNS =
+  "id, farmer_id, farmer_email, product, quantity, price, counter_price, final_price, " +
+  "status, parity, freight_cost, delivery_start, delivery_end, delivery_location, " +
+  "loading_location, crop_year, quantity_tolerance, currency, remarks, contract_no, " +
+  "accepted_at, created_at";
+
+// Sentinel for "no location set" — freight parities leave delivery_location
+// null until an admin assigns one, and those bids need to stay findable.
+const NO_LOCATION = "-";
 
 const formatDateOnly = (value) => {
   if (!value) return "-";
@@ -70,8 +85,11 @@ function BidStatusBadge({ status }) {
 }
 
 export default function BidsTab() {
-  const { bids, fetchBids, addFarmerRewardsPoints } = useAppContext();
+  const { addFarmerRewardsPoints } = useAppContext();
 
+  const [bids, setBids] = useState([]);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [farmers, setFarmers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -100,19 +118,37 @@ export default function BidsTab() {
   const [adminConfirmAction, setAdminConfirmAction] = useState(null);
   const [modalError, setModalError] = useState(null);
   const [deliveryLocations, setDeliveryLocations] = useState([]);
+  const [loadingLocationOptions, setLoadingLocationOptions] = useState([]);
+  const [cropYearOptions, setCropYearOptions] = useState([]);
 
+  // Filter dropdowns come from their own sources, not from the loaded rows:
+  // with pagination only ~50 bids are in memory, so deriving options from them
+  // would quietly shrink the lists to whatever is on the current page.
   useEffect(() => {
-    if (!Array.isArray(bids)) return;
-    const map = new Map();
-    bids.forEach((b) => {
-      if (!b.farmer_id) return;
-      if (!map.has(b.farmer_id)) {
-        map.set(b.farmer_id, { id: b.farmer_id, email: b.farmer_email || b.farmer_id });
+    let cancelled = false;
+
+    (async () => {
+      const [profilesRes, optionsRes] = await Promise.all([
+        supabase.from("profiles").select("id, email, full_name").eq("role", "farmer"),
+        supabase.rpc("bid_filter_options"),
+      ]);
+      if (cancelled) return;
+
+      if (!profilesRes.error && profilesRes.data) {
+        setFarmers(
+          profilesRes.data
+            .map((p) => ({ id: p.id, email: p.full_name || p.email || p.id }))
+            .sort((a, b) => String(a.email).localeCompare(String(b.email)))
+        );
       }
-    });
-    setFarmers(Array.from(map.values()));
-    setLoading(false);
-  }, [bids]);
+      if (!optionsRes.error && optionsRes.data) {
+        setLoadingLocationOptions(optionsRes.data.loading_locations || []);
+        setCropYearOptions(optionsRes.data.crop_years || []);
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     supabase
@@ -126,6 +162,111 @@ export default function BidsTab() {
         setDeliveryLocations(["Port Constanța", ...Array.from(map.keys())]);
       });
   }, []);
+
+  // ── Bid list: server-side filters + keyset pagination ─────────────────────────
+  //
+  // Previously the whole table was fetched and filtered in the browser. Ordering
+  // by id descending is equivalent to created_at descending (id is a monotonic
+  // identity assigned as rows are inserted) but gives a trivial cursor, and the
+  // primary key serves it as a backward index scan.
+
+  const applyFilters = useCallback((query) => {
+    let q = query;
+    if (listFarmerFilter !== "all") q = q.eq("farmer_id", listFarmerFilter);
+    if (filterProduct !== "all") q = q.eq("product", filterProduct);
+    if (filterStatus !== "all") {
+      if (filterStatus === "pending") q = q.in("status", ["pending", "countered", "farmer_countered"]);
+      else q = q.eq("status", filterStatus);
+    }
+    if (filterParity !== "all") q = q.eq("parity", filterParity);
+    if (filterDeliveryLocation !== "all") {
+      q = filterDeliveryLocation === NO_LOCATION
+        ? q.is("delivery_location", null)
+        : q.eq("delivery_location", filterDeliveryLocation);
+    }
+    if (filterLoadingLocation !== "all") {
+      q = filterLoadingLocation === NO_LOCATION
+        ? q.is("loading_location", null)
+        : q.eq("loading_location", filterLoadingLocation);
+    }
+    if (filterCropYear !== "all") q = q.eq("crop_year", Number(filterCropYear));
+    // A bid with no delivery window cannot satisfy a window filter; NULL
+    // comparisons drop it, matching the previous client-side behaviour.
+    if (filterDeliveryFrom) q = q.gte("delivery_start", filterDeliveryFrom);
+    if (filterDeliveryTo) q = q.lte("delivery_end", filterDeliveryTo);
+    return q;
+  }, [
+    listFarmerFilter, filterProduct, filterStatus, filterParity,
+    filterDeliveryLocation, filterLoadingLocation, filterCropYear,
+    filterDeliveryFrom, filterDeliveryTo,
+  ]);
+
+  const fetchPage = useCallback(async ({ cursor = null, limit = PAGE_SIZE } = {}) => {
+    let q = applyFilters(supabase.from("bids").select(BID_COLUMNS));
+    if (cursor != null) q = q.lt("id", cursor);
+    return q.order("id", { ascending: false }).limit(limit);
+  }, [applyFilters]);
+
+  // First page, and a fresh one whenever a filter changes.
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      setLoading(true);
+      setError(null);
+
+      const { data, error: fetchError } = await fetchPage();
+      if (cancelled) return;
+
+      setLoading(false);
+      if (fetchError) {
+        // Silence here is what made a failed load look like an empty table.
+        setError("Nu am putut încărca ofertele: " + fetchError.message);
+        setBids([]);
+        setHasMore(false);
+        return;
+      }
+      setBids(data || []);
+      setHasMore((data || []).length === PAGE_SIZE);
+    })();
+
+    return () => { cancelled = true; };
+  }, [fetchPage]);
+
+  const loadMore = async () => {
+    const last = bids[bids.length - 1];
+    if (!last || loadingMore) return;
+
+    setLoadingMore(true);
+    const { data, error: fetchError } = await fetchPage({ cursor: last.id });
+    setLoadingMore(false);
+
+    if (fetchError) {
+      setError("Nu am putut încărca restul ofertelor: " + fetchError.message);
+      return;
+    }
+    setBids((prev) => [...prev, ...(data || [])]);
+    setHasMore((data || []).length === PAGE_SIZE);
+  };
+
+  // Realtime: refresh exactly the rows already on screen. Re-evaluating whether
+  // an incoming row still matches the active filters would mean duplicating the
+  // filter logic client-side — the thing this refactor removes — and the loaded
+  // window is at most a few hundred rows.
+  const refreshWindowRef = useRef(null);
+  refreshWindowRef.current = async () => {
+    const { data, error: fetchError } = await fetchPage({
+      limit: Math.max(bids.length, PAGE_SIZE),
+    });
+    if (fetchError || !data) return;
+    setBids(data);
+    setHasMore(data.length >= Math.max(bids.length, PAGE_SIZE));
+  };
+
+  // Stable identity so the channel is not torn down and rebuilt on every
+  // filter change.
+  const onBidsChanged = useCallback(() => { refreshWindowRef.current?.(); }, []);
+  useRealtimeSubscription("bids", onBidsChanged);
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -153,12 +294,12 @@ export default function BidsTab() {
 
   // Direct accept/reject from card — no modal, no freight validation needed
   const submitDirectDecision = async (action, bid) => {
-    const { error } = await supabase.from("bids").update({ status: action }).eq("id", bid.id);
-    if (error) { console.error("Decision error:", error.message); return; }
+    const { error: updateError } = await supabase.from("bids").update({ status: action }).eq("id", bid.id);
+    if (updateError) { setError("Nu am putut actualiza oferta: " + updateError.message); return; }
     if (action === "accepted" && bid.farmer_id) {
       await addFarmerRewardsPoints(bid.farmer_id, Number(bid.quantity || 0));
     }
-    await fetchBids();
+    await refreshWindowRef.current?.();
   };
 
   const submitAdminDecision = async (action, targetBid = null) => {
@@ -188,8 +329,8 @@ export default function BidsTab() {
     }
 
     setModalError(null);
-    const { error } = await supabase.from("bids").update(payload).eq("id", bid.id);
-    if (error) { setModalError("Eroare la trimiterea actualizării: " + error.message); return; }
+    const { error: updateError } = await supabase.from("bids").update(payload).eq("id", bid.id);
+    if (updateError) { setModalError("Eroare la trimiterea actualizării: " + updateError.message); return; }
 
     if (action === "accepted" && bid.farmer_id) {
       await addFarmerRewardsPoints(bid.farmer_id, Number(bid.quantity || 0));
@@ -202,7 +343,7 @@ export default function BidsTab() {
       setAdminModalFreight("");
       setAdminModalDelivery("");
     }
-    await fetchBids();
+    await refreshWindowRef.current?.();
   };
 
   const openAdminModal = (bid, confirmAction = null) => {
@@ -235,12 +376,18 @@ export default function BidsTab() {
       setStatsLoading(true);
       setStatsError(null);
 
+      // Mirrors applyFilters() above — the list and these totals must describe
+      // the same set of contracts.
       const { data, error: rpcError } = await supabase.rpc("bid_stats", {
         p_farmer_id:         listFarmerFilter === "all" ? null : listFarmerFilter,
         p_product:           filterProduct === "all" ? null : filterProduct,
         p_parity:            filterParity === "all" ? null : filterParity,
-        p_delivery_location: filterDeliveryLocation === "all" ? null : filterDeliveryLocation,
-        p_loading_location:  filterLoadingLocation === "all" ? null : filterLoadingLocation,
+        p_delivery_location: (filterDeliveryLocation === "all" || filterDeliveryLocation === NO_LOCATION)
+          ? null : filterDeliveryLocation,
+        p_loading_location:  (filterLoadingLocation === "all" || filterLoadingLocation === NO_LOCATION)
+          ? null : filterLoadingLocation,
+        p_delivery_location_unset: filterDeliveryLocation === NO_LOCATION,
+        p_loading_location_unset:  filterLoadingLocation === NO_LOCATION,
         p_delivery_from:     filterDeliveryFrom || null,
         p_delivery_to:       filterDeliveryTo || null,
         p_crop_year:         filterCropYear === "all" ? null : Number(filterCropYear),
@@ -269,47 +416,15 @@ export default function BidsTab() {
 
   // ── Derived data ─────────────────────────────────────────────────────────────
 
-  const filteredBids = (bids || []).filter((b) => {
-    if (listFarmerFilter !== "all" && b.farmer_id !== listFarmerFilter) return false;
-    if (filterProduct !== "all" && b.product !== filterProduct) return false;
-    if (filterStatus !== "all") {
-      if (filterStatus === "pending") {
-        if (b.status !== "pending" && b.status !== "countered" && b.status !== "farmer_countered") return false;
-      } else if (b.status !== filterStatus) {
-        return false;
-      }
-    }
-    if (filterParity !== "all" && b.parity !== filterParity) return false;
-    if (filterDeliveryLocation !== "all" && (b.delivery_location || "-") !== filterDeliveryLocation) return false;
-    if (filterLoadingLocation !== "all" && (b.loading_location || "-") !== filterLoadingLocation) return false;
-    if (filterCropYear !== "all" && String(b.crop_year ?? "") !== filterCropYear) return false;
-    if (filterDeliveryFrom || filterDeliveryTo) {
-      const start = b.delivery_start ? b.delivery_start.slice(0, 10) : null;
-      const end = b.delivery_end ? b.delivery_end.slice(0, 10) : null;
-      if (!start || !end) return false;
-      if (filterDeliveryFrom && start < filterDeliveryFrom) return false;
-      if (filterDeliveryTo && end > filterDeliveryTo) return false;
-    }
-    return true;
-  });
-
   // Derived, not synced: a status filter excluding accepted simply has no
   // statistics, and the last fetched rows stay cached for when it is cleared.
   const visibleStats = statsApplicable ? statsRows : [];
 
   const statsTotalQty = visibleStats.reduce((sum, row) => sum + Number(row.totalQty || 0), 0);
 
-  const deliveryLocationOptions = Array.from(
-    new Set((bids || []).map((b) => b.delivery_location || "-").filter((loc) => loc && loc.trim() !== ""))
-  ).sort((a, b) => a.localeCompare(b));
-
-  const loadingLocationOptions = Array.from(
-    new Set((bids || []).map((b) => b.loading_location || "-").filter((loc) => loc && loc.trim() !== ""))
-  ).sort((a, b) => a.localeCompare(b));
-
-  const cropYearOptions = Array.from(
-    new Set((bids || []).map((b) => b.crop_year).filter((y) => y != null))
-  ).sort((a, b) => b - a);
+  // delivery_location is constrained to the silo list by BidForm, so the silo
+  // query already loaded above is its real domain.
+  const deliveryLocationOptions = deliveryLocations;
 
   // ── Render ────────────────────────────────────────────────────────────────────
 
@@ -377,7 +492,7 @@ export default function BidsTab() {
 
         {!loading && !error && (
           <div className="admin-bid-list" style={{ marginTop: 14 }}>
-            {filteredBids.map((b) => (
+            {bids.map((b) => (
               <BidCardComponent
                 key={b.id}
                 bid={b}
@@ -388,7 +503,7 @@ export default function BidsTab() {
               />
             ))}
 
-            {filteredBids.length === 0 && (
+            {bids.length === 0 && (
               <div className="empty-state">
                 <svg className="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2M12 12h.01M12 16h.01" />
@@ -413,6 +528,25 @@ export default function BidsTab() {
                   Resetează filtrele
                 </button>
               </div>
+            )}
+
+            {hasMore && (
+              <div style={{ display: "flex", justifyContent: "center", marginTop: 14 }}>
+                <button
+                  type="button"
+                  className="btn small outline"
+                  disabled={loadingMore}
+                  onClick={loadMore}
+                >
+                  {loadingMore ? "Se încarcă…" : "Încarcă mai multe"}
+                </button>
+              </div>
+            )}
+
+            {bids.length > 0 && (
+              <p className="small-text" style={{ textAlign: "center", marginTop: 10 }}>
+                {hasMore ? `${bids.length} oferte afișate` : `${bids.length} oferte — toate încărcate`}
+              </p>
             )}
           </div>
         )}
@@ -722,6 +856,7 @@ export default function BidsTab() {
                   <label className="bid-input-label" htmlFor="af-delivery-loc">Locație livrare</label>
                   <select id="af-delivery-loc" className="bid-input-field" value={filterDeliveryLocation} onChange={(e) => setFilterDeliveryLocation(e.target.value)}>
                     <option value="all">Toate</option>
+                    <option value={NO_LOCATION}>Fără locație</option>
                     {deliveryLocationOptions.map((loc) => (
                       <option key={loc} value={loc}>{formatLocationDisplay(loc)}</option>
                     ))}
@@ -731,6 +866,7 @@ export default function BidsTab() {
                   <label className="bid-input-label" htmlFor="af-loading-loc">Locație încărcare</label>
                   <select id="af-loading-loc" className="bid-input-field" value={filterLoadingLocation} onChange={(e) => setFilterLoadingLocation(e.target.value)}>
                     <option value="all">Toate</option>
+                    <option value={NO_LOCATION}>Fără locație</option>
                     {loadingLocationOptions.map((loc) => (
                       <option key={loc} value={loc}>{formatLocationDisplay(loc)}</option>
                     ))}
