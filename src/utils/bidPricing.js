@@ -1,13 +1,10 @@
-// Single source of truth for contracted price and bid statistics.
+// Price a single bid was contracted at, for display.
 //
-// Statistics answer one question: what was actually contracted, and at what
-// price. Only bids with status 'accepted' count. Pending, countered and
-// rejected bids are proposals — blending their asking prices into an average
-// yields a figure that matches no real transaction.
+// Aggregate statistics do NOT go through here — they are computed by the
+// bid_stats() RPC (supabase/migrations/20260716120000_bid_stats_rpc.sql),
+// which mirrors this expression in SQL. Keep the two in step.
 
 import { hasPositiveNumber } from "./numberFormat";
-
-export const isContracted = (bid) => bid?.status === "accepted";
 
 // final_price is written only when a farmer accepts a counter-offer; when an
 // admin accepts directly it stays null, so fall back to the standing
@@ -19,25 +16,4 @@ export const getAcceptedPrice = (bid) => {
     : bid.price;
   const num = Number(raw);
   return Number.isFinite(num) ? num : null;
-};
-
-// Volume-weighted average price per product, over accepted contracts only.
-export const computeAcceptedStats = (bids) => {
-  const map = new Map();
-
-  (bids || []).filter(isContracted).forEach((bid) => {
-    const product = bid.product || "unknown";
-    const qty = Number(bid.quantity || 0);
-    const price = Number(getAcceptedPrice(bid) || 0);
-    const current = map.get(product) || { product, totalQty: 0, totalValue: 0 };
-    current.totalQty += qty;
-    current.totalValue += qty * price;
-    map.set(product, current);
-  });
-
-  return Array.from(map.values()).map((row) => ({
-    product: row.product,
-    totalQty: row.totalQty,
-    avgPrice: row.totalQty ? row.totalValue / row.totalQty : 0,
-  }));
 };

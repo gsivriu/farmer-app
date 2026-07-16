@@ -5,7 +5,6 @@ import { useRealtimeSubscription } from "../../hooks/useRealtimeSubscription.js"
 import { getProductLabelSafe, PRODUCT_FILTER_KEYS } from "../../utils/productLabels";
 import { formatCompactNumber, hasPositiveNumber } from "../../utils/numberFormat";
 import { formatDeliveryRange, formatLocationDisplay, isFreightParity } from "../../utils/formatting";
-import { computeAcceptedStats } from "../../utils/bidPricing";
 import BidCardV2 from "../../components/features/BidCardV2.jsx";
 
 const formatParityDisplay = (bid) => {
@@ -89,11 +88,16 @@ export default function ActivityTab() {
   const [selectedBid, setSelectedBid] = useState(null);
   const [productFilter, setProductFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [cropYearFilter, setCropYearFilter] = useState("all");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [farmerId, setFarmerId] = useState(null);
+
+  const [statsRows, setStatsRows] = useState([]);
+  const [statsLoading, setStatsLoading] = useState(false);
+  const [statsError, setStatsError] = useState(null);
 
   useEffect(() => {
     let mounted = true;
@@ -151,6 +155,7 @@ export default function ActivityTab() {
           return false;
         }
       }
+      if (cropYearFilter !== "all" && String(b.crop_year ?? "") !== cropYearFilter) return false;
       if (dateFrom || dateTo) {
         const dateStr = b.created_at ? b.created_at.slice(0, 10) : null;
         if (!dateStr) return false;
@@ -159,18 +164,64 @@ export default function ActivityTab() {
       }
       return true;
     });
-  }, [userBids, productFilter, statusFilter, dateFrom, dateTo]);
+  }, [userBids, productFilter, statusFilter, cropYearFilter, dateFrom, dateTo]);
 
-  const statsRows = useMemo(() => computeAcceptedStats(filteredBids), [filteredBids]);
-
-  const statsTotalQty = useMemo(
-    () => statsRows.reduce((sum, row) => sum + Number(row.totalQty || 0), 0),
-    [statsRows]
+  const cropYearOptions = useMemo(
+    () => Array.from(new Set(userBids.map((b) => b.crop_year).filter((y) => y != null))).sort((a, b) => b - a),
+    [userBids]
   );
+
+  // Same bid_stats() RPC the admin uses — one definition of the contracted
+  // price, in SQL. RLS scopes the result to this farmer, so no farmer_id is
+  // passed. Only 'accepted' is aggregated, so a status filter that excludes
+  // accepted has nothing to show and skips the round-trip.
+  const statsApplicable = statusFilter === "all" || statusFilter === "accepted";
+
+  useEffect(() => {
+    if (!showStats || !statsApplicable) return;
+
+    let cancelled = false;
+
+    (async () => {
+      setStatsLoading(true);
+      setStatsError(null);
+
+      const { data, error: rpcError } = await supabase.rpc("bid_stats", {
+        p_product:      productFilter === "all" ? null : productFilter,
+        p_created_from: dateFrom || null,
+        p_created_to:   dateTo || null,
+        p_crop_year:    cropYearFilter === "all" ? null : Number(cropYearFilter),
+      });
+      if (cancelled) return;
+
+      setStatsLoading(false);
+      if (rpcError) {
+        setStatsError("Nu am putut încărca statisticile: " + rpcError.message);
+        setStatsRows([]);
+        return;
+      }
+      setStatsRows((data || []).map((row) => ({
+        product:  row.product,
+        totalQty: Number(row.total_qty || 0),
+        avgPrice: Number(row.avg_price || 0),
+      })));
+    })();
+
+    return () => { cancelled = true; };
+  }, [showStats, statsApplicable, productFilter, dateFrom, dateTo, cropYearFilter]);
+
+  // Derived, not synced: a status filter excluding accepted simply has no
+  // statistics, and the last fetched rows stay cached for when it is cleared.
+  const visibleStats = statsApplicable ? statsRows : [];
+
+  // bid_stats() returns one row per product, so there is nothing here worth
+  // memoizing — the aggregation itself now happens in the database.
+  const statsTotalQty = visibleStats.reduce((sum, row) => sum + Number(row.totalQty || 0), 0);
 
   const activeFilterCount = [
     productFilter !== "all",
     statusFilter !== "all",
+    cropYearFilter !== "all",
     !!dateFrom,
     !!dateTo,
   ].filter(Boolean).length;
@@ -253,7 +304,11 @@ export default function ActivityTab() {
 
             {showStats && (
               <div className="dashboard-section">
-                {statsRows.length === 0 ? (
+                {statsLoading && statsApplicable ? (
+                  <p className="small-text">Se calculează statisticile…</p>
+                ) : statsError && statsApplicable ? (
+                  <p className="badge rejected" role="alert">{statsError}</p>
+                ) : visibleStats.length === 0 ? (
                   <p className="small-text">Nu există contracte acceptate pentru filtrele selectate.</p>
                 ) : (
                   <>
@@ -268,7 +323,7 @@ export default function ActivityTab() {
                         </tr>
                       </thead>
                       <tbody>
-                        {statsRows.map((row) => (
+                        {visibleStats.map((row) => (
                           <tr key={row.product}>
                             <td>{getProductLabelSafe(row.product)}</td>
                             <td>{Number(row.totalQty || 0).toFixed(2)}</td>
@@ -564,6 +619,23 @@ export default function ActivityTab() {
 
               <div className="bid-form-grid-2">
                 <div className="bid-input-container">
+                  <label className="bid-input-label" htmlFor="filter-crop-year">An recoltă</label>
+                  <select
+                    id="filter-crop-year"
+                    className="bid-input-field"
+                    value={cropYearFilter}
+                    onChange={(e) => setCropYearFilter(e.target.value)}
+                  >
+                    <option value="all">Toți anii</option>
+                    {cropYearOptions.map((year) => (
+                      <option key={year} value={String(year)}>{year}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="bid-form-grid-2">
+                <div className="bid-input-container">
                   <label className="bid-input-label" htmlFor="filter-date-from">Perioada · de la</label>
                   <input
                     id="filter-date-from"
@@ -590,7 +662,7 @@ export default function ActivityTab() {
                 <button
                   type="button"
                   className="btn small ghost filter-btn-reset"
-                  onClick={() => { setProductFilter("all"); setStatusFilter("all"); setDateFrom(""); setDateTo(""); }}
+                  onClick={() => { setProductFilter("all"); setStatusFilter("all"); setCropYearFilter("all"); setDateFrom(""); setDateTo(""); }}
                 >
                   Resetează
                 </button>

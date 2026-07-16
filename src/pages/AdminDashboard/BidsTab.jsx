@@ -4,7 +4,7 @@ import { useAppContext } from "../../context/AppContext.jsx";
 import { getProductLabelSafe, PRODUCT_FILTER_KEYS } from "../../utils/productLabels";
 import { formatCompactNumber, hasPositiveNumber } from "../../utils/numberFormat";
 import { formatDeliveryRange, formatLocationDisplay, isFreightParity } from "../../utils/formatting";
-import { getAcceptedPrice, computeAcceptedStats } from "../../utils/bidPricing";
+import { getAcceptedPrice } from "../../utils/bidPricing";
 import BidCardV2 from "../../components/features/BidCardV2.jsx";
 
 const BidCardComponent = BidCardV2;
@@ -84,8 +84,13 @@ export default function BidsTab() {
   const [filterDeliveryTo, setFilterDeliveryTo] = useState("");
   const [filterDeliveryLocation, setFilterDeliveryLocation] = useState("all");
   const [filterLoadingLocation, setFilterLoadingLocation] = useState("all");
+  const [filterCropYear, setFilterCropYear] = useState("all");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [showStats, setShowStats] = useState(false);
+
+  const [statsRows, setStatsRows] = useState([]);
+  const [statsLoading, setStatsLoading] = useState(false);
+  const [statsError, setStatsError] = useState(null);
 
   const [adminSelectedBid, setAdminSelectedBid] = useState(null);
   const [adminModalCounter, setAdminModalCounter] = useState("");
@@ -213,6 +218,55 @@ export default function BidsTab() {
     setModalError(null);
   };
 
+  // Statistics are aggregated by the DB, not by walking every bid in the
+  // browser: the payload stays a handful of rows no matter how many contracts
+  // exist. RLS inside bid_stats() scopes the result to the caller, so the same
+  // call serves an admin (all farmers) and a farmer (their own).
+  // Only 'accepted' is aggregated, so a status filter that excludes accepted
+  // has no statistics to show — skip the round-trip entirely.
+  const statsApplicable = filterStatus === "all" || filterStatus === "accepted";
+
+  useEffect(() => {
+    if (!showStats || !statsApplicable) return;
+
+    let cancelled = false;
+
+    (async () => {
+      setStatsLoading(true);
+      setStatsError(null);
+
+      const { data, error: rpcError } = await supabase.rpc("bid_stats", {
+        p_farmer_id:         listFarmerFilter === "all" ? null : listFarmerFilter,
+        p_product:           filterProduct === "all" ? null : filterProduct,
+        p_parity:            filterParity === "all" ? null : filterParity,
+        p_delivery_location: filterDeliveryLocation === "all" ? null : filterDeliveryLocation,
+        p_loading_location:  filterLoadingLocation === "all" ? null : filterLoadingLocation,
+        p_delivery_from:     filterDeliveryFrom || null,
+        p_delivery_to:       filterDeliveryTo || null,
+        p_crop_year:         filterCropYear === "all" ? null : Number(filterCropYear),
+      });
+      if (cancelled) return;
+
+      setStatsLoading(false);
+      if (rpcError) {
+        setStatsError("Nu am putut încărca statisticile: " + rpcError.message);
+        setStatsRows([]);
+        return;
+      }
+      setStatsRows((data || []).map((row) => ({
+        product:  row.product,
+        totalQty: Number(row.total_qty || 0),
+        avgPrice: Number(row.avg_price || 0),
+      })));
+    })();
+
+    return () => { cancelled = true; };
+  }, [
+    showStats, statsApplicable, listFarmerFilter, filterProduct, filterParity,
+    filterDeliveryLocation, filterLoadingLocation, filterDeliveryFrom,
+    filterDeliveryTo, filterCropYear,
+  ]);
+
   // ── Derived data ─────────────────────────────────────────────────────────────
 
   const filteredBids = (bids || []).filter((b) => {
@@ -228,6 +282,7 @@ export default function BidsTab() {
     if (filterParity !== "all" && b.parity !== filterParity) return false;
     if (filterDeliveryLocation !== "all" && (b.delivery_location || "-") !== filterDeliveryLocation) return false;
     if (filterLoadingLocation !== "all" && (b.loading_location || "-") !== filterLoadingLocation) return false;
+    if (filterCropYear !== "all" && String(b.crop_year ?? "") !== filterCropYear) return false;
     if (filterDeliveryFrom || filterDeliveryTo) {
       const start = b.delivery_start ? b.delivery_start.slice(0, 10) : null;
       const end = b.delivery_end ? b.delivery_end.slice(0, 10) : null;
@@ -238,9 +293,11 @@ export default function BidsTab() {
     return true;
   });
 
-  const statsRows = computeAcceptedStats(filteredBids);
+  // Derived, not synced: a status filter excluding accepted simply has no
+  // statistics, and the last fetched rows stay cached for when it is cleared.
+  const visibleStats = statsApplicable ? statsRows : [];
 
-  const statsTotalQty = statsRows.reduce((sum, row) => sum + Number(row.totalQty || 0), 0);
+  const statsTotalQty = visibleStats.reduce((sum, row) => sum + Number(row.totalQty || 0), 0);
 
   const deliveryLocationOptions = Array.from(
     new Set((bids || []).map((b) => b.delivery_location || "-").filter((loc) => loc && loc.trim() !== ""))
@@ -249,6 +306,10 @@ export default function BidsTab() {
   const loadingLocationOptions = Array.from(
     new Set((bids || []).map((b) => b.loading_location || "-").filter((loc) => loc && loc.trim() !== ""))
   ).sort((a, b) => a.localeCompare(b));
+
+  const cropYearOptions = Array.from(
+    new Set((bids || []).map((b) => b.crop_year).filter((y) => y != null))
+  ).sort((a, b) => b - a);
 
   // ── Render ────────────────────────────────────────────────────────────────────
 
@@ -272,7 +333,11 @@ export default function BidsTab() {
 
         {showStats && (
           <div style={{ marginTop: 12 }}>
-            {statsRows.length === 0 ? (
+            {statsLoading && statsApplicable ? (
+              <p className="small-text">Se calculează statisticile…</p>
+            ) : statsError && statsApplicable ? (
+              <p className="badge rejected" role="alert">{statsError}</p>
+            ) : visibleStats.length === 0 ? (
               <p className="small-text">Nu există contracte acceptate pentru filtrele selectate.</p>
             ) : (
               <>
@@ -287,7 +352,7 @@ export default function BidsTab() {
                     </tr>
                   </thead>
                   <tbody>
-                    {statsRows.map((row) => (
+                    {visibleStats.map((row) => (
                       <tr key={row.product}>
                         <td>{getProductLabelSafe(row.product)}</td>
                         <td>{Number(row.totalQty || 0).toFixed(2)}</td>
@@ -342,6 +407,7 @@ export default function BidsTab() {
                     setFilterDeliveryTo("");
                     setFilterDeliveryLocation("all");
                     setFilterLoadingLocation("all");
+                    setFilterCropYear("all");
                   }}
                 >
                   Resetează filtrele
@@ -672,6 +738,19 @@ export default function BidsTab() {
                 </div>
               </div>
 
+              {/* An recoltă */}
+              <div className="bid-form-grid-2">
+                <div className="bid-input-container">
+                  <label className="bid-input-label" htmlFor="af-crop-year">An recoltă</label>
+                  <select id="af-crop-year" className="bid-input-field" value={filterCropYear} onChange={(e) => setFilterCropYear(e.target.value)}>
+                    <option value="all">Toți anii</option>
+                    {cropYearOptions.map((year) => (
+                      <option key={year} value={String(year)}>{year}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
               {/* Livrare de la + până la */}
               <div className="bid-form-grid-2">
                 <div className="bid-input-container">
@@ -709,6 +788,7 @@ export default function BidsTab() {
                     setFilterDeliveryTo("");
                     setFilterDeliveryLocation("all");
                     setFilterLoadingLocation("all");
+                    setFilterCropYear("all");
                   }}
                 >
                   Resetează
