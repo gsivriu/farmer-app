@@ -37,7 +37,9 @@ AS $$
     );
 $$;
 
-REVOKE EXECUTE ON FUNCTION public.bid_filter_options() FROM PUBLIC;
+-- Both revokes are needed: EXECUTE reaches anon via the default PUBLIC grant
+-- and via an explicit grant from Supabase's default privileges.
+REVOKE EXECUTE ON FUNCTION public.bid_filter_options() FROM PUBLIC, anon;
 GRANT  EXECUTE ON FUNCTION public.bid_filter_options() TO authenticated;
 
 -- Partial indexes keep the DISTINCT scans off the heap. Both columns are

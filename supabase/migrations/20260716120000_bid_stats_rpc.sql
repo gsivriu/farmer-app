@@ -84,11 +84,14 @@ $$;
 
 -- RLS already yields anon an empty set, but leaving the function on the public
 -- API surface is the same finding the linter raises elsewhere in this schema.
--- EXECUTE is granted to PUBLIC by default and anon inherits it, so revoking
--- from anon alone is a no-op — the grant has to come off PUBLIC.
+--
+-- Both revokes are needed. EXECUTE reaches anon by two independent routes: the
+-- default PUBLIC grant, and an explicit grant Supabase's default privileges
+-- attach to every new function in this schema. Revoking either one alone
+-- leaves the other standing.
 REVOKE EXECUTE ON FUNCTION public.bid_stats(
     uuid, text, text, text, text, date, date, date, date, integer, boolean, boolean
-) FROM PUBLIC;
+) FROM PUBLIC, anon;
 
 GRANT EXECUTE ON FUNCTION public.bid_stats(
     uuid, text, text, text, text, date, date, date, date, integer, boolean, boolean
