@@ -16,15 +16,8 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* The Oferte page reads as an actual page, not a "card on a card".
-   Drop the inherited .card chrome and add page-grade padding so the
-   content breathes away from the sidebar and the right edge. */
+/* The Oferte page reads as an actual page, not a "card on a card". */
 .oferte-page.card {
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  border-radius: 0;
-  padding: 26px 32px 22px;
   margin: 0;
   width: 100%;
   max-width: none;
@@ -33,15 +26,33 @@
   gap: 24px;
 }
 
+/* Padding has to be qualified with .dashboard-surface to outrank
+   `.dashboard-surface .admin-card { padding: 0 }` in styles.css. Both selectors
+   are (0,2,0), so that one wins purely on being later in the bundle — which is
+   why every page-padding value tried here so far computed to 0 and the page sat
+   flush in the corner. The chrome resets (transparent/no border/no shadow/no
+   radius) that used to live above are dropped: the .admin-card rule already
+   applies them, and only the padding ever lost. */
+.dashboard-surface .oferte-page.card {
+  padding: 26px 32px 22px;
+}
+
+/* Same .dashboard-surface qualifier as the base rule above — a media query adds
+   no specificity, so an unqualified selector here would lose to it and leave
+   desktop padding on small screens. */
 @media (max-width: 1023px) {
-  .oferte-page.card {
+  .dashboard-surface .oferte-page.card {
     padding: 20px 20px 22px;
+  }
+  .oferte-page.card {
     gap: 20px;
   }
 }
 @media (max-width: 600px) {
-  .oferte-page.card {
+  .dashboard-surface .oferte-page.card {
     padding: 16px 14px 20px;
+  }
+  .oferte-page.card {
     gap: 16px;
   }
 }
