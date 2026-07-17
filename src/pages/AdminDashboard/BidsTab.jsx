@@ -331,15 +331,21 @@ export default function BidsTab() {
   // an incoming row still matches the active filters would mean duplicating the
   // filter logic client-side — the thing this refactor removes — and the loaded
   // window is at most a few hundred rows.
+  // Written in an effect, not during render: React reserves render for pure
+  // computation, and a ref assigned mid-render is not guaranteed to survive a
+  // discarded render pass. No dependency array — it re-runs after every render
+  // so the closure always sees the current fetchPage and window size.
   const refreshWindowRef = useRef(null);
-  refreshWindowRef.current = async () => {
-    const { data, error: fetchError } = await fetchPage({
-      limit: Math.max(bids.length, PAGE_SIZE),
-    });
-    if (fetchError || !data) return;
-    setBids(data);
-    setHasMore(data.length >= Math.max(bids.length, PAGE_SIZE));
-  };
+  useEffect(() => {
+    refreshWindowRef.current = async () => {
+      const { data, error: fetchError } = await fetchPage({
+        limit: Math.max(bids.length, PAGE_SIZE),
+      });
+      if (fetchError || !data) return;
+      setBids(data);
+      setHasMore(data.length >= Math.max(bids.length, PAGE_SIZE));
+    };
+  });
 
   // Stable identity so the channel is not torn down and rebuilt on every
   // filter change.
