@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useMemo, useEffect } from "react";
 import StocksPage from "./Motherboard/StocksPage";
 import { TrainIcon, BargeIcon, TruckIcon } from "../components/TransportIcons";
-import { useAppContext } from "../context/AppContext.jsx";
+import { supabase } from "../supabaseClient";
 import { getProductLabelSafe } from "../utils/productLabels";
 import { formatCompactNumber } from "../utils/numberFormat";
 
@@ -1227,14 +1227,30 @@ const PAYMENT_STYLES = {
 const DEMO_PAYMENT = ["fully_paid", "partially_paid", "payment_pending"];
 const DEMO_PCT     = [100, 60, 30, 0];
 
-function ExecutionTab() {
-  // TODO: replace with Supabase fetch when ready
-  const { bids } = useAppContext();
+const EXECUTION_PAGE_SIZE = 100;
 
-  const acceptedBids = useMemo(
-    () => (Array.isArray(bids) ? bids.filter(b => b.status === "accepted") : []),
-    [bids]
-  );
+function ExecutionTab() {
+  // Fetches its own accepted contracts rather than filtering a full copy of the
+  // bids table held in context — that copy no longer exists.
+  // TODO: paginate / persist calculation_sent + payment_status to Supabase.
+  const [acceptedBids, setAcceptedBids] = useState([]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    supabase
+      .from("bids")
+      .select("id, farmer_id, farmer_email, product, quantity, price, counter_price, final_price, status, parity, delivery_start, delivery_end, contract_no, created_at")
+      .eq("status", "accepted")
+      .order("id", { ascending: false })
+      .limit(EXECUTION_PAGE_SIZE)
+      .then(({ data, error }) => {
+        if (cancelled || error || !data) return;
+        setAcceptedBids(data);
+      });
+
+    return () => { cancelled = true; };
+  }, []);
 
   // Local UI state per bid — TODO: persist calculation_sent + payment_status to Supabase
   const [calcState, setCalcState] = useState({});
