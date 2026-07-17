@@ -4,9 +4,154 @@ import { useAppContext } from "../../context/AppContext.jsx";
 import { getProductLabelSafe, PRODUCT_FILTER_KEYS } from "../../utils/productLabels";
 import { formatCompactNumber, hasPositiveNumber } from "../../utils/numberFormat";
 import { formatDeliveryRange, formatLocationDisplay, isFreightParity } from "../../utils/formatting";
-import BidCardV2 from "../../components/features/BidCardV2.jsx";
+import AdminBidDetailModal from "../../components/AdminBidDetailModal.jsx";
+import "./BidsTab.css";
 
-const BidCardComponent = BidCardV2;
+const PERIOD_OPTIONS = [
+  { value: "all", label: "Toate" },
+  { value: "1", label: "Astăzi" },
+  { value: "7", label: "Ultimele 7 zile" },
+  { value: "30", label: "Ultimele 30 zile" },
+  { value: "90", label: "Ultimele 90 zile" },
+  { value: "365", label: "Ultimul an" },
+];
+
+const periodCutoff = (value) => {
+  if (!value || value === "all") return null;
+  const days = Number(value);
+  if (!Number.isFinite(days) || days <= 0) return null;
+  const cutoff = new Date();
+  cutoff.setHours(0, 0, 0, 0);
+  cutoff.setDate(cutoff.getDate() - (days - 1));
+  return cutoff;
+};
+
+const RO_MONTHS = ["ian.", "feb.", "mar.", "apr.", "mai", "iun.", "iul.", "aug.", "sep.", "oct.", "noi.", "dec."];
+const formatCardDate = (iso) => {
+  if (!iso) return { day: "—", time: "" };
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return { day: "—", time: "" };
+  const day = `${String(d.getDate()).padStart(2, "0")} ${RO_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+  const time = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  return { day, time };
+};
+
+const formatQuantity = (qty) => {
+  const n = Number(qty || 0);
+  if (!Number.isFinite(n)) return "—";
+  return new Intl.NumberFormat("ro-RO", { maximumFractionDigits: 2 }).format(n);
+};
+
+const formatCardPrice = (bid) => {
+  const s = String(bid?.status || "").toLowerCase();
+  const raw = (s === "accepted" || s === "rejected")
+    ? (bid.final_price ?? (hasPositiveNumber(bid.counter_price) ? bid.counter_price : bid.price))
+    : (hasPositiveNumber(bid.counter_price) ? bid.counter_price : bid.price);
+  const n = Number(raw);
+  if (!Number.isFinite(n)) return "—";
+  return new Intl.NumberFormat("ro-RO", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+};
+
+const formatCardDelivery = (bid) => {
+  if (!bid?.parity) return null;
+  const parity = String(bid.parity).toUpperCase();
+  const delivery = formatLocationDisplay(bid.delivery_location || "");
+  const loading = formatLocationDisplay(bid.loading_location || "");
+  if (isFreightParity(bid.parity)) {
+    const loc = (loading && loading !== "-") ? loading : (delivery && delivery !== "-" ? delivery : "");
+    return loc ? `${parity} ${loc}` : null;
+  }
+  return (delivery && delivery !== "-") ? `${parity} ${delivery}` : parity;
+};
+
+const STATUS_PILL = {
+  accepted: { cls: "ok",   label: "Acceptat" },
+  rejected: { cls: "err",  label: "Respins"  },
+  countered: { cls: "info", label: "Contra-ofertă" },
+  farmer_countered: { cls: "info", label: "Răspuns fermier" },
+  pending:  { cls: "warn", label: "În așteptare" },
+};
+const statusVisual = (s) => STATUS_PILL[String(s || "").toLowerCase()] || STATUS_PILL.pending;
+
+function OfferCard({ bid, onOpen }) {
+  const farmer = bid.farmer_email || bid.farmer_id || "—";
+  const date = formatCardDate(bid.created_at);
+  const status = statusVisual(bid.status);
+  const unit = `${bid.currency || (bid.product === "sunflower" ? "USD" : "EUR")}/t`;
+  const deliveryLabel = formatCardDelivery(bid);
+  const cropYear = bid.crop_year || "—";
+
+  const open = (e) => { e.stopPropagation(); onOpen?.(); };
+  const handleKey = (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen?.(); }
+  };
+
+  return (
+    <article
+      className="offer-card"
+      role="button"
+      tabIndex={0}
+      onClick={() => onOpen?.()}
+      onKeyDown={handleKey}
+    >
+      <header className="offer-head">
+        <div className="head-prod">
+          <span className="prod-name">{getProductLabelSafe(bid.product)}</span>
+        </div>
+        <div className="head-recolta">
+          <span className="recolta">Recoltă <span className="crop">{cropYear}</span></span>
+        </div>
+        <div className="head-fermier">
+          <span className="fermier-email" title={farmer}>{farmer}</span>
+        </div>
+        <div className="head-status">
+          <span className={`pill ${status.cls}`}><span className="dot" />{status.label}</span>
+          <button type="button" className="row-action" aria-label="Acțiuni" onClick={open}>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+              <circle cx="2.5" cy="6" r="1" />
+              <circle cx="6" cy="6" r="1" />
+              <circle cx="9.5" cy="6" r="1" />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <div className="offer-data">
+        <div className="field">
+          <span className="field-label">Cantitate</span>
+          <span className="field-value num">{formatQuantity(bid.quantity)}<span className="unit">t</span></span>
+        </div>
+        <div className="field">
+          <span className="field-label">Preț</span>
+          <span className="field-value num">{formatCardPrice(bid)}<span className="unit">{unit}</span></span>
+        </div>
+        <div className="field">
+          <span className="field-label">Livrare</span>
+          {deliveryLabel ? (
+            <div className="field-value">
+              <span className="pin">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M6 1.5c-2 0-3.5 1.5-3.5 3.5 0 2.5 3.5 5.5 3.5 5.5s3.5-3 3.5-5.5C9.5 3 8 1.5 6 1.5z" />
+                  <circle cx="6" cy="5" r="1.2" />
+                </svg>
+                <span>{deliveryLabel}</span>
+              </span>
+            </div>
+          ) : (
+            <div className="field-value muted">—</div>
+          )}
+        </div>
+        <div className="field date-field">
+          <span className="field-label">Data</span>
+          <span className="field-value-wrap">
+            <span className="field-value">{date.day}</span>
+            {date.time && <span className="field-sub">{date.time}</span>}
+          </span>
+        </div>
+      </div>
+    </article>
+  );
+}
 
 const formatDateOnly = (value) => {
   if (!value) return "-";
@@ -92,6 +237,7 @@ export default function BidsTab() {
   const [filterDeliveryTo, setFilterDeliveryTo] = useState("");
   const [filterDeliveryLocation, setFilterDeliveryLocation] = useState("all");
   const [filterLoadingLocation, setFilterLoadingLocation] = useState("all");
+  const [filterPeriod, setFilterPeriod] = useState("30");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [showStats, setShowStats] = useState(false);
 
@@ -154,16 +300,6 @@ export default function BidsTab() {
     return null;
   };
 
-  // Direct accept/reject from card — no modal, no freight validation needed
-  const submitDirectDecision = async (action, bid) => {
-    const { error } = await supabase.from("bids").update({ status: action }).eq("id", bid.id);
-    if (error) { console.error("Decision error:", error.message); return; }
-    if (action === "accepted" && bid.farmer_id) {
-      await addFarmerRewardsPoints(bid.farmer_id, Number(bid.quantity || 0));
-    }
-    await fetchBids();
-  };
-
   const submitAdminDecision = async (action, targetBid = null) => {
     const bid = targetBid ?? adminSelectedBid;
     if (!bid) return;
@@ -223,16 +359,10 @@ export default function BidsTab() {
 
   // ── Derived data ─────────────────────────────────────────────────────────────
 
-  const filteredBids = (bids || []).filter((b) => {
+  const periodCut = periodCutoff(filterPeriod);
+  const scopedBids = (bids || []).filter((b) => {
     if (listFarmerFilter !== "all" && b.farmer_id !== listFarmerFilter) return false;
     if (filterProduct !== "all" && b.product !== filterProduct) return false;
-    if (filterStatus !== "all") {
-      if (filterStatus === "pending") {
-        if (b.status !== "pending" && b.status !== "countered" && b.status !== "farmer_countered") return false;
-      } else if (b.status !== filterStatus) {
-        return false;
-      }
-    }
     if (filterParity !== "all" && b.parity !== filterParity) return false;
     if (filterDeliveryLocation !== "all" && (b.delivery_location || "-") !== filterDeliveryLocation) return false;
     if (filterLoadingLocation !== "all" && (b.loading_location || "-") !== filterLoadingLocation) return false;
@@ -243,7 +373,31 @@ export default function BidsTab() {
       if (filterDeliveryFrom && start < filterDeliveryFrom) return false;
       if (filterDeliveryTo && end > filterDeliveryTo) return false;
     }
+    if (periodCut) {
+      if (!b.created_at) return false;
+      const created = new Date(b.created_at);
+      if (Number.isNaN(created.getTime()) || created < periodCut) return false;
+    }
     return true;
+  });
+
+  const isPending = (s) => s === "pending" || s === "countered" || s === "farmer_countered";
+  const statusCounts = scopedBids.reduce(
+    (acc, b) => {
+      acc.all += 1;
+      if (b.status === "accepted") acc.accepted += 1;
+      else if (b.status === "rejected") acc.rejected += 1;
+      else if (isPending(b.status)) acc.pending += 1;
+      return acc;
+    },
+    { all: 0, accepted: 0, rejected: 0, pending: 0 },
+  );
+  const totalVolume = scopedBids.reduce((sum, b) => sum + Number(b.quantity || 0), 0);
+
+  const filteredBids = scopedBids.filter((b) => {
+    if (filterStatus === "all") return true;
+    if (filterStatus === "pending") return isPending(b.status);
+    return b.status === filterStatus;
   });
 
   const statsRows = (() => {
@@ -279,10 +433,21 @@ export default function BidsTab() {
 
   return (
     <>
-      <div className="card admin-card dashboard-card">
-        <div className="card-header admin-bids-header activity-header-compact">
-          <h2 className="market-title">Toate ofertele</h2>
-          <div className="admin-bids-actions">
+      <div className="card admin-card dashboard-card oferte-page">
+        <header className="oferte-head">
+          <div className="oferte-title">
+            <h2>Oferte</h2>
+            <div className="oferte-sub">
+              <span className="stat"><strong>{statusCounts.all}</strong>&nbsp;total</span>
+              <span className="sep" />
+              <span className="stat"><strong>{statusCounts.accepted}</strong>&nbsp;acceptate</span>
+              <span className="sep" />
+              <span className="stat"><strong>{statusCounts.rejected}</strong>&nbsp;respinse</span>
+              <span className="sep" />
+              <span className="stat"><strong>{formatCompactNumber(totalVolume)}</strong>&nbsp;t volum</span>
+            </div>
+          </div>
+          <div className="oferte-tools">
             <button type="button" className="btn small outline" onClick={() => setFiltersOpen(true)}>Filtre</button>
             <button type="button" className="btn small outline" onClick={() => setShowStats((prev) => !prev)}>
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" style={{ marginRight: 5 }}>
@@ -292,6 +457,91 @@ export default function BidsTab() {
               </svg>
               Statistici
             </button>
+          </div>
+        </header>
+
+        <div className="oferte-filter-bar">
+          <div className="oferte-tabs" role="tablist" aria-label="Filtrează după stare">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={filterStatus === "all"}
+              className={"oferte-tab" + (filterStatus === "all" ? " is-on" : "")}
+              onClick={() => setFilterStatus("all")}
+            >
+              Toate <span className="count">{statusCounts.all}</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={filterStatus === "accepted"}
+              className={"oferte-tab" + (filterStatus === "accepted" ? " is-on" : "")}
+              onClick={() => setFilterStatus("accepted")}
+            >
+              Acceptate <span className="count">{statusCounts.accepted}</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={filterStatus === "rejected"}
+              className={"oferte-tab" + (filterStatus === "rejected" ? " is-on" : "")}
+              onClick={() => setFilterStatus("rejected")}
+            >
+              Respinse <span className="count">{statusCounts.rejected}</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={filterStatus === "pending"}
+              className={"oferte-tab" + (filterStatus === "pending" ? " is-on" : "")}
+              onClick={() => setFilterStatus("pending")}
+            >
+              În așteptare <span className="count">{statusCounts.pending}</span>
+            </button>
+          </div>
+
+          <div className="oferte-dds">
+            <div className="oferte-dd-group" style={{ "--label-pad": "62px" }}>
+              <span className="lbl">Produs:</span>
+              <select
+                aria-label="Filtrează după produs"
+                className="oferte-dd"
+                value={filterProduct}
+                onChange={(e) => setFilterProduct(e.target.value)}
+              >
+                <option value="all">Toate</option>
+                {PRODUCT_FILTER_KEYS.map((key) => (
+                  <option key={key} value={key}>{getProductLabelSafe(key)}</option>
+                ))}
+              </select>
+            </div>
+            <div className="oferte-dd-group" style={{ "--label-pad": "64px" }}>
+              <span className="lbl">Fermier:</span>
+              <select
+                aria-label="Filtrează după fermier"
+                className="oferte-dd"
+                value={listFarmerFilter}
+                onChange={(e) => setListFarmerFilter(e.target.value)}
+              >
+                <option value="all">Toți</option>
+                {farmers.map((f) => (
+                  <option key={f.id} value={f.id}>{f.email || f.id}</option>
+                ))}
+              </select>
+            </div>
+            <div className="oferte-dd-group" style={{ "--label-pad": "75px" }}>
+              <span className="lbl">Perioadă:</span>
+              <select
+                aria-label="Filtrează după perioadă"
+                className="oferte-dd"
+                value={filterPeriod}
+                onChange={(e) => setFilterPeriod(e.target.value)}
+              >
+                {PERIOD_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
@@ -333,15 +583,12 @@ export default function BidsTab() {
         {error && <p className="badge rejected" style={{ marginTop: 12 }}>{error}</p>}
 
         {!loading && !error && (
-          <div className="admin-bid-list" style={{ marginTop: 14 }}>
+          <div className="offer-list">
             {filteredBids.map((b) => (
-              <BidCardComponent
+              <OfferCard
                 key={b.id}
                 bid={b}
-                onClick={() => openAdminModal(b, null)}
-                onAccept={() => submitDirectDecision("accepted", b)}
-                onReject={() => submitDirectDecision("rejected", b)}
-                onCounter={() => openAdminModal(b, "countered")}
+                onOpen={() => openAdminModal(b, null)}
               />
             ))}
 
@@ -364,6 +611,7 @@ export default function BidsTab() {
                     setFilterDeliveryTo("");
                     setFilterDeliveryLocation("all");
                     setFilterLoadingLocation("all");
+                    setFilterPeriod("all");
                   }}
                 >
                   Resetează filtrele
@@ -374,236 +622,12 @@ export default function BidsTab() {
         )}
       </div>
 
-      {/* Admin bid action modal */}
       {adminSelectedBid && (
-        <div
-          className="bid-modal-backdrop bid-modal-backdrop-details"
-          role="dialog"
-          aria-modal="true"
-          onClick={() => setAdminSelectedBid(null)}
-        >
-          <div
-            className="bid-modal bid-modal-details"
-            onClick={(event) => { event.stopPropagation(); setAdminConfirmAction(null); }}
-          >
-            <div className="bid-detail-drag" aria-hidden="true" />
-            <div className="bid-modal-header">
-              <div className="bid-detail-header-left">
-                <div className="bid-detail-title-row">
-                  <h3 className="bid-detail-title">{getProductLabelSafe(adminSelectedBid.product)}</h3>
-                  <BidStatusBadge status={adminSelectedBid.status} />
-                </div>
-                <span className="bid-detail-date">{formatDateTime(adminSelectedBid.created_at)}</span>
-              </div>
-              <button type="button" className="bid-detail-close" onClick={() => setAdminSelectedBid(null)}>
-                ×
-              </button>
-            </div>
-            <div className="bid-modal-body">
-              <div className="bid-modal-row">
-                <span className="bid-modal-label">Fermier</span>
-                <span className="bid-modal-value">{adminSelectedBid.farmer_email || adminSelectedBid.farmer_id}</span>
-              </div>
-              <div className="bid-modal-row">
-                <span className="bid-modal-label">Produs</span>
-                <span className="bid-modal-value">{getProductLabelSafe(adminSelectedBid.product)}</span>
-              </div>
-              <div className="bid-modal-row">
-                <span className="bid-modal-label">Cantitate</span>
-                <span className="bid-modal-value">{formatCompactNumber(adminSelectedBid.quantity)} t</span>
-              </div>
-              <div className="bid-modal-row">
-                <span className="bid-modal-label">Preț</span>
-                <span className="bid-modal-value">
-                  {adminSelectedBid.status === "accepted" && getAcceptedPrice(adminSelectedBid) != null ? (
-                    <>{formatCompactNumber(getAcceptedPrice(adminSelectedBid))}{" "}{`${adminSelectedBid.currency || (adminSelectedBid.product === "sunflower" ? "USD" : "EUR")}/t`}</>
-                  ) : hasPositiveNumber(adminSelectedBid.counter_price) ? (
-                    <>{formatCompactNumber(adminSelectedBid.counter_price)}{" "}{`${adminSelectedBid.currency || (adminSelectedBid.product === "sunflower" ? "USD" : "EUR")}/t`}</>
-                  ) : (
-                    <>{formatCompactNumber(adminSelectedBid.price)}{" "}{`${adminSelectedBid.currency || (adminSelectedBid.product === "sunflower" ? "USD" : "EUR")}/t`}</>
-                  )}
-                </span>
-              </div>
-              <div className="bid-modal-row">
-                <span className="bid-modal-label">Contra-ofertă</span>
-                <span className="bid-modal-value bid-modal-counter">
-                  <input
-                    className="bid-detail-counter-input"
-                    type="number"
-                    step="0.01"
-                    inputMode="decimal"
-                    placeholder="-"
-                    value={adminModalCounter}
-                    onChange={(e) => setAdminModalCounter(e.target.value)}
-                  />
-                  <span className="bid-modal-unit">
-                    {`${adminSelectedBid.currency || (adminSelectedBid.product === "sunflower" ? "USD" : "EUR")}/t`}
-                  </span>
-                </span>
-              </div>
-              {isFreightParity(adminSelectedBid.parity) && (
-                <div className="bid-modal-row">
-                  <span className="bid-modal-label">Transport</span>
-                  <span className="bid-modal-value bid-modal-counter">
-                    <input
-                      className="bid-detail-counter-input"
-                      type="number"
-                      step="0.01"
-                      inputMode="decimal"
-                      placeholder="-"
-                      value={adminModalFreight}
-                      onChange={(e) => setAdminModalFreight(e.target.value)}
-                    />
-                    <span className="bid-modal-unit">
-                      {`${adminSelectedBid.currency || (adminSelectedBid.product === "sunflower" ? "USD" : "EUR")}/t`}
-                    </span>
-                  </span>
-                </div>
-              )}
-              <div className="bid-modal-row">
-                <span className="bid-modal-label">Paritate</span>
-                <span className="bid-modal-value">
-                  {isFreightParity(adminSelectedBid.parity) ? (
-                    <span className="bid-modal-parity-edit">
-                      <span>
-                        {String(adminSelectedBid.parity || "").toUpperCase()}{" "}
-                        {adminSelectedBid.loading_location || "-"}
-                      </span>
-                      <span className="bid-modal-parity-separator">la</span>
-                      <select
-                        className="input inline-select bid-modal-inline-select"
-                        value={adminModalDelivery}
-                        onChange={(e) => setAdminModalDelivery(e.target.value)}
-                      >
-                        <option value="">Locație livrare</option>
-                        {adminModalDelivery && !deliveryLocations.includes(adminModalDelivery) && (
-                          <option value={adminModalDelivery}>{formatLocationDisplay(adminModalDelivery)}</option>
-                        )}
-                        {deliveryLocations.map((loc) => (
-                          <option key={loc} value={loc}>{formatLocationDisplay(loc)}</option>
-                        ))}
-                      </select>
-                    </span>
-                  ) : (
-                    formatParityDisplay(adminSelectedBid, { detailed: true })
-                  )}
-                </span>
-              </div>
-              <div className="bid-modal-row">
-                <span className="bid-modal-label">Livrare</span>
-                <span className="bid-modal-value">
-                  {formatDeliveryRange(adminSelectedBid.delivery_start, adminSelectedBid.delivery_end)}
-                </span>
-              </div>
-              {adminSelectedBid.crop_year && (
-                <div className="bid-modal-row">
-                  <span className="bid-modal-label">An recoltă</span>
-                  <span className="bid-modal-value">{adminSelectedBid.crop_year}</span>
-                </div>
-              )}
-              {adminSelectedBid.quantity_tolerance != null && (
-                <div className="bid-modal-row">
-                  <span className="bid-modal-label">Toleranță</span>
-                  <span className="bid-modal-value">±{adminSelectedBid.quantity_tolerance}%</span>
-                </div>
-              )}
-              {adminSelectedBid.remarks && (
-                <div className="bid-modal-row">
-                  <span className="bid-modal-label">Observații</span>
-                  <span className="bid-modal-value">{adminSelectedBid.remarks}</span>
-                </div>
-              )}
-              <div className="bid-modal-row">
-                <span className="bid-modal-label">Stare</span>
-                <span className="bid-modal-value">{getStatusLabel(adminSelectedBid.status)}</span>
-              </div>
-              {adminSelectedBid.status === "accepted" && adminSelectedBid.contract_no && (
-                <div className="bid-modal-row">
-                  <span className="bid-modal-label">Contract</span>
-                  <span className="bid-modal-value">{adminSelectedBid.contract_no}</span>
-                </div>
-              )}
-            </div>
-            {modalError && (
-              <div className="modal-inline-error" role="alert">
-                {modalError}
-              </div>
-            )}
-            <div className="bid-detail-footer">
-              {(() => {
-                const currentCounter = parseOptionalNumber(adminModalCounter);
-                const originalCounter = parseOptionalNumber(adminModalOriginal.counter);
-                const currentFreight = parseOptionalNumber(adminModalFreight);
-                const originalFreight = parseOptionalNumber(adminModalOriginal.freight);
-                const currentDelivery = normalizeOptionalText(adminModalDelivery);
-                const originalDelivery = normalizeOptionalText(adminModalOriginal.delivery);
-                const isDecisionLocked =
-                  adminSelectedBid.status === "accepted" ||
-                  adminSelectedBid.status === "rejected" ||
-                  adminSelectedBid.status === "countered";
-                const counterInvalid = currentCounter != null && !Number.isFinite(currentCounter);
-                const freightInvalid =
-                  isFreightParity(adminSelectedBid.parity) &&
-                  currentFreight != null && !Number.isFinite(currentFreight);
-                const counterChanged =
-                  counterInvalid ||
-                  (currentCounter == null && originalCounter != null) ||
-                  (currentCounter != null && originalCounter == null) ||
-                  (Number.isFinite(currentCounter) && Number.isFinite(originalCounter) && currentCounter !== originalCounter);
-                const freightChanged =
-                  isFreightParity(adminSelectedBid.parity) &&
-                  (freightInvalid ||
-                    (currentFreight == null && originalFreight != null) ||
-                    (currentFreight != null && originalFreight == null) ||
-                    (Number.isFinite(currentFreight) && Number.isFinite(originalFreight) && currentFreight !== originalFreight));
-                const deliveryChanged =
-                  isFreightParity(adminSelectedBid.parity) && currentDelivery !== originalDelivery;
-                const hasChanges = counterChanged || freightChanged || deliveryChanged;
-
-                return (
-                  <>
-                    <button
-                      type="button"
-                      className={`bid-action-reject${adminConfirmAction === "rejected" ? " is-confirming" : ""}`}
-                      disabled={isDecisionLocked}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        if (adminConfirmAction !== "rejected") { setAdminConfirmAction("rejected"); return; }
-                        submitAdminDecision("rejected");
-                      }}
-                    >
-                      {adminConfirmAction === "rejected" ? "Confirmi?" : "Respinge"}
-                    </button>
-                    <button
-                      type="button"
-                      className={`bid-action-counter${adminConfirmAction === "countered" ? " is-confirming" : ""}`}
-                      disabled={isDecisionLocked || !hasChanges || counterInvalid || freightInvalid}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        if (adminConfirmAction !== "countered") { setAdminConfirmAction("countered"); return; }
-                        submitAdminDecision("countered");
-                      }}
-                    >
-                      {adminConfirmAction === "countered" ? "Confirmi?" : "Contra-ofertă"}
-                    </button>
-                    <button
-                      type="button"
-                      className={`bid-action-accept${adminConfirmAction === "accepted" ? " is-confirming" : ""}`}
-                      disabled={isDecisionLocked || hasChanges}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        if (adminConfirmAction !== "accepted") { setAdminConfirmAction("accepted"); return; }
-                        submitAdminDecision("accepted");
-                      }}
-                    >
-                      {adminConfirmAction === "accepted" ? "Confirmi?" : "Acceptă"}
-                    </button>
-                  </>
-                );
-              })()}
-            </div>{/* bid-detail-footer */}
-          </div>
-        </div>
+        <AdminBidDetailModal
+          bid={(bids || []).find((b) => b.id === adminSelectedBid.id) || adminSelectedBid}
+          onClose={() => setAdminSelectedBid(null)}
+          onUpdated={fetchBids}
+        />
       )}
 
       {/* Filters modal */}
@@ -731,6 +755,7 @@ export default function BidsTab() {
                     setFilterDeliveryTo("");
                     setFilterDeliveryLocation("all");
                     setFilterLoadingLocation("all");
+                    setFilterPeriod("all");
                   }}
                 >
                   Resetează
