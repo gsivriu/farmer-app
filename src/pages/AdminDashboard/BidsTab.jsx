@@ -293,7 +293,14 @@ export default function BidsTab() {
       setLoading(true);
       setError(null);
 
-      const { data, error: fetchError } = await fetchPage();
+      let data, fetchError;
+      try {
+        ({ data, error: fetchError } = await fetchPage());
+      } catch (err) {
+        // A rejected promise (network down, bad Supabase URL, CORS) skips the
+        // {error} path entirely; without this the spinner would run forever.
+        fetchError = err;
+      }
       if (cancelled) return;
 
       setLoading(false);
@@ -316,7 +323,12 @@ export default function BidsTab() {
     if (!last || loadingMore) return;
 
     setLoadingMore(true);
-    const { data, error: fetchError } = await fetchPage({ cursor: last.id });
+    let data, fetchError;
+    try {
+      ({ data, error: fetchError } = await fetchPage({ cursor: last.id }));
+    } catch (err) {
+      fetchError = err;
+    }
     setLoadingMore(false);
 
     if (fetchError) {
@@ -383,7 +395,12 @@ export default function BidsTab() {
     let cancelled = false;
 
     (async () => {
-      const { data, error: rpcError } = await supabase.rpc("bid_counts", rpcFilters(false));
+      let data, rpcError;
+      try {
+        ({ data, error: rpcError } = await supabase.rpc("bid_counts", rpcFilters()));
+      } catch (err) {
+        rpcError = err;
+      }
       if (cancelled) return;
       if (rpcError || !data) { setCounts(EMPTY_COUNTS); return; }
       setCounts({ ...EMPTY_COUNTS, ...data });
@@ -405,7 +422,12 @@ export default function BidsTab() {
       setStatsLoading(true);
       setStatsError(null);
 
-      const { data, error: rpcError } = await supabase.rpc("bid_stats", rpcFilters(true));
+      let data, rpcError;
+      try {
+        ({ data, error: rpcError } = await supabase.rpc("bid_stats", rpcFilters()));
+      } catch (err) {
+        rpcError = err;
+      }
       if (cancelled) return;
 
       setStatsLoading(false);
