@@ -1,0 +1,455 @@
+/* ─── Oferte page (admin) — redesign 2026-05 ──────────────────── */
+
+.oferte-page {
+  --ink:    var(--color-text-1);
+  --ink-2:  var(--color-text-2);
+  --ink-3:  var(--color-text-3);
+  --bg:     var(--color-canvas);
+  --surface: var(--color-surface);
+  --surface-2: var(--color-surface-2);
+  --border: var(--color-border-medium);
+  --border-s: var(--color-border);
+  --brand:  var(--color-brand);
+  --ok:     var(--color-success);
+  --warn:   var(--color-warning);
+  --err:    var(--color-error);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The Oferte page reads as an actual page, not a "card on a card". */
+.oferte-page.card {
+  margin: 0;
+  width: 100%;
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Padding has to be qualified with .dashboard-surface to outrank
+   `.dashboard-surface .admin-card { padding: 0 }` in styles.css. Both selectors
+   are (0,2,0), so that one wins purely on being later in the bundle — which is
+   why every page-padding value tried here so far computed to 0 and the page sat
+   flush in the corner. The chrome resets (transparent/no border/no shadow/no
+   radius) that used to live above are dropped: the .admin-card rule already
+   applies them, and only the padding ever lost. */
+.dashboard-surface .oferte-page.card {
+  padding: 26px 32px 22px;
+}
+
+/* Same .dashboard-surface qualifier as the base rule above — a media query adds
+   no specificity, so an unqualified selector here would lose to it and leave
+   desktop padding on small screens. */
+@media (max-width: 1023px) {
+  .dashboard-surface .oferte-page.card {
+    padding: 20px 20px 22px;
+  }
+  .oferte-page.card {
+    gap: 20px;
+  }
+}
+@media (max-width: 600px) {
+  .dashboard-surface .oferte-page.card {
+    padding: 16px 14px 20px;
+  }
+  .oferte-page.card {
+    gap: 16px;
+  }
+}
+
+/* ── Page header ── */
+.oferte-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 0;
+  flex-wrap: wrap;
+}
+.oferte-title h2 {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 6px;
+  color: var(--ink);
+}
+.oferte-sub {
+  font-size: 13px;
+  color: var(--ink-2);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: 4px;
+}
+.oferte-sub .stat strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+.oferte-sub .sep {
+  width: 3px; height: 3px; border-radius: 999px;
+  background: var(--ink-3);
+  margin: 0 10px;
+  display: inline-block;
+}
+
+.oferte-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ── Filter bar ── */
+.oferte-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 0;
+}
+
+.oferte-tabs {
+  display: inline-flex;
+  padding: 3px;
+  background: var(--surface-2);
+  border-radius: 9px;
+  border: 1px solid var(--border-s);
+}
+.oferte-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-2);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.oferte-tab:hover { color: var(--ink); }
+.oferte-tab .count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-3);
+}
+.oferte-tab.is-on {
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow: 0 0 0 1px var(--border), 0 1px 1px rgba(15,15,14,0.04);
+}
+.oferte-tab.is-on .count { color: var(--ink-2); }
+
+.oferte-dds {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.oferte-dd {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 30px 0 11px;
+  border-radius: 7px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  font-family: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10' fill='none' stroke='%23A5A299' stroke-width='1.5'><path d='M2 4l3 3 3-3'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+.oferte-dd:hover { border-color: var(--color-border-strong); }
+.oferte-dd:focus { outline: 2px solid var(--color-brand-border); outline-offset: 1px; }
+.oferte-dd .lbl {
+  color: var(--ink-3);
+  font-weight: 500;
+  margin-right: 2px;
+}
+
+/* When wrapping select inside a label group */
+.oferte-dd-group {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.oferte-dd-group .lbl {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-3);
+  font-size: 12.5px;
+  font-weight: 500;
+  pointer-events: none;
+  z-index: 1;
+}
+.oferte-dd-group select.oferte-dd {
+  padding-left: var(--label-pad, 70px);
+}
+
+/* ── Offer card list (matches Claude Design "Toate Ofertele") ── */
+.oferte-page .offer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  --card-py: 14px;
+}
+
+.offer-card {
+  background: var(--surface);
+  border: 1px solid var(--border-s);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+  cursor: pointer;
+  outline: none;
+}
+.offer-card:hover {
+  border-color: var(--color-border-strong);
+  box-shadow: 0 1px 2px rgba(15,15,14,0.04), 0 4px 14px rgba(15,15,14,0.05);
+}
+.offer-card:focus-visible {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--color-brand-border);
+}
+
+.offer-card .offer-head {
+  display: grid;
+  grid-template-columns:
+    110px
+    170px
+    minmax(180px, 1fr)
+    180px;
+  column-gap: 32px;
+  padding: var(--card-py) 20px;
+  align-items: center;
+}
+.offer-card .head-prod {
+  grid-column: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+.offer-card .head-recolta {
+  grid-column: 2;
+  display: flex;
+  align-items: baseline;
+  min-width: 0;
+}
+.offer-card .prod-name {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.1px;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.offer-card .recolta {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+.offer-card .recolta .crop {
+  font-family: var(--font-mono);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.offer-card .head-fermier {
+  grid-column: 3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.offer-card .head-fermier .fermier-email {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.25;
+}
+
+.offer-card .head-status {
+  grid-column: 4;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.offer-card .pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink);
+  white-space: nowrap;
+  min-width: 112px;
+}
+.offer-card .pill .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+.offer-card .pill.ok   .dot { background: var(--ok);   box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 14%, transparent); }
+.offer-card .pill.err  .dot { background: var(--err);  box-shadow: 0 0 0 3px color-mix(in srgb, var(--err) 14%, transparent); }
+.offer-card .pill.warn .dot { background: var(--warn); box-shadow: 0 0 0 3px color-mix(in srgb, var(--warn) 14%, transparent); }
+.offer-card .pill.info .dot { background: var(--color-info, #2563EB); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-info, #2563EB) 14%, transparent); }
+
+.offer-card .row-action {
+  width: 26px;
+  height: 26px;
+  margin-left: auto;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-3);
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+.offer-card:hover .row-action,
+.offer-card .row-action:hover {
+  color: var(--ink-2);
+  border-color: var(--border);
+  background: var(--surface);
+}
+
+.offer-card .offer-data {
+  border-top: 1px solid var(--border-s);
+  padding: 12px 20px var(--card-py);
+  display: grid;
+  grid-template-columns:
+    110px
+    170px
+    minmax(180px, 1fr)
+    180px;
+  gap: 32px;
+  align-items: flex-start;
+}
+.offer-card .field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.offer-card .field-label {
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  font-weight: 600;
+  line-height: 1;
+}
+.offer-card .field-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.offer-card .field-value.num {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.offer-card .field-value.num .unit {
+  font-family: var(--font-main);
+  font-weight: 500;
+  color: var(--ink-3);
+  font-size: 11px;
+  margin-left: 3px;
+}
+.offer-card .field-value.muted {
+  color: var(--ink-3);
+  font-weight: 500;
+}
+.offer-card .field-value .pin {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+}
+.offer-card .field-value .pin svg {
+  width: 12px;
+  height: 12px;
+  color: var(--ink-3);
+  flex-shrink: 0;
+}
+.offer-card .field-value .pin span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.offer-card .field-sub {
+  font-size: 11px;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  line-height: 1.2;
+  margin-top: 2px;
+}
+.offer-card .field-value-wrap {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+@media (max-width: 860px) {
+  .offer-card .offer-head,
+  .offer-card .offer-data {
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 18px;
+    padding: 12px 14px;
+  }
+  .offer-card .head-prod { grid-column: 1 / -1; }
+  .offer-card .head-recolta { grid-column: 1 / -1; }
+  .offer-card .head-fermier { grid-column: 1; }
+  .offer-card .head-status { grid-column: 2; justify-content: flex-end; }
+  .offer-card .pill { min-width: 0; }
+}
+
+/* ── Empty state already styled globally (.empty-state) ── */
+.oferte-empty {
+  background: var(--surface);
+  border: 1px solid var(--border-s);
+  border-radius: 12px;
+  padding: 36px 20px;
+  text-align: center;
+}
+
+@media (max-width: 720px) {
+  .oferte-head { gap: 14px; }
+  .oferte-title h2 { font-size: 22px; }
+  .oferte-tools { width: 100%; justify-content: flex-end; }
+  .oferte-tabs { width: 100%; overflow-x: auto; }
+  .oferte-dds { width: 100%; }
+  .oferte-dd { flex: 1 1 auto; }
+}

@@ -4,8 +4,36 @@ import MarketTicker from "../../components/MarketTicker.jsx";
 import SiloPriceTable from "../../components/SiloPriceTable.jsx";
 import ExchangeRatesCard from "../../components/ExchangeRatesCard.jsx";
 import { getProductLabelSafe } from "../../utils/productLabels";
+import HomeTabDesktop from "./HomeTabDesktop.jsx";
+
+function useIsDesktop(minWidth = 1024) {
+  const get = () =>
+    typeof window !== "undefined" && typeof window.matchMedia === "function"
+      ? window.matchMedia(`(min-width: ${minWidth}px)`).matches
+      : false;
+  const [isDesktop, setIsDesktop] = useState(get);
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
+    const mql = window.matchMedia(`(min-width: ${minWidth}px)`);
+    const handler = (e) => setIsDesktop(e.matches);
+    mql.addEventListener ? mql.addEventListener("change", handler) : mql.addListener(handler);
+    setIsDesktop(mql.matches);
+    return () => {
+      mql.removeEventListener
+        ? mql.removeEventListener("change", handler)
+        : mql.removeListener(handler);
+    };
+  }, [minWidth]);
+  return isDesktop;
+}
 
 export default function HomeTab() {
+  const isDesktop = useIsDesktop(1024);
+  if (isDesktop) return <HomeTabDesktop />;
+  return <HomeTabMobile />;
+}
+
+function HomeTabMobile() {
   const { commodities, updateCommodityPrice, stopCommodity } = useAppContext();
 
   const [draftPrices, setDraftPrices] = useState({});
