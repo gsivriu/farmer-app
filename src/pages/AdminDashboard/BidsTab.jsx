@@ -15,7 +15,7 @@ const BID_COLUMNS =
   "id, farmer_id, farmer_email, product, quantity, price, counter_price, final_price, " +
   "status, parity, freight_cost, delivery_start, delivery_end, delivery_location, " +
   "loading_location, crop_year, quantity_tolerance, currency, remarks, contract_no, " +
-  "accepted_at, created_at";
+  "accepted_at, created_at, status_changed_at";
 
 // Sentinel for "no location set" — freight parities leave delivery_location
 // null until an admin assigns one, and those bids need to stay findable.
@@ -94,7 +94,10 @@ const statusVisual = (s) => STATUS_PILL[String(s || "").toLowerCase()] || STATUS
 
 function OfferCard({ bid, onOpen }) {
   const farmer = bid.farmer_email || bid.farmer_id || "—";
-  const date = formatCardDate(bid.created_at);
+  // The card date tracks the last status change, so the pill and the date
+  // agree — "Acceptat · 15 iul" reads as when it was accepted, not submitted.
+  // Falls back to created_at for rows predating status_changed_at.
+  const date = formatCardDate(bid.status_changed_at || bid.created_at);
   const status = statusVisual(bid.status);
   const unit = `${bid.currency || (bid.product === "sunflower" ? "USD" : "EUR")}/t`;
   const deliveryLabel = formatCardDelivery(bid);
