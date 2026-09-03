@@ -9600,6 +9600,12 @@ select.input:focus {
   margin-left: 6px;
 }
 
+.farmers-list-more {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-5);
+}
+
 .farmers-search {
   height: 36px;
   width: 260px;
