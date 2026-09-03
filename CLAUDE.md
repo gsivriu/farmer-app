@@ -73,8 +73,8 @@ Generic hook for subscribing to Postgres changes on a table. Handles reconnectio
 - `invite-farmer` — admin invites a new farmer (uses service_role, server-side only)
 - `send-push` — push notification delivery
 - `exchange-rates`, `grain-futures`, `sharp-proxy`, `gnews` — external data proxies (keeps API keys off the client)
-- `test-ameropa-db`, `test-mysql` — connectivity checks against the Ameropa MySQL DB
 - `.github/workflows/supabase-keepalive.yml` pings Supabase on a schedule to prevent the free-tier project from pausing.
+- `test-ameropa-db`/`test-mysql` (unauthenticated MySQL connectivity-check functions, publicly invokable with the anon key) were deleted from prod on 2026-08-25 — use the local-only `test-ameropa.js` script for the same check instead of re-adding an Edge Function for it.
 
 ### Capacitor iOS dev loop
 Two independent toggles, don't confuse them: `cap:dev:on` points the bundled iOS app at a local Vite server (instant HMR on-device, requires `dev:host:5173` running and same-WiFi); `cap:live:on <url>` points a TestFlight build at a deployed HTTPS URL so web deploys update the app without a new App Store build. See `README.md` for the full sequences.

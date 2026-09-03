@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "../../supabaseClient";
-import { useAppContext } from "../../context/AppContext.jsx";
 import { useRealtimeSubscription } from "../../hooks/useRealtimeSubscription.js";
 import { getProductLabelSafe, PRODUCT_FILTER_KEYS } from "../../utils/productLabels";
 import { formatCompactNumber, hasPositiveNumber } from "../../utils/numberFormat";
@@ -74,8 +73,6 @@ function SkeletonBidRow() {
 }
 
 export default function ActivityTab() {
-  const { addFarmerRewardsPoints } = useAppContext();
-
   const [localBids, setLocalBids] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -238,7 +235,6 @@ export default function ActivityTab() {
     setLocalBids((prev) =>
       prev.map((x) => x.id === bid.id ? { ...x, status: "accepted", final_price: finalPrice } : x)
     );
-    if (bid.farmer_id) await addFarmerRewardsPoints(bid.farmer_id, Number(bid.quantity || 0));
     window.dispatchEvent(new Event("farmer-progress-refresh"));
     setFarmerConfirmAction(null);
     setFarmerActionLocks((prev) => ({ ...prev, [bid.id]: { locked: true, lastCounter: null } }));

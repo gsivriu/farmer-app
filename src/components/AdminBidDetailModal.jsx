@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
-import { useAppContext } from "../context/AppContext.jsx";
 import { getProductLabelSafe } from "../utils/productLabels";
 import { formatCompactNumber, hasPositiveNumber } from "../utils/numberFormat";
 import { formatDeliveryRange, formatLocationDisplay, isFreightParity } from "../utils/formatting";
@@ -70,8 +69,6 @@ function BidStatusBadge({ status }) {
 }
 
 export default function AdminBidDetailModal({ bid, onClose, onUpdated }) {
-  const { addFarmerRewardsPoints } = useAppContext();
-
   const [counter, setCounter] = useState("");
   const [freight, setFreight] = useState("");
   const [delivery, setDelivery] = useState("");
@@ -179,10 +176,6 @@ export default function AdminBidDetailModal({ bid, onClose, onUpdated }) {
     if (error) {
       setModalError("Eroare la trimiterea actualizării: " + error.message);
       return;
-    }
-
-    if (action === "accepted" && bid.farmer_id) {
-      await addFarmerRewardsPoints(bid.farmer_id, Number(bid.quantity || 0));
     }
 
     if (typeof onUpdated === "function") await onUpdated();
