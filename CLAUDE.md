@@ -5,6 +5,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 A React + Vite web app (with Capacitor iOS) for farmers to submit bids on commodities and for admins ("traders") to manage them. Connects to Supabase for auth/data/Edge Functions and deploys to Vercel. Comments and UI copy are largely in Romanian.
 
+**Before any architecture, scalability, or roadmap discussion, read `ARCHITECTURE.md`** (repo root) first — it's the maintained source of truth for what's been audited, what's fixed, and what's still open, kept current by Gabriel across sessions.
+
 ## Stack
 - Frontend: React 19 + Vite 7 (JSX, not TypeScript)
 - Backend: Supabase (Postgres + auth + Realtime + Edge Functions on Deno)
