@@ -7,6 +7,27 @@ A React + Vite web app (with Capacitor iOS) for farmers to submit bids on commod
 
 **Before any architecture, scalability, or roadmap discussion, read `ARCHITECTURE.md`** (repo root) first — it's the maintained source of truth for what's been audited, what's fixed, and what's still open, kept current by Gabriel across sessions.
 
+## Standing Priorities (what we keep coming back to)
+
+The recurring lens for this project — apply these by default, not just when asked:
+
+- **Scale to 5,000+ users without a rewrite.** The one pattern that keeps paying off: explicit column selects (never `select('*')`), server-side pagination (keyset, not offset), RPC aggregates instead of pulling raw rows to sum/count in JS. `BidsTab` and `FarmiersTab` already do this — extend it, don't reintroduce a full-table fetch on a new list screen.
+- **RLS is the real trust boundary, not the UI.** Every table with sensitive data needs a policy, admin access is gated on `is_admin(...) AND aal2`, and — the hard lesson from 2026-09-03 — when an OR'd policy mixes an `is_admin(...)` branch with a self-referential owner check (`id = auth.uid()`), the owner check goes **first**, always. Test any RLS change with a direct impersonated query (`SET ROLE authenticated` + `request.jwt.claims`) before calling it done, not just a visual read of the SQL.
+- **Dev before prod, every time, no exceptions.** Both Supabase projects exist so a bad migration or RLS change surfaces on dev first. Restore the dev project (`eirqbksgxiiudgeezlob`, pauses on the free tier) rather than skipping straight to prod.
+- **Security posture stays tight by default:** MFA required for admins, rate limiting on every public Edge Function, secrets in Edge Function config — never in client code, never left in `.env` longer than necessary.
+- **Solo-dev pragmatism.** Gabriel is the only developer — don't add abstractions, a services layer, or test infrastructure ahead of actual need (see `ARCHITECTURE.md` §5.2/§12 for when that calculus changes). Do fix things that are cheap now and expensive later (indexes, RLS ordering, pagination) before traffic grows, not after.
+- **Update `ARCHITECTURE.md` and this file's Known Issues when something gets fixed or discovered** — stale docs are worse than no docs; they were the root cause of redoing already-finished work earlier in this project's history.
+
+## Active Next Steps
+
+Pulled from `ARCHITECTURE.md` §11 — check there for the full roadmap and reasoning, this is just the current front of the queue:
+
+1. Move MySQL credentials out of local `.env` into `supabase secrets set` — blocked on Gabriel supplying the actual values, not something Claude can do from a checkout that doesn't have them.
+2. Enable leaked-password protection in the Supabase Auth dashboard (toggle, no code).
+3. Decide `sharp-proxy`'s fate — finish wiring `src/services/sharpApi.js` into a screen, or delete both as dead/unfinished.
+4. Supabase Pro upgrade — daily backups + PITR, connection pooling, higher Realtime limits. Billing decision for Gabriel, not something to just do.
+5. Once the above land: services layer extraction, admin route code-splitting, Sentry alerting, and reconciling the pre-baseline migration history (`ARCHITECTURE.md` §11, Faza 2).
+
 ## Stack
 - Frontend: React 19 + Vite 7 (JSX, not TypeScript)
 - Backend: Supabase (Postgres + auth + Realtime + Edge Functions on Deno)
