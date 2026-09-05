@@ -1,7 +1,7 @@
 # Arhitectura Farmer App — Plan de scalabilitate, securitate & UX
 
 **Țintă:** 5000+ utilizatori activi în ~12 luni (majoritar fermieri pe mobil/iOS, până la ~20 admini pe desktop).
-**Stare la data acestui document:** actualizat 2026-09-05. 9 profile în producție (4 fermieri, 5 admini), tabela `bids` cu 96 de rânduri. Faza 0 e complet închisă. Faza 1 e aproape închisă: RLS reparat (inclusiv ultimele 3 avertismente `multiple_permissive_policies` + cel de `auth_rls_initplan` rămas pe `device_tokens`), `FarmiersTab` paginat, `rate_limits` conectat. Rămân deschise: secretele MySQL, leaked-password toggle, upgrade-ul la Supabase Pro.
+**Stare la data acestui document:** actualizat 2026-09-05. 9 profile în producție (4 fermieri, 5 admini), tabela `bids` cu 96 de rânduri. Faza 0 e complet închisă. Faza 1 e aproape închisă: RLS reparat (inclusiv ultimele 3 avertismente `multiple_permissive_policies` + cel de `auth_rls_initplan` rămas pe `device_tokens`), `FarmiersTab` paginat, `rate_limits` conectat, secretele MySQL clarificate ca fals pozitiv (nu era nimic de mutat). Rămâne deschis un singur lucru real: upgrade-ul la Supabase Pro (decizie de billing) — de care depinde şi leaked-password toggle-ul, blocat pe planul Free.
 **Audiență:** Gabriel (owner/dev solo) + IT lead, pentru revizuire tehnică.
 
 ---
@@ -21,7 +21,7 @@ Ce s-a rezolvat efectiv de la ultima versiune (2026-09-05):
 
 Ce rămâne deschis, neschimbat față de ultima versiune:
 
-- Secretele MySQL tot în `.env` local, nu în `supabase secrets set` — nu am putut verifica/muta pentru că fișierul `.env` nu există în checkout-ul cu care am lucrat (gitignored, local-only la tine).
+- ~~Secretele MySQL tot în `.env` local, nu în `supabase secrets set`~~ — **fals pozitiv, închis 2026-09-05**: nicio funcție Edge nu citește `AMEROPA_DB_*`, doar scriptul local `test-ameropa.js`. Un secret Supabase e vizibil doar codului care rulează pe infrastructura Supabase — un script local nu are cum să-l citească oricum, deci n-avea unde să fie „mutat". `.env` fiind gitignored e deja protecția corectă pentru acest caz.
 - Upgrade Supabase → Pro — decizie de billing, nu de cod.
 - `sharp-proxy` — descoperire nouă: e deployat doar pe dev, nu şi pe prod, iar clientul lui (`src/services/sharpApi.js`) nu e folosit nicăieri în `src/`. Pare integrare neterminată. Nu am atins-o fără o decizie explicită.
 
@@ -64,6 +64,7 @@ flowchart LR
 
     MySQL[("MySQL Ameropa\n(extern)")]
     APIs["APIs externe\n(exchange rates, futures, news, weather)"]
+    Local["Laptop Gabriel\n(test-ameropa.js)"]
 
     Web --> Static
     iOS -- "live mode: URL extern\ndev mode: LAN + HMR\nbuild: bundlat local" --> Static
@@ -74,9 +75,11 @@ flowchart LR
     iOS --> Auth
     iOS --> DB
     iOS --> RT
-    EF --> MySQL
+    Local --> MySQL
     EF --> APIs
 ```
+
+Notă: nicio funcție Edge nu se conectează la MySQL — verificat 2026-09-05, `AMEROPA_DB_*` e citit doar de `test-ameropa.js`, rulat manual, local. Diagrama veche arăta greşit o legătură `EF --> MySQL`; corectată aici.
 
 **Straturi:**
 - **Frontend:** React 19 SPA, o singură rută `/dashboard` care randează `FarmerDashboard` sau `AdminDashboard` după `role`. Fără server-side rendering — tot ce vede utilizatorul e calculat client-side după ce sesiunea Supabase se rezolvă.
@@ -119,7 +122,7 @@ Legenda: 🔴 critic (acționează acum) · 🟠 sever (înainte de creștere se
 - **Fără strat de servicii pentru acces la date.** Neschimbat — `supabase.from(...)` direct din componente. Funcţional acum, devine friction la echipă mai mare.
 - **Fişiere monolitice:** `Motherboard.jsx` (1490 linii), `BidsTab.jsx` (827 linii), `ActivityTab.jsx` (683 linii). Neschimbat.
 - **Fără suită de teste.** Neschimbat. Cel mai mare risc care creşte cu fiecare funcţionalitate nouă pe un flow financiar.
-- **`.env` local conţine credenţiale MySQL** — neschimbat, nu am putut verifica sau muta (fişierul nu există în checkout-ul de lucru).
+- ~~**`.env` local conţine credenţiale MySQL**~~ — închis 2026-09-05, vezi rezumatul din secţiunea 1: e folosit doar de un script local, nu de vreo funcţie Edge, deci `.env` gitignored e suficient.
 
 ### 4.4 🔵 De păstrat (deja bine făcut)
 
@@ -165,7 +168,7 @@ Neschimbate faţă de versiunea anterioară a documentului — strat de servicii
 | Rate limiting | **Conectat efectiv** (2026-09-03) | Monitorizează dacă limitele alese (30/min, 20/min, 30/oră etc.) sunt potrivite la trafic real |
 | Parole compromise | Dezactivat, **blocat pe planul Free** (2026-09-05) | Necesită upgrade Pro întâi — toggle-ul e needitabil fără el |
 | Funcţii Edge de test | Şterse din prod şi din repo | — |
-| Secrete MySQL | În `.env` local | Mută în `supabase secrets set` — blocat, are nevoie de acces la valorile reale |
+| Secrete MySQL | În `.env` local, folosit doar de scriptul local `test-ameropa.js` | Rezolvat — nicio funcţie Edge nu are nevoie de el ca secret Supabase; `.env` gitignored e suficient |
 | Backup | Manual, plan Free | Upgrade Pro |
 | Security headers | Prezente | Păstrează |
 
@@ -189,7 +192,7 @@ Neschimbate faţă de versiunea anterioară a documentului.
 5. ✅ RLS: `(select auth.<fn>())` + politici duplicate unite + FK-uri indexate (2026-09-03) — **plus fix de recursie şi reordonare, vezi 4.5**, **plus ultimele 3 avertismente `multiple_permissive_policies` şi cel de `auth_rls_initplan` pe `device_tokens`, închise 2026-09-05**. Advisor-ul de securitate/performanţă e curat pe dev şi prod acum, în afară de indexurile INFO nefolosite şi toggle-ul de mai jos.
 6. ✅ `rate_limits` conectat pe funcţiile Edge publice (2026-09-03). Login e acoperit de rate limiting-ul nativ Supabase Auth (de verificat în dashboard, neschimbat).
 7. ⬜ Leaked password protection — **descoperire 2026-09-05: toggle-ul e blocat pe planul Free** ("Only available on Pro plan and above" direct în UI-ul Supabase, verificat de Gabriel în dashboard pe proiectul de producţie). Nu e o simplă bifă manuală cum credeam — depinde de punctul 9 (upgrade Pro).
-8. ⬜ Mută credenţialele MySQL din `.env` în `supabase secrets set` — **blocat**, are nevoie de tine (valorile nu sunt accesibile din acest mediu de lucru).
+8. ✅ ~~Mută credenţialele MySQL din `.env` în `supabase secrets set`~~ — închis 2026-09-05 ca fals pozitiv: nicio funcţie Edge nu foloseşte `AMEROPA_DB_*`, doar `test-ameropa.js` local. Nimic de mutat.
 9. ⬜ Upgrade Supabase la Pro — decizie de billing, motivată acum şi de timeout-urile tranzitorii observate în sesiunea de 2026-09-03.
 
 **Faza 2 — Lunile 3–6:** neschimbată.
