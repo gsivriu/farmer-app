@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
+import { useIdleLogout } from "./useIdleLogout";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext(null);
@@ -91,6 +92,8 @@ export function AuthProvider({ children }) {
       listener.subscription.unsubscribe();
     };
   }, []);
+
+  useIdleLogout(!!user);
 
   return (
     <AuthContext.Provider value={{ user, role, profile, loading, aalLevel, mfaEnrolled }}>
