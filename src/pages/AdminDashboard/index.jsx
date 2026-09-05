@@ -2,13 +2,15 @@ import { useEffect, useState } from "react";
 import HomeTab from "./HomeTab";
 import BidsTab from "./BidsTab";
 import FarmiersTab from "./FarmiersTab";
-import MotherboardPage from "../Motherboard";
 import AdminSidebar from "./AdminSidebar.jsx";
 
+const VALID_TABS = ["home", "bids", "farmers"];
+
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState(() =>
-    window.localStorage.getItem("admin-active-tab") || "home"
-  );
+  const [activeTab, setActiveTab] = useState(() => {
+    const stored = window.localStorage.getItem("admin-active-tab");
+    return VALID_TABS.includes(stored) ? stored : "home";
+  });
 
   useEffect(() => {
     window.localStorage.setItem("admin-active-tab", activeTab);
@@ -30,10 +32,6 @@ export default function AdminDashboard() {
 
           <div className={activeTab === "farmers" ? "tab-pane active" : "tab-pane"}>
             {activeTab === "farmers" && <FarmiersTab />}
-          </div>
-
-          <div className={"tab-pane admin-motherboard-pane" + (activeTab === "motherboard" ? " active" : "")}>
-            <MotherboardPage />
           </div>
         </div>
 
@@ -80,28 +78,6 @@ export default function AdminDashboard() {
               <path d="M16 3.13a4 4 0 0 1 0 7.75" />
             </svg>
             <span className="nav-label">Fermieri</span>
-          </button>
-          <button
-            type="button"
-            className={"nav-item " + (activeTab === "motherboard" ? "active" : "")}
-            onClick={() => setActiveTab("motherboard")}
-          >
-            <svg
-              className="nav-icon"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <rect x="3" y="3" width="7" height="7" rx="1" />
-              <rect x="14" y="3" width="7" height="7" rx="1" />
-              <rect x="3" y="14" width="7" height="7" rx="1" />
-              <rect x="14" y="14" width="7" height="7" rx="1" />
-            </svg>
-            <span className="nav-label">Motherboard</span>
           </button>
         </nav>
       </div>
