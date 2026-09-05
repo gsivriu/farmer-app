@@ -1,7 +1,7 @@
 # Arhitectura Farmer App — Plan de scalabilitate, securitate & UX
 
 **Țintă:** 5000+ utilizatori activi în ~12 luni (majoritar fermieri pe mobil/iOS, până la ~20 admini pe desktop).
-**Stare la data acestui document:** actualizat 2026-09-03. 9 profile în producție (4 fermieri, 5 admini), tabela `bids` cu 96 de rânduri. Faza 0 e complet închisă (inclusiv partea care fusese doar marcată, nu și făcută). Faza 1 e parțial închisă: RLS reparat, `FarmiersTab` paginat, `rate_limits` conectat. Rămân deschise: secretele MySQL, upgrade-ul la Supabase Pro.
+**Stare la data acestui document:** actualizat 2026-09-05. 9 profile în producție (4 fermieri, 5 admini), tabela `bids` cu 96 de rânduri. Faza 0 e complet închisă. Faza 1 e aproape închisă: RLS reparat (inclusiv ultimele 3 avertismente `multiple_permissive_policies` + cel de `auth_rls_initplan` rămas pe `device_tokens`), `FarmiersTab` paginat, `rate_limits` conectat. Rămân deschise: secretele MySQL, leaked-password toggle, upgrade-ul la Supabase Pro.
 **Audiență:** Gabriel (owner/dev solo) + IT lead, pentru revizuire tehnică.
 
 ---
@@ -10,13 +10,14 @@
 
 Fundația e mai solidă decât media unui proiect la acest stadiu: MFA obligatoriu pentru admini, RLS pe toate tabelele cu date sensibile, un hook de realtime cu reconnect/backoff/health-check scris ca pentru producție, și un pattern de scalabilitate (paginare + RPC-uri agregate + coloane explicite) demonstrat acum pe `BidsTab` **și** `FarmiersTab`. Nu pornim de la zero, și de la ultima versiune a acestui document am închis o bucată reală din lista de lacune.
 
-Ce s-a rezolvat efectiv de la ultima versiune (2026-09-03):
+Ce s-a rezolvat efectiv de la ultima versiune (2026-09-05):
 
-- **Faza 0, punctul 3 era doar marcat ✅ în document, dar nu era făcut** — codul mort de recompense (`RewardsContext`, cele 3 apeluri `addFarmerRewardsPoints`) încă exista în repo, verificat direct în git log. A fost scos azi, de-adevăratelea.
+- **Faza 0, punctul 3 era doar marcat ✅ în document, dar nu era făcut** — codul mort de recompense (`RewardsContext`, cele 3 apeluri `addFarmerRewardsPoints`) încă exista în repo, verificat direct în git log. A fost scos, de-adevăratelea.
 - **`FarmiersTab` paginat** — acelaşi pattern ca `BidsTab`: keyset pe `(created_at, id)`, căutare server-side, index dedicat.
 - **`rate_limits` conectat efectiv** — RPC `check_rate_limit()` + wiring în toate funcțiile Edge publice (`exchange-rates`, `gnews`, `grain-futures`, `sharp-proxy`, `invite-farmer`).
 - **RLS reparat pe advisor-ul de performanță** — `auth.<fn>()` înfășurat în `(select ...)`, politici duplicate unite.
 - **Un incident real, cauzat de mine, reparat în aceeași sesiune** — vezi secțiunea 4.5. Merită documentat cinstit, nu ascuns: o migrație de performanță RLS a introdus o recursie infinită pe `profiles`, care a picat login-ul în producție ~40 de minute. Lecția e prinsă mai jos și aplicată deja unde era relevant.
+- **Ultimele 3 avertismente `multiple_permissive_policies`, lăsate deschise intenționat pe 2026-09-03** — rezolvate 2026-09-05: `commodities`/`silo_price_configs` aveau politica de admin declarată `FOR ALL`, deci ramura ei de SELECT se evalua dublu alături de politica dedicată de citire (`qual = true`); despărțită în INSERT/UPDATE/DELETE, fără nicio schimbare de comportament (SELECT-ul adminilor trecea deja prin politica de citire). `device_tokens` avea ambele politici declarate pentru `{public}` (toate rolurile), deşi condițiile lor restrângeau deja la `service_role`, respectiv `authenticated` — rescope cu `ALTER POLICY ... TO ...`, fără schimbare de qual. Plus un avertisment separat, ratat pe 2026-09-03 pentru că politica nu există pe dev: `device_tokens.service_read_all_tokens` (doar pe prod) nu avea `auth.role()` înfășurat în `(select ...)`. Ambele migrații (`20260905120000`, `20260905120100`) sunt idempotente față de drift-ul dev/prod (`if exists` pe `service_read_all_tokens`), aplicate întâi pe dev, verificate cu interogări impersonate (`SET ROLE authenticated`/`service_role` + `request.jwt.claims`) înainte și după, apoi aplicate pe prod și reverificate acolo.
 
 Ce rămâne deschis, neschimbat față de ultima versiune:
 
@@ -110,7 +111,7 @@ Legenda: 🔴 critic (acționează acum) · 🟠 sever (înainte de creștere se
 
 **Leaked password protection dezactivat.** Încă deschis — toggle din dashboard, fără cost de dezvoltare, dar niciun tool automat nu-l poate activa.
 
-**Politici RLS re-evaluau funcţii de autentificare per rând + politici duplicate.** → **Rezolvat parţial.** Vezi 4.5 pentru cum s-a făcut şi ce a picat pe parcurs.
+**Politici RLS re-evaluau funcţii de autentificare per rând + politici duplicate.** → **Rezolvat.** Vezi 4.5 pentru cum s-a făcut şi ce a picat pe parcurs, şi rezumatul din secţiunea 1 pentru cele 3 avertismente `multiple_permissive_policies` rămase, închise pe 2026-09-05.
 
 ### 4.3 🟡 Mediu
 
@@ -185,10 +186,11 @@ Neschimbate faţă de versiunea anterioară a documentului.
 
 **Faza 1 — Lunile 1–2:**
 4. ✅ Paginare server-side pe `FarmiersTab` (2026-09-03).
-5. ✅ RLS: `(select auth.<fn>())` + politici duplicate unite + FK-uri indexate (2026-09-03) — **plus fix de recursie şi reordonare, vezi 4.5**.
+5. ✅ RLS: `(select auth.<fn>())` + politici duplicate unite + FK-uri indexate (2026-09-03) — **plus fix de recursie şi reordonare, vezi 4.5**, **plus ultimele 3 avertismente `multiple_permissive_policies` şi cel de `auth_rls_initplan` pe `device_tokens`, închise 2026-09-05**. Advisor-ul de securitate/performanţă e curat pe dev şi prod acum, în afară de indexurile INFO nefolosite şi toggle-ul de mai jos.
 6. ✅ `rate_limits` conectat pe funcţiile Edge publice (2026-09-03). Login e acoperit de rate limiting-ul nativ Supabase Auth (de verificat în dashboard, neschimbat).
-7. ⬜ Mută credenţialele MySQL din `.env` în `supabase secrets set` — **blocat**, are nevoie de tine (valorile nu sunt accesibile din acest mediu de lucru).
-8. ⬜ Upgrade Supabase la Pro — decizie de billing, motivată acum şi de timeout-urile tranzitorii observate azi.
+7. ⬜ Activează leaked password protection din Supabase Auth dashboard — toggle manual, fără cod.
+8. ⬜ Mută credenţialele MySQL din `.env` în `supabase secrets set` — **blocat**, are nevoie de tine (valorile nu sunt accesibile din acest mediu de lucru).
+9. ⬜ Upgrade Supabase la Pro — decizie de billing, motivată acum şi de timeout-urile tranzitorii observate în sesiunea de 2026-09-03.
 
 **Faza 2 — Lunile 3–6:** neschimbată.
 
