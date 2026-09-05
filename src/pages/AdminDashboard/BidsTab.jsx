@@ -1,11 +1,25 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "../../supabaseClient";
-import { useAppContext } from "../../context/AppContext.jsx";
+import { useRealtimeSubscription } from "../../hooks/useRealtimeSubscription.js";
 import { getProductLabelSafe, PRODUCT_FILTER_KEYS } from "../../utils/productLabels";
 import { formatCompactNumber, hasPositiveNumber } from "../../utils/numberFormat";
-import { formatDeliveryRange, formatLocationDisplay, isFreightParity } from "../../utils/formatting";
+import { formatLocationDisplay, isFreightParity } from "../../utils/formatting";
 import AdminBidDetailModal from "../../components/AdminBidDetailModal.jsx";
 import "./BidsTab.css";
+
+const PAGE_SIZE = 50;
+
+// Explicit column list: `*` shipped every column of every row, and the payload
+// is the whole point here.
+const BID_COLUMNS =
+  "id, farmer_id, farmer_email, product, quantity, price, counter_price, final_price, " +
+  "status, parity, freight_cost, delivery_start, delivery_end, delivery_location, " +
+  "loading_location, crop_year, quantity_tolerance, currency, remarks, contract_no, " +
+  "accepted_at, created_at, status_changed_at";
+
+// Sentinel for "no location set" — freight parities leave delivery_location
+// null until an admin assigns one, and those bids need to stay findable.
+const NO_LOCATION = "-";
 
 const PERIOD_OPTIONS = [
   { value: "all", label: "Toate" },
@@ -25,6 +39,11 @@ const periodCutoff = (value) => {
   cutoff.setDate(cutoff.getDate() - (days - 1));
   return cutoff;
 };
+
+// Postgres compares created_at::date against a date, so send a plain local
+// calendar day rather than a UTC instant.
+const toDateParam = (d) =>
+  d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}` : null;
 
 const RO_MONTHS = ["ian.", "feb.", "mar.", "apr.", "mai", "iun.", "iul.", "aug.", "sep.", "oct.", "noi.", "dec."];
 const formatCardDate = (iso) => {
@@ -75,7 +94,10 @@ const statusVisual = (s) => STATUS_PILL[String(s || "").toLowerCase()] || STATUS
 
 function OfferCard({ bid, onOpen }) {
   const farmer = bid.farmer_email || bid.farmer_id || "—";
-  const date = formatCardDate(bid.created_at);
+  // The card date tracks the last status change, so the pill and the date
+  // agree — "Acceptat · 15 iul" reads as when it was accepted, not submitted.
+  // Falls back to created_at for rows predating status_changed_at.
+  const date = formatCardDate(bid.status_changed_at || bid.created_at);
   const status = statusVisual(bid.status);
   const unit = `${bid.currency || (bid.product === "sunflower" ? "USD" : "EUR")}/t`;
   const deliveryLabel = formatCardDelivery(bid);
@@ -153,78 +175,12 @@ function OfferCard({ bid, onOpen }) {
   );
 }
 
-const formatDateOnly = (value) => {
-  if (!value) return "-";
-  const dt = new Date(value);
-  if (Number.isNaN(dt.getTime())) return "-";
-  return dt.toLocaleDateString("ro-RO", { year: "numeric", month: "2-digit", day: "2-digit" });
-};
-
-const formatDateTime = (value) => {
-  if (!value) return "-";
-  const dt = new Date(value);
-  if (Number.isNaN(dt.getTime())) return "-";
-  return dt.toLocaleString("ro-RO", {
-    year: "numeric", month: "2-digit", day: "2-digit",
-    hour: "2-digit", minute: "2-digit",
-  });
-};
-
-const getStatusLabel = (status) => {
-  const value = String(status || "").toLowerCase();
-  if (value === "accepted") return "Acceptat";
-  if (value === "rejected") return "Respins";
-  if (value === "countered") return "Contra-ofertă";
-  if (value === "farmer_countered") return "Răspuns fermier";
-  return "În așteptare";
-};
-
-const getAcceptedPrice = (bid) => {
-  if (!bid) return null;
-  const raw = bid.final_price != null ? bid.final_price
-    : hasPositiveNumber(bid.counter_price) ? bid.counter_price
-    : bid.price;
-  const num = Number(raw);
-  return Number.isFinite(num) ? num : null;
-};
-
-const formatParityDisplay = (bid, { detailed = false } = {}) => {
-  if (!bid?.parity) return "-";
-  const parity = String(bid.parity).toUpperCase();
-  const delivery = formatLocationDisplay(bid.delivery_location || "-");
-  const loading = formatLocationDisplay(bid.loading_location || "-");
-  if (parity === "FCA" || parity === "FOB" || parity === "FOR") {
-    return detailed
-      ? `${parity} ${loading} cu livrare la ${delivery}`
-      : `${parity} ${loading} la ${delivery}`;
-  }
-  return `${parity} ${delivery}`;
-};
-
-const parseOptionalNumber = (value) => {
-  const trimmed = String(value ?? "").trim();
-  if (trimmed === "") return null;
-  const num = Number(trimmed);
-  return Number.isFinite(num) ? num : NaN;
-};
-
-const normalizeOptionalText = (value) => {
-  const trimmed = String(value ?? "").trim();
-  return trimmed === "" ? null : trimmed;
-};
-
-function BidStatusBadge({ status }) {
-  const s = String(status || "").toLowerCase();
-  if (s === "accepted")         return <span className="bid-status-badge bid-status-accepted">Acceptat</span>;
-  if (s === "rejected")         return <span className="bid-status-badge bid-status-rejected">Respins</span>;
-  if (s === "countered")        return <span className="bid-status-badge bid-status-countered">Contra-ofertă</span>;
-  if (s === "farmer_countered") return <span className="bid-status-badge bid-status-countered">Răspuns fermier</span>;
-  return <span className="bid-status-badge bid-status-pending">În așteptare</span>;
-}
+const EMPTY_COUNTS = { all: 0, accepted: 0, rejected: 0, pending: 0, total_volume: 0 };
 
 export default function BidsTab() {
-  const { bids, fetchBids, addFarmerRewardsPoints } = useAppContext();
-
+  const [bids, setBids] = useState([]);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [farmers, setFarmers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -237,31 +193,36 @@ export default function BidsTab() {
   const [filterDeliveryTo, setFilterDeliveryTo] = useState("");
   const [filterDeliveryLocation, setFilterDeliveryLocation] = useState("all");
   const [filterLoadingLocation, setFilterLoadingLocation] = useState("all");
+  const [filterCropYear, setFilterCropYear] = useState("all");
   const [filterPeriod, setFilterPeriod] = useState("30");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [showStats, setShowStats] = useState(false);
 
   const [adminSelectedBid, setAdminSelectedBid] = useState(null);
-  const [adminModalCounter, setAdminModalCounter] = useState("");
-  const [adminModalFreight, setAdminModalFreight] = useState("");
-  const [adminModalDelivery, setAdminModalDelivery] = useState("");
-  const [adminModalOriginal, setAdminModalOriginal] = useState({ counter: "", freight: "", delivery: "" });
-  const [adminConfirmAction, setAdminConfirmAction] = useState(null);
-  const [modalError, setModalError] = useState(null);
   const [deliveryLocations, setDeliveryLocations] = useState([]);
+  const [loadingLocations, setLoadingLocations] = useState([]);
+  const [cropYears, setCropYears] = useState([]);
+
+  const [counts, setCounts] = useState(EMPTY_COUNTS);
+  const [statsRows, setStatsRows] = useState([]);
+  const [statsLoading, setStatsLoading] = useState(false);
+  const [statsError, setStatsError] = useState(null);
+
+  // ── Filter option sources ───────────────────────────────────────────────────
+  // None of these can be derived from the loaded page any more: with 50 rows in
+  // hand, the dropdowns would only ever offer what happened to be on screen.
 
   useEffect(() => {
-    if (!Array.isArray(bids)) return;
-    const map = new Map();
-    bids.forEach((b) => {
-      if (!b.farmer_id) return;
-      if (!map.has(b.farmer_id)) {
-        map.set(b.farmer_id, { id: b.farmer_id, email: b.farmer_email || b.farmer_id });
-      }
-    });
-    setFarmers(Array.from(map.values()));
-    setLoading(false);
-  }, [bids]);
+    supabase
+      .from("profiles")
+      .select("id, email, full_name")
+      .eq("role", "farmer")
+      .order("email", { ascending: true })
+      .then(({ data, error: loadError }) => {
+        if (loadError) return;
+        setFarmers((data || []).map((p) => ({ id: p.id, email: p.email || p.full_name || p.id })));
+      });
+  }, []);
 
   useEffect(() => {
     supabase
@@ -270,164 +231,234 @@ export default function BidsTab() {
       .order("silo_name", { ascending: true })
       .then(({ data, error: loadError }) => {
         if (loadError) return;
-        const map = new Map();
-        (data || []).forEach((row) => { if (row?.silo_name) map.set(row.silo_name, true); });
-        setDeliveryLocations(["Port Constanța", ...Array.from(map.keys())]);
+        const names = Array.from(new Set((data || []).map((r) => r?.silo_name).filter(Boolean)));
+        setDeliveryLocations(["Port Constanța", ...names]);
       });
   }, []);
 
-  // ── Helpers ──────────────────────────────────────────────────────────────────
-
-  const hasFreightDetails = (bid, freightValue, deliveryValue) => {
-    if (!isFreightParity(bid?.parity)) return true;
-    const freightRaw = freightValue != null && String(freightValue).trim() !== "" ? freightValue : bid?.freight_cost;
-    const deliveryRaw = deliveryValue != null && String(deliveryValue).trim() !== "" ? deliveryValue : bid?.delivery_location;
-    const freightNum = Number(freightRaw);
-    const hasFreight = freightRaw != null && String(freightRaw).trim() !== "" && Number.isFinite(freightNum) && freightNum > 0;
-    return hasFreight && String(deliveryRaw || "").trim() !== "";
-  };
-
-  const getMissingFreightMessage = (bid, freightValue, deliveryValue) => {
-    if (!isFreightParity(bid?.parity)) return null;
-    const freightRaw = freightValue != null && String(freightValue).trim() !== "" ? freightValue : bid?.freight_cost;
-    const deliveryRaw = deliveryValue != null && String(deliveryValue).trim() !== "" ? deliveryValue : bid?.delivery_location;
-    const freightNum = Number(freightRaw);
-    const hasFreight = freightRaw != null && String(freightRaw).trim() !== "" && Number.isFinite(freightNum) && freightNum > 0;
-    const hasDelivery = String(deliveryRaw || "").trim() !== "";
-    if (!hasFreight && !hasDelivery) return "Oferta nu a fost trimisă. Completează tariful de transport și locația de livrare.";
-    if (!hasFreight) return "Oferta nu a fost trimisă. Completează tariful de transport.";
-    if (!hasDelivery) return "Oferta nu a fost trimisă. Completează locația de livrare.";
-    return null;
-  };
-
-  const submitAdminDecision = async (action, targetBid = null) => {
-    const bid = targetBid ?? adminSelectedBid;
-    if (!bid) return;
-    const useModal = !targetBid;
-    const freightValue = useModal ? adminModalFreight : bid.freight_cost;
-    const deliveryValue = useModal ? adminModalDelivery : bid.delivery_location;
-    const counterValue = useModal ? adminModalCounter : bid.counter_price;
-
-    if (isFreightParity(bid.parity)) {
-      const missingMessage = getMissingFreightMessage(bid, freightValue, deliveryValue);
-      if (missingMessage) { setModalError(missingMessage); return; }
-    }
-
-    const payload = { status: action };
-    if (action === "countered") {
-      const counterNum = parseOptionalNumber(counterValue);
-      if (!Number.isFinite(counterNum) || counterNum <= 0) { setModalError("Introdu un preț de contra-ofertă valid."); return; }
-      payload.counter_price = counterNum;
-      if (isFreightParity(bid.parity)) {
-        const freightNum = parseOptionalNumber(freightValue);
-        if (!Number.isFinite(freightNum) || freightNum <= 0) { setModalError("Introdu un tarif de transport valid."); return; }
-        payload.freight_cost = freightNum;
-        payload.delivery_location = normalizeOptionalText(deliveryValue);
-      }
-    }
-
-    setModalError(null);
-    const { error } = await supabase.from("bids").update(payload).eq("id", bid.id);
-    if (error) { setModalError("Eroare la trimiterea actualizării: " + error.message); return; }
-
-    if (action === "accepted" && bid.farmer_id) {
-      await addFarmerRewardsPoints(bid.farmer_id, Number(bid.quantity || 0));
-    }
-
-    if (useModal) {
-      setAdminSelectedBid(null);
-      setAdminConfirmAction(null);
-      setAdminModalCounter("");
-      setAdminModalFreight("");
-      setAdminModalDelivery("");
-    }
-    await fetchBids();
-  };
-
-  const openAdminModal = (bid, confirmAction = null) => {
-    setAdminSelectedBid(bid);
-    const counterValue = Number(bid.counter_price || 0) > 0 ? String(bid.counter_price) : "";
-    const freightValue = Number(bid.freight_cost || 0) > 0 ? String(bid.freight_cost) : "";
-    const deliveryValue = bid.delivery_location ?? "";
-    setAdminModalCounter(counterValue);
-    setAdminModalFreight(freightValue);
-    setAdminModalDelivery(deliveryValue);
-    setAdminModalOriginal({ counter: counterValue, freight: freightValue, delivery: deliveryValue });
-    setAdminConfirmAction(confirmAction);
-    setModalError(null);
-  };
-
-  // ── Derived data ─────────────────────────────────────────────────────────────
-
-  const periodCut = periodCutoff(filterPeriod);
-  const scopedBids = (bids || []).filter((b) => {
-    if (listFarmerFilter !== "all" && b.farmer_id !== listFarmerFilter) return false;
-    if (filterProduct !== "all" && b.product !== filterProduct) return false;
-    if (filterParity !== "all" && b.parity !== filterParity) return false;
-    if (filterDeliveryLocation !== "all" && (b.delivery_location || "-") !== filterDeliveryLocation) return false;
-    if (filterLoadingLocation !== "all" && (b.loading_location || "-") !== filterLoadingLocation) return false;
-    if (filterDeliveryFrom || filterDeliveryTo) {
-      const start = b.delivery_start ? b.delivery_start.slice(0, 10) : null;
-      const end = b.delivery_end ? b.delivery_end.slice(0, 10) : null;
-      if (!start || !end) return false;
-      if (filterDeliveryFrom && start < filterDeliveryFrom) return false;
-      if (filterDeliveryTo && end > filterDeliveryTo) return false;
-    }
-    if (periodCut) {
-      if (!b.created_at) return false;
-      const created = new Date(b.created_at);
-      if (Number.isNaN(created.getTime()) || created < periodCut) return false;
-    }
-    return true;
-  });
-
-  const isPending = (s) => s === "pending" || s === "countered" || s === "farmer_countered";
-  const statusCounts = scopedBids.reduce(
-    (acc, b) => {
-      acc.all += 1;
-      if (b.status === "accepted") acc.accepted += 1;
-      else if (b.status === "rejected") acc.rejected += 1;
-      else if (isPending(b.status)) acc.pending += 1;
-      return acc;
-    },
-    { all: 0, accepted: 0, rejected: 0, pending: 0 },
-  );
-  const totalVolume = scopedBids.reduce((sum, b) => sum + Number(b.quantity || 0), 0);
-
-  const filteredBids = scopedBids.filter((b) => {
-    if (filterStatus === "all") return true;
-    if (filterStatus === "pending") return isPending(b.status);
-    return b.status === filterStatus;
-  });
-
-  const statsRows = (() => {
-    const map = new Map();
-    filteredBids.forEach((b) => {
-      const product = b.product || "unknown";
-      const qty = Number(b.quantity || 0);
-      const price = b.status === "accepted"
-        ? Number(getAcceptedPrice(b) || 0)
-        : Number(hasPositiveNumber(b.counter_price) ? b.counter_price : b.price ?? 0);
-      if (!map.has(product)) map.set(product, { product, totalQty: 0, totalValue: 0 });
-      const current = map.get(product);
-      current.totalQty += qty;
-      current.totalValue += qty * price;
+  useEffect(() => {
+    supabase.rpc("bid_filter_options").then(({ data, error: loadError }) => {
+      if (loadError || !data) return;
+      setLoadingLocations(data.loading_locations || []);
+      setCropYears(data.crop_years || []);
     });
-    return Array.from(map.values()).map((row) => ({
-      ...row,
-      avgPrice: row.totalQty ? row.totalValue / row.totalQty : 0,
-    }));
-  })();
+  }, []);
 
-  const statsTotalQty = statsRows.reduce((sum, row) => sum + Number(row.totalQty || 0), 0);
+  // ── Data ────────────────────────────────────────────────────────────────────
 
-  const deliveryLocationOptions = Array.from(
-    new Set((bids || []).map((b) => b.delivery_location || "-").filter((loc) => loc && loc.trim() !== ""))
-  ).sort((a, b) => a.localeCompare(b));
+  const periodFrom = toDateParam(periodCutoff(filterPeriod));
 
-  const loadingLocationOptions = Array.from(
-    new Set((bids || []).map((b) => b.loading_location || "-").filter((loc) => loc && loc.trim() !== ""))
-  ).sort((a, b) => a.localeCompare(b));
+  const applyFilters = useCallback((query) => {
+    let q = query;
+    if (listFarmerFilter !== "all") q = q.eq("farmer_id", listFarmerFilter);
+    if (filterProduct !== "all") q = q.eq("product", filterProduct);
+    if (filterStatus !== "all") {
+      if (filterStatus === "pending") q = q.in("status", ["pending", "countered", "farmer_countered"]);
+      else q = q.eq("status", filterStatus);
+    }
+    if (filterParity !== "all") q = q.eq("parity", filterParity);
+    if (filterDeliveryLocation !== "all") {
+      q = filterDeliveryLocation === NO_LOCATION
+        ? q.is("delivery_location", null)
+        : q.eq("delivery_location", filterDeliveryLocation);
+    }
+    if (filterLoadingLocation !== "all") {
+      q = filterLoadingLocation === NO_LOCATION
+        ? q.is("loading_location", null)
+        : q.eq("loading_location", filterLoadingLocation);
+    }
+    if (filterCropYear !== "all") q = q.eq("crop_year", Number(filterCropYear));
+    // A bid with no delivery window cannot satisfy a window filter; NULL
+    // comparisons drop it, matching the previous client-side behaviour.
+    if (filterDeliveryFrom) q = q.gte("delivery_start", filterDeliveryFrom);
+    if (filterDeliveryTo) q = q.lte("delivery_end", filterDeliveryTo);
+    if (periodFrom) q = q.gte("created_at", periodFrom);
+    return q;
+  }, [
+    listFarmerFilter, filterProduct, filterStatus, filterParity,
+    filterDeliveryLocation, filterLoadingLocation, filterCropYear,
+    filterDeliveryFrom, filterDeliveryTo, periodFrom,
+  ]);
+
+  // Keyset on id rather than offset: id is a monotonic identity, so ordering by
+  // it matches created_at ordering while the primary key serves the cursor as a
+  // backward index scan. offset would make Postgres count past every skipped row.
+  const fetchPage = useCallback(async ({ cursor = null, limit = PAGE_SIZE } = {}) => {
+    let q = applyFilters(supabase.from("bids").select(BID_COLUMNS));
+    if (cursor != null) q = q.lt("id", cursor);
+    return q.order("id", { ascending: false }).limit(limit);
+  }, [applyFilters]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      setLoading(true);
+      setError(null);
+
+      let data, fetchError;
+      try {
+        ({ data, error: fetchError } = await fetchPage());
+      } catch (err) {
+        // A rejected promise (network down, bad Supabase URL, CORS) skips the
+        // {error} path entirely; without this the spinner would run forever.
+        fetchError = err;
+      }
+      if (cancelled) return;
+
+      setLoading(false);
+      if (fetchError) {
+        // Silence here is what made a failed load look like an empty table.
+        setError("Nu am putut încărca ofertele: " + fetchError.message);
+        setBids([]);
+        setHasMore(false);
+        return;
+      }
+      setBids(data || []);
+      setHasMore((data || []).length === PAGE_SIZE);
+    })();
+
+    return () => { cancelled = true; };
+  }, [fetchPage]);
+
+  const loadMore = async () => {
+    const last = bids[bids.length - 1];
+    if (!last || loadingMore) return;
+
+    setLoadingMore(true);
+    let data, fetchError;
+    try {
+      ({ data, error: fetchError } = await fetchPage({ cursor: last.id }));
+    } catch (err) {
+      fetchError = err;
+    }
+    setLoadingMore(false);
+
+    if (fetchError) {
+      setError("Nu am putut încărca restul ofertelor: " + fetchError.message);
+      return;
+    }
+    setBids((prev) => [...prev, ...(data || [])]);
+    setHasMore((data || []).length === PAGE_SIZE);
+  };
+
+  // Realtime: refresh exactly the rows already on screen. Re-evaluating whether
+  // an incoming row still matches the active filters would mean duplicating the
+  // filter logic client-side — the thing this refactor removes — and the loaded
+  // window is at most a few hundred rows.
+  // Written in an effect, not during render: React reserves render for pure
+  // computation, and a ref assigned mid-render is not guaranteed to survive a
+  // discarded render pass. No dependency array — it re-runs after every render
+  // so the closure always sees the current fetchPage and window size.
+  const refreshWindowRef = useRef(null);
+  useEffect(() => {
+    refreshWindowRef.current = async () => {
+      const { data, error: fetchError } = await fetchPage({
+        limit: Math.max(bids.length, PAGE_SIZE),
+      });
+      if (fetchError || !data) return;
+      setBids(data);
+      setHasMore(data.length >= Math.max(bids.length, PAGE_SIZE));
+    };
+  });
+
+  // Stable identity so the channel is not torn down and rebuilt on every
+  // filter change.
+  const onBidsChanged = useCallback(() => { refreshWindowRef.current?.(); }, []);
+  useRealtimeSubscription("bids", onBidsChanged);
+
+  // Shared by bid_counts and bid_stats — the list, the tabs and the statistics
+  // must describe the same set of contracts. Status is deliberately absent:
+  // bid_counts needs every status to fill the tabs, and bid_stats is
+  // accepted-only by definition.
+  const rpcFilters = useCallback(() => ({
+    p_farmer_id:         listFarmerFilter === "all" ? null : listFarmerFilter,
+    p_product:           filterProduct === "all" ? null : filterProduct,
+    p_parity:            filterParity === "all" ? null : filterParity,
+    p_delivery_location: (filterDeliveryLocation === "all" || filterDeliveryLocation === NO_LOCATION)
+      ? null : filterDeliveryLocation,
+    p_loading_location:  (filterLoadingLocation === "all" || filterLoadingLocation === NO_LOCATION)
+      ? null : filterLoadingLocation,
+    p_delivery_location_unset: filterDeliveryLocation === NO_LOCATION,
+    p_loading_location_unset:  filterLoadingLocation === NO_LOCATION,
+    p_delivery_from:     filterDeliveryFrom || null,
+    p_delivery_to:       filterDeliveryTo || null,
+    p_created_from:      periodFrom,
+    p_crop_year:         filterCropYear === "all" ? null : Number(filterCropYear),
+  }), [
+    listFarmerFilter, filterProduct, filterParity, filterDeliveryLocation,
+    filterLoadingLocation, filterDeliveryFrom, filterDeliveryTo, filterCropYear,
+    periodFrom,
+  ]);
+
+  // Counts drive the header and the status tabs, so they deliberately ignore
+  // the status filter — each tab has to show what it would contain. Counting in
+  // the browser would report whatever fits on the current page.
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      let data, rpcError;
+      try {
+        ({ data, error: rpcError } = await supabase.rpc("bid_counts", rpcFilters()));
+      } catch (err) {
+        rpcError = err;
+      }
+      if (cancelled) return;
+      if (rpcError || !data) { setCounts(EMPTY_COUNTS); return; }
+      setCounts({ ...EMPTY_COUNTS, ...data });
+    })();
+
+    return () => { cancelled = true; };
+  }, [rpcFilters]);
+
+  // Only 'accepted' is aggregated, so a status filter that excludes accepted has
+  // no statistics to show — skip the round-trip entirely.
+  const statsApplicable = filterStatus === "all" || filterStatus === "accepted";
+
+  useEffect(() => {
+    if (!showStats || !statsApplicable) return;
+
+    let cancelled = false;
+
+    (async () => {
+      setStatsLoading(true);
+      setStatsError(null);
+
+      let data, rpcError;
+      try {
+        ({ data, error: rpcError } = await supabase.rpc("bid_stats", rpcFilters()));
+      } catch (err) {
+        rpcError = err;
+      }
+      if (cancelled) return;
+
+      setStatsLoading(false);
+      if (rpcError) {
+        setStatsError("Nu am putut încărca statisticile: " + rpcError.message);
+        setStatsRows([]);
+        return;
+      }
+      setStatsRows(data || []);
+    })();
+
+    return () => { cancelled = true; };
+  }, [showStats, statsApplicable, rpcFilters]);
+
+  const statsTotalQty = statsRows.reduce((sum, row) => sum + Number(row.total_qty || 0), 0);
+
+  const resetFilters = () => {
+    setListFarmerFilter("all");
+    setFilterProduct("all");
+    setFilterStatus("all");
+    setFilterParity("all");
+    setFilterDeliveryFrom("");
+    setFilterDeliveryTo("");
+    setFilterDeliveryLocation("all");
+    setFilterLoadingLocation("all");
+    setFilterCropYear("all");
+    setFilterPeriod("all");
+  };
 
   // ── Render ────────────────────────────────────────────────────────────────────
 
@@ -438,13 +469,13 @@ export default function BidsTab() {
           <div className="oferte-title">
             <h2>Oferte</h2>
             <div className="oferte-sub">
-              <span className="stat"><strong>{statusCounts.all}</strong>&nbsp;total</span>
+              <span className="stat"><strong>{counts.all}</strong>&nbsp;total</span>
               <span className="sep" />
-              <span className="stat"><strong>{statusCounts.accepted}</strong>&nbsp;acceptate</span>
+              <span className="stat"><strong>{counts.accepted}</strong>&nbsp;acceptate</span>
               <span className="sep" />
-              <span className="stat"><strong>{statusCounts.rejected}</strong>&nbsp;respinse</span>
+              <span className="stat"><strong>{counts.rejected}</strong>&nbsp;respinse</span>
               <span className="sep" />
-              <span className="stat"><strong>{formatCompactNumber(totalVolume)}</strong>&nbsp;t volum</span>
+              <span className="stat"><strong>{formatCompactNumber(counts.total_volume)}</strong>&nbsp;t volum</span>
             </div>
           </div>
           <div className="oferte-tools">
@@ -469,7 +500,7 @@ export default function BidsTab() {
               className={"oferte-tab" + (filterStatus === "all" ? " is-on" : "")}
               onClick={() => setFilterStatus("all")}
             >
-              Toate <span className="count">{statusCounts.all}</span>
+              Toate <span className="count">{counts.all}</span>
             </button>
             <button
               type="button"
@@ -478,7 +509,7 @@ export default function BidsTab() {
               className={"oferte-tab" + (filterStatus === "accepted" ? " is-on" : "")}
               onClick={() => setFilterStatus("accepted")}
             >
-              Acceptate <span className="count">{statusCounts.accepted}</span>
+              Acceptate <span className="count">{counts.accepted}</span>
             </button>
             <button
               type="button"
@@ -487,7 +518,7 @@ export default function BidsTab() {
               className={"oferte-tab" + (filterStatus === "rejected" ? " is-on" : "")}
               onClick={() => setFilterStatus("rejected")}
             >
-              Respinse <span className="count">{statusCounts.rejected}</span>
+              Respinse <span className="count">{counts.rejected}</span>
             </button>
             <button
               type="button"
@@ -496,7 +527,7 @@ export default function BidsTab() {
               className={"oferte-tab" + (filterStatus === "pending" ? " is-on" : "")}
               onClick={() => setFilterStatus("pending")}
             >
-              În așteptare <span className="count">{statusCounts.pending}</span>
+              În așteptare <span className="count">{counts.pending}</span>
             </button>
           </div>
 
@@ -547,34 +578,45 @@ export default function BidsTab() {
 
         {showStats && (
           <div style={{ marginTop: 12 }}>
-            {statsRows.length === 0 ? (
-              <p className="small-text">Nu există statistici pentru filtrele selectate.</p>
+            {!statsApplicable ? (
+              <p className="small-text">
+                Statisticile acoperă doar contractele acceptate. Alege „Toate” sau „Acceptate”.
+              </p>
+            ) : statsLoading ? (
+              <p className="small-text">Se încarcă statisticile…</p>
+            ) : statsError ? (
+              <p className="badge rejected">{statsError}</p>
+            ) : statsRows.length === 0 ? (
+              <p className="small-text">Nu există contracte acceptate pentru filtrele selectate.</p>
             ) : (
-              <div className="table-wrapper">
-                <table className="table stats-table">
-                  <thead>
-                    <tr>
-                      <th>Produs</th>
-                      <th>Volum (t)</th>
-                      <th>Preț mediu</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {statsRows.map((row) => (
-                      <tr key={row.product}>
-                        <td>{getProductLabelSafe(row.product)}</td>
-                        <td>{Number(row.totalQty || 0).toFixed(2)}</td>
-                        <td>{Number(row.avgPrice || 0).toFixed(2)}</td>
+              <>
+                <p className="small-text" style={{ marginBottom: 8 }}>Doar contracte acceptate</p>
+                <div className="table-wrapper">
+                  <table className="table stats-table">
+                    <thead>
+                      <tr>
+                        <th>Produs</th>
+                        <th>Volum (t)</th>
+                        <th>Preț mediu</th>
                       </tr>
-                    ))}
-                    <tr className="stats-total-row">
-                      <td>TOTAL</td>
-                      <td>{Number(statsTotalQty || 0).toFixed(2)}</td>
-                      <td>-</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {statsRows.map((row) => (
+                        <tr key={row.product}>
+                          <td>{getProductLabelSafe(row.product)}</td>
+                          <td>{formatQuantity(row.total_qty)}</td>
+                          <td>{Number(row.avg_price || 0).toFixed(2)}</td>
+                        </tr>
+                      ))}
+                      <tr className="stats-total-row">
+                        <td>TOTAL</td>
+                        <td>{formatQuantity(statsTotalQty)}</td>
+                        <td>-</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </div>
         )}
@@ -584,37 +626,36 @@ export default function BidsTab() {
 
         {!loading && !error && (
           <div className="offer-list">
-            {filteredBids.map((b) => (
+            {bids.map((b) => (
               <OfferCard
                 key={b.id}
                 bid={b}
-                onOpen={() => openAdminModal(b, null)}
+                onOpen={() => setAdminSelectedBid(b)}
               />
             ))}
 
-            {filteredBids.length === 0 && (
+            {bids.length === 0 && (
               <div className="empty-state">
                 <svg className="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2M12 12h.01M12 16h.01" />
                 </svg>
                 <p className="empty-state-title">Nicio ofertă găsită</p>
                 <p className="empty-state-subtitle">Nicio ofertă nu corespunde filtrelor selectate. Încearcă să ajustezi sau resetezi filtrele.</p>
+                <button type="button" className="btn small outline" onClick={resetFilters}>
+                  Resetează filtrele
+                </button>
+              </div>
+            )}
+
+            {hasMore && (
+              <div className="offer-list-more">
                 <button
                   type="button"
                   className="btn small outline"
-                  onClick={() => {
-                    setListFarmerFilter("all");
-                    setFilterProduct("all");
-                    setFilterStatus("all");
-                    setFilterParity("all");
-                    setFilterDeliveryFrom("");
-                    setFilterDeliveryTo("");
-                    setFilterDeliveryLocation("all");
-                    setFilterLoadingLocation("all");
-                    setFilterPeriod("all");
-                  }}
+                  disabled={loadingMore}
+                  onClick={loadMore}
                 >
-                  Resetează filtrele
+                  {loadingMore ? "Se încarcă…" : "Încarcă mai multe"}
                 </button>
               </div>
             )}
@@ -624,9 +665,9 @@ export default function BidsTab() {
 
       {adminSelectedBid && (
         <AdminBidDetailModal
-          bid={(bids || []).find((b) => b.id === adminSelectedBid.id) || adminSelectedBid}
+          bid={bids.find((b) => b.id === adminSelectedBid.id) || adminSelectedBid}
           onClose={() => setAdminSelectedBid(null)}
-          onUpdated={fetchBids}
+          onUpdated={() => refreshWindowRef.current?.()}
         />
       )}
 
@@ -658,7 +699,7 @@ export default function BidsTab() {
                   <label className="bid-input-label" htmlFor="af-farmer">Fermier</label>
                   <select id="af-farmer" className="bid-input-field" value={listFarmerFilter} onChange={(e) => setListFarmerFilter(e.target.value)}>
                     <option value="all">Toți fermierii</option>
-                    {(farmers || []).map((f) => (
+                    {farmers.map((f) => (
                       <option key={f.id} value={f.id}>{f.email || f.id}</option>
                     ))}
                   </select>
@@ -702,7 +743,8 @@ export default function BidsTab() {
                   <label className="bid-input-label" htmlFor="af-delivery-loc">Locație livrare</label>
                   <select id="af-delivery-loc" className="bid-input-field" value={filterDeliveryLocation} onChange={(e) => setFilterDeliveryLocation(e.target.value)}>
                     <option value="all">Toate</option>
-                    {deliveryLocationOptions.map((loc) => (
+                    <option value={NO_LOCATION}>Fără locație</option>
+                    {deliveryLocations.map((loc) => (
                       <option key={loc} value={loc}>{formatLocationDisplay(loc)}</option>
                     ))}
                   </select>
@@ -711,8 +753,30 @@ export default function BidsTab() {
                   <label className="bid-input-label" htmlFor="af-loading-loc">Locație încărcare</label>
                   <select id="af-loading-loc" className="bid-input-field" value={filterLoadingLocation} onChange={(e) => setFilterLoadingLocation(e.target.value)}>
                     <option value="all">Toate</option>
-                    {loadingLocationOptions.map((loc) => (
+                    <option value={NO_LOCATION}>Fără locație</option>
+                    {loadingLocations.map((loc) => (
                       <option key={loc} value={loc}>{formatLocationDisplay(loc)}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* An recoltă + Perioadă */}
+              <div className="bid-form-grid-2">
+                <div className="bid-input-container">
+                  <label className="bid-input-label" htmlFor="af-crop-year">An recoltă</label>
+                  <select id="af-crop-year" className="bid-input-field" value={filterCropYear} onChange={(e) => setFilterCropYear(e.target.value)}>
+                    <option value="all">Toți anii</option>
+                    {cropYears.map((y) => (
+                      <option key={y} value={y}>{y}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="bid-input-container">
+                  <label className="bid-input-label" htmlFor="af-period">Perioadă</label>
+                  <select id="af-period" className="bid-input-field" value={filterPeriod} onChange={(e) => setFilterPeriod(e.target.value)}>
+                    {PERIOD_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
                     ))}
                   </select>
                 </div>
@@ -743,21 +807,7 @@ export default function BidsTab() {
               </div>
 
               <div className="filter-actions">
-                <button
-                  type="button"
-                  className="btn small ghost filter-btn-reset"
-                  onClick={() => {
-                    setListFarmerFilter("all");
-                    setFilterProduct("all");
-                    setFilterStatus("all");
-                    setFilterParity("all");
-                    setFilterDeliveryFrom("");
-                    setFilterDeliveryTo("");
-                    setFilterDeliveryLocation("all");
-                    setFilterLoadingLocation("all");
-                    setFilterPeriod("all");
-                  }}
-                >
+                <button type="button" className="btn small ghost filter-btn-reset" onClick={resetFilters}>
                   Resetează
                 </button>
                 <button

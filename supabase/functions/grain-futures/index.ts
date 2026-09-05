@@ -1,3 +1,5 @@
+import { checkRateLimit, clientIdentity, rateLimitResponse } from "../_shared/rateLimit.ts";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -63,7 +65,9 @@ Deno.serve(async (req) => {
   }
 
   // No auth check needed — this function returns public market data only.
-  // Deployed with --no-verify-jwt; rate-limiting is handled by Yahoo Finance upstream.
+  if (!(await checkRateLimit("grain-futures", clientIdentity(req), 30, 60))) {
+    return rateLimitResponse(corsHeaders);
+  }
 
   const products = await Promise.all(
     PRODUCTS.map(async (p) => {

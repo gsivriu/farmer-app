@@ -1,6 +1,7 @@
 // supabase/functions/gnews/index.ts
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { checkRateLimit, rateLimitResponse } from "../_shared/rateLimit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -50,6 +51,10 @@ Deno.serve(async (req) => {
     });
   }
   // ✅ END AUTH CHECK
+
+  if (!(await checkRateLimit("gnews", user.id, 20, 60))) {
+    return rateLimitResponse(corsHeaders);
+  }
 
   try {
     const apiKey = Deno.env.get("GNEWS_API_KEY");

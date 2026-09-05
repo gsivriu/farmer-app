@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
-import { useAppContext } from "../context/AppContext.jsx";
 import { getProductLabelSafe } from "../utils/productLabels";
 import { formatCompactNumber, hasPositiveNumber } from "../utils/numberFormat";
 import { formatDeliveryRange, formatLocationDisplay, isFreightParity } from "../utils/formatting";
@@ -70,8 +69,6 @@ function BidStatusBadge({ status }) {
 }
 
 export default function AdminBidDetailModal({ bid, onClose, onUpdated }) {
-  const { addFarmerRewardsPoints } = useAppContext();
-
   const [counter, setCounter] = useState("");
   const [freight, setFreight] = useState("");
   const [delivery, setDelivery] = useState("");
@@ -148,6 +145,14 @@ export default function AdminBidDetailModal({ bid, onClose, onUpdated }) {
     }
 
     const payload = { status: action };
+    if (action === "accepted") {
+      // Freeze the agreed price into final_price, the same way the farmer's
+      // accept path does, so it stays correct even if counter_price is edited
+      // later. For a countered bid this is the standing counter; for a plain
+      // pending bid it is the farmer's asking price.
+      const acceptedPrice = getAcceptedPrice(bid);
+      if (acceptedPrice != null) payload.final_price = acceptedPrice;
+    }
     if (action === "countered") {
       const counterNum = parseOptionalNumber(counter);
       if (!Number.isFinite(counterNum) || counterNum <= 0) {
@@ -173,10 +178,6 @@ export default function AdminBidDetailModal({ bid, onClose, onUpdated }) {
       return;
     }
 
-    if (action === "accepted" && bid.farmer_id) {
-      await addFarmerRewardsPoints(bid.farmer_id, Number(bid.quantity || 0));
-    }
-
     if (typeof onUpdated === "function") await onUpdated();
     onClose();
   };
@@ -187,8 +188,12 @@ export default function AdminBidDetailModal({ bid, onClose, onUpdated }) {
   const originalFreight = parseOptionalNumber(original.freight);
   const currentDelivery = normalizeOptionalText(delivery);
   const originalDelivery = normalizeOptionalText(original.delivery);
+  // Only the terminal states lock the admin out. A 'countered' bid (the admin
+  // already sent a counter and is waiting on the farmer) stays actionable: the
+  // admin can still accept, re-counter, or withdraw it — otherwise a farmer who
+  // never responds leaves the offer stuck forever with no admin recourse.
   const isDecisionLocked =
-    bid.status === "accepted" || bid.status === "rejected" || bid.status === "countered";
+    bid.status === "accepted" || bid.status === "rejected";
   const counterInvalid = currentCounter != null && !Number.isFinite(currentCounter);
   const freightInvalid =
     isFreightParity(bid.parity) && currentFreight != null && !Number.isFinite(currentFreight);

@@ -1,13 +1,55 @@
-# farmer-app — Claude Context
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
-A React + Vite web app (with Capacitor iOS) for farmers to manage bids, commodities, and activity. Connects to Supabase for auth and data, deployed on Vercel.
+A React + Vite web app (with Capacitor iOS) for farmers to submit bids on commodities and for admins ("traders") to manage them. Connects to Supabase for auth/data/Edge Functions and deploys to Vercel. Comments and UI copy are largely in Romanian.
+
+**Before any architecture, scalability, or roadmap discussion, read `ARCHITECTURE.md`** (repo root) first — it's the maintained source of truth for what's been audited, what's fixed, and what's still open, kept current by Gabriel across sessions.
+
+## Standing Priorities (what we keep coming back to)
+
+The recurring lens for this project — apply these by default, not just when asked:
+
+- **Scale to 5,000+ users without a rewrite.** The one pattern that keeps paying off: explicit column selects (never `select('*')`), server-side pagination (keyset, not offset), RPC aggregates instead of pulling raw rows to sum/count in JS. `BidsTab` and `FarmiersTab` already do this — extend it, don't reintroduce a full-table fetch on a new list screen.
+- **RLS is the real trust boundary, not the UI.** Every table with sensitive data needs a policy, admin access is gated on `is_admin(...) AND aal2`, and — the hard lesson from 2026-09-03 — when an OR'd policy mixes an `is_admin(...)` branch with a self-referential owner check (`id = auth.uid()`), the owner check goes **first**, always. Test any RLS change with a direct impersonated query (`SET ROLE authenticated` + `request.jwt.claims`) before calling it done, not just a visual read of the SQL.
+- **Dev before prod, every time, no exceptions.** Both Supabase projects exist so a bad migration or RLS change surfaces on dev first. Restore the dev project (`eirqbksgxiiudgeezlob`, pauses on the free tier) rather than skipping straight to prod.
+- **Security posture stays tight by default:** MFA required for admins, rate limiting on every public Edge Function, secrets in Edge Function config — never in client code, never left in `.env` longer than necessary.
+- **Solo-dev pragmatism.** Gabriel is the only developer — don't add abstractions, a services layer, or test infrastructure ahead of actual need (see `ARCHITECTURE.md` §5.2/§12 for when that calculus changes). Do fix things that are cheap now and expensive later (indexes, RLS ordering, pagination) before traffic grows, not after.
+- **Update `ARCHITECTURE.md` and this file's Known Issues when something gets fixed or discovered** — stale docs are worse than no docs; they were the root cause of redoing already-finished work earlier in this project's history.
+
+## Active Next Steps
+
+Pulled from `ARCHITECTURE.md` §11 — check there for the full roadmap and reasoning, this is just the current front of the queue:
+
+1. ~~Move MySQL credentials out of local `.env` into `supabase secrets set`~~ — closed 2026-09-05 as a false positive: grepped `supabase/functions/` and confirmed no Edge Function reads `AMEROPA_DB_*`; the only consumer is `test-ameropa.js`, a local-only diagnostic script run by hand on Gabriel's machine. A Supabase secret is only visible to code running on Supabase's own infrastructure, so there is nothing to move it to — a local script can only ever read a local `.env`. `.env` is already gitignored, which is the correct and sufficient protection for this case.
+2. Enable leaked-password protection in the Supabase Auth dashboard — confirmed 2026-09-05 this toggle is grayed out on the Free plan ("Only available on Pro plan and above"), so it's blocked on the Supabase Pro decision (#4), not independently actionable.
+3. Decide `sharp-proxy`'s fate — finish wiring `src/services/sharpApi.js` into a screen, or delete both as dead/unfinished.
+4. Supabase Pro upgrade — daily backups + PITR, connection pooling, higher Realtime limits. Billing decision for Gabriel, not something to just do.
+5. Once the above land: services layer extraction, admin route code-splitting, Sentry alerting, and reconciling the pre-baseline migration history (`ARCHITECTURE.md` §11, Faza 2).
 
 ## Stack
-- Frontend: React + Vite (JSX, not TypeScript)
-- Backend: Supabase (auth, database, Edge Functions)
-- Mobile: Capacitor iOS
+- Frontend: React 19 + Vite 7 (JSX, not TypeScript)
+- Backend: Supabase (Postgres + auth + Realtime + Edge Functions on Deno)
+- Mobile: Capacitor iOS (`ios/`)
 - Deployment: Vercel (production branch: `main`)
+- No test suite/runner is configured in this repo.
+
+## Commands
+```bash
+npm run dev              # vite dev server
+npm run dev:host:5173    # dev server bound to 0.0.0.0:5173 (for iOS dev mode)
+npm run build             # production build
+npm run lint               # eslint .
+npm run preview            # preview a production build
+
+# Capacitor iOS
+npm run cap:sync:ios       # sync web build into the iOS project
+npm run cap:open:ios       # open the iOS project in Xcode
+npm run cap:dev:on/off     # toggle instant hot-reload dev mode on device
+npm run cap:live:on/off    # toggle TestFlight "live" mode (loads from a remote URL instead of bundled assets)
+```
+There's no `test` script — verify changes via `npm run lint`, `npm run build`, and manual/browser checking.
 
 ## Environment Setup
 
@@ -19,12 +61,9 @@ A React + Vite web app (with Capacitor iOS) for farmers to manage bids, commodit
 
 - `.env.local` **always** points to DEV — `https://eirqbksgxiiudgeezlob.supabase.co`
 - `.env.production` **always** points to PROD — `https://zehwkrndfwjrvqdckepu.supabase.co`
-- Both files are gitignored — never committed
-- `.env.example` is committed with empty values as a template
-
-### Supabase Project IDs
-- **PRODUCTION**: `zehwkrndfwjrvqdckepu` → https://zehwkrndfwjrvqdckepu.supabase.co
-- **DEVELOPMENT**: `eirqbksgxiiudgeezlob` → https://eirqbksgxiiudgeezlob.supabase.co
+- Both files are gitignored — never committed. `.env.example` is committed with empty values as a template.
+- `VITE_` prefix = exposed to the browser bundle — never put secrets there.
+- The root `.env` (also gitignored) holds MySQL credentials for the Ameropa DB, used only by Edge Functions (never imported client-side).
 
 ## Branch Strategy
 ```
@@ -32,46 +71,67 @@ develop  →  test locally / preview deploy on Vercel
     ↓
   main   →  production deploy on Vercel (auto on push)
 ```
+- All feature work happens on `develop` or feature branches.
+- Only merge to `main` when tested and ready for production.
+- Never push directly to `main` for features.
 
-- All feature work happens on `develop` or feature branches
-- Only merge to `main` when tested and ready for production
-- Never push directly to `main` for features
+## Architecture
 
-## Key Files
-- `src/supabaseClient.js` — single Supabase client instance (uses `import.meta.env` vars)
-- `src/App.jsx` — main app with routing
-- `src/hooks/useAuth.jsx` — authentication hook
-- `src/context/` — React contexts (Bids, Commodities, Rewards)
-- `src/pages/` — page-level components
-- `supabase/functions/` — Edge Functions (Deno runtime)
-- `VERCEL_SETUP.md` — manual Vercel dashboard setup instructions
-- `SUPABASE_DEV_SETUP.md` — instructions to create and configure the dev Supabase project
+### Auth (`src/hooks/useAuth.jsx`, `src/components/ProtectedRoute.jsx`)
+`AuthProvider` wraps the app and drives everything off `supabase.auth.onAuthStateChange`. On each auth event it loads the `profiles` row (for `role`) and the MFA assurance level (AAL) in parallel. Two roles exist: `farmer` and `admin`. Admins are hard-required to enroll TOTP MFA — `App.jsx`'s `DashboardShell` forces `MFASetup`/`MFAVerify` before rendering `AdminDashboard` if an admin hasn't enrolled or isn't at `aal2` yet. If the profile fetch fails, or the profile `status` is `"disabled"`, the user is signed out rather than allowed to fall through with a default role. There's a 5s safety-net timeout that force-signs-out if `onAuthStateChange` never fires (hung token refresh). `ProtectedRoute` gates on `loading`/`user`/optional `requiredRole`. Do not change this flow without discussion — it also handles both PKCE (invite links) and implicit auth flows (`src/pages/SetPassword.jsx`).
 
-## Setup References
-- See `VERCEL_SETUP.md` for Vercel environment variable configuration
-- See `SUPABASE_DEV_SETUP.md` for creating the dev Supabase project
+### Routing (`src/App.jsx`)
+Single `/dashboard` route renders either `FarmerDashboard` or `AdminDashboard` based on `role` — there's no separate admin URL space (`/admin` and `/motherboard` just redirect to `/dashboard`). Dark mode is stored in `localStorage` and can also be driven by a `weather-theme-change` window event dispatched from `WeatherWidget` (day/night syncs the theme).
 
-## Current Sprint / Active Work
-Dev/prod environment split complete as of 2026-03-25.
-- Both Supabase projects provisioned and schema-matched
-- Baseline migration in `supabase/migrations/20260325120000_baseline.sql`
-- `develop` branch created locally (not yet pushed)
-- Next: configure Vercel env vars per environment (see `VERCEL_SETUP.md`)
+### Contexts (`src/context/`)
+`AppProvider` composes `CommoditiesContext` (prices, realtime price feed, `updateCommodityPrice`). **Bids intentionally have no context** — see the doc comment in `src/context/AppContext.jsx`. Each screen queries exactly what it displays: `BidsTab` paginates with server-side filters, `ActivityTab` fetches only the current farmer's bids, admin execution views fetch only accepted bids. A shared context was tried and dropped because it loaded the entire bids table for every user on every tab visit. `RewardsContext` (farmer points) was removed 2026-09-03 — it wrote to `farmer_rewards.points`/`updated_at`, columns that don't exist on that table (real schema is `reward_type`/`unlocked_at`/`target_t`/`bonus_eur`/...), so every write had failed silently since it was added; nothing read `farmerRewards` either. `FarmerProgress.jsx` (the tonnage progress widget farmers actually see) is unrelated — it computes progress straight from accepted `bids`.
+
+### Bids at scale (`src/pages/AdminDashboard/BidsTab.jsx`)
+The admin bids list is built for a large, growing table: explicit column selects (never `select('*')`), `PAGE_SIZE = 50` server-side pagination, dedicated RPCs for aggregates instead of pulling full rows (`bid_stats_rpc`, `bid_counts_rpc`, `bid_filter_options` — see migrations `20260716120000_bid_stats_rpc.sql`, `20260717130000_bid_counts_rpc.sql`, `20260716130000_bid_filter_options.sql`), and indexes added in `20260715120000_bids_scalability_indexes.sql`. `status_changed_at` (migration `20260718120000_bids_status_changed_at.sql`) drives the card date so it reflects the last status transition, not submission time. Keep this pattern (explicit columns, pagination, RPC aggregates) when extending bid-heavy views instead of reintroducing full-table fetches. `FarmiersTab.jsx` (admin farmer list) follows the same pattern since 2026-09-03: keyset pagination on `(created_at, id)` — not `id` alone, since two prod rows share an exact `created_at` — server-side `ilike` search instead of client-side `.filter()`, and a separate `head: true` count query for the header badge. Backed by `idx_profiles_role_created_at`.
+
+### Rate limiting (`rate_limits` table + `check_rate_limit()` RPC)
+Fixed-window limiter wired up 2026-09-03 (migration `20260903181726_wire_up_rate_limits.sql`) after sitting unused since March. `check_rate_limit(key, limit, window_seconds)` is `SECURITY DEFINER`, atomic (single `INSERT ... ON CONFLICT DO UPDATE`), and **not** granted to `anon`/`authenticated` — only `service_role`, so a caller can never spoof someone else's key or an inflated limit. Edge Functions call it through `supabase/functions/_shared/rateLimit.ts` (`checkRateLimit(bucket, identity, limit, windowSeconds)`), keyed by `user.id` where the function already authenticates the caller (`exchange-rates`, `gnews`, `invite-farmer`) and by best-effort IP (`clientIdentity()`) where it doesn't (`grain-futures`, `sharp-proxy`). Fails open on infra errors — a `rate_limits` hiccup must not take the feature down with it. `bids` has its own, separate rate limit (`check_bid_rate_limit()` trigger, 5/min + 15/hour per farmer) that counts directly off the `bids` table and was already wired up; this RPC is for everything else.
+
+### Realtime (`src/hooks/useRealtimeSubscription.js`)
+Generic hook for subscribing to Postgres changes on a table. Handles reconnection on `CHANNEL_ERROR`/`TIMED_OUT` with exponential backoff, resubscribes on tab visibility change and Capacitor `appStateChange` (app resume), and runs a 20s health check — needed because iOS can silently kill the WebSocket while the WKWebView is suspended without firing either a visibility event or a channel error.
+
+### Edge Functions (`supabase/functions/`, Deno runtime)
+- `invite-farmer` — admin invites a new farmer (uses service_role, server-side only); rate-limited 30/hour per admin
+- `send-push` — push notification delivery
+- `exchange-rates`, `grain-futures`, `gnews` — external data proxies (keeps API keys off the client); all rate-limited (see Rate limiting above)
+- `sharp-proxy` — Ameropa Sharp API proxy, **deployed to dev only, not on prod**. `src/services/sharpApi.js` calls it but is itself unused anywhere in `src/` — looks like an unfinished integration, not a live prod dependency. Confirm before deploying it to prod or wiring `sharpApi.js` into a screen.
+- `_shared/rateLimit.ts` — not its own function (the `_` prefix excludes it from deployment); shared rate-limit helper imported by the functions above.
+- `.github/workflows/supabase-keepalive.yml` pings Supabase on a schedule to prevent the free-tier project from pausing.
+- `test-ameropa-db`/`test-mysql` (unauthenticated MySQL connectivity-check functions, publicly invokable with the anon key) were deleted from prod on 2026-08-25, and their source removed from the repo 2026-09-03 — use the local-only `test-ameropa.js` script for the same check instead of re-adding an Edge Function for it.
+
+### Capacitor iOS dev loop
+Two independent toggles, don't confuse them: `cap:dev:on` points the bundled iOS app at a local Vite server (instant HMR on-device, requires `dev:host:5173` running and same-WiFi); `cap:live:on <url>` points a TestFlight build at a deployed HTTPS URL so web deploys update the app without a new App Store build. See `README.md` for the full sequences.
 
 ## Known Issues / Tech Debt
-- [ ] Prod DB has 11 migrations tracked remotely but no matching local files. Baseline (`20260325120000_baseline.sql`) captures the full schema but is not reconciled with remote history. Do NOT run `supabase db push` against prod without first running `supabase migration repair`.
-- [x] ~~4 DB functions missing `SET search_path = ''`~~ — fixed in `20260325130000_fix_function_search_paths.sql`, applied DEV + PROD.
-- [x] ~~`rate_limits` RLS no-policy advisory~~ — fixed in `20260325130001_fix_rate_limits_rls.sql`, applied DEV + PROD.
+- [x] ~~PROD OUTAGE 2026-09-03, ~18:12–18:53 UTC: login worked but the app hung right after~~ — `profiles_select_policy` (introduced same day in `20260903180824_rls_performance_optimization.sql`) ordered its OR as `(is_admin(...) AND aal2) OR (id = auth.uid())`. `is_admin(uid)` queries `profiles` for the caller's own row, so evaluating that inner query re-enters `profiles`' own RLS; with the expensive `is_admin()` branch checked first, that inner evaluation never reached the cheap terminating `id = auth.uid()` branch before calling `is_admin()` again — infinite recursion, "stack depth limit exceeded", every `GET /rest/v1/profiles` returned 500. `useAuth.jsx` could never resolve a role, so the app sat frozen after a successful login. Fixed in `20260903185317_fix_profiles_select_recursion.sql` (dev + prod) by putting the self-check first. `bids_select_policy`/`bids_update_policy` had the same expensive-branch-first ordering (not recursive, since `bids` doesn't self-reference, but same footgun) — reordered too in `20260903185414_reorder_bids_policies_cheap_check_first.sql`. **Lesson: when merging an `is_admin(...)` branch with a self-referential owner check into one OR'd RLS policy, the self-check MUST come first** — `is_admin()` always queries the caller's own profile row, so it depends on that same short-circuit to terminate.
+- [x] ~~Prod (and dev) had migration versions tracked remotely that didn't match local filenames for the July migrations, plus 2 migrations that ran but weren't tracked at all~~ — fixed 2026-09-05 by correcting `supabase_migrations.schema_migrations` directly (`UPDATE`/`INSERT` on the version-tracking table only — no schema or data touched): `bid_stats_rpc`, `bid_filter_options`, `bid_counts_rpc`, `bids_status_changed_at` now carry the same version on dev, prod, and their local filenames; `bids_scalability_indexes` and `revoke_trigger_function_execute` (ran on both, untracked on both — verified via the actual indexes/revoked grants, not just the tracking table) got the missing tracking row. Both today's own migrations got the same fix (their applied version didn't match their filename either). Verified with a fresh `list_migrations` on both projects after.
+- [ ] Prod has one migration, `20260516071545_secure_send_push`, with no local file — deliberately left unreconciled: it hardens the push-notification triggers with an internal shared secret, but its content (captured 2026-09-05, see git history of this file) also carries the prod-only `trg_commodity_active_notify` trigger and hardcoded prod URLs/anon key. Adding it as a numbered file in `supabase/migrations/` would make a future `supabase db push` try to apply it to dev too — which would reintroduce the exact prod-only push-notification behavior Gabriel deliberately kept off dev (see the item below). Leave as an intentional, undocumented-in-files exception.
+- [x] ~~Dev is missing the commodity active/inactive flag + its push notification, and the two push-notification DB triggers for bid status changes and commodity price changes~~ — confirmed 2026-09-05 this is a real schema gap, not just a tracking gap (the `commodities.active` column and `trg_commodity_active_notify` trigger don't exist on dev at all; `trg_bid_countered_notify`/`trg_commodity_price_notify` *functions* exist on dev but their triggers were never attached to `bids`/`commodities`). Gabriel confirmed this was probably applied directly to prod and decided to leave dev without it for now — these trigger functions have prod's URL and anon key hardcoded, so wiring them up on dev would make dev fire real push notifications through prod's `send-push` function. Not planned to be fixed unless he asks.
+- [ ] Dev's pre-`20260716000000` migration history (everything from the March/April baseline through early July) still uses different version numbers than both prod and the local filenames, and has 2 entries (`add_bid_rate_limit_trigger`, `fix_bid_rate_limit_search_path`) with no matching local file at all — this is the older, larger, still-open part of the "pre-baseline migration history" item in `ARCHITECTURE.md` §11 Faza 2. Not touched in the 2026-09-05 cleanup (scoped to the confirmed July+ drift only); needs its own pass before any `supabase db push` is run against dev.
 - [ ] Leaked password protection (HaveIBeenPwned) not enabled — see `SECURITY_MANUAL_STEPS.md`.
-- [ ] `vercel.json` missing security headers (X-Frame-Options, X-Content-Type-Options, Referrer-Policy)
-- [ ] `.env` file contains MySQL credentials for Ameropa DB — these should be managed as Edge Function secrets via `supabase secrets set`, not a local file
+- [x] ~~`.env` file contains MySQL credentials for Ameropa DB locally — should be Edge Function secrets~~ — closed 2026-09-05, was a false positive: no Edge Function reads `AMEROPA_DB_*`, only the local-only `test-ameropa.js` script does. `.env` being gitignored is correct and sufficient for a local script's local secret; there's no Supabase secret to move it to.
+- [x] ~~Supabase performance advisor RLS warnings~~ — fixed in `20260903180824_rls_performance_optimization.sql` + `20260905120000_split_admin_all_policies_scope_device_tokens_roles.sql` + `20260905120100_wrap_device_tokens_service_read_auth_role.sql` (all applied dev + prod, dev-first, verified with impersonated `SET ROLE authenticated`/`service_role` queries before and after): wrapped `auth.uid()`/`auth.jwt()`/`auth.role()`/`is_admin(auth.uid())` in `(select ...)` everywhere including `device_tokens.service_read_all_tokens` (prod-only, was missed on 2026-09-03 since that policy doesn't exist on dev); merged `bids`/`profiles` duplicate SELECT/UPDATE permissive policies; added the 2 missing FK indexes; split `commodities`/`silo_price_configs`'s admin `ALL` policy into INSERT/UPDATE/DELETE (removes the overlap with the `true`-qual read policy instead of changing who can do what) and scoped `device_tokens`'s two policies to `TO service_role` / `TO authenticated` respectively. Advisors now clean on both projects except the informational (not WARN) unused-index lints and the leaked-password toggle below.
+- [x] ~~`device_tokens` had an RLS policy (`service_read_all_tokens`) on prod that dev doesn't have~~ — the drift itself is unchanged (still prod-only, intentional: dev has no service-role caller that needs it), but both migrations above guard on its existence so applying the same file to dev is a safe no-op instead of erroring.
+- [x] ~~`FarmiersTab` fetched the whole `profiles` table with no pagination~~ — fixed 2026-09-03, see "Bids at scale" above.
+- [x] ~~`rate_limits` table built but never read or written~~ — fixed 2026-09-03, see "Rate limiting" above.
+- [ ] `sharp-proxy` Edge Function exists on dev but was never deployed to prod, and its only client (`src/services/sharpApi.js`) is unused in `src/` — confirm intent (finish wiring it up, or drop the dead pieces) before touching either side.
+- [ ] Supabase project upgrade to Pro (automatic daily backups + PITR, connection pooling, higher Realtime connection limits) — not done, requires a billing decision.
 
 ## Security Notes
-- All Supabase access via anon key (client-side) — service_role key must never be exposed to the browser
-- Supabase auth uses PKCE flow (invite links + password set)
-- MySQL credentials (Ameropa DB) live in `.env` (gitignored) — used by Edge Functions only
-- `VITE_` prefix = exposed to browser bundle — never put secrets there
+- All Supabase access via anon key (client-side) — service_role key must never be exposed to the browser; it's only used inside Edge Functions.
+- RLS policies are security-critical — verify on dev before applying to prod.
+
+## Setup References
+- `VERCEL_SETUP.md` — Vercel environment variable configuration
+- `SUPABASE_DEV_SETUP.md` — creating/configuring the dev Supabase project
+- `SECURITY_MANUAL_STEPS.md` — manual dashboard steps not scriptable via migrations
 
 ## What NOT to Change Without Discussion
-- Auth flow (`src/hooks/useAuth.jsx`, `src/pages/SetPassword.jsx`) — complex, handles both PKCE and implicit flows
-- RLS policies — security-critical, verify on dev before applying to prod
+- Auth flow (`src/hooks/useAuth.jsx`, `src/pages/SetPassword.jsx`, `src/components/ProtectedRoute.jsx`) — handles both PKCE and implicit flows plus MFA gating.
+- RLS policies.
+- The bids-have-no-context pattern in `src/context/AppContext.jsx` — re-adding a shared bids context was already tried and reverted for scale reasons.

@@ -1,13 +1,13 @@
 import BidForm from "../../components/BidForm";
-import { useAppContext } from "../../context/AppContext.jsx";
 
+// No onBidCreated callback: ActivityTab holds the farmer's own list and its
+// realtime subscription picks the new bid up on its own. The previous callback
+// refetched a context list no farmer component ever read.
 export default function SaleTab() {
-  const { fetchBids } = useAppContext();
-
   return (
     <div className="sale-layout sale-form-only">
       <div className="card dashboard-card sale-card sale-form-pane">
-        <BidForm onBidCreated={fetchBids} embedded />
+        <BidForm embedded />
       </div>
     </div>
   );

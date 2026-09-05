@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { checkRateLimit, rateLimitResponse } from "../_shared/rateLimit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -50,6 +51,10 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Forbidden: admin only" }), {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    if (!(await checkRateLimit("invite-farmer", requestingUserId, 30, 3600))) {
+      return rateLimitResponse(corsHeaders);
     }
 
     // Parsăm body-ul
