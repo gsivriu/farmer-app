@@ -163,7 +163,7 @@ Neschimbate faţă de versiunea anterioară a documentului — strat de servicii
 | RLS | Activ, reparat pe advisor-ul de perf; **un bug de recursie introdus şi reparat în aceeaşi sesiune** (4.5) | La orice OR nou cu `is_admin(...)`: verificarea de proprietar întâi |
 | MFA | Obligatoriu pt admini, opţional pt fermieri | Păstrează |
 | Rate limiting | **Conectat efectiv** (2026-09-03) | Monitorizează dacă limitele alese (30/min, 20/min, 30/oră etc.) sunt potrivite la trafic real |
-| Parole compromise | Dezactivat | Activează din Dashboard → Auth |
+| Parole compromise | Dezactivat, **blocat pe planul Free** (2026-09-05) | Necesită upgrade Pro întâi — toggle-ul e needitabil fără el |
 | Funcţii Edge de test | Şterse din prod şi din repo | — |
 | Secrete MySQL | În `.env` local | Mută în `supabase secrets set` — blocat, are nevoie de acces la valorile reale |
 | Backup | Manual, plan Free | Upgrade Pro |
@@ -188,7 +188,7 @@ Neschimbate faţă de versiunea anterioară a documentului.
 4. ✅ Paginare server-side pe `FarmiersTab` (2026-09-03).
 5. ✅ RLS: `(select auth.<fn>())` + politici duplicate unite + FK-uri indexate (2026-09-03) — **plus fix de recursie şi reordonare, vezi 4.5**, **plus ultimele 3 avertismente `multiple_permissive_policies` şi cel de `auth_rls_initplan` pe `device_tokens`, închise 2026-09-05**. Advisor-ul de securitate/performanţă e curat pe dev şi prod acum, în afară de indexurile INFO nefolosite şi toggle-ul de mai jos.
 6. ✅ `rate_limits` conectat pe funcţiile Edge publice (2026-09-03). Login e acoperit de rate limiting-ul nativ Supabase Auth (de verificat în dashboard, neschimbat).
-7. ⬜ Activează leaked password protection din Supabase Auth dashboard — toggle manual, fără cod.
+7. ⬜ Leaked password protection — **descoperire 2026-09-05: toggle-ul e blocat pe planul Free** ("Only available on Pro plan and above" direct în UI-ul Supabase, verificat de Gabriel în dashboard pe proiectul de producţie). Nu e o simplă bifă manuală cum credeam — depinde de punctul 9 (upgrade Pro).
 8. ⬜ Mută credenţialele MySQL din `.env` în `supabase secrets set` — **blocat**, are nevoie de tine (valorile nu sunt accesibile din acest mediu de lucru).
 9. ⬜ Upgrade Supabase la Pro — decizie de billing, motivată acum şi de timeout-urile tranzitorii observate în sesiunea de 2026-09-03.
 

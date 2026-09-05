@@ -23,7 +23,7 @@ The recurring lens for this project — apply these by default, not just when as
 Pulled from `ARCHITECTURE.md` §11 — check there for the full roadmap and reasoning, this is just the current front of the queue:
 
 1. Move MySQL credentials out of local `.env` into `supabase secrets set` — blocked on Gabriel supplying the actual values, not something Claude can do from a checkout that doesn't have them.
-2. Enable leaked-password protection in the Supabase Auth dashboard (toggle, no code).
+2. Enable leaked-password protection in the Supabase Auth dashboard — confirmed 2026-09-05 this toggle is grayed out on the Free plan ("Only available on Pro plan and above"), so it's blocked on the Supabase Pro decision (#4), not independently actionable.
 3. Decide `sharp-proxy`'s fate — finish wiring `src/services/sharpApi.js` into a screen, or delete both as dead/unfinished.
 4. Supabase Pro upgrade — daily backups + PITR, connection pooling, higher Realtime limits. Billing decision for Gabriel, not something to just do.
 5. Once the above land: services layer extraction, admin route code-splitting, Sentry alerting, and reconciling the pre-baseline migration history (`ARCHITECTURE.md` §11, Faza 2).
