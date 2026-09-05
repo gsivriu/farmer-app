@@ -150,7 +150,22 @@ Diagnosticat prin reproducerea exactă a request-ului eşuat (`SET ROLE authenti
 Ideea centrală rămâne: **generalizează ce funcţionează deja**, plus completările de infrastructură rămase.
 
 ### 5.1 Bază de date
-- **Upgrade Supabase la planul Pro** — încă nefăcut. Nota din sesiunea de azi: proiectul e pe Free chiar acum, iar volumul de operaţii MCP (migraţii, deploy-uri, advisors) rulat concentrat a saturat pool-ul de conexiuni suficient cât să producă timeout-uri tranzitorii pe `/token`/`/logout` — un semnal concret, nu doar teoretic, că pool-ul de conexiuni limitat al planului Free e deja o constrângere reală.
+
+**Planul Supabase — decis 2026-09-05, cifre verificate la zi (nu presupuse):**
+
+Cele 2 proiecte (dev + prod) sunt pe Free acum. Planul Pro se plăteşte **per proiect**, nu per organizaţie.
+
+| Pas | Ce facem | Cost | Când |
+|---|---|---|---|
+| 1 | Upgrade **doar prod** la Pro | ~25 $/lună | Următorul pas decis, neexecutat încă — decizie de billing a lui Gabriel |
+| 2 | Dev rămâne pe Free | 0 $ | Pauzarea după 7 zile de inactivitate e o bătaie de cap acceptată, nu un risc de business |
+| 3 | SMTP propriu pentru `invite-farmer` | gratis, independent de Pro | Înainte de orice val mare de invitaţii — Pro **nu** ridică limita de 2 email-uri/oră a serviciului default; doar un SMTP propriu o face (implicit 30/oră, ajustabil) |
+| 4 | PITR (point-in-time recovery) | ~140 $/lună (25 Pro + 15 compute Small + 100 PITR/7 zile) | **Nu acum** — backup-urile zilnice incluse în Pro sunt suficiente la volumul curent (96 rânduri `bids`). Revizitează când volumul zilnic de oferte ajunge la un punct unde "am pierdut ultimele ore" ar costa efectiv bani, nu doar teoretic |
+| 5 | Compute add-on peste Micro-ul inclus | de la 15 $/lună (Small) în sus | Doar dacă, după upgrade la Pro, tot apar timeout-uri de conexiune sub trafic real — nu preventiv |
+| 6 | Realtime peste 500 conexiuni incluse | 10 $/1000 conexiuni suplimentare | Cost aşteptat, nu evitabil, pe măsură ce fermierii activi simultan cresc spre 5000 |
+
+De ce prod, nu ambele, şi de ce nu tot pachetul deodată: la 9 utilizatori şi 96 rânduri în `bids`, riscul real de azi e lipsa completă a oricărui backup pe prod (rezolvată de pasul 1 singur) şi limita de 200 conexiuni Realtime concurente care s-ar lovi mult înainte de 5000 utilizatori (rezolvată tot de pasul 1, la 500 incluse). PITR şi compute suplimentar sunt costuri reale (140$+/lună) care nu-şi arată încă valoarea la acest volum — le adăugăm când datele arată nevoia, nu preventiv "ca să fie".
+
 - **Pattern-ul `bids`/`FarmiersTab`** generalizat — orice listă nouă care poate creşte urmează acelaşi model.
 - **RLS reparat** — cu grijă la ordinea OR-urilor de-acum încolo (vezi 4.5).
 - **Migration hygiene**: parţial rezolvat 2026-09-05 — vezi rezumatul din secţiunea 1. Rămâne deschis istoricul dev dinainte de iulie (mai vechi şi mai mare, vezi mai jos).
@@ -170,7 +185,7 @@ Neschimbate faţă de versiunea anterioară a documentului — strat de servicii
 | Parole compromise | Dezactivat, **blocat pe planul Free** (2026-09-05) | Necesită upgrade Pro întâi — toggle-ul e needitabil fără el |
 | Funcţii Edge de test | Şterse din prod şi din repo | — |
 | Secrete MySQL | În `.env` local, folosit doar de scriptul local `test-ameropa.js` | Rezolvat — nicio funcţie Edge nu are nevoie de el ca secret Supabase; `.env` gitignored e suficient |
-| Backup | Manual, plan Free | Upgrade Pro |
+| Backup | Niciunul, plan Free | Upgrade Pro pe prod → backup zilnic inclus (vezi planul din 5.1) |
 | Security headers | Prezente | Păstrează |
 
 ---
@@ -194,7 +209,7 @@ Neschimbate faţă de versiunea anterioară a documentului.
 6. ✅ `rate_limits` conectat pe funcţiile Edge publice (2026-09-03). Login e acoperit de rate limiting-ul nativ Supabase Auth (de verificat în dashboard, neschimbat).
 7. ⬜ Leaked password protection — **descoperire 2026-09-05: toggle-ul e blocat pe planul Free** ("Only available on Pro plan and above" direct în UI-ul Supabase, verificat de Gabriel în dashboard pe proiectul de producţie). Nu e o simplă bifă manuală cum credeam — depinde de punctul 9 (upgrade Pro).
 8. ✅ ~~Mută credenţialele MySQL din `.env` în `supabase secrets set`~~ — închis 2026-09-05 ca fals pozitiv: nicio funcţie Edge nu foloseşte `AMEROPA_DB_*`, doar `test-ameropa.js` local. Nimic de mutat.
-9. ⬜ Upgrade Supabase la Pro — decizie de billing, motivată acum şi de timeout-urile tranzitorii observate în sesiunea de 2026-09-03.
+9. ⬜ Upgrade Supabase la Pro — **plan concret stabilit 2026-09-05, vezi secţiunea 5.1**: doar prod, ~25$/lună, PITR şi compute suplimentar amânate până le justifică volumul real. Rămâne doar apăsarea butonului de billing — decizia lui Gabriel.
 
 **Faza 2 — Lunile 3–6:** neschimbată.
 
