@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
-import { useIdleLogout } from "./useIdleLogout";
+import { useIdleLogout, markIdleActivity } from "./useIdleLogout";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext(null);
@@ -82,7 +82,8 @@ export function AuthProvider({ children }) {
       setLoading(false);
     };
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN") markIdleActivity();
       loadProfile(session?.user ?? null);
     });
 
