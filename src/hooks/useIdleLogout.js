@@ -32,6 +32,14 @@ export function useIdleLogout(enabled) {
   useEffect(() => {
     if (!enabled) return;
 
+    // TEMPORARY — remove once the TestFlight login-loop root cause is
+    // confirmed. Logs every mount unconditionally so we can tell "the idle
+    // check ran and decided not to sign out" apart from "it never ran".
+    supabase.from("auth_debug_logs").insert({
+      tag: "idle-logout-mounted",
+      detail: { storedRaw: window.localStorage.getItem(STORAGE_KEY) },
+    }).then(() => {}, () => {});
+
     const readLastActive = () => {
       const stored = Number(window.localStorage.getItem(STORAGE_KEY));
       return Number.isFinite(stored) && stored > 0 ? stored : Date.now();
@@ -52,7 +60,12 @@ export function useIdleLogout(enabled) {
       const last = readLastActive();
       const elapsed = Date.now() - last;
       if (elapsed >= IDLE_TIMEOUT_MS) {
-        console.error("[auth-debug] idle-logout sign-out — elapsedMs:", elapsed, "lastActiveAt:", new Date(last).toISOString());
+        const detail = { elapsedMs: elapsed, lastActiveAt: new Date(last).toISOString() };
+        console.error("[auth-debug] idle-logout-signout", detail);
+        supabase.from("auth_debug_logs").insert({ tag: "idle-logout-signout", detail }).then(
+          () => {},
+          () => {},
+        );
         supabase.auth.signOut({ scope: "local" });
         return true;
       }
