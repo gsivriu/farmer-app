@@ -20,6 +20,7 @@ export function AuthProvider({ children }) {
     // force-clear the session and redirect to login after 5 seconds.
     const safetyTimeout = setTimeout(() => {
       if (cancelled) return;
+      console.error("[auth-debug] safety-timeout sign-out (onAuthStateChange never fired within 5s)");
       supabase.auth.signOut({ scope: "local" }).finally(() => {
         window.location.replace("/login");
       });
@@ -48,8 +49,9 @@ export function AuthProvider({ children }) {
             .single(),
           supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
         ]);
-      } catch {
+      } catch (fetchErr) {
         if (cancelled) return;
+        console.error("[auth-debug] catch-block sign-out (profile/aal fetch threw)", fetchErr);
         await supabase.auth.signOut({ scope: "local" });
         window.location.replace("/login");
         return;
@@ -59,12 +61,14 @@ export function AuthProvider({ children }) {
 
       // Can't determine role — sign out rather than fall back to "farmer"
       if (profileResult.error || !profileResult.data) {
+        console.error("[auth-debug] profile-error sign-out", profileResult.error, profileResult.data);
         await supabase.auth.signOut({ scope: "local" });
         window.location.replace("/login");
         return;
       }
 
       if (profileResult.data.status === "disabled") {
+        console.error("[auth-debug] disabled-account sign-out", profileResult.data);
         await supabase.auth.signOut({ scope: "local" });
         setLoading(false);
         return;
@@ -83,6 +87,7 @@ export function AuthProvider({ children }) {
     };
 
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      console.error("[auth-debug] onAuthStateChange event:", event, "hasSession:", !!session);
       if (event === "SIGNED_IN") markIdleActivity();
       loadProfile(session?.user ?? null);
     });
