@@ -49,7 +49,10 @@ export function useIdleLogout(enabled) {
     };
 
     const checkIdle = () => {
-      if (Date.now() - readLastActive() >= IDLE_TIMEOUT_MS) {
+      const last = readLastActive();
+      const elapsed = Date.now() - last;
+      if (elapsed >= IDLE_TIMEOUT_MS) {
+        console.error("[auth-debug] idle-logout sign-out — elapsedMs:", elapsed, "lastActiveAt:", new Date(last).toISOString());
         supabase.auth.signOut({ scope: "local" });
         return true;
       }
