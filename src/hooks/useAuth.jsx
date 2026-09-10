@@ -2,6 +2,17 @@ import { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 import { useIdleLogout, markIdleActivity } from "./useIdleLogout";
 
+// TEMPORARY — remove once the TestFlight login-loop root cause is confirmed.
+// Writes to a throwaway debug table instead of console.error since the
+// device can't be plugged into Safari Web Inspector right now.
+function logAuthDebug(tag, detail) {
+  console.error("[auth-debug]", tag, detail);
+  supabase.from("auth_debug_logs").insert({ tag, detail: detail ?? null }).then(
+    () => {},
+    () => {},
+  );
+}
+
 // eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext(null);
 
@@ -20,7 +31,7 @@ export function AuthProvider({ children }) {
     // force-clear the session and redirect to login after 5 seconds.
     const safetyTimeout = setTimeout(() => {
       if (cancelled) return;
-      console.error("[auth-debug] safety-timeout sign-out (onAuthStateChange never fired within 5s)");
+      logAuthDebug("safety-timeout-signout", { note: "onAuthStateChange never fired within 5s" });
       supabase.auth.signOut({ scope: "local" }).finally(() => {
         window.location.replace("/login");
       });
@@ -51,7 +62,7 @@ export function AuthProvider({ children }) {
         ]);
       } catch (fetchErr) {
         if (cancelled) return;
-        console.error("[auth-debug] catch-block sign-out (profile/aal fetch threw)", fetchErr);
+        logAuthDebug("catch-block-signout", { message: String(fetchErr?.message ?? fetchErr) });
         await supabase.auth.signOut({ scope: "local" });
         window.location.replace("/login");
         return;
@@ -61,14 +72,17 @@ export function AuthProvider({ children }) {
 
       // Can't determine role — sign out rather than fall back to "farmer"
       if (profileResult.error || !profileResult.data) {
-        console.error("[auth-debug] profile-error sign-out", profileResult.error, profileResult.data);
+        logAuthDebug("profile-error-signout", {
+          error: profileResult.error ? String(profileResult.error.message ?? profileResult.error) : null,
+          hasData: !!profileResult.data,
+        });
         await supabase.auth.signOut({ scope: "local" });
         window.location.replace("/login");
         return;
       }
 
       if (profileResult.data.status === "disabled") {
-        console.error("[auth-debug] disabled-account sign-out", profileResult.data);
+        logAuthDebug("disabled-account-signout", { status: profileResult.data.status });
         await supabase.auth.signOut({ scope: "local" });
         setLoading(false);
         return;
@@ -87,7 +101,7 @@ export function AuthProvider({ children }) {
     };
 
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-      console.error("[auth-debug] onAuthStateChange event:", event, "hasSession:", !!session);
+      logAuthDebug("auth-state-change", { event, hasSession: !!session, userId: session?.user?.id ?? null });
       if (event === "SIGNED_IN") markIdleActivity();
       loadProfile(session?.user ?? null);
     });
