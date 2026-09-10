@@ -9,6 +9,18 @@ const STORAGE_KEY = "farmer-app-last-active-at";
 const ACTIVITY_EVENTS = ["mousemove", "keydown", "click", "touchstart", "scroll"];
 
 /**
+ * Resets the idle clock on a fresh interactive sign-in. Must be called when
+ * a login actually happens (the SIGNED_IN auth event) — otherwise a stale
+ * timestamp left over from a previous session (signed out over an hour ago)
+ * gets read by the idle check the instant the post-login effect below
+ * mounts, forcing an immediate re-signout and locking the user in a login
+ * loop, since the check-fails path intentionally skips refreshing it.
+ */
+export function markIdleActivity() {
+  window.localStorage.setItem(STORAGE_KEY, String(Date.now()));
+}
+
+/**
  * Signs the user out after IDLE_TIMEOUT_MS with no interaction. Counts
  * backgrounded/locked time too, not just foreground idling — the common
  * real case is someone locking their phone (or leaving the browser tab)

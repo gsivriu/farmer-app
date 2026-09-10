@@ -144,6 +144,12 @@ Diagnosticat prin reproducerea exactă a request-ului eşuat (`SET ROLE authenti
 
 → **Lecţie prinsă în `CLAUDE.md`:** când se unesc într-o singură politică OR o ramură `is_admin(...)` cu o verificare de proprietar auto-referenţială, verificarea de proprietar **trebuie** să fie prima — `is_admin()` depinde mereu de acelaşi short-circuit ca să se termine.
 
+### 4.6 🔴 Nou — loop de login pe TestFlight, cauzat de feature-ul de idle-logout (2026-09-05), reparat 2026-09-09
+
+**`useIdleLogout` (adăugat 2026-09-05, `54fd6a8`, pentru sign-out după 1 oră de inactivitate) delogа imediat un login proaspăt, dacă rămăsese un timestamp vechi în `localStorage`.**
+Hook-ul se activează de îndată ce `user` devine truthy (chiar la finalul unui login reuşit) şi rulează imediat `checkIdle()` faţă de orice avea deja `farmer-app-last-active-at` în `localStorage` — inclusiv un timestamp rămas de la o sesiune închisă cu mult peste o oră în urmă, cazul obişnuit pe TestFlight, unde aplicaţia stă închisă ore între lansări. Când asta se întâmpla, login-ul proaspăt era delogat pe loc (`supabase.auth.signOut`), iar pentru că ramura „idle detectat" evită intenţionat să reîmprospăteze timestamp-ul (ca să prindă şi cazul legitim „aplicaţia redeschisă după ore, dar tot logat"), valoarea veche nu se actualiza niciodată — deci fiecare încercare următoare de login pica pe aceeaşi verificare şi bucla la infinit înapoi la ecranul de login.
+→ **Acțiune realizată:** `markIdleActivity()` (nou, în `useIdleLogout.js`) resetează explicit timestamp-ul, apelat din `useAuth.jsx` doar pe evenimentul Supabase `SIGNED_IN` — care se declanşează exclusiv la un login interactiv explicit, niciodată la restaurarea unei sesiuni existente la pornirea la rece (`INITIAL_SESSION`). Un login proaspăt nu mai e judecat după un timestamp anterior lui, iar cazul legitim de idle-resume rămâne neschimbat.
+
 ---
 
 ## 5. Arhitectura țintă pentru 5000+ utilizatori / 12 luni
