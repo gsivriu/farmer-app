@@ -60,6 +60,10 @@ export function useIdleLogout(enabled) {
       const last = readLastActive();
       const elapsed = Date.now() - last;
       if (elapsed >= IDLE_TIMEOUT_MS) {
+        // Drop the stamp before signing out. Leaving a stale one behind is what
+        // bounced the *next* login straight back to /login: the effect below
+        // re-mounts on that login and re-reads this same expired value.
+        window.localStorage.removeItem(STORAGE_KEY);
         const detail = { elapsedMs: elapsed, lastActiveAt: new Date(last).toISOString() };
         console.error("[auth-debug] idle-logout-signout", detail);
         supabase.from("auth_debug_logs").insert({ tag: "idle-logout-signout", detail }).then(
