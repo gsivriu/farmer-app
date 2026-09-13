@@ -150,6 +150,24 @@ Diagnosticat prin reproducerea exactă a request-ului eşuat (`SET ROLE authenti
 Hook-ul se activează de îndată ce `user` devine truthy (chiar la finalul unui login reuşit) şi rulează imediat `checkIdle()` faţă de orice avea deja `farmer-app-last-active-at` în `localStorage` — inclusiv un timestamp rămas de la o sesiune închisă cu mult peste o oră în urmă, cazul obişnuit pe TestFlight, unde aplicaţia stă închisă ore între lansări. Când asta se întâmpla, login-ul proaspăt era delogat pe loc (`supabase.auth.signOut`), iar pentru că ramura „idle detectat" evită intenţionat să reîmprospăteze timestamp-ul (ca să prindă şi cazul legitim „aplicaţia redeschisă după ore, dar tot logat"), valoarea veche nu se actualiza niciodată — deci fiecare încercare următoare de login pica pe aceeaşi verificare şi bucla la infinit înapoi la ecranul de login.
 → **Acțiune realizată:** `markIdleActivity()` (nou, în `useIdleLogout.js`) resetează explicit timestamp-ul, apelat din `useAuth.jsx` doar pe evenimentul Supabase `SIGNED_IN` — care se declanşează exclusiv la un login interactiv explicit, niciodată la restaurarea unei sesiuni existente la pornirea la rece (`INITIAL_SESSION`). Un login proaspăt nu mai e judecat după un timestamp anterior lui, iar cazul legitim de idle-resume rămâne neschimbat.
 
+
+### 4.7 🔴 Nou — acelaşi loop raportat din nou pe 2026-09-13, dar cu altă cauză: telefonul rula cod vechi
+
+**Fix-ul din §4.6 era pe prod de pe 2026-09-10 12:22 UTC. Telefonul pur şi simplu nu-l executa.**
+
+Dovada, din log-urile prod (nu din raţionament pe cod):
+- Bundle-ul live `index-Z13zX47Z.js` conţine atât fix-ul, cât şi instrumentarea `auth_debug_logs`; `/` se serveşte cu `Cache-Control: no-store`.
+- Edge logs, 2026-09-13 11:30 UTC: `token?grant_type=password` 200 → `profiles` 200 → `logout?scope=local` 204 la 1,3s, de două ori la rând — exact simptomul raportat.
+- În toată secvenţa: **zero** `POST /rest/v1/auth_debug_logs`. Bundle-ul de pe prod scrie un rând la fiecare eveniment `onAuthStateChange`, deci e imposibil să fi rulat el. Cel mai recent rând din tabel e încă de pe 2026-09-10 12:19:59.
+
+Deci dispozitivul executa JS de dinainte de `cdbfa58`, adică exact `useIdleLogout`-ul stricat — de unde simptomul neschimbat. Două mecanisme posibile, ambele rezolvate la fel (cod nou pe dispozitiv): build-ul TestFlight rulează asset-uri îngheţate în IPA (`capacitor.config.json` nu are bloc `server` → bundled, deci niciun deploy web nu-l poate atinge vreodată), sau e în mod `cap:live` şi WKWebView serveşte un `index.html` pus în cache *înainte* să apară header-ul `no-store`.
+
+→ **Acţiuni realizate (2026-09-13):**
+1. **Marcaj de build.** `vite.config.js` injectează SHA-ul scurt al commit-ului şi ora build-ului (`import.meta.env.APP_BUILD_ID` / `APP_BUILD_TIME`), expuse prin `src/buildInfo.js`. Ecranul de login afişează `<sha> · <zz.ll>` discret, iar fiecare rând din `auth_debug_logs` poartă `detail.buildId`. Întrebarea „ce cod rulează dispozitivul?" devine verificabilă dintr-o privire, în loc să coste zile de ghicit.
+2. **Garanţie structurală în `useIdleLogout`.** `checkIdle()` iese imediat dacă `user.last_sign_in_at` al sesiunii e mai nou decât `IDLE_TIMEOUT_MS`: o sesiune autentificată acum sub o oră nu poate fi inactivă de o oră. §4.6 repară bucla menţinând timestamp-ul *corect*; garanţia asta ţine şi când nu e, deci niciun `localStorage` vechi nu mai poate deloga un login proaspăt.
+
+→ **Lecţie:** „fix-ul e deployat?" şi „dispozitivul rulează fix-ul?" sunt întrebări diferite. Pe WKWebView/TestFlight, a doua e cea care pică — şi până pe 2026-09-13 nimic din aplicaţie nu putea răspunde la ea.
+
 ---
 
 ## 5. Arhitectura țintă pentru 5000+ utilizatori / 12 luni

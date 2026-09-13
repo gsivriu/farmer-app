@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import { useAuth } from "../hooks/useAuth";
+import { buildStamp } from "../buildInfo";
 
 const COLOR_RED = "#b01c2e";
 const COLOR_RED_DARK = "#8e1624";
@@ -411,6 +412,23 @@ export default function LoginPage() {
             />
           )}
           {view === "forgot" && <ForgotView onGoLogin={() => setView("login")} />}
+
+          {/* Ce build rulează efectiv clientul. Pe TestFlight/WKWebView o
+              pagină din cache poate rula luni de cod vechi fără niciun semn
+              vizibil — asta face diferența dintre "fix-ul nu e pe prod" și
+              "telefonul n-a luat încă fix-ul" verificabilă dintr-o privire. */}
+          <div
+            style={{
+              marginTop: 20,
+              textAlign: "center",
+              fontFamily: FONT_SANS,
+              fontSize: 11,
+              letterSpacing: ".03em",
+              color: "#a8a29a",
+            }}
+          >
+            {buildStamp()}
+          </div>
         </div>
       </div>
     </div>

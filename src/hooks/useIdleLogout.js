@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { App } from "@capacitor/app";
 import { supabase } from "../supabaseClient";
+import { BUILD_ID } from "../buildInfo";
 
 const IDLE_TIMEOUT_MS = 60 * 60 * 1000; // 1 oră
 const CHECK_INTERVAL_MS = 60 * 1000;
@@ -25,9 +26,20 @@ export function markIdleActivity() {
  * backgrounded/locked time too, not just foreground idling — the common
  * real case is someone locking their phone (or leaving the browser tab)
  * with the app open and coming back hours later.
+ *
+ * `lastSignInAt` is the current session's `user.last_sign_in_at`. It is the
+ * structural guard against the login loop: a session that authenticated less
+ * than IDLE_TIMEOUT_MS ago cannot possibly have been idle for that long, so
+ * it is never signed out no matter what localStorage says. markIdleActivity()
+ * on SIGNED_IN and clearing the stamp at sign-out both fix the loop by
+ * keeping the stored timestamp correct; this one holds even when it isn't.
  */
-export function useIdleLogout(enabled) {
+export function useIdleLogout(enabled, lastSignInAt) {
   const lastWriteRef = useRef(0);
+  const signedInAtRef = useRef(null);
+
+  const parsedSignInAt = lastSignInAt ? Date.parse(lastSignInAt) : NaN;
+  signedInAtRef.current = Number.isFinite(parsedSignInAt) ? parsedSignInAt : null;
 
   useEffect(() => {
     if (!enabled) return;
@@ -37,7 +49,11 @@ export function useIdleLogout(enabled) {
     // check ran and decided not to sign out" apart from "it never ran".
     supabase.from("auth_debug_logs").insert({
       tag: "idle-logout-mounted",
-      detail: { storedRaw: window.localStorage.getItem(STORAGE_KEY) },
+      detail: {
+        buildId: BUILD_ID,
+        storedRaw: window.localStorage.getItem(STORAGE_KEY),
+        lastSignInAt: lastSignInAt ?? null,
+      },
     }).then(() => {}, () => {});
 
     const readLastActive = () => {
@@ -57,6 +73,14 @@ export function useIdleLogout(enabled) {
     };
 
     const checkIdle = () => {
+      // A session younger than the idle timeout can't have been idle for the
+      // idle timeout. Makes "fresh login bounced straight back to /login"
+      // impossible regardless of what's left in localStorage.
+      const signedInAt = signedInAtRef.current;
+      if (signedInAt !== null && Date.now() - signedInAt < IDLE_TIMEOUT_MS) {
+        return false;
+      }
+
       const last = readLastActive();
       const elapsed = Date.now() - last;
       if (elapsed >= IDLE_TIMEOUT_MS) {
@@ -64,7 +88,12 @@ export function useIdleLogout(enabled) {
         // bounced the *next* login straight back to /login: the effect below
         // re-mounts on that login and re-reads this same expired value.
         window.localStorage.removeItem(STORAGE_KEY);
-        const detail = { elapsedMs: elapsed, lastActiveAt: new Date(last).toISOString() };
+        const detail = {
+          buildId: BUILD_ID,
+          elapsedMs: elapsed,
+          lastActiveAt: new Date(last).toISOString(),
+          lastSignInAt: lastSignInAt ?? null,
+        };
         console.error("[auth-debug] idle-logout-signout", detail);
         supabase.from("auth_debug_logs").insert({ tag: "idle-logout-signout", detail }).then(
           () => {},
@@ -109,5 +138,8 @@ export function useIdleLogout(enabled) {
       appStateSub?.remove();
       clearInterval(interval);
     };
+    // lastSignInAt is read through signedInAtRef so a token refresh that
+    // re-creates the user object doesn't tear down and re-run the effect.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled]);
 }

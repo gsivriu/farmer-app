@@ -1,16 +1,20 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 import { useIdleLogout, markIdleActivity } from "./useIdleLogout";
+import { BUILD_ID } from "../buildInfo";
 
 // TEMPORARY — remove once the TestFlight login-loop root cause is confirmed.
 // Writes to a throwaway debug table instead of console.error since the
 // device can't be plugged into Safari Web Inspector right now.
 function logAuthDebug(tag, detail) {
   console.error("[auth-debug]", tag, detail);
-  supabase.from("auth_debug_logs").insert({ tag, detail: detail ?? null }).then(
-    () => {},
-    () => {},
-  );
+  supabase
+    .from("auth_debug_logs")
+    .insert({ tag, detail: { buildId: BUILD_ID, ...(detail ?? {}) } })
+    .then(
+      () => {},
+      () => {},
+    );
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -113,7 +117,7 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  useIdleLogout(!!user);
+  useIdleLogout(!!user, user?.last_sign_in_at);
 
   return (
     <AuthContext.Provider value={{ user, role, profile, loading, aalLevel, mfaEnrolled }}>
