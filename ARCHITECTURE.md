@@ -168,6 +168,12 @@ Deci dispozitivul executa JS de dinainte de `cdbfa58`, adică exact `useIdleLogo
 
 → **Lecţie:** „fix-ul e deployat?" şi „dispozitivul rulează fix-ul?" sunt întrebări diferite. Pe WKWebView/TestFlight, a doua e cea care pică — şi până pe 2026-09-13 nimic din aplicaţie nu putea răspunde la ea.
 
+**Lămurit (tot 2026-09-13, după reinstalare):** nu e cache de WKWebView, e cod îngheţat în build. După ce Gabriel a şters şi reinstalat aplicaţia şi s-a logat cu succes, `auth_debug_logs` are în continuare **zero** rânduri pentru toată ziua de 13.09. Un login reuşit declanşează obligatoriu `SIGNED_IN`, iar bundle-ul de pe prod scrie un rând la fiecare eveniment — deci codul care a rulat nu e cel livrat. iOS şterge containerul aplicaţiei (inclusiv cache-urile) la dezinstalare, deci un cache supravieţuitor e exclus: aplicaţia încarcă cod din IPA — fie asset-uri împachetate (`capacitor.config.json` nu are bloc `server`), fie `cap:live` fixat pe un URL de deployment în loc de alias-ul stabil. În ambele cazuri deploy-ul web nu ajunge niciodată la ea, şi **doar un build TestFlight nou rezolvă**.
+
+Reinstalarea a părut că repară login-ul doar pentru că a şters `localStorage` şi, odată cu el, timestamp-ul `farmer-app-last-active-at` vechi — codul vechi citeşte `Date.now()` când cheia lipseşte, deci primul login trece. **Bucla revine** prima dată când aplicaţia stă închisă peste o oră.
+
+Asta explică şi de ce fix-ul din §4.6 părea verificat: rândurile de debug din 10.09 12:19 veneau din Safari mobil de pe telefon (care chiar ia de pe Vercel), nu din aplicaţia TestFlight. Fiecare fix de atunci a fost verificat pe web, în timp ce aplicaţia rula cod dinainte de 10.09. Ambele afirmaţii — „l-am reparat" şi „tot nu merge" — au fost adevărate simultan tot timpul.
+
 ---
 
 ## 5. Arhitectura țintă pentru 5000+ utilizatori / 12 luni
